@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InkScroll - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#690005",
+              "primary-container": "#0f766e",
+              "on-primary": "#003733",
+              "error-container": "#93000a",
+              "on-primary-fixed-variant": "#00504a",
+              "primary-fixed": "#9cf2e8",
+              "on-secondary-container": "#003f37",
+              "secondary-container": "#00b4a0",
+              "on-secondary-fixed-variant": "#005047",
+              "on-tertiary-fixed": "#001453",
+              "surface-tint": "#80d5cb",
+              "tertiary": "#b8c4ff",
+              "outline-variant": "#3e4947",
+              "on-tertiary-fixed-variant": "#173bab",
+              "secondary-fixed-dim": "#4ddcc6",
+              "tertiary-fixed-dim": "#b8c4ff",
+              "on-tertiary": "#002584",
+              "surface-container-high": "#242b2c",
+              "on-surface": "#dce4e5",
+              "on-secondary-fixed": "#00201b",
+              "surface-container-lowest": "#080f10",
+              "primary": "#80d5cb",
+              "tertiary-container": "#4461cf",
+              "surface-bright": "#333a3c",
+              "on-secondary": "#003730",
+              "outline": "#889391",
+              "inverse-surface": "#dce4e5",
+              "on-tertiary-container": "#e7e9ff",
+              "secondary-fixed": "#6ef9e2",
+              "on-surface-variant": "#bdc9c6",
+              "on-primary-fixed": "#00201d",
+              "inverse-on-surface": "#2a3233",
+              "primary-fixed-dim": "#80d5cb",
+              "surface-container": "#1a2122",
+              "surface-dim": "#0d1516",
+              "on-error-container": "#ffdad6",
+              "inverse-primary": "#006a63",
+              "on-primary-container": "#a3faef",
+              "surface-container-highest": "#2f3637",
+              "tertiary-fixed": "#dde1ff",
+              "error": "#ffb4ab",
+              "secondary": "#4ddcc6",
+              "surface": "#0d1516",
+              "on-background": "#dce4e5",
+              "surface-variant": "#2f3637",
+              "surface-container-low": "#161d1e",
+              "background": "#0d1516"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #080F10;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+      .brand-gradient-border {
+        background: linear-gradient(135deg, #0F766E, #1E40AF);
+        padding: 2px;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-surface antialiased">
+<!-- TopAppBar Shell -->
+<header class="sticky top-0 w-full z-50 bg-[#111416]/75 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full no-border tonal-layering">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-400 hover:opacity-80 transition-opacity active:scale-90 transition-transform cursor-pointer" data-icon="menu">menu</span>
+<h1 class="text-2xl font-bold bg-gradient-to-br from-[#0F766E] to-[#1E40AF] bg-clip-text text-transparent font-['Plus_Jakarta_Sans']">InkScroll</h1>
+</div>
+<div class="h-8 w-8 rounded-full overflow-hidden hover:opacity-80 transition-opacity active:scale-90 transition-transform cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a young man with a slight smile in soft studio lighting against a dark neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx1o390SOz-qLTz34hOto2N060e61dPA6l9b_DJ8udwHi9a_Vq9oBwhFTIrbJQkU2EYO3T9pXl7SpLADf8kHaVKga19McGVNnCYmbrQgBSw83uiKUzase-jCMbaLIbWwYOBPpmf738iieCm9A7f-yIRa6jacKAh6wZ6hEFL1-dhOXDj4SzDOMXeNJRJs3jOlOWwq3q0hTvKwhE3udHAysppi5MjoASSOa3jtcJ2zDcm_IubmQar8B4ZLZAuClBRCVDrW47Z2oMRI4L"/>
+</div>
+</header>
+<main class="max-w-md mx-auto px-6 pt-8 pb-32 space-y-10">
+<!-- Profile Header -->
+<section class="flex flex-col items-center gap-4">
+<div class="brand-gradient-border rounded-full shadow-lg">
+<div class="w-[80px] h-[80px] rounded-full overflow-hidden border-4 border-[#080F10]">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Detailed portrait of a stylish young male user with sharp features and a modern haircut in artistic low light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBITdYMjbSA2rfEYy6P_ZMPTV96SML_N2c1gFuy1E_qAZu06_e-LFOj345kCm2BIRH_hEzbw3zDc_xIZLtAVzRzCUMQ6e4lK1PkmkviJYnzbsW76nsbWX_iCgqZ6nGZF9MThNXTfCT4ZqyrDIedSMRkFHBv8ncz25ApQMMAPJK1IYfVhT5jp1Ab5mwkj5ju1uwokp8HpoSRIApi_AZvzK3uOa5U_uN5vRVOxTSi0xhks4bp4Dtx0ZHcAU1EO-gGoDHArNtuG9xCB3vx"/>
+</div>
+</div>
+<h2 class="text-[22px] font-semibold text-on-surface tracking-tight">Kaelen Vance</h2>
+</section>
+<!-- Stats Grid (2x2) -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-[#111416] p-5 rounded-[12px] flex flex-col items-start gap-1">
+<span class="text-[10px] font-bold text-outline tracking-widest">TITLES READ</span>
+<span class="text-[28px] font-bold text-primary">142</span>
+</div>
+<div class="bg-[#111416] p-5 rounded-[12px] flex flex-col items-start gap-1">
+<span class="text-[10px] font-bold text-outline tracking-widest">CHAPTERS READ</span>
+<span class="text-[28px] font-bold text-primary">3,892</span>
+</div>
+<div class="bg-[#111416] p-5 rounded-[12px] flex flex-col items-start gap-1">
+<span class="text-[10px] font-bold text-outline tracking-widest">DAYS STREAK</span>
+<span class="text-[28px] font-bold text-primary">24</span>
+</div>
+<div class="bg-[#111416] p-5 rounded-[12px] flex flex-col items-start gap-1">
+<span class="text-[10px] font-bold text-outline tracking-widest">MINUTES READ</span>
+<span class="text-[28px] font-bold text-primary">12.5k</span>
+</div>
+</section>
+<!-- Reading History -->
+<section class="space-y-5">
+<h3 class="text-sm font-bold text-on-surface tracking-wide px-1">Recent History</h3>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar -mx-6 px-6">
+<!-- Cover 1 -->
+<div class="flex-none w-32 space-y-3">
+<div class="aspect-[3/4] rounded-lg overflow-hidden shadow-[0_8px_20px_-4px_rgba(15,118,110,0.4)]">
+<img alt="Manga Cover" class="w-full h-full object-cover" data-alt="Digital illustration of a high-fantasy manga cover featuring a warrior with a glowing sword in a dark neon forest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPSnKh4CmYyfw4SRPcfTL3b2ReQUgsP59XBD6FxLnNPGvW1PacKH2eweLkfKYJFbVh9d58gKJMXldctpASrAwiLhi_OPfn-YFZUxgSL1MWZg07gHZLoXqvBkPYQEkcl7PoMDm7lxa7mT53uapB44Kutwg5dacK77eIZ53zpVDT0pmOc8Oej3IW2UwlttH7gk9nUsaMdAKclhKJtXEpbULsnhtOfjwYDsWyyRSGX8I2oqldAHOY3WX5tSC1bX6a6jmb9MkOfdpAcFo7"/>
+</div>
+<p class="text-[13px] font-medium text-on-surface-variant line-clamp-2 leading-tight">Shadow Realm Chronicles</p>
+</div>
+<!-- Cover 2 -->
+<div class="flex-none w-32 space-y-3">
+<div class="aspect-[3/4] rounded-lg overflow-hidden shadow-[0_8px_20px_-4px_rgba(30,64,175,0.4)]">
+<img alt="Manga Cover" class="w-full h-full object-cover" data-alt="Vibrant anime-style character artwork with intense blue eyes and flowing energy effects against a dark cityscape" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqgV4eFpP8drcuNXq5EBairKNn5kB38MIBmchuxRpCvG8eSAJr0d9aIIZ9yu7Oq0zgqDuyMfpA3_viep61hEZ4bV2WyW1HooXhXfy3iNaHpYm38GsiQHIh5HQxSsDQ4opWkA4pzv1bZ-EyJCcX2TDK5m9DE-yV5H4SeFOaufXW6nM29MLnHXB3uqjSQL3Phdoaw5aYGcD1g12cEuHhvbuwEDDsS1TEAmC1C4EQt5ybjYtvi6Y468VVmyjvEqEcC3POLkZzbsN3g0JI"/>
+</div>
+<p class="text-[13px] font-medium text-on-surface-variant line-clamp-2 leading-tight">Neon Pulse Protocol</p>
+</div>
+<!-- Cover 3 -->
+<div class="flex-none w-32 space-y-3">
+<div class="aspect-[3/4] rounded-lg overflow-hidden shadow-[0_8px_20px_-4px_rgba(128,213,203,0.3)]">
+<img alt="Manga Cover" class="w-full h-full object-cover" data-alt="Atmospheric dark fantasy manga cover showing a silhouette of a dragon over a moonlit ruined castle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbYWQal9kqr2T1ESYG-mBfSGwKMHkHMYj2s-waDkA1axEnBhnD6pFY_kBp3GoLDyXm_yGCNC4eYCl-n-GW4KvY_WgOWZFSlBlCq5nE69zUNUgO4d5lYFubjaKV4_Zk8HZRStIcPgsPyF9XLskQLDPmh94NkKPG6FDSz70i-L5toEsxLGQ71ScclrqL6JKJegIqIVMHo-eXxPr9PMLXzzLEIlw9gdTyU5huSj0ddYat_zdDpbrSk6q74nh7V2IG41zsjuviA7eFJsSy"/>
+</div>
+<p class="text-[13px] font-medium text-on-surface-variant line-clamp-2 leading-tight">Echoes of Ancient Sky</p>
+</div>
+</div>
+</section>
+<!-- App Settings -->
+<section class="space-y-6">
+<h3 class="text-[10px] font-bold text-outline tracking-[0.2em]">APP SETTINGS</h3>
+<div class="space-y-5">
+<!-- Theme -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="dark_mode">dark_mode</span>
+<span class="text-[15px] font-medium">Theme</span>
+</div>
+<div class="w-10 h-5 bg-[#0F766E] rounded-full relative flex items-center px-1">
+<div class="w-3.5 h-3.5 bg-white rounded-full translate-x-4"></div>
+</div>
+</div>
+<!-- Notifications -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="notifications">notifications</span>
+<span class="text-[15px] font-medium">Notifications</span>
+</div>
+<div class="w-10 h-5 bg-primary-container rounded-full relative flex items-center px-1">
+<div class="w-3.5 h-3.5 bg-on-primary-container rounded-full translate-x-4"></div>
+</div>
+</div>
+<!-- Download Quality -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="download">download</span>
+<span class="text-[15px] font-medium">Download Quality</span>
+</div>
+<span class="material-symbols-outlined text-outline text-lg" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Privacy & Security -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="security">security</span>
+<span class="text-[15px] font-medium">Privacy &amp; Security</span>
+</div>
+<span class="material-symbols-outlined text-outline text-lg" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Footer Actions -->
+<section class="flex flex-col items-center gap-2 pt-4">
+<button class="text-[15px] font-medium text-outline hover:text-on-surface transition-colors">Sign out</button>
+<span class="text-[12px] text-outline opacity-40">Version 2.4.0 (Build 892)</span>
+</section>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-0 w-full px-4 pb-6 flex justify-around items-center z-50">
+<div class="w-full h-[56px] bg-[#1A2122]/75 backdrop-blur-xl rounded-[20px] shadow-[0_12px_40px_rgba(0,0,0,0.4)] flex justify-around items-center relative">
+<div class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="collections_bookmark">collections_bookmark</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#80D5CB] drop-shadow-[0_0_8px_rgba(128,213,203,0.5)] active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+</div>
+</nav>
+</body></html>

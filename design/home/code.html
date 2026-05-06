@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #080F10;
+            color: #dce4e5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error": "#690005",
+                        "primary-container": "#0f766e",
+                        "on-primary": "#003733",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00504a",
+                        "primary-fixed": "#9cf2e8",
+                        "on-secondary-container": "#003f37",
+                        "secondary-container": "#00b4a0",
+                        "on-secondary-fixed-variant": "#005047",
+                        "on-tertiary-fixed": "#001453",
+                        "surface-tint": "#80d5cb",
+                        "tertiary": "#b8c4ff",
+                        "outline-variant": "#3e4947",
+                        "on-tertiary-fixed-variant": "#173bab",
+                        "secondary-fixed-dim": "#4ddcc6",
+                        "tertiary-fixed-dim": "#b8c4ff",
+                        "on-tertiary": "#002584",
+                        "surface-container-high": "#242b2c",
+                        "on-surface": "#dce4e5",
+                        "on-secondary-fixed": "#00201b",
+                        "surface-container-lowest": "#080f10",
+                        "primary": "#80d5cb",
+                        "tertiary-container": "#4461cf",
+                        "surface-bright": "#333a3c",
+                        "on-secondary": "#003730",
+                        "outline": "#889391",
+                        "inverse-surface": "#dce4e5",
+                        "on-tertiary-container": "#e7e9ff",
+                        "secondary-fixed": "#6ef9e2",
+                        "on-surface-variant": "#bdc9c6",
+                        "on-primary-fixed": "#00201d",
+                        "inverse-on-surface": "#2a3233",
+                        "primary-fixed-dim": "#80d5cb",
+                        "surface-container": "#1a2122",
+                        "surface-dim": "#0d1516",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006a63",
+                        "on-primary-container": "#a3faef",
+                        "surface-container-highest": "#2f3637",
+                        "tertiary-fixed": "#dde1ff",
+                        "error": "#ffb4ab",
+                        "secondary": "#4ddcc6",
+                        "surface": "#0d1516",
+                        "on-background": "#dce4e5",
+                        "surface-variant": "#2f3637",
+                        "surface-container-low": "#161d1e",
+                        "background": "#0d1516"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 bg-[#111416]/75 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-400 hover:opacity-80 transition-opacity cursor-pointer">menu</span>
+</div>
+<h1 class="text-2xl font-bold bg-gradient-to-br from-[#0F766E] to-[#1E40AF] bg-clip-text text-transparent font-['Plus_Jakarta_Sans']">InkScroll</h1>
+<div class="w-8 h-8 rounded-full overflow-hidden scale-95 active:scale-90 transition-transform cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a young man with a friendly expression and short dark hair in high-end studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDzVtrl4KWsdV77ZUMF4-didPy7G33EpAMo9oueHfF2QpD2F5wTrKhye-HK0ryxIozuF26nxPzOgV8_QmEldAjqNcoEUC0JjjQtS3C532ijH_09446sDH0TU95RQZ5vWBQ2SiF2iqqvoVTMw07rjRL2u5ieHvzMVRF8tlKokgZ2Odt1XLX6VvRX3V1Sja5eauhM5a6Fk84vzCSP3rgdMc_ZBoJX6R0rKoPJyNUkqV9-8Cnjoo9f6R_RRDcCOSJqUPnjimJTLmcptWg"/>
+</div>
+</header>
+<main class="space-y-[32px]">
+<!-- Hero Carousel Section -->
+<section class="relative w-full h-[540px] overflow-hidden">
+<div class="absolute inset-0">
+<img class="w-full h-full object-cover" data-alt="dramatic cinematic manga illustration style background with cosmic elements and deep blue and teal highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD84mFJWyg06ZU1MNWwM8CiBwWrByNLroQmVA3Gx731YVgXFurQJdXQIbhfEzb69hz-kJv8_z1eOfAGOre7JJDOMcFP8BeODBgpM20V-Im1fgw5hMj9acsMACsMUnxLgylaiuy7rtyeVgRMCGfH4z9u08u7BCTIk_YKkoznksjrTH4eYDhIgffFGClS9DI7k6x2mjq0tv3o9rKBmZumgab7ABDVlfyd0ftwxVl1l7xrv40YNbU5eyow6230ZLey_4qAQZP2Mj83W87m"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#080F10] via-transparent to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-[#080F10]/80 via-transparent to-transparent"></div>
+</div>
+<div class="relative h-full flex flex-col justify-end px-6 pb-12 space-y-4">
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 rounded-full bg-[#5EEAD4] text-[#003733] text-[10px] font-extrabold tracking-widest uppercase">TRENDING</span>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-sm font-bold">9.8</span>
+</div>
+</div>
+<h2 class="text-[28px] font-bold leading-tight max-w-[280px] text-on-surface">Shadow of the Infinite</h2>
+<p class="text-on-surface-variant font-medium text-sm">Manga · Seinen</p>
+<div class="flex items-center gap-3 pt-2">
+<button class="bg-gradient-to-br from-[#0F766E] to-[#1E40AF] text-white px-8 py-3 rounded-full font-bold text-sm hover:opacity-90 transition-all active:scale-95">Read Now</button>
+<button class="bg-[#111416]/80 backdrop-blur-md text-on-surface px-8 py-3 rounded-full font-bold text-sm hover:bg-[#1A2122] transition-all active:scale-95">Library</button>
+</div>
+</div>
+</section>
+<!-- Category Section -->
+<section class="px-6">
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary text-sm font-bold shrink-0">All</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-semibold shrink-0">Popular</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-semibold shrink-0">Romance</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-semibold shrink-0">Action</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-semibold shrink-0">Sci-Fi</button>
+</div>
+<div class="flex gap-3 mt-6">
+<div class="px-4 py-1.5 rounded-lg bg-surface-container/50 backdrop-blur-md border border-white/5 text-[10px] font-bold tracking-wider text-primary-fixed uppercase">WEEKLY</div>
+<div class="px-4 py-1.5 rounded-lg bg-surface-container/50 backdrop-blur-md border border-white/5 text-[10px] font-bold tracking-wider text-secondary-fixed uppercase">NEW ARRIVALS</div>
+</div>
+</section>
+<!-- Continue Reading Section -->
+<section class="space-y-6">
+<div class="px-6 flex justify-between items-center">
+<h3 class="text-xl font-bold tracking-tight text-on-surface">Continue reading</h3>
+<button class="text-primary text-[12px] font-extrabold tracking-widest uppercase">VIEW ALL</button>
+</div>
+<div class="flex gap-6 overflow-x-auto hide-scrollbar px-6 pb-4">
+<!-- Card 1 -->
+<div class="w-[140px] shrink-0 group">
+<div class="aspect-[3/4] rounded-xl overflow-hidden mb-3 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="stylized manga character with neon cyber-punk aesthetics and dramatic facial expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqeR3WevQEp6bnyaQVsgg7TPhdw45KeIolTDApyFinUjJQJi77Iv7uLstFAGBsKnJbMKFUhLDja0EcOEnHJFiVKisYKQfo0XeuiOYdgLApOWt3tD-MEVaw9AhN4sLfmZWNf28JMjldqpHJhOTkFMW_773plXGYKdElaLbQIA1FJ9x5pD5NtTK-S9umUsP3shZ8s_J8_DkvpkL3Y8UpAI8mndnPoL9X2JW0tPGnAWTtk7IsFwkaXO3eb1dMevLMuX4BLQ8ijS_gDJl0"/>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-container">
+<div class="h-full bg-primary w-[75%]"></div>
+</div>
+</div>
+<h4 class="text-sm font-bold text-on-surface truncate">Vanguard Zero</h4>
+<p class="text-[11px] text-on-surface-variant font-medium mt-1">Ch. 42 · 3m left</p>
+</div>
+<!-- Card 2 -->
+<div class="w-[140px] shrink-0 group">
+<div class="aspect-[3/4] rounded-xl overflow-hidden mb-3 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="abstract anime-style composition with a lone swordsman standing against a crimson sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvYpgwdr-2M2YfiPGMWBj5L-fmdscikQX7uMTJkhk0cL78XfzaT6HpoKvLoI76IuJA3oCJTsRrbUGyF-bOvsBx1wiwcIbcvI4_HpVJ31CcqbJ36UF4NmrAkx6BqmcXbcvFVcZCb2WSiu0yudGk1T7rEVO2ZB93IoYdKe83A3Y1HoLUf4UToPeFx0ovIDzXK-zxDNEvPhghv0opqh5P1Cy891rvyLOJeQNUKBJdcF53VB5CBWlyIcvFf2J7RTAdhdE3CHyGamLYxk-g"/>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-container">
+<div class="h-full bg-primary w-[40%]"></div>
+</div>
+</div>
+<h4 class="text-sm font-bold text-on-surface truncate">Crimson Blade</h4>
+<p class="text-[11px] text-on-surface-variant font-medium mt-1">Ch. 12 · 15m left</p>
+</div>
+<!-- Card 3 -->
+<div class="w-[140px] shrink-0 group">
+<div class="aspect-[3/4] rounded-xl overflow-hidden mb-3 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="close-up of a manga character's eyes with intense glowing pupils and intricate line art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCz9SjwNqSu08IkJa3JcfuiGaegA3le7-NWIV7h4JRu1a3N8gPoRTrBrk6wx4baYSv39EVS9EPT05R_3PAyox-4khF58kvWjseFczrVKhyzN0AxDgFSI_VGvbrBcazZCBQQ6nt5RAEKYOsxg534yGqbdptlNkAFYMovRKkhk21hX7Q0ODbvP9JqYZql7AbNl8cgZNakYUtg7rNOyOhMFQnz3dBvWG_ZF2MOSoFIatUl4zASMjVqu1x-t7-pkJca-Vwz_D8Y4pDPs0z6"/>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-container">
+<div class="h-full bg-primary w-[90%]"></div>
+</div>
+</div>
+<h4 class="text-sm font-bold text-on-surface truncate">Insight</h4>
+<p class="text-[11px] text-on-surface-variant font-medium mt-1">Ch. 104 · 1m left</p>
+</div>
+</div>
+</section>
+<!-- Trending Now Section -->
+<section class="px-6 space-y-6">
+<h3 class="text-xl font-bold tracking-tight text-on-surface">Trending now</h3>
+<div class="grid grid-cols-2 gap-x-6 gap-y-10">
+<!-- Trending Card 1 -->
+<div class="space-y-3 relative group">
+<div class="aspect-[3/4.2] rounded-xl overflow-hidden relative shadow-2xl">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="vibrant manga cover art featuring a group of heroes standing on a skyscraper overlooking a futuristic city" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcqfG4p0u517pFdjrlArj35grhUEFa7azQIJQYbQPCx8_Cn-pEYawykYguRZH9QcEy3sPIVoQZYoGaXeX-4YfmnHWI5fRTHIirwrRfDjMZuV96wwVbZLTC1YgmroaHM3x_qszHMZnyHqjDt-TJSY9aYTh_XiumK4PFvCOW5DXDcvY4odtGuDW0CajnDOeVOXRhYviGwE6MYQC8VY8aFLdoyG-3UqVsJuiERf_UZKQj9UChEoTPU38W6X6DTJUD9rG6gtz-h0qpUVLh"/>
+<div class="absolute top-3 right-3 w-8 h-8 bg-[#111416]/60 backdrop-blur-md rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-lg">bookmark</span>
+</div>
+<div class="absolute bottom-3 left-3 px-2 py-1 bg-[#111416]/80 backdrop-blur-md rounded-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[10px] font-bold text-on-surface">4.9</span>
+</div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface line-clamp-1">Neon Knights: Rebirth</h4>
+<p class="text-[11px] text-on-surface-variant">Sci-Fi · Shonen</p>
+</div>
+</div>
+<!-- Trending Card 2 -->
+<div class="space-y-3 relative group">
+<div class="aspect-[3/4.2] rounded-xl overflow-hidden relative shadow-2xl">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="atmospheric black and white manga illustration of a dark forest with eerie glowing eyes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeXLcw7VGQANxUMeusVKEwSgNMlUQILipifM1xbMFOgFL0xiAOEqg4zPnYHKuncy7nK4Q9jfjkZP9Zq3qyht8E_tDZD-mqlFdP1BdJICMl-WOE9GGbj8sFGllw58OtsI5u7e2N9mRhslg8KQSL2E5TGIh_ZjCIFCsjCW15f-2ltXP4f8PgiT9yJvqEBNz1I-iyJ9ctrZKvNeNOMLzxqCRuYtQPlFBdR40ikFUzqY-TSJMnVIz5OU4CSGRMXcDyCtpQzHFEEoITQiPw"/>
+<div class="absolute top-3 right-3 w-8 h-8 bg-[#111416]/60 backdrop-blur-md rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-lg">bookmark</span>
+</div>
+<div class="absolute bottom-3 left-3 px-2 py-1 bg-[#111416]/80 backdrop-blur-md rounded-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[10px] font-bold text-on-surface">4.8</span>
+</div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface line-clamp-1">Silent Echoes</h4>
+<p class="text-[11px] text-on-surface-variant">Horror · Mystery</p>
+</div>
+</div>
+</div>
+</section>
+<!-- New Chapters Section -->
+<section class="px-6 space-y-6 pb-12">
+<h3 class="text-xl font-bold tracking-tight text-on-surface">New chapters</h3>
+<div class="space-y-6">
+<!-- Chapter Item 1 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
+<div class="flex items-center gap-4">
+<div class="w-[50px] h-[50px] rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="close-up detail of a hand-drawn manga page showing a focused character's face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOZrSYEPUqQ2ZOsui1cclN-IGMFva_Z-tL_Y-O8PvTpJTVibZ45CYg-eO_kwYlxpPiwxlPZGuBsafu1kJyXTwDKaulAoaofjuCsFUEmxaiZUKxamWB5-Fg3wciI7Ro2k1mej6-uo4SfK3TyhwJaRZzGvTABXeL8EUMRSXLzDQsUjS7Z9K9f2b7f-e_rL6WNPV3BdlH9fLutMTdVpw7-roCHxGwd8xr76KKVqOSExdH02OqqFGaELd6fv1sLQ8rkmNV-T-JRKHYrQJ1"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-on-surface line-clamp-1">Abyssal Reach</span>
+<div class="w-2 h-2 rounded-full bg-[#5EEAD4]"></div>
+</div>
+<p class="text-[11px] font-medium text-on-surface-variant">CHAPTER 154 · 2h ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<!-- Chapter Item 2 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
+<div class="flex items-center gap-4">
+<div class="w-[50px] h-[50px] rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="intricate fantasy illustration of a magical artifact with glowing runes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeSWAacEpMtLLoycSbSMcPYnBs4OYLOdmQdKmljydn19M0hb7CtcFymW96-x2f4DPiXHSOatTzubAHeoZct4iyOjaExms-_j8-S2Pl0w0d-YFoenWGidg25A0HrIuJ9ShrgCfgVkLxH42OndN-kOLq0KledQFhYeRRxUaR-bipVGtwo0wOG88NkgDXMQhn50UxPxFKi-Q1xrj2ZxeVSByLFOK_MqJeArw0OMKqwL0_0AkZujiPDl-xUZcMyrtz509-qb33Qm2LwAvL"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-on-surface line-clamp-1">The Gilded Cage</span>
+<div class="w-2 h-2 rounded-full bg-[#5EEAD4]"></div>
+</div>
+<p class="text-[11px] font-medium text-on-surface-variant">CHAPTER 89 · 5h ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<!-- Chapter Item 3 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl">
+<div class="flex items-center gap-4">
+<div class="w-[50px] h-[50px] rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="modern minimal architectural sketch in manga style with clean lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArdTmVjYcNbeHo-qnZ6qu965WFe8jBepDfFeaOK6rev5yg_M1PBFbG1JWogGMuQYWOWhGFnPxvfyBYgx_p1x80Tw54moTxeuBLe5W0_OZaZ30wu6NqiV9HSoxfoploOX7H9LCU_POuO2Nc0GZw0swh1G_3cdyvFfOr2ZgH3Nh9SvgQol7m1iPb3jUtmv6YJ-TQG3zUA-LjVUiiVaG9dvdJn60EDmtE4NnlfaEnubCyG4u6B5EdenOy9prPnfYlm_ezqdiO0mcct9uA"/>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface line-clamp-1">Metropolis X</span>
+<p class="text-[11px] font-medium text-on-surface-variant">CHAPTER 12 · 1d ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full px-4 pb-6 flex justify-around items-center z-50">
+<div class="fixed bottom-4 left-4 right-4 h-[56px] rounded-[20px] bg-[#1A2122]/75 backdrop-blur-xl flex justify-around items-center shadow-[0_12px_40px_rgba(0,0,0,0.4)] px-6">
+<a class="flex flex-col items-center justify-center text-[#80D5CB] drop-shadow-[0_0_8px_rgba(128,213,203,0.5)] active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium mt-0.5">home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium mt-0.5">explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">collections_bookmark</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium mt-0.5">library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[10px] font-medium mt-0.5">person</span>
+</a>
+</div>
+</nav>
+</body></html>

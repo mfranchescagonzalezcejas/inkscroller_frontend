@@ -1,0 +1,317 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  quality-gates:
+    name: Quality gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      tag: ${{ steps.release_meta.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.5'
+          cache: true
+
+      - name: Install FVM
+        run: dart pub global activate fvm
+
+      - name: Add pub cache to PATH
+        run: echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install FVM-pinned SDK
+        run: fvm install
+
+      - name: Install dependencies
+        run: fvm flutter pub get
+
+      - name: Analyze
+        run: fvm flutter analyze
+
+      - name: Run tests
+        run: fvm flutter test
+
+      - name: Validate tag matches pubspec version
+        run: |
+          RELEASE_TAG="${{ github.ref_name }}"
+          TAG_VERSION="${RELEASE_TAG#v}"
+          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          PUBSPEC_SEMVER="${PUBSPEC_VERSION%%+*}"
+
+          if [ "$PUBSPEC_SEMVER" != "$TAG_VERSION" ]; then
+            echo "[ERROR] Tag v$TAG_VERSION does not match pubspec.yaml version $PUBSPEC_VERSION"
+            echo "        Bump pubspec.yaml before tagging."
+            exit 1
+          fi
+
+          echo "[OK] Tag v$TAG_VERSION matches pubspec.yaml $PUBSPEC_VERSION"
+
+      - name: Write Firebase dart-defines
+        run: |
+          mkdir -p .dart-defines
+          echo '${{ secrets.FIREBASE_DART_DEFINES_JSON }}' > .dart-defines/firebase.json
+
+      - name: Generate release metadata
+        id: release_meta
+        run: |
+          TAG="${{ github.ref_name }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+          PREVIOUS_TAG=$(git rev-list --tags --skip=1 --max-count=1 \
+            | xargs -r git describe --tags 2>/dev/null || echo "")
+          RANGE="$PREVIOUS_TAG..HEAD"
+          [ -z "$PREVIOUS_TAG" ] && RANGE="HEAD"
+
+          mkdir -p release-metadata
+
+          COMMIT_FILTER='^(feat|fix|perf|refactor|test)(\([^)]+\))?: '
+          EXCLUDE_FILTER='^chore\(release\): bump version to '
+
+          git log $RANGE --pretty=format:"%s" \
+            | grep -E "$COMMIT_FILTER" \
+            | grep -Ev "$EXCLUDE_FILTER" \
+            | sed 's/^/- /' > release-metadata/release_notes_dev.txt || true
+
+          cp release-metadata/release_notes_dev.txt release-metadata/release_notes_staging.txt
+          cp release-metadata/release_notes_dev.txt release-metadata/release_notes_pro.txt
+
+          DEFAULT_MESSAGE="- Internal improvements and QA fixes included in this release"
+          [ ! -s release-metadata/release_notes_dev.txt ] \
+            && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_dev.txt
+          [ ! -s release-metadata/release_notes_staging.txt ] \
+            && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_staging.txt
+          [ ! -s release-metadata/release_notes_pro.txt ] \
+            && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_pro.txt
+
+      - name: Upload release metadata
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-metadata
+          path: release-metadata/
+          if-no-files-found: error
+
+  build-apk:
+    name: Build ${{ matrix.flavor }} APK
+    needs: quality-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - flavor: dev
+            target: lib/main_dev.dart
+            apk_name: app-dev-release.apk
+          - flavor: staging
+            target: lib/main_staging.dart
+            apk_name: app-staging-release.apk
+          - flavor: pro
+            target: lib/main_pro.dart
+            apk_name: app-pro-release.apk
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.5'
+          cache: true
+
+      - name: Install FVM
+        run: dart pub global activate fvm
+
+      - name: Add pub cache to PATH
+        run: echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install FVM-pinned SDK
+        run: fvm install
+
+      - name: Install dependencies
+        run: fvm flutter pub get
+
+      - name: Write Firebase dart-defines
+        run: |
+          mkdir -p .dart-defines
+          echo '${{ secrets.FIREBASE_DART_DEFINES_JSON }}' > .dart-defines/firebase.json
+
+      - name: Resolve flavor configuration
+        run: |
+          case "${{ matrix.flavor }}" in
+            dev)
+              echo "API_BASE_URL=${{ secrets.API_BASE_URL_DEV }}" >> "$GITHUB_ENV"
+              ;;
+            staging)
+              echo "API_BASE_URL=${{ secrets.API_BASE_URL_STAGING }}" >> "$GITHUB_ENV"
+              ;;
+            pro)
+              echo "API_BASE_URL=${{ secrets.API_BASE_URL_PRO }}" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unknown flavor: ${{ matrix.flavor }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Build ${{ matrix.flavor }} APK
+        run: |
+          fvm flutter build apk \
+            --flavor "${{ matrix.flavor }}" \
+            -t "${{ matrix.target }}" \
+            --dart-define="API_BASE_URL=$API_BASE_URL" \
+            --dart-define-from-file=.dart-defines/firebase.json
+
+      - name: Upload ${{ matrix.flavor }} APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: apk-${{ matrix.flavor }}
+          path: build/app/outputs/flutter-apk/${{ matrix.apk_name }}
+          if-no-files-found: error
+
+  create-release:
+    name: Create GitHub Release
+    needs:
+      - quality-gates
+      - build-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download release metadata
+        uses: actions/download-artifact@v4
+        with:
+          name: release-metadata
+          path: release-metadata
+
+      - name: Download APK artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: apk-*
+          path: release-assets
+
+      - name: Create or update GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: mfranchescagonzalezcejas/inkscroller_flutter
+        run: |
+          TAG="${{ needs.quality-gates.outputs.tag }}"
+
+          DEV_APK="release-assets/apk-dev/app-dev-release.apk"
+          STAGING_APK="release-assets/apk-staging/app-staging-release.apk"
+          PRO_APK="release-assets/apk-pro/app-pro-release.apk"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" \
+              "$DEV_APK" \
+              "$STAGING_APK" \
+              "$PRO_APK" \
+              --clobber
+          else
+            gh release create "$TAG" \
+              --title "Release $TAG" \
+              --notes-file release-metadata/release_notes_dev.txt \
+              "$DEV_APK" \
+              "$STAGING_APK" \
+              "$PRO_APK"
+          fi
+
+  distribute:
+    name: Distribute ${{ matrix.flavor }}
+    needs:
+      - quality-gates
+      - build-apk
+      - create-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - flavor: dev
+            artifact_name: apk-dev
+            apk_name: app-dev-release.apk
+            release_notes: release_notes_dev.txt
+          - flavor: staging
+            artifact_name: apk-staging
+            apk_name: app-staging-release.apk
+            release_notes: release_notes_staging.txt
+          - flavor: pro
+            artifact_name: apk-pro
+            apk_name: app-pro-release.apk
+            release_notes: release_notes_pro.txt
+    steps:
+      - name: Download release metadata
+        uses: actions/download-artifact@v4
+        with:
+          name: release-metadata
+          path: release-metadata
+
+      - name: Download ${{ matrix.flavor }} APK
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Resolve Firebase distribution configuration
+        run: |
+          case "${{ matrix.flavor }}" in
+            dev)
+              echo 'FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID_DEV }}' >> "$GITHUB_ENV"
+              printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_DEV }}' > firebase-key.json
+              ;;
+            staging)
+              echo 'FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID_STAGING }}' >> "$GITHUB_ENV"
+              printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_STAGING }}' > firebase-key.json
+              ;;
+            pro)
+              echo 'FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID_PRO }}' >> "$GITHUB_ENV"
+              printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_PRO }}' > firebase-key.json
+              ;;
+            *)
+              echo "Unknown flavor: ${{ matrix.flavor }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Distribute ${{ matrix.flavor }}
+        env:
+          FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
+          GOOGLE_APPLICATION_CREDENTIALS: firebase-key.json
+        run: |
+          firebase appdistribution:distribute \
+            "dist/${{ matrix.apk_name }}" \
+            --app "$FIREBASE_APP_ID" \
+            --testers "$FIREBASE_TESTERS" \
+            --release-notes "$(cat release-metadata/${{ matrix.release_notes }})"

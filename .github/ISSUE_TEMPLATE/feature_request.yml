@@ -1,0 +1,64 @@
+name: Feature request
+description: Propose a feature or improvement for InkScroller Flutter
+title: "feat(scope): short feature description"
+labels: [enhancement]
+assignees: [mfranchescagonzalezcejas]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. Please describe the problem and the expected outcome clearly.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
+        - label: This request is still relevant to the current project roadmap
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: What problem or pain point does this feature solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: Describe how it should work from the user or developer perspective.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected area
+      options:
+        - Auth
+        - Library
+        - Reader
+        - Profile / Preferences
+        - Navigation / Routing
+        - Build / Flavors
+        - Android Studio / Tooling
+        - CI / Workflows
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

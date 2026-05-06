@@ -1,0 +1,215 @@
+{
+  "@@locale": "en",
+  "offlineBannerMessage": "Offline. Showing cached data when available.",
+  "searchMangaHint": "Search manga…",
+  "clearAction": "Clear",
+  "noMangasAvailable": "No manga available",
+  "noSearchResults": "No results for \"{query}\"",
+  "@noSearchResults": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "noMoreMangaToLoad": "No more manga to load",
+  "failedToLoadChapters": "Could not load chapters",
+  "retryAction": "Retry",
+  "noChaptersAvailable": "No chapters available",
+  "chaptersTitle": "Chapters",
+  "routeInvalidTitle": "Invalid route",
+  "routeMissingMangaMessage": "Missing manga data to open the detail page.",
+  "routeMissingChapterMessage": "Could not find the requested chapter.",
+  "routeNotFoundTitle": "Page not found",
+  "routeNotFoundMessage": "The requested route does not exist.",
+  "backToHomeAction": "Back to home",
+  "settingsComingSoon": "Coming soon 👀",
+  "settingsTitle": "Settings",
+  "settingsAppSectionTitle": "App",
+  "settingsAppNameLabel": "App name",
+  "settingsFlavorLabel": "Flavor",
+  "settingsApiBaseUrlLabel": "API base URL",
+  "settingsCacheSectionTitle": "Cache",
+  "settingsMangaListCacheLabel": "Manga list cache",
+  "settingsMangaDetailCacheLabel": "Manga detail cache",
+  "settingsMangaChaptersCacheLabel": "Chapter list cache",
+  "settingsCacheMinutesValue": "{minutes} min",
+  "@settingsCacheMinutesValue": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsClearCacheAction": "Clear cached data",
+  "settingsCacheClearedMessage": "Cached data cleared",
+  "settingsCacheClearFailedMessage": "Could not clear cached data",
+  "loadingChapter": "Loading chapter",
+  "chapterPagesProgress": "{loadedPages} / {totalPages} pages",
+  "@chapterPagesProgress": {
+    "placeholders": {
+      "loadedPages": {
+        "type": "int"
+      },
+      "totalPages": {
+        "type": "int"
+      }
+    }
+  },
+  "readingChapter": "Reading chapter",
+  "chapterLabel": "Chapter {number}",
+  "@chapterLabel": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "extraLabel": "Extra",
+  "homeFeatured": "🔥 Featured",
+  "homeLatest": "🆕 Latest",
+  "homePopular": "🔥 Popular",
+  "homeDemographic": "📚 Demographics",
+  "homeNoMangas": "No manga available",
+  "demographicShounen": "Shounen",
+  "demographicShoujo": "Shoujo",
+  "demographicSeinen": "Seinen",
+  "demographicJosei": "Josei",
+  "readNow": "Read Now",
+  "addToLibrary": "Add to Library",
+  "removeFromLibrary": "Remove from Library",
+  "libraryItemAdded": "{title} added to your library",
+  "@libraryItemAdded": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "libraryItemRemoved": "{title} removed from your library",
+  "@libraryItemRemoved": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "genreAll": "All",
+  "genrePopular": "Popular",
+  "genreRomance": "Romance",
+  "genreAction": "Action",
+  "libraryTitle": "My Library",
+  "libraryCollectionsCount": "{count} collections",
+  "@libraryCollectionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryTabAll": "All",
+  "libraryTabReading": "Reading",
+  "libraryTabCompleted": "Completed",
+  "libraryTabOnHold": "On Hold",
+  "libraryEmpty": "Your library is empty. Add manga from Home or Manga Detail.",
+  "libraryEmptyTab": "No manga in this tab yet.",
+  "libraryStatusReading": "Mark as Reading",
+  "libraryStatusCompleted": "Mark as Completed",
+  "libraryStatusPaused": "Mark as Paused",
+  "libraryStatusUpdated": "Library status updated",
+  "libraryUnknownMeta": "Unknown",
+  "libraryProgressValue": "{readCount} / {totalCount} read",
+  "@libraryProgressValue": {
+    "placeholders": {
+      "readCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
+  "exploreTitle": "Explore",
+  "exploreSubtitle": "Discover your next story",
+  "externalChapterTitle": "External chapter",
+  "externalChapterMessage": "This chapter is only available on the original site. It cannot be read inside InkScroller.",
+  "externalChapterOpenAction": "Open on original site",
+  "externalChapterGoBackAction": "Go back",
+  "readingProgressDialogTitle": "Update reading progress",
+  "readingProgressDialogMessage": "This will mark {count} chapters up to {chapterLabel} as read.",
+  "@readingProgressDialogMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "chapterLabel": {}
+    }
+  },
+  "readingProgressDialogExternalMessage": "This chapter opens outside InkScroller. Do you want to mark {count} chapters up to {chapterLabel} before leaving?",
+  "@readingProgressDialogExternalMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "chapterLabel": {}
+    }
+  },
+  "readingProgressConfirmAction": "Mark as read",
+  "readingProgressOpenOnlyAction": "Open without marking",
+  "readingProgressUndoAction": "Undo",
+  "readingProgressUpdatedMessage": "Reading progress updated",
+  "navHome": "Home",
+  "navExplore": "Explore",
+  "navLibrary": "Library",
+  "navProfile": "Profile",
+  "settingsCacheSizeLabel": "Cached data",
+  "settingsCacheSizeValue": "{size}",
+  "@settingsCacheSizeValue": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "settingsCacheSizeLoading": "Calculating…",
+  "refreshAction": "Refresh",
+  "profileReadingPreferencesSection": "Reading preferences",
+  "profileAppSettingsSection": "App settings",
+  "profileReadingModeTitle": "Reading mode",
+  "profileReadingModeVertical": "Vertical",
+  "profileReadingModePaged": "Paged",
+  "profilePreferredAppLanguageTitle": "App language",
+  "profilePreferredReadingLanguageTitle": "Manga reading language",
+  "profileCacheSettingsTitle": "Cache & saved data",
+  "profileCacheSettingsSubtitle": "Clear local data",
+  "profileAppInfoTitle": "App information",
+  "profileAppInfoSubtitle": "Version, licenses, credits",
+  "profileGuestTitle": "You're using the app as a guest.",
+  "profileGuestSubtitle": "Sign in or create an account to view your profile and manage your preferences.",
+  "profileGuestCta": "Sign in or create account",
+  "profileSignOutAction": "Sign out",
+  "profileSignOutSnackBar": "Signed out. You are now in guest mode.",
+  "profileServerConnectionError": "Could not connect to the server.",
+  "profileVersionLabel": "Version {version} (Build {buildNumber})",
+  "@profileVersionLabel": {
+    "placeholders": {
+      "version": {},
+      "buildNumber": {}
+    }
+  },
+  "authSignInTitle": "Sign in",
+  "authSignInSubtitle": "Your manga collection awaits",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Password",
+  "authSignInButton": "Sign in",
+  "authNoAccount": "Don't have an account? Create one",
+  "authContinueAsGuest": "Continue as guest",
+  "authEmailRequired": "Enter your email.",
+  "authEmailInvalid": "Enter a valid email.",
+  "authPasswordRequired": "Enter your password.",
+  "authPasswordTooShort": "Password must be at least 6 characters.",
+  "authCreateAccountTitle": "Create account",
+  "authCreateAccountSubtitle": "Join the collection",
+  "authCreateAccountButton": "Create account",
+  "authHaveAccount": "Already have an account? Sign in",
+  "readerSettingsDirection": "Reading direction",
+  "readerSettingsBrightness": "Brightness",
+  "readerSettingsAmoled": "AMOLED Black",
+  "readerSettingsAmoledSubtitle": "Save battery on OLED screens",
+  "readerSettingsImmersive": "Immersive mode",
+  "readerSettingsImmersiveSubtitle": "Hide system navigation bars",
+  "readerSettingsConfirm": "Confirm settings",
+  "readerDirectionLtr": "LTR",
+  "readerDirectionRtl": "RTL",
+  "readerDirectionVertical": "Vertical"
+}

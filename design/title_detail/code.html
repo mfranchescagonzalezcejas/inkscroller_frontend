@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-error": "#690005",
+            "primary-container": "#0f766e",
+            "on-primary": "#003733",
+            "error-container": "#93000a",
+            "on-primary-fixed-variant": "#00504a",
+            "primary-fixed": "#9cf2e8",
+            "on-secondary-container": "#003f37",
+            "secondary-container": "#00b4a0",
+            "on-secondary-fixed-variant": "#005047",
+            "on-tertiary-fixed": "#001453",
+            "surface-tint": "#80d5cb",
+            "tertiary": "#b8c4ff",
+            "outline-variant": "#3e4947",
+            "on-tertiary-fixed-variant": "#173bab",
+            "secondary-fixed-dim": "#4ddcc6",
+            "tertiary-fixed-dim": "#b8c4ff",
+            "on-tertiary": "#002584",
+            "surface-container-high": "#242b2c",
+            "on-surface": "#dce4e5",
+            "on-secondary-fixed": "#00201b",
+            "surface-container-lowest": "#080f10",
+            "primary": "#80d5cb",
+            "tertiary-container": "#4461cf",
+            "surface-bright": "#333a3c",
+            "on-secondary": "#003730",
+            "outline": "#889391",
+            "inverse-surface": "#dce4e5",
+            "on-tertiary-container": "#e7e9ff",
+            "secondary-fixed": "#6ef9e2",
+            "on-surface-variant": "#bdc9c6",
+            "on-primary-fixed": "#00201d",
+            "inverse-on-surface": "#2a3233",
+            "primary-fixed-dim": "#80d5cb",
+            "surface-container": "#1a2122",
+            "surface-dim": "#0d1516",
+            "on-error-container": "#ffdad6",
+            "inverse-primary": "#006a63",
+            "on-primary-container": "#a3faef",
+            "surface-container-highest": "#2f3637",
+            "tertiary-fixed": "#dde1ff",
+            "error": "#ffb4ab",
+            "secondary": "#4ddcc6",
+            "surface": "#0d1516",
+            "on-background": "#dce4e5",
+            "surface-variant": "#2f3637",
+            "surface-container-low": "#161d1e",
+            "background": "#0d1516"
+          },
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Plus Jakarta Sans"],
+            "label": ["Plus Jakarta Sans"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #080f10; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .brand-gradient { background: linear-gradient(135deg, #0F766E, #1E40AF); }
+    .hero-blur { filter: brightness(0.25) blur(24px); }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased pb-24">
+<!-- Header Placeholder for Back/Bookmark -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4 pointer-events-none">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-[#111416]/50 backdrop-blur-md text-on-surface pointer-events-auto transition-transform active:scale-90">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-[#111416]/50 backdrop-blur-md text-on-surface pointer-events-auto transition-transform active:scale-90">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</header>
+<!-- Hero Section -->
+<section class="relative w-full h-[420px] overflow-hidden">
+<!-- Blurred Background Cover -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover hero-blur scale-110" data-alt="Abstract cinematic manga illustration with deep teal and blue hues, mysterious atmosphere and sharp character silhouettes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnLab0lsQPP3v6CD7o1hZgsTBQM9Xeg1fOubDIgNITKiYBddt1UzrPopING-imsYPSN0SY7HDtR8Z-vX9ix5ilMYjgS-kGra8ET8d85Bjokw52g6fw-HwNB47cZQVjoqNaNXuApd6IlyqKK9yEQ-OEzfrX1t7NfusyHk4sXgmq4vaV7KolZavYVpO08iMa6Fkh8YmzT4FfaG6E9W5b0Dwpums7cj2Wu77ZcN5L9QZ9jULhl7f-K0QSCqG_sPmNCluCvjOt5yjgnFp3"/>
+</div>
+<!-- Centered Floating Cover -->
+<div class="relative z-10 flex flex-col items-center justify-end h-full pb-8">
+<div class="w-[140px] h-[200px] rounded-[12px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-transform hover:scale-105 duration-500">
+<img class="w-full h-full object-cover" data-alt="Close up of a dramatic manga volume cover featuring a dark fantasy protagonist with glowing teal accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBytif1rB3fceMyLlEw7yoLEPfA5OmnNj9_G32mX7gIdJmA5b_DcjG1xcOZU-LjnYSKkMx5okbwTHHfwjebVGSCsE-TefK1iryEVhj4Qn0lf-cAAuiK1Z1pn65_ZvZDfSbDj9SkBL7MfaghRELMRHNiI4N6kiNSABIXDaOVXBn0fPE44tw2NKEY_qflnXN4ozozulrvZ0-Dl94knnlf0AONgWmJn9SBNIc7hfqpiT7K5_1j6d248ItIxarlMwCxLQbCcKON2uVz9-lF"/>
+</div>
+</div>
+</section>
+<!-- Info Content -->
+<main class="px-6 -mt-4 relative z-20">
+<!-- Status Tags -->
+<div class="flex flex-wrap gap-2 mb-4 justify-center">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold tracking-wider flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(77,220,198,0.6)]"></span>
+        ONGOING
+      </span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold tracking-wider text-on-surface-variant">MYSTERY</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold tracking-wider text-on-surface-variant">SEINEN</span>
+</div>
+<!-- Title & Stats -->
+<div class="text-center mb-8">
+<h1 class="text-[30px] font-extrabold leading-tight mb-2 tracking-tight">The Shadow Protocol</h1>
+<p class="text-on-surface-variant text-sm font-medium">
+        ★ 4.9 <span class="mx-2 text-outline">·</span> 142 chapters <span class="mx-2 text-outline">·</span> 820k readers
+      </p>
+</div>
+<!-- CTA & Main Actions -->
+<div class="space-y-6 mb-10">
+<button class="w-full h-[52px] brand-gradient rounded-[12px] flex items-center justify-center gap-2 text-white font-bold text-sm tracking-widest shadow-[0_8px_20px_rgba(15,118,110,0.3)] active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+        EMPEZAR A LEER
+      </button>
+<div class="flex justify-center gap-6">
+<button class="w-12 h-12 rounded-full bg-[#111416] flex items-center justify-center text-on-surface shadow-lg transition-colors hover:bg-surface-container">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="w-12 h-12 rounded-full bg-[#111416] flex items-center justify-center text-on-surface shadow-lg transition-colors hover:bg-surface-container">
+<span class="material-symbols-outlined">download</span>
+</button>
+<button class="w-12 h-12 rounded-full bg-[#111416] flex items-center justify-center text-on-surface shadow-lg transition-colors hover:bg-surface-container">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+<!-- Synopsis Section -->
+<section class="mb-12">
+<h3 class="text-outline text-[10px] font-bold tracking-[0.2em] mb-3">SYNOPSIS</h3>
+<div class="relative">
+<p class="text-[14px] leading-[1.6] text-on-surface">
+          In a world where digital memories can be harvested and sold as high-end narcotics, Kaelen is a "Memory Weaver" working for the underground resistance. When he discovers a encrypted fragment of his own forgotten childhood... 
+          <span class="text-primary font-bold ml-1 cursor-pointer">Read more</span>
+</p>
+</div>
+</section>
+<!-- Chapters List Section -->
+<section class="mb-10">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-bold tracking-tight">Chapters</h2>
+<button class="text-on-surface-variant flex items-center gap-1 hover:text-on-surface">
+<span class="material-symbols-outlined text-xl">tune</span>
+</button>
+</div>
+<div class="space-y-1">
+<!-- Chapter Row (Alternate BG) -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low/30 hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-4">
+<span class="text-outline text-xs font-mono">142</span>
+<div>
+<p class="text-sm font-semibold">The Final Awakening</p>
+<p class="text-[11px] text-outline">Oct 24, 2023</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-primary tracking-widest px-2 py-0.5 rounded bg-primary/10">NEW</span>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-4">
+<span class="text-outline text-xs font-mono">141</span>
+<div>
+<p class="text-sm font-semibold">Fragments of Silence</p>
+<p class="text-[11px] text-outline">Oct 20, 2023</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-lg">download_done</span>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low/30 hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-4">
+<span class="text-outline text-xs font-mono">140</span>
+<div>
+<p class="text-sm font-semibold">Neon Shadows</p>
+<p class="text-[11px] text-outline">Oct 15, 2023</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-lg">download_done</span>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl hover:bg-surface-container-low/50 transition-colors">
+<div class="flex items-center gap-4">
+<span class="text-outline text-xs font-mono">139</span>
+<div>
+<p class="text-sm font-semibold">The Weaver's Choice</p>
+<p class="text-[11px] text-outline">Oct 08, 2023</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-lg">download_done</span>
+</div>
+</div>
+<button class="w-full py-4 text-outline text-xs font-bold tracking-widest mt-4 hover:text-on-surface transition-colors">
+        VIEW ALL CHAPTERS
+      </button>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 w-full px-4 pb-6 flex justify-around items-center z-50">
+<div class="bg-[#1A2122]/75 backdrop-blur-xl h-[56px] rounded-[20px] w-full max-w-md mx-auto flex justify-around items-center shadow-[0_12px_40px_rgba(0,0,0,0.4)] px-4">
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#80D5CB] drop-shadow-[0_0_8px_rgba(128,213,203,0.5)] active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">collections_bookmark</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined">person</span>
+</a>
+</div>
+</nav>
+</body></html>

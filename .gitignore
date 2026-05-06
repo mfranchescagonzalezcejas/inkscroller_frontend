@@ -1,0 +1,95 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code workspace settings are local because launch/tasks often contain
+# machine-specific SDK paths or private dart-define files.
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# FVM (Flutter Version Management)
+.fvm/
+
+# Local generated dart-define files (real values — never commit)
+# Use *.example.json for committed templates
+.dart-defines/*
+!.dart-defines/*.example.json
+
+# Local QA smoke evidence outputs
+.qa-evidence/
+.atl/
+.engram/
+
+# Editor backup files
+*~
+
+# -------------------------------------------------------
+# PUBLIC-READY SECURITY BASELINE
+# Secrets and sensitive config — never commit these
+# -------------------------------------------------------
+
+# Environment variable files
+.env
+.env.*
+!.env.example
+
+# Firebase config (injected via CI — see SECURITY_PUBLIC_READINESS.md)
+android/app/src/dev/google-services.json
+android/app/src/staging/google-services.json
+android/app/src/pro/google-services.json
+android/app/google-services.json
+ios/Runner/GoogleService-Info*.plist
+ios/config/dev/GoogleService-Info.plist
+ios/config/staging/GoogleService-Info.plist
+ios/config/pro/GoogleService-Info.plist
+
+# Generated local Flutter environment export
+ios/Flutter/flutter_export_environment.sh
+
+# Android signing
+android/*.jks
+android/*.keystore
+android/key.properties
+
+# iOS signing (fastlane / manual certs)
+ios/Certificates/
+ios/**/*.p12
+ios/**/*.mobileprovision
+*.p12
+*.mobileprovision

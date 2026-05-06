@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Flutter Dev Local" type="FlutterRunConfigurationType" factoryName="Flutter">
+    <option name="filePath" value="$PROJECT_DIR$/lib/main_dev.dart" />
+    <option name="buildFlavor" value="dev" />
+    <option name="additionalArgs" value="--dart-define=API_BASE_URL=http://127.0.0.1:8000 --dart-define-from-file=$PROJECT_DIR$/.dart-defines/firebase.json" />
+    <method v="2" />
+  </configuration>
+</component>

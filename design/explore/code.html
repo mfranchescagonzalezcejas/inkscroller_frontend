@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #080F10;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        /* Custom scrollbar suppression for a cleaner editorial look */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#690005",
+              "primary-container": "#0f766e",
+              "on-primary": "#003733",
+              "error-container": "#93000a",
+              "on-primary-fixed-variant": "#00504a",
+              "primary-fixed": "#9cf2e8",
+              "on-secondary-container": "#003f37",
+              "secondary-container": "#00b4a0",
+              "on-secondary-fixed-variant": "#005047",
+              "on-tertiary-fixed": "#001453",
+              "surface-tint": "#80d5cb",
+              "tertiary": "#b8c4ff",
+              "outline-variant": "#3e4947",
+              "on-tertiary-fixed-variant": "#173bab",
+              "secondary-fixed-dim": "#4ddcc6",
+              "tertiary-fixed-dim": "#b8c4ff",
+              "on-tertiary": "#002584",
+              "surface-container-high": "#242b2c",
+              "on-surface": "#dce4e5",
+              "on-secondary-fixed": "#00201b",
+              "surface-container-lowest": "#080f10",
+              "primary": "#80d5cb",
+              "tertiary-container": "#4461cf",
+              "surface-bright": "#333a3c",
+              "on-secondary": "#003730",
+              "outline": "#889391",
+              "inverse-surface": "#dce4e5",
+              "on-tertiary-container": "#e7e9ff",
+              "secondary-fixed": "#6ef9e2",
+              "on-surface-variant": "#bdc9c6",
+              "on-primary-fixed": "#00201d",
+              "inverse-on-surface": "#2a3233",
+              "primary-fixed-dim": "#80d5cb",
+              "surface-container": "#1a2122",
+              "surface-dim": "#0d1516",
+              "on-error-container": "#ffdad6",
+              "inverse-primary": "#006a63",
+              "on-primary-container": "#a3faef",
+              "surface-container-highest": "#2f3637",
+              "tertiary-fixed": "#dde1ff",
+              "error": "#ffb4ab",
+              "secondary": "#4ddcc6",
+              "surface": "#0d1516",
+              "on-background": "#dce4e5",
+              "surface-variant": "#2f3637",
+              "surface-container-low": "#161d1e",
+              "background": "#0d1516"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="sticky top-0 w-full z-50 bg-[#111416]/75 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-teal-600 dark:text-[#80D5CB] hover:opacity-80 transition-opacity active:scale-90 transition-transform cursor-pointer">menu</span>
+<h1 class="text-2xl font-bold bg-gradient-to-br from-[#0F766E] to-[#1E40AF] bg-clip-text text-transparent font-['Plus_Jakarta_Sans']">InkScroll</h1>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden hover:opacity-80 transition-opacity active:scale-90 transition-transform cursor-pointer">
+<img alt="User Profile" data-alt="Close-up portrait of a young man with a friendly expression in soft cinematic studio lighting on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFAg8Mfn9a1p2fMIhIXUd-0HrA0qsPxOk32ujSYywLBBGsGp8b_T7YwYRi-ZaIq4hPGvUZXR8Wqs14UQO6MtD06XBHaXCcaaqfjUZM4bsTnelDBeRNhvJLAidkxpO7fEXRsq_TH-SuH-_VLBLHsc0M1pBqSv51vmyWqSfpMbcI_gMC0O4-MTFFsn8FeMzC868p-AQBFhKp2y7Pme3zQ8qOoLt3pLzpY1N2Jv8hmmBfs8MiTvbpud02FaYfTKKXLtgTRPzjN0eaYltv"/>
+</div>
+</header>
+<main class="px-6 space-y-8 mt-4">
+<!-- Editorial Header -->
+<section class="space-y-2 pt-4">
+<h2 class="text-[28px] font-bold text-on-surface leading-tight">Discover your next story</h2>
+<p class="text-[#888D93] text-base">Explore curated collections and trending narratives.</p>
+</section>
+<!-- Search Input -->
+<section>
+<div class="relative flex items-center h-[48px] bg-[#181B1E] rounded-lg px-4 focus-within:bg-surface-bright transition-all duration-300">
+<span class="material-symbols-outlined text-[#888D93] mr-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-[#888D93] w-full text-sm" placeholder="Search titles, authors, genres..." type="text"/>
+</div>
+</section>
+<!-- Recent Searches -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="text-[12px] font-bold tracking-widest text-[#4A4F55]">RECENT SEARCHES</h3>
+<button class="text-[12px] font-medium text-[#4A4F55] hover:text-on-surface-variant transition-colors">CLEAR ALL</button>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full text-sm text-on-surface group cursor-pointer hover:bg-surface-bright transition-colors">
+<span>Solo Leveling</span>
+<span class="material-symbols-outlined text-base text-[#4A4F55] group-hover:text-on-surface">close</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full text-sm text-on-surface group cursor-pointer hover:bg-surface-bright transition-colors">
+<span>Vagabond</span>
+<span class="material-symbols-outlined text-base text-[#4A4F55] group-hover:text-on-surface">close</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full text-sm text-on-surface group cursor-pointer hover:bg-surface-bright transition-colors">
+<span>Berserk</span>
+<span class="material-symbols-outlined text-base text-[#4A4F55] group-hover:text-on-surface">close</span>
+</div>
+</div>
+</section>
+<!-- Trending Now -->
+<section class="space-y-6">
+<h3 class="text-xl font-bold text-on-surface">Trending Now</h3>
+<div class="space-y-8">
+<!-- Trending Item 01 -->
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="text-4xl font-extrabold text-[#4A4F55] opacity-30 italic min-w-[48px]">01</span>
+<div class="w-14 h-14 rounded-lg overflow-hidden shadow-lg shadow-primary/10">
+<img alt="Trending Manga 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Dark dramatic anime style illustration of a warrior with glowing cyan eyes standing in a rain-slicked neon street" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8Y-4pjeysFZ8Pm3a4Zixo6s8dYAbqqGNZc5lQ9nj5kI1h9xTScx0oVGKVN8gfiQ8Zat8nQC8Bk0I4XQtgTi5H-GEhq7P_iTW7bXGakdoHWc55-OEzcArhiWBGV537xt4ChrXvbxyH0mhsEaRYW2UtfcFUl2SFJDZf3BsJo66D-JjKb0ME0EyFhugKJMuXtMKtwd7k3bqqsSal1F_QRRjngIRDpHnUeR9pdpyiGpx41ASL07ZiBtE15uwbRVEp9X6AXdtzavU6atcX"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">Shadow Sovereignty</h4>
+<p class="text-[12px] text-[#888D93] mt-1 tracking-wider uppercase">CHAPTER 142 · ACTION</p>
+</div>
+</div>
+<!-- Trending Item 02 -->
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="text-4xl font-extrabold text-[#4A4F55] opacity-30 italic min-w-[48px]">02</span>
+<div class="w-14 h-14 rounded-lg overflow-hidden shadow-lg shadow-secondary/10">
+<img alt="Trending Manga 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Stylized character art of a mysterious figure in a hooded cloak amidst floating purple magical particles and deep shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaSfiZ47E7LzErTRcYOAbHw_UE0MuQ3DDm3Gy9k1vYHmPltqtOjmkhG02sIzgMUs7tePiPMOC_hK_VINZgz97u47Du58Yf7731OTPB9v4EPSfOjZBCqMD0-A2EnTnhNpY4fQ5nBM1A4ChyiZyalvsga9H2bpb4QXt4Pn3m9UOQVgvhpV01gl6y7jbySxH7FZOMUn5lz5FxEE6UCnv6mEkZR59VzCy2AYQ-WMY_U_Wb3JLKDmgeq32gHxLrGSh1SQXKbiXHbD5aV6HM"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">The Last Oracle</h4>
+<p class="text-[12px] text-[#888D93] mt-1 tracking-wider uppercase">CHAPTER 89 · SUPERNATURAL</p>
+</div>
+</div>
+<!-- Trending Item 03 -->
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="text-4xl font-extrabold text-[#4A4F55] opacity-30 italic min-w-[48px]">03</span>
+<div class="w-14 h-14 rounded-lg overflow-hidden shadow-lg shadow-tertiary/10">
+<img alt="Trending Manga 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Atmospheric painting of a quiet city balcony at twilight with soft warm lights and a melancholic blue atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0kGC7uRALIdYDMDLw1TvRetrLZMr9o4adQgqt1-CMjfGqxELCLREzyvaWmvmaKs7o3qqwaMFmOdiytIcJv5ZPwA1is5R0ggXsujkRcw4wPnl-Nx3yuow73xUzQQL8RrxFGn2s4wr6969SS37mKo204pJ4wZDHmf61L0RYvIElnSw6xD5pRjHYG5myyWoo1AA7EPQOyl9XcybieUhsMuye0IRSB8d2KecuCfKayvDE-HpHwfakxvKL2bKd85FybioHhe_Bj3IXoflK"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">Neon Echoes</h4>
+<p class="text-[12px] text-[#888D93] mt-1 tracking-wider uppercase">CHAPTER 56 · SLICE OF LIFE</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Explore by Genre -->
+<section class="space-y-6 pb-12">
+<h3 class="text-xl font-bold text-on-surface">Explore by Genre</h3>
+<div class="grid grid-cols-2 gap-4">
+<!-- Psychological -->
+<div class="relative h-32 rounded-[16px] overflow-hidden group cursor-pointer bg-gradient-to-br from-[#081221] to-[#121a2b]">
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center p-4">
+<span class="text-white font-bold text-base text-center z-10">Psychological</span>
+</div>
+<!-- Ambient abstract background decoration -->
+<div class="absolute -bottom-4 -right-4 w-20 h-20 bg-blue-900/30 blur-2xl rounded-full"></div>
+</div>
+<!-- Action -->
+<div class="relative h-32 rounded-[16px] overflow-hidden group cursor-pointer bg-gradient-to-br from-[#1b2112] to-[#2a301a]">
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center p-4">
+<span class="text-white font-bold text-base text-center z-10">Action</span>
+</div>
+<div class="absolute -bottom-4 -right-4 w-20 h-20 bg-green-900/30 blur-2xl rounded-full"></div>
+</div>
+<!-- Supernatural -->
+<div class="relative h-32 rounded-[16px] overflow-hidden group cursor-pointer bg-gradient-to-br from-[#1a0a21] to-[#2b1236]">
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center p-4">
+<span class="text-white font-bold text-base text-center z-10">Supernatural</span>
+</div>
+<div class="absolute -bottom-4 -right-4 w-20 h-20 bg-purple-900/30 blur-2xl rounded-full"></div>
+</div>
+<!-- Slice of Life -->
+<div class="relative h-32 rounded-[16px] overflow-hidden group cursor-pointer bg-gradient-to-br from-[#0a1e1e] to-[#123131]">
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center p-4">
+<span class="text-white font-bold text-base text-center z-10">Slice of Life</span>
+</div>
+<div class="absolute -bottom-4 -right-4 w-20 h-20 bg-teal-900/30 blur-2xl rounded-full"></div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full px-4 pb-6 flex justify-around items-center z-50">
+<div class="bg-[#1A2122]/75 backdrop-blur-xl h-[56px] rounded-[20px] w-full flex justify-around items-center shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+<div class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#80D5CB] drop-shadow-[0_0_8px_rgba(128,213,203,0.5)] active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">collections_bookmark</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+</div>
+</div>
+</nav>
+</body></html>

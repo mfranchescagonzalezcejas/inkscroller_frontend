@@ -1,0 +1,215 @@
+{
+  "@@locale": "es",
+  "offlineBannerMessage": "Sin conexión. Mostrando datos guardados si están disponibles.",
+  "searchMangaHint": "Buscar mangas…",
+  "clearAction": "Limpiar",
+  "noMangasAvailable": "No hay mangas disponibles",
+  "noSearchResults": "Sin resultados para \"{query}\"",
+  "@noSearchResults": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "noMoreMangaToLoad": "No hay más mangas para cargar",
+  "failedToLoadChapters": "No se pudieron cargar los capítulos",
+  "retryAction": "Reintentar",
+  "noChaptersAvailable": "No hay capítulos disponibles",
+  "chaptersTitle": "Capítulos",
+  "routeInvalidTitle": "Ruta inválida",
+  "routeMissingMangaMessage": "Faltan los datos del manga para abrir el detalle.",
+  "routeMissingChapterMessage": "No se encontró el capítulo solicitado.",
+  "routeNotFoundTitle": "Página no encontrada",
+  "routeNotFoundMessage": "La ruta solicitada no existe.",
+  "backToHomeAction": "Volver al inicio",
+  "settingsComingSoon": "Próximamente 👀",
+  "settingsTitle": "Ajustes",
+  "settingsAppSectionTitle": "Aplicación",
+  "settingsAppNameLabel": "Nombre de la app",
+  "settingsFlavorLabel": "Flavor",
+  "settingsApiBaseUrlLabel": "API base URL",
+  "settingsCacheSectionTitle": "Caché",
+  "settingsMangaListCacheLabel": "Caché de lista de mangas",
+  "settingsMangaDetailCacheLabel": "Caché de detalle de manga",
+  "settingsMangaChaptersCacheLabel": "Caché de capítulos",
+  "settingsCacheMinutesValue": "{minutes} min",
+  "@settingsCacheMinutesValue": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsClearCacheAction": "Limpiar datos guardados",
+  "settingsCacheClearedMessage": "Datos guardados eliminados",
+  "settingsCacheClearFailedMessage": "No se pudieron eliminar los datos guardados",
+  "loadingChapter": "Cargando capítulo",
+  "chapterPagesProgress": "{loadedPages} / {totalPages} páginas",
+  "@chapterPagesProgress": {
+    "placeholders": {
+      "loadedPages": {
+        "type": "int"
+      },
+      "totalPages": {
+        "type": "int"
+      }
+    }
+  },
+  "readingChapter": "Leyendo capítulo",
+  "chapterLabel": "Capítulo {number}",
+  "@chapterLabel": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "extraLabel": "Extra",
+  "homeFeatured": "🔥 Destacados",
+  "homeLatest": "🆕 Nuevos",
+  "homePopular": "🔥 Populares",
+  "homeDemographic": "📚 Demografía",
+  "homeNoMangas": "No hay mangas disponibles",
+  "demographicShounen": "Shounen",
+  "demographicShoujo": "Shoujo",
+  "demographicSeinen": "Seinen",
+  "demographicJosei": "Josei",
+  "readNow": "Leer ahora",
+  "addToLibrary": "Añadir a biblioteca",
+  "removeFromLibrary": "Quitar de biblioteca",
+  "libraryItemAdded": "{title} se añadió a tu biblioteca",
+  "@libraryItemAdded": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "libraryItemRemoved": "{title} se quitó de tu biblioteca",
+  "@libraryItemRemoved": {
+    "placeholders": {
+      "title": {}
+    }
+  },
+  "genreAll": "Todo",
+  "genrePopular": "Popular",
+  "genreRomance": "Romance",
+  "genreAction": "Acción",
+  "libraryTitle": "Mi Biblioteca",
+  "libraryCollectionsCount": "{count} colecciones",
+  "@libraryCollectionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryTabAll": "Todo",
+  "libraryTabReading": "Leyendo",
+  "libraryTabCompleted": "Completo",
+  "libraryTabOnHold": "Pausado",
+  "libraryEmpty": "Tu biblioteca está vacía. Añadí mangas desde Inicio o el detalle.",
+  "libraryEmptyTab": "Todavía no hay mangas en esta pestaña.",
+  "libraryStatusReading": "Marcar como Leyendo",
+  "libraryStatusCompleted": "Marcar como Completo",
+  "libraryStatusPaused": "Marcar como Pausado",
+  "libraryStatusUpdated": "Estado de biblioteca actualizado",
+  "libraryUnknownMeta": "Sin dato",
+  "libraryProgressValue": "{readCount} / {totalCount} leídos",
+  "@libraryProgressValue": {
+    "placeholders": {
+      "readCount": {
+        "type": "int"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
+  "exploreTitle": "Explorar",
+  "exploreSubtitle": "Descubre tu próxima historia",
+  "externalChapterTitle": "Capítulo externo",
+  "externalChapterMessage": "Este capítulo solo está disponible en el sitio original. No se puede leer dentro de InkScroller.",
+  "externalChapterOpenAction": "Abrir en el sitio original",
+  "externalChapterGoBackAction": "Volver",
+  "readingProgressDialogTitle": "Actualizar progreso de lectura",
+  "readingProgressDialogMessage": "Se van a marcar {count} capítulos hasta {chapterLabel} como leídos.",
+  "@readingProgressDialogMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "chapterLabel": {}
+    }
+  },
+  "readingProgressDialogExternalMessage": "Este capítulo se abre afuera de InkScroller. ¿Querés marcar {count} capítulos hasta {chapterLabel} antes de salir?",
+  "@readingProgressDialogExternalMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "chapterLabel": {}
+    }
+  },
+  "readingProgressConfirmAction": "Marcar",
+  "readingProgressOpenOnlyAction": "Abrir sin marcar",
+  "readingProgressUndoAction": "Deshacer",
+  "readingProgressUpdatedMessage": "Progreso de lectura actualizado",
+  "navHome": "Inicio",
+  "navExplore": "Explorar",
+  "navLibrary": "Biblioteca",
+  "navProfile": "Perfil",
+  "settingsCacheSizeLabel": "Datos en caché",
+  "settingsCacheSizeValue": "{size}",
+  "@settingsCacheSizeValue": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "settingsCacheSizeLoading": "Calculando…",
+  "refreshAction": "Actualizar",
+  "profileReadingPreferencesSection": "Preferencias de lectura",
+  "profileAppSettingsSection": "Ajustes de la app",
+  "profileReadingModeTitle": "Modo de lectura",
+  "profileReadingModeVertical": "Vertical",
+  "profileReadingModePaged": "Paginado",
+  "profilePreferredAppLanguageTitle": "Idioma de la app",
+  "profilePreferredReadingLanguageTitle": "Idioma para leer manga",
+  "profileCacheSettingsTitle": "Caché y datos guardados",
+  "profileCacheSettingsSubtitle": "Limpiar datos locales",
+  "profileAppInfoTitle": "Información de la app",
+  "profileAppInfoSubtitle": "Versión, licencias, créditos",
+  "profileGuestTitle": "Estás usando la app como invitada.",
+  "profileGuestSubtitle": "Iniciá sesión o creá una cuenta para ver tu perfil y gestionar tus preferencias.",
+  "profileGuestCta": "Iniciar sesión o crear cuenta",
+  "profileSignOutAction": "Cerrar sesión",
+  "profileSignOutSnackBar": "Sesión cerrada. Seguís en modo invitada.",
+  "profileServerConnectionError": "No se pudo conectar con el servidor.",
+  "profileVersionLabel": "Versión {version} (Build {buildNumber})",
+  "@profileVersionLabel": {
+    "placeholders": {
+      "version": {},
+      "buildNumber": {}
+    }
+  },
+  "authSignInTitle": "Iniciá sesión",
+  "authSignInSubtitle": "Tu colección de manga te espera",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Contraseña",
+  "authSignInButton": "Iniciar sesión",
+  "authNoAccount": "¿No tenés cuenta? Crear una",
+  "authContinueAsGuest": "Continuar como invitada",
+  "authEmailRequired": "Ingresá tu email.",
+  "authEmailInvalid": "Ingresá un email válido.",
+  "authPasswordRequired": "Ingresá tu contraseña.",
+  "authPasswordTooShort": "La contraseña debe tener al menos 6 caracteres.",
+  "authCreateAccountTitle": "Crear cuenta",
+  "authCreateAccountSubtitle": "Unite a la colección",
+  "authCreateAccountButton": "Crear cuenta",
+  "authHaveAccount": "¿Ya tenés cuenta? Iniciá sesión",
+  "readerSettingsDirection": "Dirección de lectura",
+  "readerSettingsBrightness": "Brillo",
+  "readerSettingsAmoled": "Negro AMOLED",
+  "readerSettingsAmoledSubtitle": "Ahorrá batería en pantallas OLED",
+  "readerSettingsImmersive": "Modo inmersivo",
+  "readerSettingsImmersiveSubtitle": "Ocultar barras de navegación del sistema",
+  "readerSettingsConfirm": "Confirmar ajustes",
+  "readerDirectionLtr": "LTR",
+  "readerDirectionRtl": "RTL",
+  "readerDirectionVertical": "Vertical"
+}

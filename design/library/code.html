@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InkScroll Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#690005",
+              "primary-container": "#0f766e",
+              "on-primary": "#003733",
+              "error-container": "#93000a",
+              "on-primary-fixed-variant": "#00504a",
+              "primary-fixed": "#9cf2e8",
+              "on-secondary-container": "#003f37",
+              "secondary-container": "#00b4a0",
+              "on-secondary-fixed-variant": "#005047",
+              "on-tertiary-fixed": "#001453",
+              "surface-tint": "#80d5cb",
+              "tertiary": "#b8c4ff",
+              "outline-variant": "#3e4947",
+              "on-tertiary-fixed-variant": "#173bab",
+              "secondary-fixed-dim": "#4ddcc6",
+              "tertiary-fixed-dim": "#b8c4ff",
+              "on-tertiary": "#002584",
+              "surface-container-high": "#242b2c",
+              "on-surface": "#dce4e5",
+              "on-secondary-fixed": "#00201b",
+              "surface-container-lowest": "#080f10",
+              "primary": "#80d5cb",
+              "tertiary-container": "#4461cf",
+              "surface-bright": "#333a3c",
+              "on-secondary": "#003730",
+              "outline": "#889391",
+              "inverse-surface": "#dce4e5",
+              "on-tertiary-container": "#e7e9ff",
+              "secondary-fixed": "#6ef9e2",
+              "on-surface-variant": "#bdc9c6",
+              "on-primary-fixed": "#00201d",
+              "inverse-on-surface": "#2a3233",
+              "primary-fixed-dim": "#80d5cb",
+              "surface-container": "#1a2122",
+              "surface-dim": "#0d1516",
+              "on-error-container": "#ffdad6",
+              "inverse-primary": "#006a63",
+              "on-primary-container": "#a3faef",
+              "surface-container-highest": "#2f3637",
+              "tertiary-fixed": "#dde1ff",
+              "error": "#ffb4ab",
+              "secondary": "#4ddcc6",
+              "surface": "#0d1516",
+              "on-background": "#dce4e5",
+              "surface-variant": "#2f3637",
+              "surface-container-low": "#161d1e",
+              "background": "#0d1516"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #080f10;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #dce4e5;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 w-full z-50 bg-[#111416]/75 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-teal-600 dark:text-[#80D5CB] hover:opacity-80 transition-opacity active:scale-90 transition-transform cursor-pointer">menu</span>
+<span class="text-2xl font-bold bg-gradient-to-br from-[#0F766E] to-[#1E40AF] bg-clip-text text-transparent">InkScroll</span>
+</div>
+<div class="flex items-center">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container hover:opacity-80 transition-opacity cursor-pointer active:scale-95 transition-transform">
+<img class="w-full h-full object-cover" data-alt="modern close-up portrait of a young man with a neutral expression and professional lighting against a dark gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzUmuZMKzMciTDAvVXoDKTtsfjSTjl3DMm13JghVoZMEzKauydrgDJ9rAnb6TJiitEUguJshYzRZeyy59D6eDVFQXhCKVC903MSn5dBOaye-isa-iTMeVzc6grmK_ls_INxxrt8wtUP-iVsshACd7gpjvEAUCIBnp93hF-ZNrbXAUZzf2sgQQk8Ww0HT5obyLiE-0TmJQAq4YFmI1IpMW08KYKjbVlBflU3vOqhAs5OyS4Te56_D3qdLvM-rUbvQIkV0IHBwojW1Js"/>
+</div>
+</div>
+</header>
+<main class="max-w-md mx-auto px-6 pt-8 pb-32">
+<!-- Page Header -->
+<div class="mb-10">
+<h1 class="text-[28px] font-bold leading-tight mb-1">Library</h1>
+<p class="text-on-surface-variant font-medium">24 collections</p>
+</div>
+<!-- Editorial Tabs -->
+<div class="flex items-center gap-8 mb-10 overflow-x-auto no-scrollbar">
+<div class="relative pb-2 cursor-pointer flex-shrink-0">
+<span class="text-primary font-bold">All</span>
+<div class="absolute bottom-0 left-0 right-0 h-[2px] bg-primary"></div>
+</div>
+<div class="pb-2 cursor-pointer flex-shrink-0">
+<span class="text-on-surface-variant hover:text-on-surface transition-colors font-semibold">Reading</span>
+</div>
+<div class="pb-2 cursor-pointer flex-shrink-0">
+<span class="text-on-surface-variant hover:text-on-surface transition-colors font-semibold">Completed</span>
+</div>
+<div class="pb-2 cursor-pointer flex-shrink-0">
+<span class="text-on-surface-variant hover:text-on-surface transition-colors font-semibold">On Hold</span>
+</div>
+</div>
+<!-- Content Grid -->
+<div class="grid grid-cols-2 gap-x-6 gap-y-10">
+<!-- Manga Card 1 -->
+<div class="flex flex-col group cursor-pointer active:scale-95 transition-all duration-200">
+<div class="relative aspect-[3/4] mb-4">
+<img class="w-full h-full object-cover rounded-[12px] shadow-[0_8px_30px_rgb(0,0,0,0.12)]" data-alt="atmospheric cinematic manga style illustration of a lonely samurai standing in a field of red flowers under a dark moonlit sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANpnoMqtzk2kHi1cLEqv1kd50BmNfpXd6f0G5Y5YJVeoJqsuw8mYxexrlcFGSck5JN7WyGZMwiMINDOk3cMmiFS6lPxQtxyofWIxMSeWQsp9qhxfZF8p3ThCevIpBaiaA4JfpOzSMl9vzP0a36wJU6hgkSPwZfe1pGuoTwVFu7Na4Kjv0NcSDgPO9JzeWYgDLcpaK1zDqUSXP_PeUQBD_5I4vrukXod_7Fu3_kq8Nkf-FIoBleWPAtvDPCUeL2IugAB8e2aycfvH8l"/>
+<div class="absolute top-3 right-3 w-6 h-6 rounded-full bg-[#0F766E] flex items-center justify-center text-white text-[11px] font-extrabold shadow-lg">2</div>
+</div>
+<div class="space-y-1">
+<h3 class="font-semibold text-on-surface leading-snug line-clamp-1">Crimson Blade</h3>
+<p class="text-on-surface-variant text-sm font-medium">Cap. 45/179</p>
+<p class="text-outline text-xs">2h ago</p>
+</div>
+</div>
+<!-- Manga Card 2 -->
+<div class="flex flex-col group cursor-pointer active:scale-95 transition-all duration-200">
+<div class="relative aspect-[3/4] mb-4">
+<img class="w-full h-full object-cover rounded-[12px] shadow-[0_8px_30px_rgb(0,0,0,0.12)]" data-alt="dramatic webtoon art of a futuristic cyberpunk city at night with neon lights reflecting on wet streets and dark shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOc44BdKARh48LhD0Uv_bMmUexukCNWrZ3jEJvj_I3bDTN9EqbKvQUJrmirxQWNZ8GYsbTd4VClnLfaKIaAABO10tiAETLG2EleSYf8QXQHW8blyZvbiEeNZWg3e6V57_xkkc4Nkhjp5SDPE8kigaoZmHFKRoTHXze5LOeGRwAC6vRsu7bApaqnRYkG4dSfAf6lveQMp50yG4_nI6fphp8WICmtS4Qckvw0uZX88jNbLo93QlQnnY1eX5PYH3Vzss4vXTQgbv9SsdC"/>
+</div>
+<div class="space-y-1">
+<h3 class="font-semibold text-on-surface leading-snug line-clamp-1">Neon Drift</h3>
+<p class="text-on-surface-variant text-sm font-medium">Cap. 12/88</p>
+<p class="text-outline text-xs">5h ago</p>
+</div>
+</div>
+<!-- Manga Card 3 -->
+<div class="flex flex-col group cursor-pointer active:scale-95 transition-all duration-200">
+<div class="relative aspect-[3/4] mb-4">
+<img class="w-full h-full object-cover rounded-[12px] shadow-[0_8px_30px_rgb(0,0,0,0.12)]" data-alt="ethereal fantasy landscape illustration with floating islands, golden clouds, and a distant majestic castle in soft pastel colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgSo6taZpiz7jloqS0FIFz8DIxNoGZkYFPkbQcOxcI5omijzyg3Mt2u60Bzq7SW20f0iD31udSxL-NfOFo1ftyo1SoEgBMojrG27tttxW77ovBjidXcgr-wggDfpDCow83UU6dG-FAjeKVO93X7E4L7hN9wJ4u9OkfrvShJVSCDzu5H5hP1h4RVRAgg-XbB73hZ-5ZW8pHj_3tyF55AXFh0JwFNQo5ZF9BlFU11LOqu8I3dmbRJG4zL81U4AbFoYnBYQM4fxUbYfOG"/>
+<div class="absolute top-3 right-3 w-6 h-6 rounded-full bg-[#0F766E] flex items-center justify-center text-white text-[11px] font-extrabold shadow-lg">5</div>
+</div>
+<div class="space-y-1">
+<h3 class="font-semibold text-on-surface leading-snug line-clamp-1">Skyborne</h3>
+<p class="text-on-surface-variant text-sm font-medium">Cap. 102/300</p>
+<p class="text-outline text-xs">1d ago</p>
+</div>
+</div>
+<!-- Manga Card 4 -->
+<div class="flex flex-col group cursor-pointer active:scale-95 transition-all duration-200">
+<div class="relative aspect-[3/4] mb-4">
+<img class="w-full h-full object-cover rounded-[12px] shadow-[0_8px_30px_rgb(0,0,0,0.12)]" data-alt="intense cosmic digital art showing a swirling galaxy with deep blues and purples and sparkling stars in high resolution" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1gavz6wcAfYWLF1Xqev15GeWsHU8dC-Nw2bl025FmpPkzw1A_DLBj6GD3g6VE-YiLqWREBBipInrbhjjRUdArOFH1PP8I2lLSWnY2YrMm_uYh_tHZc9WXKkOOe3EI5FygnHKH_NoQ0JvFra5nlM33PJthX-xAuQ_ra5sCnysOammb_wwJ5uIYOMU3xvbAYVt1SFkaT8el3IFA9g1L8TZ82KV8lBxTIra_sTu6tdzwQ3RGLY-BhgvzIvXVLnt27n7PZM3ZTQNdh7u1"/>
+</div>
+<div class="space-y-1">
+<h3 class="font-semibold text-on-surface leading-snug line-clamp-1">The Void Walker</h3>
+<p class="text-on-surface-variant text-sm font-medium">Cap. 224/500</p>
+<p class="text-outline text-xs">Yesterday</p>
+</div>
+</div>
+<!-- Manga Card 5 -->
+<div class="flex flex-col group cursor-pointer active:scale-95 transition-all duration-200">
+<div class="relative aspect-[3/4] mb-4">
+<img class="w-full h-full object-cover rounded-[12px] shadow-[0_8px_30px_rgb(0,0,0,0.12)]" data-alt="serene watercolor illustration of a traditional japanese garden with a bridge over a koi pond during cherry blossom season" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJXFlvXbOdzI3eAecrfVGJnAQQXEmSIvi6PU1kHnx8azo6tkviZ_mSllnBgBeqBScqwO8GmSw1mb2fst8U8g5eFwJ3pR1iVhRkyt6WF3eBNKQQSt5bFSvBbmavCuqCmaQZSYD9C12_HbIUQvzLxw4SqKxs_AHnlJWWcfIf7uNl4ycEH6hcfF9ugJqIYmspyxR06fbZ63vgv2EdEXuweT2JpJJ3Ek_vUub-pywCApqZ8cKvG9R7obx5CBKJ8ADyK_G3VXE4fbRYw2f2"/>
+</div>
+<div class="space-y-1">
+<h3 class="font-semibold text-on-surface leading-snug line-clamp-1">Quiet Garden</h3>
+<p class="text-on-surface-variant text-sm font-medium">Cap. 5/15</p>
+<p class="text-outline text-xs">3d ago</p>
+</div>
+</div>
+<!-- Manga Card 6 -->
+<div class="flex flex-col group cursor-pointer active:scale-95 transition-all duration-200">
+<div class="relative aspect-[3/4] mb-4">
+<img class="w-full h-full object-cover rounded-[12px] shadow-[0_8_30px_rgb(0,0,0,0.12)]" data-alt="minimalist silhouette of a detective standing under a street lamp in heavy rain with dramatic chiaroscuro lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq6sQtqG0zQ-arsFpgfJfw4KQSXuOhve7sIweyoJ6XpREvYlX1NIv5TmllBSHJzR9COyPgyg66A6KeZZuybXRIxWT1EofhufzEmDB6cJcEfjlSsBs0S6cv5sOgIt_9QW7NCuC8tM-055uODRMJqR8bCVco9wsQZka-_aOyrTl67qRxZFv7L-ruPyBVqu-17EId6prVyBcbbDqUsZ4jBIs2u78-hlCOTuaws3EVgwJevDA9fCPCQtvUAJT9W6JcfLZXmkjmYf1fTi0g"/>
+<div class="absolute top-3 right-3 w-6 h-6 rounded-full bg-[#0F766E] flex items-center justify-center text-white text-[11px] font-extrabold shadow-lg">1</div>
+</div>
+<div class="space-y-1">
+<h3 class="font-semibold text-on-surface leading-snug line-clamp-1">Rainy Noir</h3>
+<p class="text-on-surface-variant text-sm font-medium">Cap. 56/56</p>
+<p class="text-outline text-xs">1w ago</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Bottom Navigation -->
+<nav class="fixed bottom-0 w-full px-4 pb-6 flex justify-around items-center z-50">
+<div class="bg-[#1A2122]/75 backdrop-blur-xl h-[56px] rounded-[20px] w-full max-w-md mx-auto flex justify-around items-center shadow-[0_12px_40px_rgba(0,0,0,0.4)] px-4">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+</a>
+<!-- Explore -->
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+</a>
+<!-- Collections (Active: Library) -->
+<a class="flex flex-col items-center justify-center text-[#80D5CB] drop-shadow-[0_0_8px_rgba(128,213,203,0.5)] active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="collections_bookmark" style="font-variation-settings: 'FILL' 1;">collections_bookmark</span>
+</a>
+<!-- Person -->
+<a class="flex flex-col items-center justify-center text-[#888D93] hover:text-white transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</a>
+</div>
+</nav>
+</body></html>
