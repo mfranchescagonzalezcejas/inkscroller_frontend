@@ -59,6 +59,7 @@ void main() {
     // Cache section
     expect(find.text('CACHÉ', skipOffstage: false), findsOneWidget);
     expect(find.text('0 B'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Limpiar datos guardados'), 120);
     expect(find.text('Limpiar datos guardados'), findsOneWidget);
   });
 
