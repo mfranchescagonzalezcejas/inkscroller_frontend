@@ -53,9 +53,9 @@ El contenido que proviene de fuentes externas debe ser atribuido visiblemente al
 
 | Contenido | Atribución requerida |
 |-----------|---------------------|
-| Portadas, títulos, descripciones de manga | "Fuente: MangaDex" (mínimo en pantalla de detalle) |
-| Score, rank, géneros (MAL/Jikan) | "Score: MAL / Jikan" o similar |
-| Capítulos | Nombre del grupo de scanlation (cuando esté disponible en la respuesta) |
+| Portadas, títulos, descripciones de manga | Atribución de fuente en About/Settings y, cuando sea útil para la decisión del usuario, en contexto de detalle. Evitar repetir "Fuente: MangaDex" junto a cada campo. |
+| Score, rank, géneros (MAL/Jikan) | Nota de fuente en About/Settings o ayuda contextual. No ensuciar la línea principal de metadata si no aporta a la decisión inmediata. |
+| Capítulos | Nombre del grupo de scanlation cuando esté disponible en la respuesta. |
 
 ### 3.2 No monetización del contenido
 
@@ -74,6 +74,15 @@ El contenido que proviene de fuentes externas debe ser atribuido visiblemente al
 En la pantalla de Perfil/Configuración o en el About de la app, debe figurar:
 
 > "InkScroller no está afiliado a MangaDex ni a MyAnimeList. El contenido pertenece a sus respectivos autores y grupos de scanlation."
+
+### 3.5 Ubicación recomendada de atribuciones
+
+La atribución debe ser visible sin convertir cada pantalla en un bloque legal. Para Manga Detail:
+
+- Mostrar disponibilidad oficial antes de las acciones de lectura cuando existan fuentes oficiales conocidas.
+- Mostrar grupo de scanlation en filas de capítulo si el backend lo provee.
+- Mostrar capítulos externos como enlaces externos claros, por ejemplo: "Disponible en MangaPlus".
+- Mantener el disclaimer completo de no afiliación en About/Settings.
 
 ---
 

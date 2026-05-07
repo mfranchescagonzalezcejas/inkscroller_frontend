@@ -20,7 +20,7 @@
 | 1.1 | Flutter **no** llama directamente a `api.mangadex.org` — todo va por el backend InkScroller | 🔴 BLOQUEANTE | ✅ 2026-04-09 |
 | 1.2 | Flutter **no** llama directamente a `api.jikan.moe` — todo va por el backend InkScroller | 🔴 BLOQUEANTE | ✅ 2026-04-09 |
 | 1.3 | `DioClient` apunta al backend InkScroller, no a APIs de terceros | 🔴 BLOQUEANTE | ✅ 2026-04-09 |
-| 1.4 | El flavor `pro` tiene configurado el `API_BASE_URL` de Cloud Run (no una URL local) | 🔴 BLOQUEANTE | ✅ 2026-04-07 |
+| 1.4 | El flavor `pro` tiene configurado el `API_BASE_URL` de Railway (no una URL local) | 🔴 BLOQUEANTE | ✅ 2026-04-07 |
 
 ## Bloque 2 — Contenido y monetización
 
@@ -112,7 +112,7 @@ Firma: ___________
 
 | Ítem | Descripción | Checklist ref | Estado |
 |------|------------|---------------|--------|
-| **P0-F1** | **Flavor `pro` apunta al `API_BASE_URL` de Cloud Run (no URL local)** | **1.4** | **✅ 2026-04-07** |
+| **P0-F1** | **Flavor `pro` apunta al `API_BASE_URL` de Railway (no URL local)** | **1.4** | **✅ 2026-04-07** |
 | **P0-F2** | **Capítulos `external: true` no se renderizan en el reader interno** | **4.1** | **✅ 2026-04-08 (PR #46)** |
 | **P0-F3** | **La UI no crashea con `score`, `rank`, `genres`, `authors` en `null`** | **4.2** | **✅ 2026-04-08 (PR #47)** |
 | **P0-F4** | **Filtro de contenido adulto (`erotica/pornographic`) activo o con verificación de edad** | **2.4** | **✅ 2026-04-09** |
@@ -125,8 +125,8 @@ Firma: ___________
 
 ### Evidencias — P0-F1
 
-- **Qué**: El flavor `pro` está configurado con el `API_BASE_URL` apuntando a la URL de Cloud Run (`https://inkscroller-backend-806863502436.us-central1.run.app`), no a `localhost` ni a una IP LAN.
-- **Verificación**: QA smoke 2026-04-07 — run config `Flutter Pro Physical.run.xml` revisado y confirmado con Cloud Run URL. Validado en dispositivo físico.
+- **Qué**: El flavor `pro` debe estar configurado con el `API_BASE_URL` apuntando a Railway, no a `localhost` ni a una IP LAN.
+- **Verificación**: QA smoke — run config `Flutter Pro Physical.run.xml` revisado con URL de backend desplegado. Revalidar contra Railway antes de release público.
 - **Fecha de cierre**: 2026-04-07
 - **Referencia cruzada**: Control Tower V1.0 (Obsidian) → P0-F1 marcado ✅ 2026-04-07
 
@@ -206,7 +206,7 @@ Firma: ___________
 - **Verificación**:
   - Búsqueda por dominios: `rg -i "mangadex|jikan|api\.mangadex\.org|api\.jikan\.moe|myanimelist" lib/ --glob "*.dart" -n` → solo comentarios/docstrings y nombres de clases de dominio (mapper de UUIDs). **0 URLs HTTP**.
   - Búsqueda por URLs directas a APIs: `rg "http[s]?://api\.(mangadex|jikan)" lib/ --glob "*.dart" -n` → **0 matches**.
-  - Búsqueda de todas las URLs hardcodeadas: `rg "http[s]?://" lib/ --glob "*.dart" -n` → 4 URLs, **todas** del backend InkScroller (`127.0.0.1:8000`, `10.0.2.2:8000`, `inkscroller-backend-*.run.app`, `localhost:8000`).
+  - Búsqueda de todas las URLs hardcodeadas: `rg "http[s]?://" lib/ --glob "*.dart" -n` → solo URLs del backend InkScroller o endpoints locales permitidos.
   - Instancias de Dio: `rg "Dio\s*\(" lib/ --glob "*.dart" -n` → **solo 1 instancia** en `dio_client.dart` con `baseUrl = ApiConfig.baseUrl = FlavorConfig.instance.apiBaseUrl`.
   - Todos los datasources impls usan `DioClient` inyectado vía DI — ninguno instancia su propio cliente.
   - Los únicos `Uri.parse()` detectados son para apertura de capítulos `external: true` en el browser del sistema vía `url_launcher` (P0-F2, ya cerrado) — no son llamadas HTTP propias.
@@ -229,7 +229,7 @@ Firma: ___________
 
 - **Qué**: Auditoría estática exhaustiva de `lib/**/*.dart` buscando patrones de secretos hardcodeados: OpenAI/Stripe `sk-...`, GitHub tokens `gh[poa]_...`, AWS `AKIA...`, Slack `xox...`, SendGrid `SG....`, GitLab `glpat-...`, Bearer tokens con valores, passwords hardcodeados, llamadas directas a `api.mangadex.org` / `api.jikan.moe`.
 - **Resultado**: **0 secretos reales encontrados.** El único hallazgo son los Firebase API keys (`REDACTED_FIREBASE_API_KEY...`) en `lib/firebase_options.dart`, que son **known-safe** por diseño de Firebase para apps mobile (ver https://firebase.google.com/docs/projects/api-keys — no son secretos, son identificadores de proyecto restringidos por Security Rules + SHA-1/bundle ID).
-- **URLs hardcodeadas**: 4 URLs encontradas, todas del backend InkScroller (`localhost`, Android emulator loopback, Cloud Run dev). Ninguna URL de terceros.
+- **URLs hardcodeadas**: URLs encontradas, todas del backend InkScroller (`localhost`, Android emulator loopback, Railway/backend configurado). Ninguna URL de terceros.
 - **Bearer token**: `'Bearer '` en `dio_client.dart` es un prefijo estático de header, no un valor. El token se obtiene en runtime de `FirebaseAuth.getIdToken()`.
 - **Tests formales**: 12 tests en `test/core/compliance/p0_f5_secrets_audit_test.dart` — **12/12 PASS**.
 - **Evidencia formal completa**: [`docs/release/templates/p0-f5-secrets-audit-evidence.md`](templates/p0-f5-secrets-audit-evidence.md)

@@ -98,7 +98,7 @@ This file is the **frontend-side status mirror** of the product's shared plannin
 | `/users/me` | ✅ Implemented | Live validation pending Firebase env |
 | `/users/me/preferences` | ✅ Implemented | Required for real preference sync |
 | Firebase token verification | ✅ Implemented | Requires backend env config |
-| Deploy target / stable URLs | ✅ Deployed & tested | Google Cloud (Cloud Run) — 3 environments deployed and validated on physical device (2026-04-06) |
+| Deploy target / stable URLs | ✅ Deployed & tested | Railway — active backend hosting target for current docs/design |
 
 ### Backend URL Configuration
 
@@ -109,31 +109,31 @@ El frontend usa `app_environment.dart` para manejar múltiples environments:
 static const String localBaseUrl = 'http://127.0.0.1:8000';
 static const String androidEmulatorBaseUrl = 'http://10.0.2.2:8000';
 
-// Cloud Run deployment URLs:
-static const String cloudRunBaseUrl = 'https://inkscroller-backend-xxx.us-central1.run.app';
+// Railway deployment URL:
+static const String railwayBaseUrl = 'https://<inkscroller-backend>.up.railway.app';
 ```
 
 #### Deployment URLs por Flavor
 
 | Flavor | Firebase Project | Backend URL | Run Config |
 |--------|------------------|-------------|------------|
-| dev | `inkscroller-aed59` | `localhost:8000` (local) / Cloud Run | Dev Physical / Dev Physical (Cloud Run) |
-| staging | `inkscroller-stg` | Cloud Run | Staging Physical (Cloud Run) |
-| prod | `inkscroller-8fa87` | Cloud Run | Pro Physical (Cloud Run) |
+| dev | `inkscroller-aed59` | `localhost:8000` (local) / Railway | Dev Physical / Dev Physical (Railway) |
+| staging | `inkscroller-stg` | Railway | Staging Physical (Railway) |
+| prod | `inkscroller-8fa87` | Railway | Pro Physical (Railway) |
 
-#### Cloud Run URLs (production)
+#### Railway URLs
 
 | Environment | URL |
 |------------|-----|
-| dev | `https://inkscroller-backend-708894048002.us-central1.run.app` |
-| staging | `https://inkscroller-backend-391760656950.us-central1.run.app` |
-| prod | `https://inkscroller-backend-806863502436.us-central1.run.app` |
+| dev | Railway backend URL configured outside this repo |
+| staging | Railway backend URL configured outside this repo |
+| prod | Railway backend URL configured outside this repo |
 
 #### Run Configurations Actualizadas
 
-Los `.run` configs para staging y prod ahora usan Cloud Run URL:
-- `Flutter Staging Physical.run.xml` → Cloud Run URL
-- `Flutter Pro Physical.run.xml` → Cloud Run URL
+Los `.run` configs para staging y prod deben usar la URL Railway correspondiente:
+- `Flutter Staging Physical.run.xml` → Railway URL
+- `Flutter Pro Physical.run.xml` → Railway URL
 
 Para development local, seguir usando `localhost` o IP LAN (`192.168.1.38:8000`).
 
