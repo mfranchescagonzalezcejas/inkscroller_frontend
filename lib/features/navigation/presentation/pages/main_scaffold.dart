@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/l10n/l10n.dart';
 
@@ -144,35 +145,43 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: Icon(
-              isActive ? activeIcon : icon,
-              key: ValueKey(isActive),
-              color: isActive ? color : AppColors.onSurfaceVariant,
-              size: 24,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: AppLayout.bottomBarItemMinWidth,
+          minHeight: AppLayout.bottomBarItemMinHeight,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                isActive ? activeIcon : icon,
+                key: ValueKey(isActive),
+                color: isActive ? color : AppColors.onSurfaceVariant,
+                size: 24,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 200),
-            style: TextStyle(
-              fontFamily: AppTypography.fontFamily,
-              fontSize: AppTypography.label,
-              fontWeight: AppTypography.labelWeight,
-              color: isActive ? color : AppColors.onSurfaceVariant,
+            const SizedBox(height: AppSpacing.xs),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontFamily: AppTypography.fontFamily,
+                fontSize: AppTypography.label,
+                fontWeight: isActive
+                    ? FontWeight.w700
+                    : AppTypography.labelWeight,
+                color: isActive ? color : AppColors.onSurfaceVariant,
+              ),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

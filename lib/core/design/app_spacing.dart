@@ -16,6 +16,17 @@ class AppSpacing {
   static const double xl = 24;
   static const double xxl = 32;
   static const double section = 40;
+  static const double editorial = 48;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PLATFORM COMFORT
+  // ═══════════════════════════════════════════════════════════════════════
+
+  /// Minimum Android touch target from Material guidance.
+  static const double minTouchTarget = 48;
+
+  /// Future iOS minimum target from Apple Human Interface Guidelines.
+  static const double minIosTouchTarget = 44;
 
   // ═══════════════════════════════════════════════════════════════════════
   // LAYOUT CONSTRAINTS

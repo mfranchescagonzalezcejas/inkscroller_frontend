@@ -11306,7 +11306,7 @@
           "fill": "#E2E4E6",
           "textGrowth": "fixed-width",
           "width": "fill_container",
-          "content": "InkScroller Design System Summary — Senior Revision",
+          "content": "InkScroller Design System Summary — Dark Mode",
           "fontFamily": "Plus Jakarta Sans",
           "fontSize": 30,
           "fontWeight": "700"
@@ -11373,7 +11373,7 @@
               "id": "wCel5",
               "name": "paletteTitle",
               "fill": "#E2E4E6",
-              "content": "Complete Palette",
+              "content": "Dark Palette",
               "fontFamily": "Plus Jakarta Sans",
               "fontSize": 22,
               "fontWeight": "700"
@@ -14688,6 +14688,733 @@
                   ]
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ypr6I",
+      "x": 3020,
+      "y": 3757,
+      "name": "17 Design System Summary — light mode revision",
+      "width": 760,
+      "height": 1900,
+      "fill": "#EAF2F0",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": 32,
+      "children": [
+        {
+          "type": "text",
+          "id": "VKfkX",
+          "name": "title",
+          "fill": "#0B1718",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "InkScroller Design System Summary — Light Translation",
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": 30,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "VbaaT",
+          "name": "sub",
+          "fill": "#526264",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Light-mode translation of the original dark palette. Every token keeps the same role and relative separation: Void, Stage, Glass, Card, Card High, Outline, Primary, Primary Deep, Ember Gold, Text, Muted and Danger.",
+          "lineHeight": 1.5,
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": 13,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "P7dGo8",
+          "name": "Senior verdict",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "uW7ND",
+              "name": "verdictTitle",
+              "fill": "#0B1718",
+              "content": "Light mode verdict",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "UGhGx",
+              "name": "verdictText",
+              "fill": "#526264",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "This is the original InkScroller palette lifted into light mode, not a separate brand. The neutral steps are intentionally distinct so hierarchy stays as readable as the dark default.",
+              "lineHeight": 1.5,
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "c4eFL",
+          "name": "Complete palette",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "children": [
+            {
+              "type": "text",
+              "id": "WUHnk",
+              "name": "paletteTitle",
+              "fill": "#0B1718",
+              "content": "Light Palette",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "U8pxGB",
+              "name": "rowA",
+              "width": "fill_container",
+              "height": 74,
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "mxnGp",
+                  "name": "c1",
+                  "width": "fill_container",
+                  "fill": "#F8FBFA",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nParL",
+                      "name": "c1t",
+                      "fill": "#0B1718",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Void Light\n#F8FBFA",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "souAu",
+                  "name": "c2",
+                  "width": "fill_container",
+                  "fill": "#DDEBE8",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "OFoC4",
+                      "name": "c2t",
+                      "fill": "#0B1718",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Stage Light\n#DDEBE8",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "r277rF",
+                  "name": "c3",
+                  "width": "fill_container",
+                  "fill": "#CFE0DC",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Y7BZAR",
+                      "name": "c3t",
+                      "fill": "#0B1718",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Glass Light\n#CFE0DC",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HtStV",
+              "name": "rowB",
+              "width": "fill_container",
+              "height": 74,
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KS6fD",
+                  "name": "c4",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "GgfXO",
+                      "name": "c4t",
+                      "fill": "#0B1718",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Card Light\n#FFFFFF",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "w5iMLq",
+                  "name": "c5",
+                  "width": "fill_container",
+                  "fill": "#C1D7D2",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "S8Au3b",
+                      "name": "c5t",
+                      "fill": "#0B1718",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Card High Light\n#C1D7D2",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mcHKf",
+                  "name": "c6",
+                  "width": "fill_container",
+                  "fill": "#7F918E",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "xdyso",
+                      "name": "c6t",
+                      "fill": "#0B1718",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Outline Light\n#7F918E",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nnult",
+              "name": "rowC",
+              "width": "fill_container",
+              "height": 74,
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "FLkAW",
+                  "name": "c7",
+                  "width": "fill_container",
+                  "fill": "#2FAFA3",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "z8k4Y8",
+                      "name": "c7t",
+                      "fill": "#061314",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Primary Light\n#2FAFA3",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "emU4G",
+                  "name": "Primary Deep #2FAFA3",
+                  "width": "fill_container",
+                  "fill": "#0F766E",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JRnGv",
+                      "name": "c8t",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Primary Deep Light\n#0F766E",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "N0rSjy",
+                  "name": "Ember Gold #F4C95D",
+                  "width": "fill_container",
+                  "fill": "#C99A2E",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wQf3B",
+                      "name": "c9t",
+                      "fill": "#061314",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Ember Gold Light\n#C99A2E",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GIUvL",
+              "name": "rowD",
+              "width": "fill_container",
+              "height": 74,
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "T5cAc9",
+                  "name": "Text #E2E4E6",
+                  "width": "fill_container",
+                  "fill": "#061314",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Gg4Uo",
+                      "name": "c10t",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Text Light\n#061314",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n1MiYB",
+                  "name": "Text Muted #888D93",
+                  "width": "fill_container",
+                  "fill": "#5B6769",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "b88FWW",
+                      "name": "c11t",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Muted Light\n#5B6769",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PCJ5G",
+                  "name": "Danger Coral #FF5A6A",
+                  "width": "fill_container",
+                  "fill": "#D94A5B",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "yCDb3",
+                      "name": "c12t",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Danger Light\n#D94A5B",
+                      "lineHeight": 1.25,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "uxY1J",
+          "name": "Flutter layout notes",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "y6eFgQ",
+              "name": "platformTitle",
+              "fill": "#0B1718",
+              "content": "Flutter light mode notes",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "p9OhBA",
+              "name": "platformText",
+              "fill": "#526264",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Dark mode remains the default and source of truth. Light mode maps every original token to a bright equivalent: Void Light #F8FBFA, Stage Light #DDEBE8, Glass Light #CFE0DC, Card Light #FFFFFF, Card High Light #C1D7D2, Outline Light #7F918E. Use the light theme only through an explicit user preference.",
+              "lineHeight": 1.5,
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "d2ah1l",
+          "name": "Typography and spacing",
+          "width": "fill_container",
+          "gap": 18,
+          "children": [
+            {
+              "type": "frame",
+              "id": "rKFC7",
+              "name": "typo",
+              "width": "fill_container",
+              "fill": "#DCEAE7",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "DF801",
+                  "name": "typoTitle",
+                  "fill": "#0B1718",
+                  "content": "Typography",
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "g8D5oB",
+                  "name": "typoText",
+                  "fill": "#526264",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Font: Plus Jakarta Sans\nDisplay/Auth: 38–44 / 700\nScreen title: 28–32 / 700\nSection title: 18–22 / 700\nBody: 14–16 / 400–500\nMeta: 11–13 / 500\nText token: Text Light #061314\nMuted token: Muted Light #5B6769",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "THZCg",
+              "name": "spacing",
+              "width": "fill_container",
+              "fill": "#DCEAE7",
+              "cornerRadius": 16,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "MQA1r",
+                  "name": "spacingTitle",
+                  "fill": "#0B1718",
+                  "content": "Spacing + Radius",
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "eTA6q",
+                  "name": "spacingText",
+                  "fill": "#526264",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Scale: 4 / 8 / 12 / 16 / 24 / 32 / 40 / 48\nCards: 16–20 padding\nSections: 24–32 gap\nEditorial blocks: 40–48\nRadius: 12 inputs, 16 cards, 20 hero, 28 nav\nSurfaces: Card Light over Stage Light",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ptAMD",
+          "name": "Cinematic rules",
+          "width": "fill_container",
+          "fill": "#DCEAE7",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "ZSSvQ",
+              "name": "principlesTitle",
+              "fill": "#0B1718",
+              "content": "Light Canvas Rules",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "Fe3Ai",
+              "name": "principlesText",
+              "fill": "#526264",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "The rule is role parity: each light token must be as distinguishable from its neighbors as the dark token is in the original palette. If Void Light, Stage Light, Glass Light and Card Light collapse visually, the light mode fails.",
+              "lineHeight": 1.5,
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "VoRMZ",
+          "name": "Component contracts",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "mn4Sh",
+              "name": "componentsTitle",
+              "fill": "#0B1718",
+              "content": "Component Contracts to Add",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "INgvR",
+              "name": "componentsText",
+              "fill": "#526264",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "• TonalTabBar: active via Card High Light #C1D7D2 + Primary Light #2FAFA3 text/weight.\n• Cards: use Card Light #FFFFFF over Stage Light #DDEBE8 or Void Light #F8FBFA.\n• Glass: use Glass Light #CFE0DC only for translucent/floating controls.\n• AuthField: Card Light fill, Stage Light disabled, Primary Light focus.\n• Empty/ErrorState: Text Light + Muted Light copy + Primary Light CTA.\n• Danger actions: Danger Light #D94A5B, never the primary teal.",
+              "lineHeight": 1.5,
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "B7A3B6",
+          "name": "Screen audit focus",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "OpQFs",
+              "name": "screensTitle",
+              "fill": "#0B1718",
+              "content": "Screen Audit Focus",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "eJBoS",
+              "name": "screensText",
+              "fill": "#526264",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Screens keep dark-mode structure and rhythm. Translate tokens role-by-role: Void → Void Light, Stage → Stage Light, Glass → Glass Light, Card → Card Light, Card High → Card High Light, Outline → Outline Light. Avoid blue legacy accents and avoid flattening all surfaces to white.",
+              "lineHeight": 1.5,
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "OXZDM",
+          "name": "Recommended order",
+          "width": "fill_container",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FFFFFF",
+                "position": 0
+              },
+              {
+                "color": "#C1D7D2",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "L8zxwf",
+              "name": "priorityTitle",
+              "fill": "#0B1718",
+              "content": "Recommended Light Mode Order",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "C8CEH",
+              "name": "priorityText",
+              "fill": "#0B1718",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "1. Add light tokens as direct mappings from dark tokens.\n2. Keep dark mode as default; expose light mode as preference.\n3. Audit Settings/About/Auth first because they are surface-heavy.\n4. Validate Explore/Library cards against cover artwork.\n5. Review runtime states for calm contrast and accessible CTAs.",
+              "lineHeight": 1.5,
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 13,
+              "fontWeight": "600"
             }
           ]
         }

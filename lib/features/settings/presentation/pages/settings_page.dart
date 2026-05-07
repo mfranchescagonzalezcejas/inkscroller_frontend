@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/config/api_config.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart'
     show AppColors, AppTypography;
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/widgets/info_list_card.dart';
 import '../../../../flavors/flavor_config.dart';
 import '../providers/settings_cache_controller.dart';
 
@@ -58,6 +60,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       appBar: AppBar(
         backgroundColor: AppColors.stage,
         foregroundColor: AppColors.onSurface,
+        iconTheme: const IconThemeData(color: AppColors.onSurfaceVariant),
         elevation: 0,
         title: Text(
           context.l10n.settingsTitle,
@@ -75,20 +78,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               text: context.l10n.settingsAppSectionTitle.toUpperCase(),
             ),
             const SizedBox(height: 8),
-            _InfoCard(
+            InfoListCard(
               children: <Widget>[
-                _InfoRow(
+                InfoListRow(
                   label: context.l10n.settingsAppNameLabel,
                   value: FlavorConfig.instance.name,
+                  icon: Icons.apps_outlined,
                 ),
-                _InfoRow(
+                InfoListRow(
                   label: context.l10n.settingsFlavorLabel,
                   value: FlavorConfig.instance.flavor.name.toUpperCase(),
+                  icon: Icons.tune_outlined,
                 ),
-                _InfoRow(
+                InfoListRow(
                   label: context.l10n.settingsApiBaseUrlLabel,
                   value: ApiConfig.baseUrl,
-                  isLast: true,
+                  icon: Icons.code_outlined,
                 ),
               ],
             ),
@@ -99,30 +104,33 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               text: context.l10n.settingsCacheSectionTitle.toUpperCase(),
             ),
             const SizedBox(height: 8),
-            _InfoCard(
+            InfoListCard(
               children: <Widget>[
-                _InfoRow(
+                InfoListRow(
                   label: context.l10n.settingsCacheSizeLabel,
                   value: cacheSize,
+                  icon: Icons.storage_outlined,
                 ),
-                _InfoRow(
+                InfoListRow(
                   label: context.l10n.settingsMangaListCacheLabel,
                   value: context.l10n.settingsCacheMinutesValue(
                     AppConstants.mangaListCacheTtlMinutes,
                   ),
+                  icon: Icons.view_list_outlined,
                 ),
-                _InfoRow(
+                InfoListRow(
                   label: context.l10n.settingsMangaDetailCacheLabel,
                   value: context.l10n.settingsCacheMinutesValue(
                     AppConstants.mangaDetailCacheTtlMinutes,
                   ),
+                  icon: Icons.menu_book_outlined,
                 ),
-                _InfoRow(
+                InfoListRow(
                   label: context.l10n.settingsMangaChaptersCacheLabel,
                   value: context.l10n.settingsCacheMinutesValue(
                     AppConstants.mangaChaptersCacheTtlMinutes,
                   ),
-                  isLast: true,
+                  icon: Icons.auto_stories_outlined,
                 ),
               ],
             ),
@@ -164,82 +172,6 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-// ── Info card ─────────────────────────────────────────────────────────────────
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      child: Column(children: children),
-    );
-  }
-}
-
-// ── Info row ──────────────────────────────────────────────────────────────────
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    this.isLast = false,
-  });
-
-  final String label;
-  final String value;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                flex: 2,
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  value,
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontSize: 13,
-                    color: AppColors.onSurface,
-                  ),
-                  textAlign: TextAlign.end,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (!isLast) const Divider(color: AppColors.outlineVariant, height: 1),
-      ],
-    );
-  }
-}
-
 // ── Clear cache button ────────────────────────────────────────────────────────
 
 class _ClearCacheButton extends StatelessWidget {
@@ -258,13 +190,13 @@ class _ClearCacheButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppLayout.authFieldRadius),
       ),
       child: TextButton(
         style: TextButton.styleFrom(
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: const Size(double.infinity, 54),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppLayout.authFieldRadius),
           ),
         ),
         onPressed: onTap,
@@ -283,7 +215,7 @@ class _ClearCacheButton extends StatelessWidget {
                   const Icon(
                     Icons.delete_sweep_outlined,
                     size: 18,
-                    color: Color(0xFFFF6B6B),
+                    color: AppColors.danger,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -292,7 +224,7 @@ class _ClearCacheButton extends StatelessWidget {
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFFF6B6B),
+                      color: AppColors.danger,
                     ),
                   ),
                 ],
