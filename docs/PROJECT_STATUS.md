@@ -4,6 +4,8 @@
 > **Repo role:** frontend implementation status for the Flutter app
 > **Last updated:** 2026-04-10 (Sprint 3 in progress — post TASK-027 lib structure alignment)
 
+> **Diagram index:** [`docs/diagrams/README.md`](diagrams/README.md)
+
 ---
 
 ## 1. Purpose of this document

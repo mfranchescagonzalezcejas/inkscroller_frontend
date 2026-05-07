@@ -6,6 +6,20 @@
 > **DI:** get_it  
 > **Navigation:** `MaterialApp.router` + `go_router` (`StatefulShellRoute.indexedStack`)
 
+## Related diagrams
+
+![App Architecture](diagrams/app-architecture.svg)
+
+Editable source: [`app-architecture.drawio`](diagrams/app-architecture.drawio)
+
+![Data Flow](diagrams/data-flow.svg)
+
+Editable source: [`data-flow.drawio`](diagrams/data-flow.drawio)
+
+![Deployment and Environment Flow](diagrams/deployment-environment-flow.svg)
+
+Editable source: [`deployment-environment-flow.drawio`](diagrams/deployment-environment-flow.drawio)
+
 ---
 
 ## Table of Contents

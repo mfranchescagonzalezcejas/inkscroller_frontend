@@ -5,6 +5,20 @@
 > **Flutter HTTP client:** Dio  
 > **Data sources:** MangaDex API + Jikan API (enrichment layer, internal to backend)
 
+## Related diagrams
+
+![Data Flow](diagrams/data-flow.svg)
+
+Editable source: [`data-flow.drawio`](diagrams/data-flow.drawio)
+
+![App Architecture](diagrams/app-architecture.svg)
+
+Editable source: [`app-architecture.drawio`](diagrams/app-architecture.drawio)
+
+![Deployment and Environment Flow](diagrams/deployment-environment-flow.svg)
+
+Editable source: [`deployment-environment-flow.drawio`](diagrams/deployment-environment-flow.drawio)
+
 ---
 
 ## Table of Contents

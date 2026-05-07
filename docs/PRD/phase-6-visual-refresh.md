@@ -4,6 +4,20 @@
 > **Depends on:** Phase 5 MVP foundation (auth, reader, backend contracts) being stable  
 > **Design source of truth:** [`design/DESIGN.md`](../../design/DESIGN.md) + screen mockups under [`design/`](../../design/)
 
+## Related diagrams
+
+![UX/UI Flow](../diagrams/ux-ui-flow.svg)
+
+Editable source: [`ux-ui-flow.drawio`](../diagrams/ux-ui-flow.drawio)
+
+![Auth and Profile Flow](../diagrams/auth-profile-flow.svg)
+
+Editable source: [`auth-profile-flow.drawio`](../diagrams/auth-profile-flow.drawio)
+
+![Reader and Offline Flow](../diagrams/reader-offline-flow.svg)
+
+Editable source: [`reader-offline-flow.drawio`](../diagrams/reader-offline-flow.drawio)
+
 > **Sprint 3 status note (2026-04-08):** Phase 6 is now actively executing. Delivery is coordinated with Control Tower P0/P1 compliance and release-readiness checkpoints; status mirrors must stay synchronized across repo docs and Obsidian.
 
 ---

@@ -1,0 +1,78 @@
+<mxfile host="app.diagrams.net" agent="OpenCode">
+  <diagram id="auth-profile-flow" name="Auth Profile Flow">
+    <mxGraphModel dx="1637" dy="788" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=30;fontStyle=1;fontColor=#E2E4E6;align=left;" value="Auth + Profile Flow" vertex="1">
+          <mxGeometry height="44" width="420" x="60" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Open Profile" vertex="1">
+          <mxGeometry height="58" width="180" x="40" y="421" as="geometry" />
+        </mxCell>
+        <mxCell id="session" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Firebase session?" vertex="1">
+          <mxGeometry height="105" width="185" x="310" y="398" as="geometry" />
+        </mxCell>
+        <mxCell id="guestHub" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Guest Profile Hub&#xa;local preferences remain available" vertex="1">
+          <mxGeometry height="90" width="250" x="277.5" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="login" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Login / Register" vertex="1">
+          <mxGeometry height="70" width="210" x="1270" y="895" as="geometry" />
+        </mxCell>
+        <mxCell id="firebase" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Firebase Auth&#xa;session + ID token" vertex="1">
+          <mxGeometry height="80" width="210" x="297.5" y="890" as="geometry" />
+        </mxCell>
+        <mxCell id="loggedProfile" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Logged-in Profile&#xa;account identity + synced preferences" vertex="1">
+          <mxGeometry height="90" width="250" x="277.5" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Backend user endpoints&#xa;/users/me&#xa;/users/me/preferences" vertex="1">
+          <mxGeometry height="110" width="230" x="912.5" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="resolution" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Preference resolution&#xa;per-title override → account pref → local default" vertex="1">
+          <mxGeometry height="100" width="315" x="870" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="settingsAbout" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Settings + About&#xa;available for guest and logged-in users" vertex="1">
+          <mxGeometry height="90" width="270" x="1450" y="335" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="session">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="session" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="loggedProfile" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="session" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="guestHub" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="guestHub" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="login">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="login" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="firebase">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="firebase" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="loggedProfile">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="loggedProfile" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" target="backend" value="ID token">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="backend" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="resolution" value="account preferences">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="guestHub" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" target="resolution" value="local default">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="settingsAbout">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="528" y="193" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="loggedProfile" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="settingsAbout">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="resolution" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="settingsAbout">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
