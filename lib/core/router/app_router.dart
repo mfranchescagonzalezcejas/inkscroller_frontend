@@ -28,8 +28,9 @@ final _authStateListenable = _FirebaseAuthStateListenable();
 
 /// Routes that require an authenticated user.
 ///
-/// Guests landing on any of these paths are redirected to `/login`.
-const _protectedRoutes = <String>[AppRoutes.profile];
+/// Profile is intentionally public: guests use it as the account/app hub to
+/// reach Settings, About, and the sign-in CTA.
+const _protectedRoutes = <String>[];
 
 /// Routes reserved for unauthenticated users.
 ///
@@ -40,7 +41,7 @@ const _authOnlyRoutes = <String>[AppRoutes.login, AppRoutes.register];
 ///
 /// Redirect rules:
 /// - Authenticated user on an auth-only surface (`/login`, `/register`) → `/`
-/// - Guest on a protected surface (`/profile`) → `/login`
+/// - Guest on a protected surface → `/login`
 /// - All other combinations → `null` (no redirect, allow navigation)
 ///
 /// Public routes (home, explore, library, manga-detail, reader) remain fully
@@ -97,7 +98,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const RegisterPage(),
     ),
 
-    // ── Protected shell ───────────────────────────────────────────────────
+    // ── Public tab shell ──────────────────────────────────────────────────
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainScaffold(navigationShell: navigationShell);

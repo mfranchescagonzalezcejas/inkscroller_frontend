@@ -173,6 +173,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ],
           ),
         ),
+        const SizedBox(height: 20),
+        _SectionLabel(label: context.l10n.profileAppSettingsSection),
+        const SizedBox(height: 8),
+        _PrefCard(
+          children: <Widget>[
+            _PrefRow(
+              icon: Icons.storage_outlined,
+              iconColor: AppColors.onSurfaceVariant,
+              title: context.l10n.profileCacheSettingsTitle,
+              value: context.l10n.profileCacheSettingsSubtitle,
+              valueIsSubtitle: true,
+              onTap: () => context.push(AppRoutes.settings),
+            ),
+            _PrefRow(
+              icon: Icons.info_outline,
+              iconColor: AppColors.onSurfaceVariant,
+              title: context.l10n.profileAppInfoTitle,
+              value: context.l10n.profileAppInfoSubtitle,
+              valueIsSubtitle: true,
+              onTap: () => context.push(AppRoutes.about),
+            ),
+          ],
+        ),
       ],
     );
   }
