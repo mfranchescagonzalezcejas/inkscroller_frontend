@@ -57,14 +57,14 @@ rg "http[s]?://" lib/ --glob "*.dart" -n
 ```
 lib/core/config/app_environment.dart:15:  static const String localBaseUrl = 'http://127.0.0.1:8000';
 lib/core/config/app_environment.dart:18:  static const String androidEmulatorBaseUrl = 'http://10.0.2.2:8000';
-lib/core/config/app_environment.dart:29:  static const String cloudRunBaseUrl = 'https://inkscroller-backend-708894048002.us-central1.run.app';
+lib/core/config/app_environment.dart:28:  static const String remoteDevBackendUrl = 'https://inkscrollerbackend-dev.up.railway.app';
 lib/core/config/app_environment.dart:68:    addCandidate('http://localhost:8000');
 ```
 
 **Análisis:** Las 4 URLs son **exclusivamente URLs del backend InkScroller**:
 - `127.0.0.1:8000` → backend local (desarrollo)
 - `10.0.2.2:8000` → backend vía Android emulator loopback
-- `inkscroller-backend-*.us-central1.run.app` → backend en Cloud Run (dev)
+- Railway backend URL → backend desplegado de InkScroller
 - `localhost:8000` → backend local (fallback)
 
 Ninguna URL apunta a `api.mangadex.org`, `api.jikan.moe`, ni ningún dominio de tercero externo.
@@ -125,7 +125,7 @@ Flutter App
             ├── _BaseUrlFallbackInterceptor (fallback entre candidatos InkScroller)
             └── _AuthInterceptor (Bearer token en /users/*)
                     ↓
-         Backend InkScroller (Cloud Run / local)
+         Backend InkScroller (Railway / local)
                     ↓
          Backend → MangaDex API / Jikan API  (invisible para Flutter)
 ```
@@ -141,7 +141,7 @@ Toda la comunicación de Flutter es con el backend InkScroller.
 |---------|-----|-----------|
 | `lib/core/network/dio_client.dart` | Cliente HTTP único | ✅ baseUrl = backend InkScroller |
 | `lib/core/config/api_config.dart` | Resuelve baseUrl | ✅ → `FlavorConfig.apiBaseUrl` |
-| `lib/core/config/app_environment.dart` | URLs hardcodeadas | ✅ Solo URLs de backend local/Cloud Run |
+| `lib/core/config/app_environment.dart` | URLs hardcodeadas | ✅ Solo URLs de backend local/Railway |
 | `lib/core/di/injection.dart` | Registro DI del DioClient | ✅ Un solo DioClient compartido |
 | `lib/features/library/data/datasources/library_remote_ds_impl.dart` | DS library | ✅ Usa DioClient inyectado |
 | `lib/features/home/data/datasources/home_remote_ds_impl.dart` | DS home | ✅ Usa DioClient inyectado |

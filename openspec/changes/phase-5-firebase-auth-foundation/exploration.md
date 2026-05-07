@@ -44,7 +44,7 @@ Pure stateless FastAPI proxy. Zero auth, zero persistence, zero user concept.
 FirebaseAuth.instance.signInWithEmailAndPassword()
         │
         ▼
-Firebase Auth (Google cloud)
+Firebase Auth service
         │
         ▼
 User.getIdToken()  →  Firebase ID Token (JWT, RS256, valid 1h)

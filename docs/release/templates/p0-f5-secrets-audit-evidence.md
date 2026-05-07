@@ -81,7 +81,7 @@ rg 'https?://api\.(mangadex|jikan)\.org' lib/ --glob "*.dart"
 lib/core/config/app_environment.dart:
   - 'http://127.0.0.1:8000'        ← localhost dev
   - 'http://10.0.2.2:8000'         ← Android emulator loopback
-  - 'https://inkscroller-backend-708894048002.us-central1.run.app'  ← dev Cloud Run
+  - 'https://inkscrollerbackend-dev.up.railway.app'  ← Railway backend
   - 'http://localhost:8000'         ← localhost fallback
 ```
 
@@ -129,7 +129,7 @@ Where `$token` is obtained at runtime via `FirebaseAuth.instance.currentUser?.ge
 ## `.env.example` Audit
 
 **File**: `.env.example`  
-**Result**: Contains only placeholder values (`https://your-cloud-run-url.run.app`).  
+**Result**: Contains only placeholder values (`https://your-railway-url.up.railway.app`).
 No real API keys, tokens, or credentials present. ✅
 
 ---

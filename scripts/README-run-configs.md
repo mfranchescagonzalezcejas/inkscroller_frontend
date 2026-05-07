@@ -16,11 +16,11 @@ Estandarizar cómo correr la app por flavor y evitar fallos por IP LAN cambiante
   - Script: `scripts/run_dev_cloud.sh`
 
 - **Run Staging Cloud (script)**
-  - Usa backend Cloud Run de staging.
+  - Usa backend remoto de staging (Railway).
   - Script: `scripts/run_staging_cloud.sh`
 
 - **Run Pro Cloud (script)**
-  - Usa backend Cloud Run de pro.
+  - Usa backend remoto de pro (Railway).
   - Script: `scripts/run_pro_cloud.sh`
 
 ## Scripts auxiliares
