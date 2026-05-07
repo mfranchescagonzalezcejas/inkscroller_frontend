@@ -8,8 +8,10 @@
 /// - design/DESIGN.md
 /// - design/pencil/inkscroller.pen
 library;
+
 import 'package:flutter/material.dart';
 
+/// Cinematic Canvas color roles for InkScroller.
 class AppColors {
   AppColors._();
 
@@ -34,6 +36,14 @@ class AppColors {
   static const Color cardHighest = Color(0xFF2F3637);
   static const Color surfaceHighest = Color(0xFF181B1E);
 
+  // Light mode role translations.
+  static const Color voidLight = Color(0xFFF8FBFA);
+  static const Color stageLight = Color(0xFFDDEBE8);
+  static const Color glassLight = Color(0xFFCFE0DC);
+  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color cardHighLight = Color(0xFFC1D7D2);
+  static const Color outlineLight = Color(0xFF7F918E);
+
   // ═══════════════════════════════════════════════════════════════════════
   // BRAND COLORS
   // ═══════════════════════════════════════════════════════════════════════
@@ -47,6 +57,18 @@ class AppColors {
   /// Accent — Used sparingly for "New Chapter" badges
   static const Color accent = Color(0xFF5EEAD4);
 
+  /// Danger — Destructive actions and unrecoverable error states.
+  static const Color danger = Color(0xFFFF5A6A);
+
+  /// Primary translation for light-mode action/selection states.
+  static const Color primaryLight = Color(0xFF2FAFA3);
+
+  /// Pressed/active depth token for light mode.
+  static const Color primaryDeepLight = Color(0xFF0F766E);
+
+  /// Destructive action token for light mode.
+  static const Color dangerLight = Color(0xFFD94A5B);
+
   // ═══════════════════════════════════════════════════════════════════════
   // TEXT COLORS
   // ═══════════════════════════════════════════════════════════════════════
@@ -59,6 +81,12 @@ class AppColors {
 
   /// Muted text — Timestamps, tertiary info
   static const Color outline = Color(0xFF4A4F55);
+
+  /// Primary readable text on light surfaces.
+  static const Color onSurfaceLight = Color(0xFF061314);
+
+  /// Muted readable text on light surfaces.
+  static const Color onSurfaceVariantLight = Color(0xFF5B6769);
 
   // Outline variants (for borders)
   static const Color outlineVariant = Color(0xFF3E4947);

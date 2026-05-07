@@ -16,9 +16,11 @@ The system is built on three rules:
 
 ## 2. Color System
 
-The palette uses dark neutrals for most of the interface, teal for brand/action, gold for rare editorial emphasis, and coral for destructive/error states.
+InkScroller is **dark-mode first**. The dark palette is the default product identity and the source of truth for the app. Light mode is an optional user preference and must be implemented as a role-by-role translation of the dark tokens, not as a separate visual brand.
 
-### Core Palette
+The palette uses dark neutrals for most of the default interface, teal for brand/action, gold for rare editorial emphasis, and coral for destructive/error states.
+
+### Dark Mode Palette — Default
 
 | Role | Hex | Usage |
 |---|---:|---|
@@ -34,6 +36,25 @@ The palette uses dark neutrals for most of the interface, teal for brand/action,
 | **Text Primary** | `#E2E4E6` | Main readable text. |
 | **Text Muted** | `#888D93` | Metadata, descriptions, helper copy. |
 | **Danger Coral** | `#FF5A6A` | Destructive actions, errors, critical feedback. |
+
+### Light Mode Palette — Optional Preference
+
+Light mode keeps the same roles and relative separation as the dark palette. Do not flatten all light surfaces to white; Canvas, Stage, Glass, Card, Card High, and Outline must remain visually distinguishable.
+
+| Dark role | Light role | Hex | Usage |
+|---|---|---:|---|
+| **Void** | **Void Light** | `#F8FBFA` | Lightest app canvas and quiet base. |
+| **Stage** | **Stage Light** | `#DDEBE8` | Main light screen background for feeds, settings, docs. |
+| **Glass Surface** | **Glass Light** | `#CFE0DC` | Floating or translucent light controls. |
+| **Card** | **Card Light** | `#FFFFFF` | Primary cards, fields, info surfaces. |
+| **Card High** | **Card High Light** | `#C1D7D2` | Selected/elevated tonal state. |
+| **Outline Variant** | **Outline Light** | `#7F918E` | Accessibility fallback only; not default dividers. |
+| **Primary Teal** | **Primary Light** | `#2FAFA3` | Primary action/selection in light mode. |
+| **Primary Deep** | **Primary Deep Light** | `#0F766E` | Pressed/active depth and progress. |
+| **Ember Gold** | **Ember Gold Light** | `#C99A2E` | Rare editorial highlight. |
+| **Text Primary** | **Text Light** | `#061314` | Main readable text on light surfaces. |
+| **Text Muted** | **Muted Light** | `#5B6769` | Metadata, descriptions, helper copy. |
+| **Danger Coral** | **Danger Light** | `#D94A5B` | Destructive actions, errors, critical feedback. |
 
 ### Semantic Color Rules
 
@@ -84,6 +105,8 @@ Exception: a border may be used only as an accessibility fallback, using `#3E494
 
 ### Surface Hierarchy
 
+Default dark hierarchy:
+
 | Level | Token | Hex | Usage |
 |---|---|---:|---|
 | Level 0 | Void | `#080F10` | Immersive base, reader, darkest shell. |
@@ -91,6 +114,16 @@ Exception: a border may be used only as an accessibility fallback, using `#3E494
 | Level 2 | Glass | `#111416` | Floating translucent surfaces. |
 | Level 3 | Card | `#1A2122` | Cards, inputs, info groups. |
 | Level 4 | Card High | `#242B2C` | Selected/elevated state. |
+
+Optional light hierarchy:
+
+| Level | Token | Hex | Usage |
+|---|---|---:|---|
+| Level 0 | Void Light | `#F8FBFA` | Lightest canvas and quiet base. |
+| Level 1 | Stage Light | `#DDEBE8` | Main light screen background. |
+| Level 2 | Glass Light | `#CFE0DC` | Floating/translucent light controls. |
+| Level 3 | Card Light | `#FFFFFF` | Cards, inputs, info groups. |
+| Level 4 | Card High Light | `#C1D7D2` | Selected/elevated tonal state. |
 
 ---
 
@@ -159,6 +192,8 @@ Use real blur, not just opacity.
 | Reader controls | `#111416` translucent + `blur(20–32)`. |
 | Floating feedback | Same glass family, never hard bordered. |
 
+In light mode, use `Glass Light #CFE0DC` only for floating/translucent controls. Do not use light glass as a generic card background; regular cards use `Card Light #FFFFFF`.
+
 ### Shadows
 
 - Floating UI: `0 12px 40px rgba(0, 0, 0, 0.4)` style shadow.
@@ -167,7 +202,42 @@ Use real blur, not just opacity.
 
 ---
 
-## 7. Component Contracts
+## 7. Platform Comfort & Accessibility Rules
+
+These rules apply to both Dark Mode and Light Mode. They are not optional polish; they are the minimum bar for a comfortable Android experience now and a future iOS implementation later.
+
+### Platform guidelines
+
+| Platform | Source of truth | Rule |
+|---|---|---|
+| Android | Material Design 3 | Use Material interaction patterns, respect system insets, and keep touch targets comfortable. |
+| iOS | Apple Human Interface Guidelines | Future iOS work must respect safe areas, native navigation expectations, and dynamic text. |
+| Accessibility | WCAG 2.2 AA | Contrast, non-color cues, focus visibility, and readable scaling must be validated. |
+
+### Visual comfort checklist
+
+| Area | Requirement |
+|---|---|
+| Text contrast | Body text targets at least `4.5:1`; large text/icons/UI components target at least `3:1`. |
+| Touch targets | Interactive controls should be at least `48dp` on Android and future `44pt` on iOS. |
+| Safe areas | No content or controls may collide with status bar, notch, gesture nav, home indicator, or bottom inset. |
+| Text scaling | Important copy must tolerate system font scaling; avoid fixed-height text containers for variable copy. |
+| Color meaning | Never communicate state through color alone. Pair color with icon, label, weight, shape, or surface shift. |
+| Focus/pressed states | Buttons, tabs, fields, and list actions need visible focus/pressed/disabled states in both themes. |
+| Motion comfort | Animations should be short and purposeful; future implementation must respect reduced-motion settings. |
+| Surface hierarchy | Canvas, stage, glass, card, selected/elevated, and outline tokens must remain distinguishable in both themes. |
+
+### InkScroller-specific interpretation
+
+- Dark Mode remains the default; Light Mode is a token translation, not a separate UI language.
+- Prefer spacing, typography, and tonal surfaces before adding outlines.
+- The Reader can be more immersive than the rest of the app, but controls still need accessible hit areas.
+- Bottom navigation and floating controls must include platform insets by design, not as afterthoughts.
+- Runtime states must be understandable without color: error copy + icon + action; offline copy + stale/cached cue + action.
+
+---
+
+## 8. Component Contracts
 
 ### Floating Bottom Nav
 
@@ -211,6 +281,7 @@ Use real blur, not just opacity.
 ### Buttons
 
 - **PrimaryButton:** `Primary Teal #80D5CB` fill, `Void #080F10` label. Use for the main action only.
+- **Light PrimaryButton:** `Primary Light #2FAFA3` fill, `Text Light #061314` label when contrast allows; otherwise use `Card Light #FFFFFF` label.
 - **SecondaryButton:** Card High / tonal surface.
 - **DestructiveButton:** coral text/icon, dark tonal container.
 - **ProviderButton:** compact circular provider icon inside a tonal container. Google auth uses this pattern, not a wide provider button.
@@ -237,7 +308,7 @@ Use real blur, not just opacity.
 
 ---
 
-## 8. Screen-Specific Direction
+## 9. Screen-Specific Direction
 
 | Screen | Senior UI direction |
 |---|---|
@@ -254,7 +325,7 @@ Use real blur, not just opacity.
 
 ---
 
-## 9. Do / Don’t
+## 10. Do / Don’t
 
 ### Do
 
@@ -276,7 +347,7 @@ Use real blur, not just opacity.
 
 ---
 
-## 10. Manga Detail Product Contract
+## 11. Manga Detail Product Contract
 
 Manga Detail is not just a metadata page. It is the handoff from discovery to reading, with compliance and source clarity built into the flow without turning the screen into legal copy.
 
@@ -305,7 +376,7 @@ Use the Manga Detail tune/settings action for controls that affect this title on
 
 ---
 
-## 11. Phase 6 Editable Design Inventory
+## 12. Phase 6 Editable Design Inventory
 
 The active Pencil source of truth is `design/designApp`. The deprecated `design/pencil/inkscroller.pen` must not be used.
 
@@ -313,17 +384,18 @@ The active Pencil source of truth is `design/designApp`. The deprecated `design/
 |---|---|---|
 | Main tabs | Home, Explore, Library, Profile logged-in, Profile guest | Guest Profile is a public account/app hub. |
 | Reading flow | Manga Detail, Reader, Reader Components, Manga settings, language empty states, community comments | Reader main screen is stable; fallback coverage lives in runtime boards. |
-| Auth/settings/docs | Login, Register, auth provider strategy, auth runtime states, Settings, About, Route Error, Design System Summary | Android/Firebase first; Google + email/password + guest. Apple is deferred. |
+| Auth/settings/docs | Login, Register, auth provider strategy, auth runtime states, Settings, About, Route Error, Dark/Light Design System Summaries | Android/Firebase first; Google + email/password + guest. Apple is deferred. |
 | Runtime states | Loading, Empty, Error, Offline/Fallback | Offline/Fallback covers cached reader, no cache, external chapters, stale catalogue, partial detail/chapter failure. |
 | Component library | Phase 6 component grid | Reflects current patterns: Primary CTAs, preference cards, settings/cache cards, reader/runtime states. |
 
 ---
 
-## 12. Final Phase 6 Decisions
+## 13. Final Phase 6 Decisions
 
 | Topic | Decision |
 |---|---|
 | Button color | Button fills use `Primary #80D5CB`, not `Primary Deep #2FAFA3`. |
+| Theme mode | Dark mode is the default product identity. Light mode is optional and maps directly from the dark token roles. |
 | Profile guest | Keep Profile public as an account/app hub. Do not add Settings to the bottom nav. |
 | Guest preferences | Represent reader mode, app language, and manga language as local/device preferences in design. Implementation is a separate task. |
 | Auth providers | Android/Firebase scope: Google, email/password, guest. Google is a circular provider icon, not a wide button. |
@@ -333,7 +405,7 @@ The active Pencil source of truth is `design/designApp`. The deprecated `design/
 
 ---
 
-## 13. Implementation Priority
+## 14. Implementation Priority
 
 1. Add/align Pencil variables and Flutter tokens with this document.
 2. Differentiate Explore and Library visually.

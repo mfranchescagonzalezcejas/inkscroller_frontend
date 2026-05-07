@@ -1,33 +1,42 @@
 import 'package:flutter/material.dart';
 
+import '../design/design_tokens.dart';
+
 /// Configures Material 3 light and dark themes for InkScroller.
 ///
-/// Exposes [light] and [dark] factory methods with the brand colour palette
-/// (blue primary `#5DA9E9`, teal secondary `#4DB6AC`) and consistent text styles.
+/// Exposes [light] and [dark] factory methods with the Cinematic Canvas token
+/// roles and consistent Material control sizing.
 class AppTheme {
-// 🔵 Brand colors (más calmados)
-  static const _bluePrimary   = Color(0xFF5DA9E9); // azul más profundo
-  static const _tealSecondary = Color(0xFF4DB6AC);
-  static const _tealAccent    = Color(0xFF26A69A);
-
+  // Brand and semantic colors.
+  static const _darkPrimary = AppColors.primary;
+  static const _lightPrimary = AppColors.primaryLight;
+  static const _tealSecondary = AppColors.secondary;
+  static const _tealAccent = AppColors.primaryDeepLight;
 
   // 🌙 Dark colors
-  static const _darkBg = Color(0xFF0B1220);
-  static const _darkSurface = Color(0xFF111A2E);
-  static const _darkDivider = Color(0xFF1F2A44);
-  static const _darkText = Color(0xFFE2E4E6);
-  static const _darkTextSecondary = Color(0xFFAAB4C8);
+  static const _darkBg = AppColors.stage;
+  static const _darkSurface = AppColors.card;
+  static const _darkDivider = AppColors.outlineVariant;
+  static const _darkText = AppColors.onSurface;
+  static const _darkTextSecondary = AppColors.onSurfaceVariant;
 
   // ☀️ Light colors
-  static const _lightBg = Color(0xFFF5F7FB);
-  static const _lightSurface = Color(0xFFFFFFFF);
-  static const _lightDivider = Color(0xFFDCE3F1);
-  static const _lightTextSecondary = Color(0xFF5C6B85);
+  static const _lightBg = AppColors.stageLight;
+  static const _lightSurface = AppColors.cardLight;
+  static const _lightDivider = AppColors.outlineLight;
+  static const _lightText = AppColors.onSurfaceLight;
+  static const _lightTextSecondary = AppColors.onSurfaceVariantLight;
+
+  static const _minimumControlSize = Size(
+    AppSpacing.minTouchTarget,
+    AppSpacing.minTouchTarget,
+  );
 
   // ☀️ LIGHT
   static ThemeData light() {
     return ThemeData(
       useMaterial3: true,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
       brightness: Brightness.light,
       scaffoldBackgroundColor: _lightBg,
       navigationBarTheme: NavigationBarThemeData(
@@ -38,7 +47,7 @@ class AppTheme {
       ),
 
       colorScheme: const ColorScheme.light(
-        primary: _bluePrimary,
+        primary: _lightPrimary,
         secondary: _tealSecondary,
         tertiary: _tealAccent,
       ),
@@ -51,9 +60,9 @@ class AppTheme {
         titleTextStyle: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
-          color: Colors.black,
+          color: _lightText,
         ),
-        iconTheme: IconThemeData(color: Colors.black87),
+        iconTheme: IconThemeData(color: _lightText),
       ),
 
       cardTheme: CardThemeData(
@@ -65,8 +74,8 @@ class AppTheme {
 
       listTileTheme: const ListTileThemeData(
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        iconColor: _bluePrimary,
-        textColor: Colors.black87,
+        iconColor: _lightPrimary,
+        textColor: _lightText,
       ),
 
       textTheme: const TextTheme(
@@ -79,12 +88,33 @@ class AppTheme {
 
       dividerTheme: const DividerThemeData(color: _lightDivider, thickness: 1),
 
-      iconTheme: const IconThemeData(color: _bluePrimary),
+      iconTheme: const IconThemeData(color: _lightPrimary),
+
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(_minimumControlSize),
+          tapTargetSize: MaterialTapTargetSize.padded,
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(_minimumControlSize),
+          tapTargetSize: MaterialTapTargetSize.padded,
+        ),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(_minimumControlSize),
+          tapTargetSize: MaterialTapTargetSize.padded,
+        ),
+      ),
 
       snackBarTheme: SnackBarThemeData(
         backgroundColor: _darkSurface,
         contentTextStyle: const TextStyle(color: _darkText),
-        actionTextColor: _bluePrimary,
+        actionTextColor: _lightPrimary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -109,6 +139,7 @@ class AppTheme {
   static ThemeData dark() {
     return ThemeData(
       useMaterial3: true,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: _darkBg,
       navigationBarTheme: NavigationBarThemeData(
@@ -119,7 +150,7 @@ class AppTheme {
       ),
 
       colorScheme: const ColorScheme.dark(
-        primary: _bluePrimary,
+        primary: _darkPrimary,
         secondary: _tealSecondary,
         tertiary: _tealAccent,
         surface: _darkSurface,
@@ -142,8 +173,8 @@ class AppTheme {
 
       listTileTheme: const ListTileThemeData(
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        iconColor: _bluePrimary,
-        textColor: Colors.white,
+        iconColor: _darkPrimary,
+        textColor: _darkText,
       ),
 
       textTheme: const TextTheme(
@@ -156,7 +187,28 @@ class AppTheme {
 
       dividerTheme: const DividerThemeData(color: _darkDivider, thickness: 1),
 
-      iconTheme: const IconThemeData(color: _bluePrimary),
+      iconTheme: const IconThemeData(color: _darkPrimary),
+
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(_minimumControlSize),
+          tapTargetSize: MaterialTapTargetSize.padded,
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(_minimumControlSize),
+          tapTargetSize: MaterialTapTargetSize.padded,
+        ),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(_minimumControlSize),
+          tapTargetSize: MaterialTapTargetSize.padded,
+        ),
+      ),
     );
   }
 }
