@@ -4,6 +4,12 @@ Releases are **tag-driven**. Pushing a semver tag to `origin` triggers the full
 release pipeline: quality gates → GitHub Release creation → APK build → Firebase
 App Distribution for all three flavors.
 
+## Related diagram
+
+![Release Flow](diagrams/release-flow.svg)
+
+Editable source: [`release-flow.drawio`](diagrams/release-flow.drawio)
+
 ---
 
 ## Release flow

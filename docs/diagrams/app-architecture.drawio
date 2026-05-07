@@ -1,0 +1,27 @@
+<mxfile host="app.diagrams.net" modified="2026-05-07T00:00:00.000Z" agent="OpenCode" version="24.7.17" type="device">
+  <diagram id="app-architecture" name="App Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" page="1" pageWidth="1600" pageHeight="1000">
+      <root><mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="title" value="InkScroller App Architecture" style="text;html=1;strokeColor=none;fillColor=none;fontSize=30;fontStyle=1;fontColor=#E2E4E6;align=left;" vertex="1" parent="1"><mxGeometry x="60" y="40" width="520" height="44" as="geometry"/></mxCell>
+        <mxCell id="note" value="Screaming Architecture by feature, Clean Architecture inside each feature." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;fontColor=#E2E4E6;fontSize=14;align=left;spacingLeft=12;" vertex="1" parent="1"><mxGeometry x="60" y="95" width="600" height="50" as="geometry"/></mxCell>
+
+        <mxCell id="features" value="features/ business domains&#xa;auth · home · explore · library · reader · preferences · profile · settings · about" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0D1516;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=16;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="60" y="190" width="360" height="130" as="geometry"/></mxCell>
+        <mxCell id="presentation" value="Presentation&#xa;Pages · Widgets · Riverpod providers · StateNotifier · immutable state" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" vertex="1" parent="1"><mxGeometry x="500" y="170" width="300" height="110" as="geometry"/></mxCell>
+        <mxCell id="domain" value="Domain&#xa;Entities · Repository contracts · Use cases&#xa;Pure Dart, no Flutter/Dio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="500" y="380" width="300" height="120" as="geometry"/></mxCell>
+        <mxCell id="data" value="Data&#xa;DTO models · Mappers · Data sources · Repository implementations&#xa;Knows JSON/Dio/API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" vertex="1" parent="1"><mxGeometry x="500" y="600" width="300" height="130" as="geometry"/></mxCell>
+
+        <mxCell id="core" value="core/ shared infrastructure&#xa;DioClient · AppRouter · get_it initDI · ApiConfig · AppEnvironment · design tokens · l10n · analytics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0D1516;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" vertex="1" parent="1"><mxGeometry x="900" y="300" width="300" height="170" as="geometry"/></mxCell>
+        <mxCell id="backend" value="FastAPI Backend&#xa;/manga · /manga/search · /manga/{id} · /chapters · /users/me · /preferences" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" vertex="1" parent="1"><mxGeometry x="1280" y="300" width="260" height="150" as="geometry"/></mxCell>
+        <mxCell id="external" value="External services&#xa;MangaDex · Jikan/MAL · Firebase Auth · Railway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" vertex="1" parent="1"><mxGeometry x="1280" y="560" width="260" height="130" as="geometry"/></mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="features" target="presentation"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" value="depends on use cases" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" edge="1" parent="1" source="presentation" target="domain"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="interfaces implemented by" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" edge="1" parent="1" source="data" target="domain"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="presentation" target="core"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="data" target="core"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" value="HTTP / JSON" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" edge="1" parent="1" source="core" target="backend"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" edge="1" parent="1" source="backend" target="external"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" agent="OpenCode">
+  <diagram id="release-flow" name="Release Flow">
+    <mxGraphModel dx="1637" dy="788" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=30;fontStyle=1;fontColor=#E2E4E6;align=left;" value="Tag-driven Release Flow" vertex="1">
+          <mxGeometry height="44" width="520" x="60" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="version" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Bump pubspec.yaml&#xa;version X.Y.Z+build" vertex="1">
+          <mxGeometry height="80" width="220" x="70" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="merge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Merge changes&#xa;PR → develop → master" vertex="1">
+          <mxGeometry height="80" width="220" x="360" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="script" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Run release script&#xa;release.sh / release.ps1" vertex="1">
+          <mxGeometry height="80" width="230" x="650" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="checks" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="6 pre-flight checks&#xa;master · clean tree · semver · pubspec match · synced origin · no duplicate tag" vertex="1">
+          <mxGeometry height="130" width="290" x="950" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="tag" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Push tag&#xa;vX.Y.Z" vertex="1">
+          <mxGeometry height="80" width="180" x="1460" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="workflow" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="GitHub Actions release.yml&#xa;triggered by semver tag" vertex="1">
+          <mxGeometry height="90" width="260" x="650" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="quality" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Quality gates&#xa;fvm flutter analyze&#xa;fvm flutter test&#xa;tag/pubspec validation" vertex="1">
+          <mxGeometry height="120" width="250" x="70" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="builds" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Build APKs&#xa;DEV · STAGING · PRO" vertex="1">
+          <mxGeometry height="90" width="230" x="420" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="ghRelease" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="GitHub Release&#xa;attach all APKs" vertex="1">
+          <mxGeometry height="90" width="230" x="760" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="firebase" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Firebase App Distribution&#xa;tester download emails" vertex="1">
+          <mxGeometry height="90" width="260" x="1100" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="secrets" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Required secrets&#xa;Firebase dart-defines · API URLs · service accounts · app IDs · testers" vertex="1">
+          <mxGeometry height="110" width="320" x="1100" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="version" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="merge">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="merge" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="script">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="script" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="checks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="checks" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="tag">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="workflow">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1460" y="360" as="sourcePoint" />
+            <mxPoint x="780" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="workflow" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="quality">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="quality" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="builds">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="builds" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="ghRelease">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="ghRelease" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="firebase">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="secrets" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="workflow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

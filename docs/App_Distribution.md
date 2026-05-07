@@ -5,6 +5,12 @@ There is no manual distribution script — the release pipeline covers all three
 
 See [RELEASING.md](RELEASING.md) for the full release flow and [ci.md](ci.md) for workflow details.
 
+## Related diagram
+
+![Release Flow](diagrams/release-flow.svg)
+
+Editable source: [`release-flow.drawio`](diagrams/release-flow.drawio)
+
 ---
 
 ## How it works

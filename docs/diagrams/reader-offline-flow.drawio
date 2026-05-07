@@ -1,0 +1,70 @@
+<mxfile host="app.diagrams.net" agent="OpenCode">
+  <diagram id="reader-offline-flow" name="Reader Offline Flow">
+    <mxGraphModel dx="1637" dy="788" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=30;fontStyle=1;fontColor=#E2E4E6;align=left;" value="Reader + Offline Flow" vertex="1">
+          <mxGeometry height="44" width="460" x="60" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="detail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2E4E6;strokeColor=#80D5CB;strokeWidth=2;fontColor=#0D1516;fontSize=15;fontStyle=1;" value="Title Detail" vertex="1">
+          <mxGeometry height="60" width="190" x="30" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="source" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Chapter source?" vertex="1">
+          <mxGeometry height="100" width="170" x="360" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="external" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Open official / external source" vertex="1">
+          <mxGeometry height="70" width="240" x="325" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="pages" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Fetch chapter pages&#xa;/chapters/{id}/pages" vertex="1">
+          <mxGeometry height="80" width="240" x="630" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cache" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Local page cache?" vertex="1">
+          <mxGeometry height="100" width="170" x="990" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="reader" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Reader&#xa;vertical or paged mode" vertex="1">
+          <mxGeometry height="80" width="220" x="1270" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="settings" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Reader Settings&#xa;mode + language overrides" vertex="1">
+          <mxGeometry height="80" width="220" x="1270" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="offline" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Connection lost?" vertex="1">
+          <mxGeometry height="100" width="170" x="1295" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="cached" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Continue cached pages" vertex="1">
+          <mxGeometry height="60" width="220" x="970" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="reconnect" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111416;strokeColor=#888D93;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Show reconnect guidance" vertex="1">
+          <mxGeometry height="60" width="220" x="1270" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="detail" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="source">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="source" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="external" value="External only">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="source" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="pages" value="Readable">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="pages" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="cache">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="cache" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="reader" value="Available">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="reader" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="settings">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="reader" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;" target="offline">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="offline" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="cached" value="Yes + cache">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="offline" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#AEB5B8;strokeWidth=2;endArrow=block;endFill=1;fontColor=#E2E4E6;labelBackgroundColor=#0D1516;" target="reconnect" value="No cache">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

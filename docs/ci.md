@@ -7,6 +7,16 @@ This repository uses **GitHub Actions** for two pipelines:
 
 The release pipeline builds and distributes **three flavors**: DEV, STAGING, PRODUCTION (PRO).
 
+## Related diagrams
+
+![Release Flow](diagrams/release-flow.svg)
+
+Editable source: [`release-flow.drawio`](diagrams/release-flow.drawio)
+
+![Deployment and Environment Flow](diagrams/deployment-environment-flow.svg)
+
+Editable source: [`deployment-environment-flow.drawio`](diagrams/deployment-environment-flow.drawio)
+
 ---
 
 ## When do workflows run?
