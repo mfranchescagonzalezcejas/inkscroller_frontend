@@ -55,7 +55,7 @@ Phase 6 stays separate on purpose so visual redesign does not get mixed with aut
 
 **Design assets available now:**
 - [`design/DESIGN.md`](../design/DESIGN.md) — "The Cinematic Canvas" design system (authoritative)
-- [`design/designApp`](../design/designApp) — active editable Pencil source of truth
+- [`design/designApp.pen`](../design/designApp.pen) — active editable Pencil source of truth
 - Screen mockups (HTML + PNG): `home/`, `explore/`, `library/`, `title_detail/`, `reader_settings_open/`, `profile_with_theme_toggle/`
 
 ---
@@ -122,7 +122,7 @@ All foundational phases are done. The codebase has Clean Architecture, test cove
 **Entry dependency:** Phase 5 MVP foundation stable (auth, reader modes, backend contracts defined). ✅ satisfied
 
 **Pre-implementation (before any code):**
-1. Use `design/DESIGN.md` + `design/designApp` as canonical design sources
+1. Use `design/DESIGN.md` + `design/designApp.pen` as canonical design sources
 2. Decide design token implementation strategy (Dart constants vs ThemeData extensions)
 3. Decide animation framework (Flutter built-ins vs `flutter_animate` vs Rive)
 4. Decide cover glow shadow implementation (palette extraction vs static fallback)
