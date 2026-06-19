@@ -1,4 +1,4 @@
-package com.example.inkscroller
+package dev.devdigi.inkscroller
 
 import io.flutter.embedding.android.FlutterActivity
 
