@@ -87,6 +87,48 @@ Go to **Settings → Secrets and variables → Actions** and verify these are se
 |--------|-------------|
 | `FIREBASE_DART_DEFINES_JSON` | Full contents of `.dart-defines/firebase.json` — all Firebase keys for all flavors |
 
+### Android release signing
+
+Use one of these secure approaches:
+
+1. **local file** `android/key.properties` (non-committed)
+2. **environment variables** in CI/local shells
+
+#### Secrets / env vars used by `android/app/build.gradle.kts`
+
+| Secret / Env | Description |
+|--------------|-------------|
+| `KEY_ALIAS` | Keystore key alias |
+| `KEY_PASSWORD` | Password for the signing key |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEYSTORE_FILE_PATH` *(optional)* | Relative path to keystore file (resolved from `android/app`); defaults to `upload-keystore.jks` which maps to `android/app/upload-keystore.jks` |
+| `KEYSTORE_BASE64` | Base64-encoded keystore contents for CI restore |
+
+`KEYSTORE_FILE_PATH` is optional when your `android/key.properties` contains `storeFile`.
+
+`android/key.properties` example (with placeholders):
+
+```properties
+storePassword=<keystore-password>
+keyPassword=<key-password>
+keyAlias=<key-alias>
+storeFile=upload-keystore.jks
+```
+
+#### Local setup
+
+1. Generate/import your upload keystore as `android/app/upload-keystore.jks`.
+2. Create `android/key.properties` (ignored by git) with the values above.
+3. Run release tasks.
+
+#### CI setup
+
+1. Store keystore and signing values as GitHub secrets.
+2. In release workflow, restore keystore from `KEYSTORE_BASE64` to `android/app/upload-keystore.jks`.
+3. Write `android/key.properties` with `${{ secrets.KEY_ALIAS }}`, `${{ secrets.KEY_PASSWORD }}`, `${{ secrets.KEYSTORE_PASSWORD }}`.
+
+If these values are not present, release builds fail fast with a clear message instead of using debug signing.
+
 ### API Base URLs
 
 | Secret | Description |
@@ -129,6 +171,7 @@ the new build as an update.
 - [ ] All changes merged to `master`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured (see table above)
+- [ ] Android signing config (`android/key.properties` or signing env vars) is configured for release
 - [ ] Run `./scripts/release.sh X.Y.Z` (or `.ps1` on Windows)
 - [ ] Confirm GitHub Release created and APKs attached
 - [ ] Confirm Firebase App Distribution emails sent

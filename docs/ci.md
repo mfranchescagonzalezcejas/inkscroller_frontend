@@ -50,6 +50,16 @@ Go to: **Settings → Secrets and variables → Actions**
 |--------|-------------|
 | `FIREBASE_DART_DEFINES_JSON` | Full contents of `.dart-defines/firebase.json` — all Firebase keys for all flavors |
 
+### Android release signing
+
+| Secret | Description |
+|--------|-------------|
+| `KEY_ALIAS` | Keystore key alias |
+| `KEY_PASSWORD` | Password for signing key |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEYSTORE_FILE_PATH` | Optional override for signing keystore path relative to `android/app` (defaults to `upload-keystore.jks`, i.e., `android/app/upload-keystore.jks`) |
+| `KEYSTORE_BASE64` | Base64-encoded upload keystore for CI restoration |
+
 ### API Base URLs
 
 | Secret | Description |
@@ -167,4 +177,5 @@ Quick summary:
 - [ ] All changes merged to `master`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured
+- [ ] Android signing secrets (`KEY_ALIAS`, `KEY_PASSWORD`, `KEYSTORE_PASSWORD`, `KEYSTORE_BASE64`) configured
 - [ ] Run `./scripts/release.sh X.Y.Z` (or `.ps1` on Windows)
