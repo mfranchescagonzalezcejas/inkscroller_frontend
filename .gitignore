@@ -85,6 +85,9 @@ ios/Flutter/flutter_export_environment.sh
 # Android signing
 android/*.jks
 android/*.keystore
+android/app/*.jks
+android/app/*.keystore
+android/app/upload-keystore.jks
 android/key.properties
 
 # iOS signing (fastlane / manual certs)

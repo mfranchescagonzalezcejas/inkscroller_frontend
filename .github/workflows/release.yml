@@ -165,6 +165,33 @@ jobs:
           mkdir -p .dart-defines
           echo '${{ secrets.FIREBASE_DART_DEFINES_JSON }}' > .dart-defines/firebase.json
 
+      - name: Restore Android signing configuration
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_FILE_PATH: ${{ secrets.KEYSTORE_FILE_PATH }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
+            echo "Missing Android signing secrets. Configure KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS."
+            exit 1
+          fi
+
+          KEYSTORE_REL_PATH="${KEYSTORE_FILE_PATH:-upload-keystore.jks}"
+          mkdir -p "android/app/$(dirname "$KEYSTORE_REL_PATH")"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "android/app/$KEYSTORE_REL_PATH"
+          chmod 600 "android/app/$KEYSTORE_REL_PATH"
+
+          cat > android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=$KEYSTORE_REL_PATH
+          EOF
+
+          chmod 600 android/key.properties
+
       - name: Resolve flavor configuration
         run: |
           case "${{ matrix.flavor }}" in
