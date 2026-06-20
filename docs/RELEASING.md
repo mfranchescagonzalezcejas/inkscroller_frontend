@@ -94,14 +94,19 @@ Use one of these secure approaches:
 1. **local file** `android/key.properties` (non-committed)
 2. **environment variables** in CI/local shells
 
-#### Secrets / env vars used by `android/app/build.gradle.kts`
+#### Gradle/local signing values used by `android/app/build.gradle.kts`
 
 | Secret / Env | Description |
 |--------------|-------------|
 | `KEY_ALIAS` | Keystore key alias |
 | `KEY_PASSWORD` | Password for the signing key |
 | `KEYSTORE_PASSWORD` | Keystore password |
-| `KEYSTORE_FILE_PATH` *(optional)* | Relative path to keystore file (resolved from `android/app`); defaults to `upload-keystore.jks` which maps to `android/app/upload-keystore.jks` |
+| `KEYSTORE_FILE_PATH` *(optional)* | Relative path to keystore file (resolved from `android/app`); defaults to `upload-keystore.jks`, which maps to `android/app/upload-keystore.jks` |
+
+#### CI restore secret used by `.github/workflows/release.yml`
+
+| Secret | Description |
+|--------|-------------|
 | `KEYSTORE_BASE64` | Base64-encoded keystore contents for CI restore |
 
 `KEYSTORE_FILE_PATH` is optional when your `android/key.properties` contains `storeFile`.
@@ -124,7 +129,7 @@ storeFile=upload-keystore.jks
 #### CI setup
 
 1. Store keystore and signing values as GitHub secrets.
-2. In release workflow, restore keystore from `KEYSTORE_BASE64` to `android/app/upload-keystore.jks`.
+2. In release workflow, restore keystore from `KEYSTORE_BASE64` to `android/app/$KEYSTORE_FILE_PATH` (or `android/app/upload-keystore.jks` by default).
 3. Write `android/key.properties` with `${{ secrets.KEY_ALIAS }}`, `${{ secrets.KEY_PASSWORD }}`, `${{ secrets.KEYSTORE_PASSWORD }}`.
 
 If these values are not present, release builds fail fast with a clear message instead of using debug signing.
