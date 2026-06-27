@@ -77,7 +77,7 @@ rg 'https?://api\.(mangadex|jikan)\.org' lib/ --glob "*.dart"
 
 ### Pattern 11: Full HTTP URL inventory (6 URLs total)
 
-```
+```text
 lib/core/config/app_environment.dart:
   - 'http://127.0.0.1:8000'        ← localhost dev
   - 'http://10.0.2.2:8000'         ← Android emulator loopback

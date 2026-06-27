@@ -22,6 +22,8 @@ void main() {
     'scripts/run_pro_cloud.sh': 'https://api.inkscroller.devdigi.dev',
   };
 
+  setUp(FlavorConfig.resetForTesting);
+
   group('AppEnvironment cloud API defaults', () {
     test('uses the custom backend domains for every flavor', () {
       expect(

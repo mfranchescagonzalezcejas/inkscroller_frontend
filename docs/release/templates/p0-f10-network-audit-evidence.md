@@ -81,7 +81,7 @@ rg "Dio\s*\(" lib/ --glob "*.dart" -n
 
 **Resultado:**
 
-```
+```text
 lib/core/network/dio_client.dart:34:    dio = Dio(
 ```
 

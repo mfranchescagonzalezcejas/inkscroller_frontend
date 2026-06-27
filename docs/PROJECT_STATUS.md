@@ -120,7 +120,7 @@ static const String proCloudBaseUrl = 'https://api.inkscroller.devdigi.dev';
 
 | Flavor | Firebase Project | Backend URL | Run Config |
 |--------|------------------|-------------|------------|
-| dev | `inkscroller-aed59` | `localhost:8000` (local) / `https://api.dev.inkscroller.devdigi.dev` | Dev Physical / Dev Cloud |
+| dev | `inkscroller-aed59` | `http://127.0.0.1:8000` (local) / `https://api.dev.inkscroller.devdigi.dev` | Dev Physical / Dev Cloud |
 | staging | `inkscroller-stg` | `https://api.stg.inkscroller.devdigi.dev` | Staging Cloud |
 | prod | `inkscroller-8fa87` | `https://api.inkscroller.devdigi.dev` | Pro Cloud |
 
