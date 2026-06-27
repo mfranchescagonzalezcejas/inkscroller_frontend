@@ -75,17 +75,19 @@ rg 'https?://api\.(mangadex|jikan)\.org' lib/ --glob "*.dart"
 → 0 matches
 ```
 
-### Pattern 11: Full HTTP URL inventory (4 URLs total)
+### Pattern 11: Full HTTP URL inventory (6 URLs total)
 
 ```
 lib/core/config/app_environment.dart:
   - 'http://127.0.0.1:8000'        ← localhost dev
   - 'http://10.0.2.2:8000'         ← Android emulator loopback
-  - 'https://inkscrollerbackend-dev.up.railway.app'  ← Railway backend
+  - 'https://api.dev.inkscroller.devdigi.dev'  ← dev backend
+  - 'https://api.stg.inkscroller.devdigi.dev'  ← staging backend
+  - 'https://api.inkscroller.devdigi.dev'      ← pro backend
   - 'http://localhost:8000'         ← localhost fallback
 ```
 
-All 4 URLs are **InkScroller backend endpoints only**. No third-party URLs.
+All 6 URLs are **InkScroller backend endpoints only**. No third-party URLs.
 
 ---
 
@@ -129,7 +131,7 @@ Where `$token` is obtained at runtime via `FirebaseAuth.instance.currentUser?.ge
 ## `.env.example` Audit
 
 **File**: `.env.example`  
-**Result**: Contains only placeholder values (`https://your-railway-url.up.railway.app`).
+**Result**: Contains only public backend custom-domain examples (`https://api*.inkscroller.devdigi.dev`).
 No real API keys, tokens, or credentials present. ✅
 
 ---

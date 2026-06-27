@@ -57,14 +57,16 @@ rg "http[s]?://" lib/ --glob "*.dart" -n
 ```
 lib/core/config/app_environment.dart:15:  static const String localBaseUrl = 'http://127.0.0.1:8000';
 lib/core/config/app_environment.dart:18:  static const String androidEmulatorBaseUrl = 'http://10.0.2.2:8000';
-lib/core/config/app_environment.dart:28:  static const String remoteDevBackendUrl = 'https://inkscrollerbackend-dev.up.railway.app';
-lib/core/config/app_environment.dart:68:    addCandidate('http://localhost:8000');
+lib/core/config/app_environment.dart:21:  static const String devCloudBaseUrl = 'https://api.dev.inkscroller.devdigi.dev';
+lib/core/config/app_environment.dart:24:  static const String stagingCloudBaseUrl = 'https://api.stg.inkscroller.devdigi.dev';
+lib/core/config/app_environment.dart:27:  static const String proCloudBaseUrl = 'https://api.inkscroller.devdigi.dev';
+lib/core/config/app_environment.dart:76:    addCandidate('http://localhost:8000');
 ```
 
-**Análisis:** Las 4 URLs son **exclusivamente URLs del backend InkScroller**:
+**Análisis:** Las URLs son **exclusivamente URLs del backend InkScroller**:
 - `127.0.0.1:8000` → backend local (desarrollo)
 - `10.0.2.2:8000` → backend vía Android emulator loopback
-- Railway backend URL → backend desplegado de InkScroller
+- dominios `api*.inkscroller.devdigi.dev` → backends desplegados de InkScroller
 - `localhost:8000` → backend local (fallback)
 
 Ninguna URL apunta a `api.mangadex.org`, `api.jikan.moe`, ni ningún dominio de tercero externo.
@@ -120,12 +122,12 @@ rg "Dio|DioClient|baseUrl" lib/features/ --glob "*_impl.dart" -n
 Flutter App
     └── DioClient (singleton, registrado en injection.dart)
             ├── baseUrl = ApiConfig.baseUrl = FlavorConfig.instance.apiBaseUrl
-            │       → --dart-define=API_BASE_URL (runtime)
-            │       → fallback: 127.0.0.1:8000 (dev local)
+            │       → --dart-define=API_BASE_URL (runtime override)
+            │       → fallback: dominio custom del flavor
             ├── _BaseUrlFallbackInterceptor (fallback entre candidatos InkScroller)
             └── _AuthInterceptor (Bearer token en /users/*)
                     ↓
-         Backend InkScroller (Railway / local)
+         Backend InkScroller (custom domain / local)
                     ↓
          Backend → MangaDex API / Jikan API  (invisible para Flutter)
 ```
@@ -141,7 +143,7 @@ Toda la comunicación de Flutter es con el backend InkScroller.
 |---------|-----|-----------|
 | `lib/core/network/dio_client.dart` | Cliente HTTP único | ✅ baseUrl = backend InkScroller |
 | `lib/core/config/api_config.dart` | Resuelve baseUrl | ✅ → `FlavorConfig.apiBaseUrl` |
-| `lib/core/config/app_environment.dart` | URLs hardcodeadas | ✅ Solo URLs de backend local/Railway |
+| `lib/core/config/app_environment.dart` | URLs hardcodeadas | ✅ Solo URLs de backend local/custom domains |
 | `lib/core/di/injection.dart` | Registro DI del DioClient | ✅ Un solo DioClient compartido |
 | `lib/features/library/data/datasources/library_remote_ds_impl.dart` | DS library | ✅ Usa DioClient inyectado |
 | `lib/features/home/data/datasources/home_remote_ds_impl.dart` | DS home | ✅ Usa DioClient inyectado |

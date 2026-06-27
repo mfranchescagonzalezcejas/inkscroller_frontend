@@ -9,5 +9,5 @@ cd "$PROJECT_DIR"
 exec fvm flutter run \
   --flavor staging \
   -t lib/main_staging.dart \
-  --dart-define=API_BASE_URL=https://inkscrollerbackend-stg.up.railway.app \
+  --dart-define=API_BASE_URL=https://api.stg.inkscroller.devdigi.dev \
   "$@"
