@@ -21,6 +21,10 @@ migrate_working_dir/
 # VS Code workspace settings are local because launch/tasks often contain
 # machine-specific SDK paths or private dart-define files.
 .vscode/
+.cursor/
+
+# CodeGraph local index/cache
+.codegraph/
 
 # Flutter/Dart/Pub related
 **/doc/api/
