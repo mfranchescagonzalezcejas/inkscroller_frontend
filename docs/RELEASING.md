@@ -138,9 +138,11 @@ If these values are not present, release builds fail fast with a clear message i
 
 | Secret | Description |
 |--------|-------------|
-| `API_BASE_URL_DEV` | Backend URL for DEV builds |
-| `API_BASE_URL_STAGING` | Backend URL for STAGING builds |
-| `API_BASE_URL_PRO` | Backend URL for PRO builds |
+| `API_BASE_URL_DEV` | Backend URL for DEV builds (`https://api.dev.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_STAGING` | Backend URL for STAGING builds (`https://api.stg.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_PRO` | Backend URL for PRO builds (`https://api.inkscroller.devdigi.dev`) |
+
+Before cutting a release, verify these GitHub secrets contain the custom backend domains above. The release workflow passes them as explicit `API_BASE_URL` values, so stale Railway URLs in secrets take precedence over Flutter flavor defaults.
 
 ### Firebase App Distribution
 

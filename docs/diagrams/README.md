@@ -11,7 +11,7 @@ This folder contains editable product and architecture diagrams for InkScroller.
 | Data Flow | [`data-flow.drawio`](data-flow.drawio) | [`svg`](data-flow.svg) | [`png`](data-flow.png) | UI → state → use case → repository → API/cache → UI state. |
 | Auth + Profile Flow | [`auth-profile-flow.drawio`](auth-profile-flow.drawio) | [`svg`](auth-profile-flow.svg) | [`png`](auth-profile-flow.png) | Guest vs logged-in profile behavior, Firebase Auth, backend user endpoints, and preferences. |
 | Reader + Offline Flow | [`reader-offline-flow.drawio`](reader-offline-flow.drawio) | [`svg`](reader-offline-flow.svg) | [`png`](reader-offline-flow.png) | Chapter source decisions, reader settings, cached pages, and reconnect guidance. |
-| Deployment + Environment Flow | [`deployment-environment-flow.drawio`](deployment-environment-flow.drawio) | [`svg`](deployment-environment-flow.svg) | [`png`](deployment-environment-flow.png) | Flutter flavors, Firebase projects, API base URL resolution, and Railway/local backend targets. |
+| Deployment + Environment Flow | [`deployment-environment-flow.drawio`](deployment-environment-flow.drawio) | [`svg`](deployment-environment-flow.svg) | [`png`](deployment-environment-flow.png) | Flutter flavors, Firebase projects, API base URL resolution, custom-domain cloud backends, and local backend targets. |
 | Release Flow | [`release-flow.drawio`](release-flow.drawio) | [`svg`](release-flow.svg) | [`png`](release-flow.png) | Version bump, release script, semver tag, GitHub Actions, APK builds, GitHub Release, and Firebase App Distribution. |
 
 ## Export recommendation

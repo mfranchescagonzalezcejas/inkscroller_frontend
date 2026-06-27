@@ -7,7 +7,7 @@ import 'flavors/flavor_config.dart';
 Future<void> main() async {
   await mainCommon(
     flavor: Flavor.staging,
-    apiBaseUrl: AppEnvironment.apiBaseUrl,
+    apiBaseUrl: AppEnvironment.stagingApiBaseUrl,
     name: AppConstants.appName,
   );
 }

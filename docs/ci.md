@@ -64,9 +64,11 @@ Go to: **Settings → Secrets and variables → Actions**
 
 | Secret | Description |
 |--------|-------------|
-| `API_BASE_URL_DEV` | Backend base URL for DEV builds |
-| `API_BASE_URL_STAGING` | Backend base URL for STAGING builds |
-| `API_BASE_URL_PRO` | Backend base URL for PRODUCTION builds |
+| `API_BASE_URL_DEV` | Backend base URL for DEV builds (`https://api.dev.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_STAGING` | Backend base URL for STAGING builds (`https://api.stg.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_PRO` | Backend base URL for PRODUCTION builds (`https://api.inkscroller.devdigi.dev`) |
+
+Keep these GitHub secrets aligned with the custom backend domains above. The release workflow reads the secret values directly, so stale Railway URLs in secrets override the app defaults.
 
 ### Firebase App Distribution
 
