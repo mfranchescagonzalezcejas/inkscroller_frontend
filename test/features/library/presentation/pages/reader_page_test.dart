@@ -31,6 +31,7 @@ import 'package:inkscroller_flutter/features/preferences/domain/usecases/get_pre
 import 'package:inkscroller_flutter/features/preferences/domain/usecases/update_preferences.dart';
 import 'package:inkscroller_flutter/features/preferences/presentation/providers/preferences_notifier.dart';
 import 'package:inkscroller_flutter/features/preferences/presentation/providers/preferences_provider.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -50,6 +51,8 @@ class _MockSignOut extends Mock implements SignOut {}
 
 class _MockGetAuthState extends Mock implements GetAuthState {}
 
+class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
 // ---------------------------------------------------------------------------
 // Stub factories — avoid GetIt in tests
 // ---------------------------------------------------------------------------
@@ -64,6 +67,7 @@ AuthNotifier _makeStubAuthNotifier() {
     signUp: _MockSignUp(),
     signOut: _MockSignOut(),
     getAuthState: getAuthState,
+    updateUserProfile: _MockUpdateUserProfile(),
   );
 }
 
@@ -110,10 +114,7 @@ Future<void> pumpReaderPage(
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: ReaderPage(
-          chapterId: chapterId,
-          chapter: chapter,
-        ),
+        home: ReaderPage(chapterId: chapterId, chapter: chapter),
       ),
     ),
   );
@@ -128,9 +129,7 @@ void main() {
   late ResolveReaderMode resolveReaderMode;
 
   setUpAll(() {
-    registerFallbackValue(
-      const ReaderContentMetadata(pageCount: 0),
-    );
+    registerFallbackValue(const ReaderContentMetadata(pageCount: 0));
   });
 
   setUp(() {

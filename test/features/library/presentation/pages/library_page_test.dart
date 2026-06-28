@@ -14,6 +14,7 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart'
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_reading_progress.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_entry.dart';
@@ -42,6 +43,8 @@ class _MockSignOut extends Mock implements SignOut {}
 
 class _MockGetAuthState extends Mock implements GetAuthState {}
 
+class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
 class _MockReadingProgressRepository extends Mock
     implements ReadingProgressRepository {}
 
@@ -65,6 +68,7 @@ AuthNotifier _makeStubAuthNotifier() {
     signUp: _MockSignUp(),
     signOut: _MockSignOut(),
     getAuthState: getAuthState,
+    updateUserProfile: _MockUpdateUserProfile(),
   );
 }
 
