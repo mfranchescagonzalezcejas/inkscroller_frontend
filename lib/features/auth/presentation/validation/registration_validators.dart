@@ -36,14 +36,11 @@ class RegistrationValidators {
     final today = _dateOnly(now ?? DateTime.now());
     final date = _dateOnly(value);
 
-    var cutoffYear = today.year - 13;
-    var cutoffMonth = today.month;
-    var cutoffDay = today.day;
-
-    // On Feb 29, the cutoff year may not be a leap year → use Feb 28.
-    if (cutoffMonth == 2 && cutoffDay == 29 && !_isLeapYear(cutoffYear)) {
-      cutoffDay = 28;
-    }
+    final cutoffYear = today.year - 13;
+    final cutoffMonth = today.month;
+    final cutoffDay = (cutoffMonth == 2 && today.day == 29 && !_isLeapYear(cutoffYear))
+        ? 28
+        : today.day;
 
     final thirteenYearsAgo = DateTime(cutoffYear, cutoffMonth, cutoffDay);
     return !date.isBefore(_minimumBirthDate) && !date.isAfter(thirteenYearsAgo);

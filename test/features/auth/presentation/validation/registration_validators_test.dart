@@ -94,7 +94,7 @@ void main() {
       );
       expect(
         RegistrationValidators.isAllowedBirthDate(
-          DateTime(2011, 3, 1),
+          DateTime(2011, 3),
           now: now,
         ),
         isFalse,
