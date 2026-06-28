@@ -47,6 +47,7 @@ tests:
       test/core/
       test/features/library/domain/
       test/features/settings/domain/
+      test/features/auth/presentation/validation/
       test/features/library/data/
       test/features/preferences/data/
       test/features/profile/data/
@@ -61,6 +62,7 @@ tests:
       fvm flutter test
       test/core/router/app_router_test.dart
       test/core/router/app_routes_test.dart
+      test/features/auth/presentation/pages/register_page_test.dart
       test/features/settings/presentation/pages/settings_page_test.dart
       test/features/library/presentation/widgets/library_widgets_test.dart
       test/features/home/presentation/pages/home_hero_overflow_test.dart
