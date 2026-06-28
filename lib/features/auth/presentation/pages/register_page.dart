@@ -78,7 +78,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final completedAuthState = ref.read(authProvider);
     final registrationSucceeded =
         !completedAuthState.registrationInProgress &&
-        completedAuthState.error == null;
+        completedAuthState.error == null &&
+        completedAuthState.user != null;
 
     if (registrationSucceeded) {
       context.go(AppRoutes.home);
@@ -252,9 +253,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   obscureText: _obscureConfirmPassword,
                   keyboardType: TextInputType.visiblePassword,
                   suffixIcon: IconButton(
-                    onPressed: () => setState(
-                      () => _obscureConfirmPassword = !_obscureConfirmPassword,
-                    ),
+                    onPressed: isActionLocked
+                        ? null
+                        : () => setState(
+                              () => _obscureConfirmPassword =
+                                  !_obscureConfirmPassword,
+                            ),
                     icon: Icon(
                       _obscureConfirmPassword
                           ? Icons.visibility_outlined
