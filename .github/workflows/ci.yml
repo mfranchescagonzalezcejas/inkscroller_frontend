@@ -81,6 +81,13 @@ jobs:
       - name: Install project dependencies
         run: fvm flutter pub get
 
+      - name: Guard against focused Dart tests
+        run: |
+          if grep -RInE '(^|[^A-Za-z0-9_])solo_(test|group)[[:space:]]*\(' test --include='*_test.dart'; then
+            echo "Focused Dart tests are not allowed in CI. Remove solo_test/solo_group before pushing."
+            exit 1
+          fi
+
       - name: Run unit tests
         run: |
           fvm flutter test \
@@ -89,6 +96,7 @@ jobs:
             test/features/settings/domain/ \
             test/features/library/data/ \
             test/features/preferences/data/ \
+            test/features/profile/data/ \
             test/features/settings/data/ \
             test/features/auth/presentation/providers/ \
             test/features/home/presentation/providers/ \
