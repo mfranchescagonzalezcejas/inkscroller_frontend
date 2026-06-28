@@ -403,7 +403,54 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authCreateAccountButton => 'Crear cuenta';
 
   @override
+  String get authCompleteProfileTitle => 'Completá tu perfil';
+
+  @override
+  String get authCompleteProfileSubtitle =>
+      'Tu cuenta fue creada. Agregá los datos obligatorios del perfil para continuar.';
+
+  @override
+  String get authCompleteProfileButton => 'Completar perfil';
+
+  @override
   String get authHaveAccount => '¿Ya tenés cuenta? Iniciá sesión';
+
+  @override
+  String get authUsernameLabel => 'Nombre de usuario';
+
+  @override
+  String get authUsernameRequired => 'Elegí un nombre de usuario.';
+
+  @override
+  String get authUsernameInvalid =>
+      'Usá 3–30 letras minúsculas, números, guiones bajos o guiones.';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirmar contraseña';
+
+  @override
+  String get authConfirmPasswordRequired => 'Confirmá tu contraseña.';
+
+  @override
+  String get authConfirmPasswordMismatch => 'Las contraseñas no coinciden.';
+
+  @override
+  String get authBirthDateLabel => 'Fecha de nacimiento';
+
+  @override
+  String get authBirthDateRequired => 'Seleccioná tu fecha de nacimiento.';
+
+  @override
+  String get authBirthDateInvalid =>
+      'Ingresá una fecha entre 1900-01-01 y hoy.';
+
+  @override
+  String get authTermsAcknowledgement =>
+      'Acepto los Términos y la Política de Privacidad.';
+
+  @override
+  String get authTermsRequired =>
+      'Tenés que aceptar los Términos y la Política de Privacidad.';
 
   @override
   String get readerSettingsDirection => 'Dirección de lectura';
