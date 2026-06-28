@@ -271,40 +271,6 @@ void main() {
     });
 
     test(
-      'keeps legacy sign-up callers working without profile metadata',
-      () async {
-        final updateUserProfile = _MockUpdateUserProfile();
-        when(
-          () => mockSignUp(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          ),
-        ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
-
-        final notifier = _makeNotifier(
-          signIn: mockSignIn,
-          signUp: mockSignUp,
-          signOut: mockSignOut,
-          getAuthState: mockGetAuthState,
-          updateUserProfile: updateUserProfile,
-        );
-
-        await notifier.signUp(email: 'alice@example.com', password: 's3cr3t');
-
-        verifyNever(
-          () => updateUserProfile(
-            username: any(named: 'username'),
-            birthDate: any(named: 'birthDate'),
-          ),
-        );
-        expect(notifier.state.isLoading, isFalse);
-        expect(notifier.state.error, isNull);
-        expect(notifier.state.profileCompletionPending, isFalse);
-        expect(notifier.state.registrationInProgress, isFalse);
-      },
-    );
-
-    test(
       'does not update profile metadata when Firebase sign-up fails',
       () async {
         final updateUserProfile = _MockUpdateUserProfile();

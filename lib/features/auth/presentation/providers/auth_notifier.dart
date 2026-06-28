@@ -189,12 +189,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  /// Registers a new account and stores profile metadata when provided.
+  /// Registers a new account and stores required profile metadata.
   Future<void> signUp({
     required String email,
     required String password,
-    String? username,
-    DateTime? birthDate,
+    required String username,
+    required DateTime birthDate,
   }) async {
     state = state.copyWith(
       isLoading: true,
@@ -212,29 +212,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         registrationInProgress: false,
       ),
       (_) async {
-        if (username == null && birthDate == null) {
-          // No profile metadata to store — registration is complete.
-          state = state.copyWith(
-            isLoading: false,
-            clearError: true,
-            profileCompletionPending: false,
-            registrationInProgress: false,
-          );
-          _checkProfileCompletionIfNeeded(state.user);
-          return;
-        }
-
-        if (username == null || birthDate == null) {
-          // One field provided without the other — inconsistent state.
-          state = state.copyWith(
-            isLoading: false,
-            error: 'Profile data is incomplete.',
-            profileCompletionPending: true,
-            registrationInProgress: false,
-          );
-          return;
-        }
-
         final profileResult = await _updateUserProfile(
           username: username,
           birthDate: birthDate,
