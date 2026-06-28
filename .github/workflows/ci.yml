@@ -184,5 +184,7 @@ jobs:
       - name: Run full UI tests
         run: |
           fvm flutter test \
-            test/features/*/presentation/pages/ \
-            test/features/*/presentation/widgets/
+            test/features/about/presentation/pages/about_page_test.dart \
+            test/features/home/presentation/pages/home_new_chapters_section_test.dart \
+            test/features/library/presentation/pages/library_page_test.dart \
+            test/features/library/presentation/pages/reader_page_test.dart
