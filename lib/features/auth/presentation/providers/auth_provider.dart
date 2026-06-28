@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
@@ -5,6 +6,7 @@ import '../../domain/usecases/get_auth_state.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up.dart';
+import '../../../profile/domain/usecases/get_user_profile.dart';
 import '../../../profile/domain/usecases/update_user_profile.dart';
 import 'auth_notifier.dart';
 import 'auth_state.dart';
@@ -19,6 +21,13 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     signUp: sl<SignUp>(),
     signOut: sl<SignOut>(),
     getAuthState: sl<GetAuthState>(),
+    getUserProfile: sl<GetUserProfile>(),
     updateUserProfile: sl<UpdateUserProfile>(),
+    profileMetadataFailureReporter: ({required flow, required reason}) {
+      return FirebaseAnalytics.instance.logEvent(
+        name: 'profile_metadata_failure',
+        parameters: <String, Object>{'flow': flow, 'reason': reason},
+      );
+    },
   );
 });
