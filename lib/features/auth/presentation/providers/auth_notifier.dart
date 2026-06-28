@@ -46,6 +46,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   StreamSubscription<AppUser?>? _authSubscription;
   String? _profileCompletionCheckUserId;
   Future<void>? _profileCompletionCheck;
+  bool _disposed = false;
 
   AuthNotifier({
     required SignIn signIn,
@@ -119,6 +120,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _checkProfileCompletion(String userId) async {
     final result = await _getUserProfile();
 
+    if (_disposed) return;
     if (state.user?.uid != userId || state.registrationInProgress) return;
 
     result.fold(
@@ -218,6 +220,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
             profileCompletionPending: false,
             registrationInProgress: false,
           );
+          _checkProfileCompletionIfNeeded(state.user);
           return;
         }
 
@@ -320,6 +323,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   @override
   void dispose() {
+    _disposed = true;
     _authSubscription?.cancel();
     super.dispose();
   }
