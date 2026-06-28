@@ -78,5 +78,28 @@ void main() {
         reason: 'under 13 should be rejected',
       );
     });
+
+    test('handles leap-day cutoff without rolling over', () {
+      // Regression: DateTime(2024, 2, 29).year - 13 = DateTime(2011, 2, 29)
+      // which Dart auto-corrects to 2011-03-01, making the cutoff one day late.
+      final now = DateTime(2024, 2, 29);
+
+      expect(
+        RegistrationValidators.isAllowedBirthDate(
+          DateTime(2011, 2, 28),
+          now: now,
+        ),
+        isTrue,
+        reason: 'born 2011-02-28 is exactly 13 on 2024-02-29',
+      );
+      expect(
+        RegistrationValidators.isAllowedBirthDate(
+          DateTime(2011, 3, 1),
+          now: now,
+        ),
+        isFalse,
+        reason: 'born 2011-03-01 is still 12 on 2024-02-29',
+      );
+    });
   });
 }

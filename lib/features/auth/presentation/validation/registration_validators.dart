@@ -35,12 +35,26 @@ class RegistrationValidators {
   static bool isAllowedBirthDate(DateTime value, {DateTime? now}) {
     final today = _dateOnly(now ?? DateTime.now());
     final date = _dateOnly(value);
-    final thirteenYearsAgo = DateTime(today.year - 13, today.month, today.day);
 
+    var cutoffYear = today.year - 13;
+    var cutoffMonth = today.month;
+    var cutoffDay = today.day;
+
+    // On Feb 29, the cutoff year may not be a leap year → use Feb 28.
+    if (cutoffMonth == 2 && cutoffDay == 29 && !_isLeapYear(cutoffYear)) {
+      cutoffDay = 28;
+    }
+
+    final thirteenYearsAgo = DateTime(cutoffYear, cutoffMonth, cutoffDay);
     return !date.isBefore(_minimumBirthDate) && !date.isAfter(thirteenYearsAgo);
   }
 
   static DateTime _dateOnly(DateTime value) {
     return DateTime(value.year, value.month, value.day);
+  }
+
+  /// Whether [year] is a Gregorian leap year.
+  static bool _isLeapYear(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
   }
 }
