@@ -329,7 +329,8 @@ void main() {
 
     await fillInitialRegistrationForm(tester);
     await submitCreateAccount(tester);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
 
     expect(notifier.signUpCalls, 1);
     expect(notifier.completeProfileCalls, 0);
@@ -414,7 +415,7 @@ void main() {
     await selectDefaultBirthDate(tester);
     await tester.ensureVisible(find.text('Complete profile'));
     await tester.tap(find.text('Complete profile'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(notifier.signUpCalls, 0);
     expect(notifier.completeProfileCalls, 1);
