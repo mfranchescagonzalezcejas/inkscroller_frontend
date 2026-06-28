@@ -9,6 +9,8 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:inkscroller_flutter/features/profile/domain/entities/user_profile.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:mocktail/mocktail.dart';
 
 // ---------------------------------------------------------------------------
@@ -23,11 +25,20 @@ class _MockSignOut extends Mock implements SignOut {}
 
 class _MockGetAuthState extends Mock implements GetAuthState {}
 
+class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 const _kUser = AppUser(uid: 'uid-123', email: 'alice@example.com');
+final _kProfile = UserProfile(
+  firebaseUid: 'uid-123',
+  email: 'alice@example.com',
+  username: 'alice_01',
+  birthDate: DateTime(2000),
+  createdAt: DateTime(2026),
+);
 
 /// Returns an [AuthNotifier] backed by the provided stubs, with a
 /// [GetAuthState] that emits a single empty stream by default so the
@@ -37,12 +48,14 @@ AuthNotifier _makeNotifier({
   required SignUp signUp,
   required SignOut signOut,
   required GetAuthState getAuthState,
+  UpdateUserProfile? updateUserProfile,
 }) {
   return AuthNotifier(
     signIn: signIn,
     signUp: signUp,
     signOut: signOut,
     getAuthState: getAuthState,
+    updateUserProfile: updateUserProfile ?? _MockUpdateUserProfile(),
   );
 }
 
@@ -82,12 +95,16 @@ void main() {
 
       expect(notifier.state.isLoading, isFalse);
 
-      final future = notifier.signIn(email: 'alice@example.com', password: 's3cr3t');
+      final future = notifier.signIn(
+        email: 'alice@example.com',
+        password: 's3cr3t',
+      );
       // isLoading should flip to true synchronously once the async fn yields.
       await future;
 
       expect(notifier.state.isLoading, isFalse);
       expect(notifier.state.error, isNull);
+      expect(notifier.state.profileCompletionPending, isFalse);
     });
 
     test('clears error on successful sign-in', () async {
@@ -162,6 +179,195 @@ void main() {
     });
   });
 
+  // ── signUp ────────────────────────────────────────────────────────────────
+
+  group('signUp', () {
+    test('updates profile metadata after Firebase sign-up succeeds', () async {
+      final updateUserProfile = _MockUpdateUserProfile();
+      when(
+        () => mockSignUp(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+      when(
+        () => updateUserProfile(
+          username: any(named: 'username'),
+          birthDate: any(named: 'birthDate'),
+        ),
+      ).thenAnswer((_) async => Right<Failure, UserProfile>(_kProfile));
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        updateUserProfile: updateUserProfile,
+      );
+
+      await notifier.signUp(
+        email: 'alice@example.com',
+        password: 's3cr3t',
+        username: 'alice_01',
+        birthDate: DateTime(2000),
+      );
+
+      verify(
+        () =>
+            updateUserProfile(username: 'alice_01', birthDate: DateTime(2000)),
+      ).called(1);
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.error, isNull);
+      expect(notifier.state.registrationInProgress, isFalse);
+    });
+
+    test(
+      'does not update profile metadata when Firebase sign-up fails',
+      () async {
+        final updateUserProfile = _MockUpdateUserProfile();
+        when(
+          () => mockSignUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer(
+          (_) async => const Left<Failure, AppUser>(
+            ServerFailure(message: 'Email already exists'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          updateUserProfile: updateUserProfile,
+        );
+
+        await notifier.signUp(
+          email: 'alice@example.com',
+          password: 's3cr3t',
+          username: 'alice_01',
+          birthDate: DateTime(2000),
+        );
+
+        verifyNever(
+          () => updateUserProfile(
+            username: any(named: 'username'),
+            birthDate: any(named: 'birthDate'),
+          ),
+        );
+        expect(notifier.state.error, 'Email already exists');
+      },
+    );
+
+    test(
+      'keeps profile completion pending on backend metadata errors',
+      () async {
+        final updateUserProfile = _MockUpdateUserProfile();
+        when(
+          () => mockSignUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+        when(
+          () => updateUserProfile(
+            username: any(named: 'username'),
+            birthDate: any(named: 'birthDate'),
+          ),
+        ).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Username already in use'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          updateUserProfile: updateUserProfile,
+        );
+
+        await notifier.signUp(
+          email: 'alice@example.com',
+          password: 's3cr3t',
+          username: 'alice_01',
+          birthDate: DateTime(2000),
+        );
+
+        expect(notifier.state.isLoading, isFalse);
+        expect(notifier.state.error, 'Username already in use');
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.registrationInProgress, isFalse);
+      },
+    );
+
+    test(
+      'completeProfile retries only backend metadata update after partial failure',
+      () async {
+        final updateUserProfile = _MockUpdateUserProfile();
+        when(
+          () => mockSignUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+        when(
+          () => updateUserProfile(
+            username: any(named: 'username'),
+            birthDate: any(named: 'birthDate'),
+          ),
+        ).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Username already in use'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          updateUserProfile: updateUserProfile,
+        );
+
+        await notifier.signUp(
+          email: 'alice@example.com',
+          password: 's3cr3t',
+          username: 'alice_01',
+          birthDate: DateTime(2000),
+        );
+
+        when(
+          () => updateUserProfile(
+            username: any(named: 'username'),
+            birthDate: any(named: 'birthDate'),
+          ),
+        ).thenAnswer((_) async => Right<Failure, UserProfile>(_kProfile));
+
+        await notifier.completeProfile(
+          username: 'alice_02',
+          birthDate: DateTime(2001),
+        );
+
+        verify(
+          () => mockSignUp(email: 'alice@example.com', password: 's3cr3t'),
+        ).called(1);
+        verify(
+          () => updateUserProfile(
+            username: 'alice_02',
+            birthDate: DateTime(2001),
+          ),
+        ).called(1);
+        expect(notifier.state.error, isNull);
+        expect(notifier.state.profileCompletionPending, isFalse);
+      },
+    );
+
+  });
+
   // ── signOut ───────────────────────────────────────────────────────────────
 
   group('signOut', () {
@@ -169,9 +375,9 @@ void main() {
       // Prime the notifier with an authenticated-looking state via the stream.
       final streamController = StreamController<AppUser?>.broadcast();
       when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);
-      when(() => mockSignOut()).thenAnswer(
-        (_) async => const Right<Failure, void>(null),
-      );
+      when(
+        () => mockSignOut(),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
 
       final notifier = _makeNotifier(
         signIn: mockSignIn,
@@ -277,9 +483,8 @@ void main() {
           password: any(named: 'password'),
         ),
       ).thenAnswer(
-        (_) async => const Left<Failure, AppUser>(
-          ServerFailure(message: 'Oops'),
-        ),
+        (_) async =>
+            const Left<Failure, AppUser>(ServerFailure(message: 'Oops')),
       );
 
       final notifier = _makeNotifier(
@@ -302,8 +507,7 @@ void main() {
   // ── P0-F7: auth stream error handling ────────────────────────────────────
 
   group('auth stream error handling (P0-F7)', () {
-    test(
-        'clears user and sets error when auth stream emits an error — '
+    test('clears user and sets error when auth stream emits an error — '
         'does not leave notifier in inconsistent state', () async {
       final streamController = StreamController<AppUser?>.broadcast();
       when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);
@@ -335,8 +539,7 @@ void main() {
       await streamController.close();
     });
 
-    test(
-        'public navigation is unaffected after auth stream error — '
+    test('public navigation is unaffected after auth stream error — '
         'user is null (guest mode), not locked', () async {
       final streamController = StreamController<AppUser?>.broadcast();
       when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);
