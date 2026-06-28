@@ -27,7 +27,9 @@ class DioClient {
 
     // Debug logging for Cloud Run deployment
     if (kDebugMode) {
-      debugPrint('[DioClient] Initializing with base URL: ${_baseUrlCandidates.first}');
+      debugPrint(
+        '[DioClient] Initializing with base URL: ${_baseUrlCandidates.first}',
+      );
       debugPrint('[DioClient] Fallback candidates: $_baseUrlCandidates');
     }
 
@@ -92,20 +94,44 @@ class _BaseUrlFallbackInterceptor extends Interceptor {
 
     if (nextAttempt >= _baseUrlCandidates.length) {
       if (kDebugMode) {
-        debugPrint('[DioClient] No more fallback candidates, passing error through');
+        debugPrint(
+          '[DioClient] No more fallback candidates, passing error through',
+        );
       }
       handler.next(err);
       return;
     }
 
     final nextBaseUrl = _baseUrlCandidates[nextAttempt];
-    
-    if (kDebugMode) {
-      debugPrint('[DioClient] Retrying with base URL: $nextBaseUrl (attempt $nextAttempt/${_baseUrlCandidates.length})');
+    final nextOrigin = Uri.parse(nextBaseUrl).origin;
+    final currentOrigin = err.requestOptions.uri.origin;
+    final changesOrigin = nextOrigin != currentOrigin;
+
+    if (_hasAuthorizationHeader(err.requestOptions.headers) && changesOrigin) {
+      if (kDebugMode) {
+        debugPrint(
+          '[DioClient] Authenticated request will not be retried across origins',
+        );
+      }
+
+      handler.next(err);
+      return;
     }
-    
+
+    if (kDebugMode) {
+      debugPrint(
+        '[DioClient] Retrying with base URL: $nextBaseUrl (attempt $nextAttempt/${_baseUrlCandidates.length})',
+      );
+    }
+
+    final headers = Map<String, dynamic>.of(err.requestOptions.headers);
+    if (changesOrigin) {
+      headers.removeWhere((key, _) => key.toLowerCase() == 'authorization');
+    }
+
     final retriedRequest = err.requestOptions.copyWith(
       baseUrl: nextBaseUrl,
+      headers: headers,
       extra: <String, Object?>{
         ...err.requestOptions.extra,
         _attemptKey: nextAttempt,
@@ -118,6 +144,10 @@ class _BaseUrlFallbackInterceptor extends Interceptor {
     } on DioException catch (retryError) {
       handler.next(retryError);
     }
+  }
+
+  bool _hasAuthorizationHeader(Map<String, dynamic> headers) {
+    return headers.keys.any((key) => key.toLowerCase() == 'authorization');
   }
 }
 

@@ -1,8 +1,15 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:inkscroller_flutter/core/config/app_environment.dart';
 import 'package:inkscroller_flutter/core/network/dio_client.dart';
+import 'package:inkscroller_flutter/flavors/flavor_config.dart';
 
 void main() {
+  setUp(FlavorConfig.resetForTesting);
+
   // ── isProtectedAuthPath ──────────────────────────────────────────────────
 
   group('isProtectedAuthPath', () {
@@ -82,27 +89,136 @@ void main() {
       expect(options.headers.containsKey('Authorization'), isFalse);
     });
 
-    test('P0-F7: does not attach header when token provider returns null', () async {
-      final options = RequestOptions(path: '/users/me');
+    test(
+      'P0-F7: does not attach header when token provider returns null',
+      () async {
+        final options = RequestOptions(path: '/users/me');
 
-      await attachAuthHeaderForRequest(
-        options,
-        tokenProvider: () async => null,
+        await attachAuthHeaderForRequest(
+          options,
+          tokenProvider: () async => null,
+        );
+
+        expect(options.headers.containsKey('Authorization'), isFalse);
+      },
+    );
+
+    test(
+      'P0-F7: does not attach header when token provider returns empty string',
+      () async {
+        final options = RequestOptions(path: '/users/me');
+
+        await attachAuthHeaderForRequest(
+          options,
+          tokenProvider: () async => '',
+        );
+
+        expect(options.headers.containsKey('Authorization'), isFalse);
+      },
+    );
+  });
+
+  group('DioClient base URL fallback', () {
+    test(
+      'retries unauthenticated dev requests against the next fallback',
+      () async {
+        FlavorConfig(
+          flavor: Flavor.dev,
+          apiBaseUrl: AppEnvironment.devCloudBaseUrl,
+          name: 'InkScroller Test',
+        );
+        final adapter = _FailThenSucceedAdapter();
+        final client = DioClient()..dio.httpClientAdapter = adapter;
+
+        final response = await client.dio.get<dynamic>('/ping');
+
+        expect(response.statusCode, 200);
+        expect(adapter.requests, hasLength(2));
+        expect(
+          adapter.requests.first.uri.origin,
+          AppEnvironment.devCloudBaseUrl,
+        );
+        expect(adapter.requests.last.uri.origin, AppEnvironment.localBaseUrl);
+        expect(
+          adapter.requests.last.headers.containsKey('Authorization'),
+          isFalse,
+        );
+      },
+    );
+
+    test('does not retry authenticated requests across origins', () async {
+      FlavorConfig(
+        flavor: Flavor.dev,
+        apiBaseUrl: AppEnvironment.devCloudBaseUrl,
+        name: 'InkScroller Test',
+      );
+      final adapter = _FailThenSucceedAdapter();
+      final client = DioClient(tokenProvider: () async => 'token-123')
+        ..dio.httpClientAdapter = adapter;
+
+      await expectLater(
+        client.dio.get<dynamic>('/users/me'),
+        throwsA(isA<DioException>()),
       );
 
-      expect(options.headers.containsKey('Authorization'), isFalse);
+      expect(adapter.requests, hasLength(1));
+      expect(
+        adapter.requests.single.headers['Authorization'],
+        'Bearer token-123',
+      );
     });
 
-    test('P0-F7: does not attach header when token provider returns empty string',
-        () async {
-      final options = RequestOptions(path: '/users/me');
+    test('does not use local fallback candidates outside dev', () async {
+      FlavorConfig(
+        flavor: Flavor.staging,
+        apiBaseUrl: AppEnvironment.stagingCloudBaseUrl,
+        name: 'InkScroller Test',
+      );
+      final adapter = _FailThenSucceedAdapter();
+      final client = DioClient()..dio.httpClientAdapter = adapter;
 
-      await attachAuthHeaderForRequest(
-        options,
-        tokenProvider: () async => '',
+      await expectLater(
+        client.dio.get<dynamic>('/ping'),
+        throwsA(isA<DioException>()),
       );
 
-      expect(options.headers.containsKey('Authorization'), isFalse);
+      expect(adapter.requests, hasLength(1));
+      expect(
+        adapter.requests.single.uri.origin,
+        AppEnvironment.stagingCloudBaseUrl,
+      );
     });
   });
+}
+
+class _FailThenSucceedAdapter implements HttpClientAdapter {
+  final requests = <RequestOptions>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options);
+
+    if (requests.length == 1) {
+      throw DioException(
+        requestOptions: options,
+        type: DioExceptionType.connectionError,
+        error: 'connection refused',
+      );
+    }
+
+    return ResponseBody.fromString(
+      '{}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
 }

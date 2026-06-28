@@ -83,11 +83,46 @@ void main() {
         expect(ApiConfig.baseUrl, AppEnvironment.proApiBaseUrl);
         expect(ApiConfig.baseUrlCandidates.first, AppEnvironment.proApiBaseUrl);
         expect(
+          ApiConfig.baseUrlCandidates,
+          isNot(contains(AppEnvironment.localBaseUrl)),
+        );
+        expect(
+          ApiConfig.baseUrlCandidates,
+          isNot(contains(AppEnvironment.androidEmulatorBaseUrl)),
+        );
+        expect(
+          ApiConfig.baseUrlCandidates,
+          isNot(contains('http://localhost:8000')),
+        );
+        expect(
           ApiConfig.baseUrlCandidates.where(oldRailwayUrls.contains),
           isEmpty,
         );
       },
     );
+
+    test('ApiConfig keeps local fallback candidates for dev only', () {
+      FlavorConfig(
+        flavor: Flavor.dev,
+        apiBaseUrl: AppEnvironment.devApiBaseUrl,
+        name: 'InkScroller Test',
+      );
+
+      expect(
+        ApiConfig.baseUrlCandidates,
+        contains(AppEnvironment.localBaseUrl),
+      );
+      expect(ApiConfig.baseUrlCandidates, contains('http://localhost:8000'));
+
+      FlavorConfig.resetForTesting();
+      FlavorConfig(
+        flavor: Flavor.staging,
+        apiBaseUrl: AppEnvironment.stagingApiBaseUrl,
+        name: 'InkScroller Test',
+      );
+
+      expect(ApiConfig.baseUrlCandidates, [AppEnvironment.stagingApiBaseUrl]);
+    });
 
     test('tracked cloud entrypoints do not use stale Railway URLs', () {
       for (final MapEntry<String, String> entry
