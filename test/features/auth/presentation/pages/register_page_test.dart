@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,13 +34,20 @@ class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 class _RecordingAuthNotifier extends AuthNotifier {
   int signUpCalls = 0;
   int completeProfileCalls = 0;
+  int signOutCalls = 0;
   String? completedUsername;
   DateTime? completedBirthDate;
+  final bool completeProfileSucceeds;
   final bool initialSignUpFirebaseFails;
+  final bool initialSignUpProfileFails;
+  final Completer<void>? signUpGate;
 
   _RecordingAuthNotifier({
     required bool profileCompletionPending,
+    this.completeProfileSucceeds = true,
     this.initialSignUpFirebaseFails = false,
+    this.initialSignUpProfileFails = false,
+    this.signUpGate,
   }) : super(
          signIn: _MockSignIn(),
          signUp: _MockSignUp(),
@@ -47,7 +56,12 @@ class _RecordingAuthNotifier extends AuthNotifier {
          getUserProfile: _MockGetUserProfile(),
          updateUserProfile: _MockUpdateUserProfile(),
        ) {
-    state = AuthState(profileCompletionPending: profileCompletionPending);
+    state = AuthState(
+      user: profileCompletionPending
+          ? const AppUser(uid: 'user-1', email: 'alice@example.com')
+          : null,
+      profileCompletionPending: profileCompletionPending,
+    );
   }
 
   static GetAuthState _emptyAuthState() {
@@ -67,7 +81,7 @@ class _RecordingAuthNotifier extends AuthNotifier {
   }) async {
     signUpCalls++;
     state = state.copyWith(isLoading: true, registrationInProgress: true);
-    await Future<void>.delayed(Duration.zero);
+    await (signUpGate?.future ?? Future<void>.delayed(Duration.zero));
 
     if (initialSignUpFirebaseFails) {
       state = state.copyWith(
@@ -78,11 +92,22 @@ class _RecordingAuthNotifier extends AuthNotifier {
       return;
     }
 
+    if (!initialSignUpProfileFails) {
+      state = state.copyWith(
+        user: const AppUser(uid: 'user-1', email: 'alice@example.com'),
+        isLoading: false,
+        clearError: true,
+        profileCompletionPending: false,
+        registrationInProgress: false,
+      );
+      return;
+    }
+
     state = state.copyWith(
       user: const AppUser(uid: 'user-1', email: 'alice@example.com'),
       isLoading: false,
-      clearError: true,
-      profileCompletionPending: false,
+      error: 'Profile update failed',
+      profileCompletionPending: true,
       registrationInProgress: false,
     );
   }
@@ -95,7 +120,26 @@ class _RecordingAuthNotifier extends AuthNotifier {
     completeProfileCalls++;
     completedUsername = username;
     completedBirthDate = birthDate;
-    state = state.copyWith(clearError: true, profileCompletionPending: false);
+    state = completeProfileSucceeds
+        ? state.copyWith(clearError: true, profileCompletionPending: false)
+        : state.copyWith(
+            error: 'Profile update failed',
+            profileCompletionPending: true,
+          );
+  }
+
+  @override
+  Future<void> signOut() async {
+    signOutCalls++;
+    state = state.copyWith(isLoading: true, clearError: true);
+    await Future<void>.delayed(Duration.zero);
+    state = state.copyWith(
+      clearUser: true,
+      clearError: true,
+      isLoading: false,
+      profileCompletionPending: false,
+      registrationInProgress: false,
+    );
   }
 }
 
@@ -143,15 +187,21 @@ void main() {
   }
 
   Future<DateTime> selectDefaultBirthDate(WidgetTester tester) async {
-    final now = DateTime.now();
-    final selectedDate = DateTime(now.year - 18, now.month, now.day);
-
     await tester.tap(authField('Birth date'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
-    return selectedDate;
+    final birthDateField = find.descendant(
+      of: authField('Birth date'),
+      matching: find.byType(EditableText),
+    );
+    final visibleBirthDate = tester
+        .widget<EditableText>(birthDateField)
+        .controller
+        .text;
+
+    return DateTime.parse(visibleBirthDate);
   }
 
   Future<void> fillInitialRegistrationForm(
@@ -176,6 +226,69 @@ void main() {
     await tester.ensureVisible(createAccountButton);
     await tester.tap(createAccountButton);
   }
+
+  testWidgets('in-flight registration blocks secondary navigation', (
+    tester,
+  ) async {
+    final signUpGate = Completer<void>();
+    final notifier = _RecordingAuthNotifier(
+      profileCompletionPending: false,
+      initialSignUpProfileFails: true,
+      signUpGate: signUpGate,
+    );
+
+    await pumpRegisterPage(tester, notifier);
+
+    await fillInitialRegistrationForm(tester);
+    await submitCreateAccount(tester);
+    await tester.pump();
+
+    expect(notifier.signUpCalls, 1);
+    expect(notifier.state.isLoading, isTrue);
+    expect(notifier.state.registrationInProgress, isTrue);
+    final backButton = find.ancestor(
+      of: find.byIcon(Icons.arrow_back),
+      matching: find.byType(IconButton),
+    );
+    expect(tester.widget<IconButton>(backButton).onPressed, isNull);
+    expect(
+      tester
+          .widget<TextButton>(
+            find.widgetWithText(TextButton, 'Already have an account? Sign in'),
+          )
+          .onPressed,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<TextButton>(
+            find.widgetWithText(TextButton, 'Continue as guest'),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.widgetWithText(TextButton, 'Continue as guest'));
+    await tester.tap(
+      find.widgetWithText(TextButton, 'Already have an account? Sign in'),
+    );
+    await tester.ensureVisible(backButton);
+    await tester.tap(backButton);
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Login'), findsNothing);
+    expect(find.text('Create account'), findsOneWidget);
+
+    signUpGate.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Complete your profile'), findsOneWidget);
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Login'), findsNothing);
+    expect(find.text('Continue as guest'), findsNothing);
+  });
 
   testWidgets('successful initial sign-up navigates to home', (tester) async {
     final notifier = _RecordingAuthNotifier(profileCompletionPending: false);
@@ -225,6 +338,37 @@ void main() {
     expect(find.text('Home'), findsNothing);
   });
 
+  testWidgets(
+    'profile completion retry submits metadata without retrying Firebase sign-up',
+    (tester) async {
+      final notifier = _RecordingAuthNotifier(profileCompletionPending: true);
+
+      await pumpRegisterPage(tester, notifier);
+
+      expect(find.text('Complete your profile'), findsOneWidget);
+      expect(find.text('Email'), findsNothing);
+      expect(find.text('Password'), findsNothing);
+      expect(find.text('Continue as guest'), findsNothing);
+      expect(find.text('Sign out'), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
+
+      await tester.enterText(authField('Username'), 'alice_02');
+      final selectedBirthDate = await selectDefaultBirthDate(tester);
+      await tester.ensureVisible(find.text('Complete profile'));
+      await tester.tap(find.text('Complete profile'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.signUpCalls, 0);
+      expect(notifier.completeProfileCalls, 1);
+      expect(notifier.completedUsername, 'alice_02');
+      expect(notifier.completedBirthDate, selectedBirthDate);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Complete your profile'), findsNothing);
+      expect(find.text('Email'), findsNothing);
+      expect(find.text('Continue as guest'), findsNothing);
+    },
+  );
+
   testWidgets('terms acknowledgement is required before submission', (
     tester,
   ) async {
@@ -255,4 +399,106 @@ void main() {
     expect(notifier.signUpCalls, 0);
     expect(find.text('Passwords do not match.'), findsOneWidget);
   });
+
+  testWidgets('profile completion failure keeps the recovery form visible', (
+    tester,
+  ) async {
+    final notifier = _RecordingAuthNotifier(
+      profileCompletionPending: true,
+      completeProfileSucceeds: false,
+    );
+
+    await pumpRegisterPage(tester, notifier);
+
+    await tester.enterText(authField('Username'), 'alice_02');
+    await selectDefaultBirthDate(tester);
+    await tester.ensureVisible(find.text('Complete profile'));
+    await tester.tap(find.text('Complete profile'));
+    await tester.pumpAndSettle();
+
+    expect(notifier.signUpCalls, 0);
+    expect(notifier.completeProfileCalls, 1);
+    expect(find.text('Complete your profile'), findsOneWidget);
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Email'), findsNothing);
+    expect(find.text('Continue as guest'), findsNothing);
+  });
+
+  testWidgets('profile completion recovery can sign out instead of bypassing', (
+    tester,
+  ) async {
+    final notifier = _RecordingAuthNotifier(profileCompletionPending: true);
+
+    await pumpRegisterPage(tester, notifier);
+
+    expect(find.text('Complete your profile'), findsOneWidget);
+    expect(find.text('Continue as guest'), findsNothing);
+    expect(find.text('Sign out'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Sign out'));
+    await tester.tap(find.text('Sign out'));
+    await tester.pumpAndSettle();
+
+    expect(notifier.signOutCalls, 1);
+    expect(notifier.state.user, isNull);
+    expect(notifier.state.profileCompletionPending, isFalse);
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Continue as guest'), findsNothing);
+  });
+
+  testWidgets('profile completion recovery disables sign-out while loading', (
+    tester,
+  ) async {
+    final notifier = _RecordingAuthNotifier(profileCompletionPending: true);
+
+    await pumpRegisterPage(tester, notifier);
+    notifier.state = notifier.state.copyWith(isLoading: true);
+    await tester.pump();
+
+    final signOutButton = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Sign out'),
+    );
+    expect(signOutButton.onPressed, isNull);
+
+    await tester.tap(find.text('Sign out'));
+    await tester.pump();
+
+    expect(notifier.signOutCalls, 0);
+    expect(find.text('Complete your profile'), findsOneWidget);
+    expect(find.text('Continue as guest'), findsNothing);
+  });
+
+  testWidgets(
+    'initial sign-up metadata failure shows recovery form instead of home',
+    (tester) async {
+      final notifier = _RecordingAuthNotifier(
+        profileCompletionPending: false,
+        initialSignUpProfileFails: true,
+      );
+
+      await pumpRegisterPage(tester, notifier);
+
+      await fillInitialRegistrationForm(tester);
+      await submitCreateAccount(tester);
+      await tester.pumpAndSettle();
+
+      expect(notifier.signUpCalls, 1);
+      expect(notifier.completeProfileCalls, 0);
+      expect(find.text('Complete your profile'), findsOneWidget);
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Email'), findsNothing);
+      expect(find.text('Continue as guest'), findsNothing);
+
+      await tester.enterText(authField('Username'), 'alice_03');
+      await selectDefaultBirthDate(tester);
+      await tester.ensureVisible(find.text('Complete profile'));
+      await tester.tap(find.text('Complete profile'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.signUpCalls, 1);
+      expect(notifier.completeProfileCalls, 1);
+      expect(find.text('Home'), findsOneWidget);
+    },
+  );
 }
