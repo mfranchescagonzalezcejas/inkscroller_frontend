@@ -222,6 +222,40 @@ void main() {
     });
 
     test(
+      'keeps legacy sign-up callers working without profile metadata',
+      () async {
+        final updateUserProfile = _MockUpdateUserProfile();
+        when(
+          () => mockSignUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          updateUserProfile: updateUserProfile,
+        );
+
+        await notifier.signUp(email: 'alice@example.com', password: 's3cr3t');
+
+        verifyNever(
+          () => updateUserProfile(
+            username: any(named: 'username'),
+            birthDate: any(named: 'birthDate'),
+          ),
+        );
+        expect(notifier.state.isLoading, isFalse);
+        expect(notifier.state.error, isNull);
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.registrationInProgress, isFalse);
+      },
+    );
+
+    test(
       'does not update profile metadata when Firebase sign-up fails',
       () async {
         final updateUserProfile = _MockUpdateUserProfile();
@@ -305,6 +339,71 @@ void main() {
     );
 
     test(
+      'keeps /register allowed when Firebase auth emits before metadata fails',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final profileCompleter = Completer<Either<Failure, UserProfile>>();
+        final updateUserProfile = _MockUpdateUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(
+          () => mockSignUp(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+        when(
+          () => updateUserProfile(
+            username: any(named: 'username'),
+            birthDate: any(named: 'birthDate'),
+          ),
+        ).thenAnswer((_) => profileCompleter.future);
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          updateUserProfile: updateUserProfile,
+        );
+
+        final signUpFuture = notifier.signUp(
+          email: 'alice@example.com',
+          password: 's3cr3t',
+          username: 'alice_01',
+          birthDate: DateTime(2000),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.registrationInProgress, isTrue);
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.isLoading, isTrue);
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.user, equals(_kUser));
+        expect(notifier.state.registrationInProgress, isTrue);
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.isLoading, isTrue);
+
+        profileCompleter.complete(
+          const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Username already in use'),
+          ),
+        );
+        await signUpFuture;
+
+        expect(notifier.state.registrationInProgress, isFalse);
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.error, 'Username already in use');
+
+        await streamController.close();
+      },
+    );
+
+    test(
       'completeProfile retries only backend metadata update after partial failure',
       () async {
         final updateUserProfile = _MockUpdateUserProfile();
@@ -366,6 +465,40 @@ void main() {
       },
     );
 
+    test(
+      'completeProfile clears loading and keeps recovery pending on validation failure',
+      () async {
+        final updateUserProfile = _MockUpdateUserProfile();
+        when(
+          () => updateUserProfile(
+            username: any(named: 'username'),
+            birthDate: any(named: 'birthDate'),
+          ),
+        ).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Profile request validation failed.'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          updateUserProfile: updateUserProfile,
+        );
+
+        await notifier.completeProfile(
+          username: 'alice_02',
+          birthDate: DateTime(2001),
+        );
+
+        expect(notifier.state.isLoading, isFalse);
+        expect(notifier.state.registrationInProgress, isFalse);
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.error, 'Profile request validation failed.');
+      },
+    );
   });
 
   // ── signOut ───────────────────────────────────────────────────────────────
