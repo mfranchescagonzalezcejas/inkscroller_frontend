@@ -189,12 +189,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  /// Registers a new account and stores profile metadata when provided.
+  /// Registers a new account and stores required profile metadata.
   Future<void> signUp({
     required String email,
     required String password,
-    String? username,
-    DateTime? birthDate,
+    required String username,
+    required DateTime birthDate,
   }) async {
     state = state.copyWith(
       isLoading: true,
