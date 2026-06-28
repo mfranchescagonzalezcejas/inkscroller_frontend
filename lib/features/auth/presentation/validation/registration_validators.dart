@@ -31,12 +31,13 @@ class RegistrationValidators {
     return parsed;
   }
 
-  /// True when [value] is not before 1900-01-01 and not in the future.
+  /// True when [value] is between 1900-01-01 and 13 years before [now].
   static bool isAllowedBirthDate(DateTime value, {DateTime? now}) {
     final today = _dateOnly(now ?? DateTime.now());
     final date = _dateOnly(value);
+    final thirteenYearsAgo = DateTime(today.year - 13, today.month, today.day);
 
-    return !date.isBefore(_minimumBirthDate) && !date.isAfter(today);
+    return !date.isBefore(_minimumBirthDate) && !date.isAfter(thirteenYearsAgo);
   }
 
   static DateTime _dateOnly(DateTime value) {

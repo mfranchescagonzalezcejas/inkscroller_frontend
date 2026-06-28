@@ -49,5 +49,34 @@ void main() {
         isFalse,
       );
     });
+
+    test('accepts 13 years or older, rejects under 13', () {
+      final now = DateTime(2026, 6, 29);
+
+      expect(
+        RegistrationValidators.isAllowedBirthDate(
+          DateTime(2013, 6, 29),
+          now: now,
+        ),
+        isTrue,
+        reason: 'exactly 13 years old should be allowed',
+      );
+      expect(
+        RegistrationValidators.isAllowedBirthDate(
+          DateTime(2013, 6, 28),
+          now: now,
+        ),
+        isTrue,
+        reason: 'older than 13 should be allowed',
+      );
+      expect(
+        RegistrationValidators.isAllowedBirthDate(
+          DateTime(2013, 6, 30),
+          now: now,
+        ),
+        isFalse,
+        reason: 'under 13 should be rejected',
+      );
+    });
   });
 }

@@ -213,7 +213,7 @@
   "authConfirmPasswordMismatch": "Las contraseñas no coinciden.",
   "authBirthDateLabel": "Fecha de nacimiento",
   "authBirthDateRequired": "Seleccioná tu fecha de nacimiento.",
-  "authBirthDateInvalid": "Ingresá una fecha entre 1900-01-01 y hoy.",
+  "authBirthDateInvalid": "Tenés que tener al menos 13 años.",
   "authTermsAcknowledgement": "Acepto los Términos y la Política de Privacidad.",
   "authTermsRequired": "Tenés que aceptar los Términos y la Política de Privacidad.",
   "readerSettingsDirection": "Dirección de lectura",

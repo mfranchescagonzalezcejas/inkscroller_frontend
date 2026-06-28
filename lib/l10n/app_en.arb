@@ -213,7 +213,7 @@
   "authConfirmPasswordMismatch": "Passwords do not match.",
   "authBirthDateLabel": "Birth date",
   "authBirthDateRequired": "Select your birth date.",
-  "authBirthDateInvalid": "Enter a birth date between 1900-01-01 and today.",
+  "authBirthDateInvalid": "You must be at least 13 years old.",
   "authTermsAcknowledgement": "I agree to the Terms and Privacy Policy.",
   "authTermsRequired": "You must agree to the Terms and Privacy Policy.",
   "readerSettingsDirection": "Reading direction",
