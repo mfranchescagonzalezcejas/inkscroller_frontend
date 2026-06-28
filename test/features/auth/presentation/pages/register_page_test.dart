@@ -187,15 +187,21 @@ void main() {
   }
 
   Future<DateTime> selectDefaultBirthDate(WidgetTester tester) async {
-    final now = DateTime.now();
-    final selectedDate = DateTime(now.year - 18, now.month, now.day);
-
     await tester.tap(authField('Birth date'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
-    return selectedDate;
+    final birthDateField = find.descendant(
+      of: authField('Birth date'),
+      matching: find.byType(EditableText),
+    );
+    final visibleBirthDate = tester
+        .widget<EditableText>(birthDateField)
+        .controller
+        .text;
+
+    return DateTime.parse(visibleBirthDate);
   }
 
   Future<void> fillInitialRegistrationForm(

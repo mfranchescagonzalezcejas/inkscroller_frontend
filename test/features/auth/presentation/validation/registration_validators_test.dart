@@ -13,7 +13,15 @@ void main() {
     test('validates backend-compatible usernames', () {
       expect(RegistrationValidators.isValidUsername('abc'), isTrue);
       expect(RegistrationValidators.isValidUsername('user-name_01'), isTrue);
+      expect(
+        RegistrationValidators.isValidUsername('a'.padRight(30, 'a')),
+        isTrue,
+      );
       expect(RegistrationValidators.isValidUsername('ab'), isFalse);
+      expect(
+        RegistrationValidators.isValidUsername('a'.padRight(31, 'a')),
+        isFalse,
+      );
       expect(RegistrationValidators.isValidUsername('user name'), isFalse);
       expect(RegistrationValidators.isValidUsername('user.name'), isFalse);
     });
