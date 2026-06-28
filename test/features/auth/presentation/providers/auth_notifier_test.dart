@@ -10,6 +10,7 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart'
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:inkscroller_flutter/features/profile/domain/entities/user_profile.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -25,6 +26,8 @@ class _MockSignOut extends Mock implements SignOut {}
 
 class _MockGetAuthState extends Mock implements GetAuthState {}
 
+class _MockGetUserProfile extends Mock implements GetUserProfile {}
+
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
 // ---------------------------------------------------------------------------
@@ -39,6 +42,11 @@ final _kProfile = UserProfile(
   birthDate: DateTime(2000),
   createdAt: DateTime(2026),
 );
+final _kIncompleteProfile = UserProfile(
+  firebaseUid: 'uid-123',
+  email: 'alice@example.com',
+  createdAt: DateTime(2026),
+);
 
 /// Returns an [AuthNotifier] backed by the provided stubs, with a
 /// [GetAuthState] that emits a single empty stream by default so the
@@ -48,14 +56,27 @@ AuthNotifier _makeNotifier({
   required SignUp signUp,
   required SignOut signOut,
   required GetAuthState getAuthState,
+  GetUserProfile? getUserProfile,
   UpdateUserProfile? updateUserProfile,
+  ProfileMetadataFailureReporter? profileMetadataFailureReporter,
 }) {
+  final resolvedGetUserProfile = getUserProfile ?? _MockGetUserProfile();
+  if (getUserProfile == null) {
+    when(
+      () => resolvedGetUserProfile(),
+    ).thenAnswer((_) async => Right<Failure, UserProfile>(_kProfile));
+  }
+
   return AuthNotifier(
     signIn: signIn,
     signUp: signUp,
     signOut: signOut,
     getAuthState: getAuthState,
+    getUserProfile: resolvedGetUserProfile,
     updateUserProfile: updateUserProfile ?? _MockUpdateUserProfile(),
+    profileMetadataFailureReporter:
+        profileMetadataFailureReporter ??
+        ({required flow, required reason}) async {},
   );
 }
 
@@ -126,6 +147,34 @@ void main() {
 
       expect(notifier.state.error, isNull);
       expect(notifier.state.isLoading, isFalse);
+    });
+
+    test('checks profile completion after successful sign-in', () async {
+      final getUserProfile = _MockGetUserProfile();
+      when(
+        () => mockSignIn(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+      when(() => getUserProfile()).thenAnswer(
+        (_) async => Right<Failure, UserProfile>(_kIncompleteProfile),
+      );
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        getUserProfile: getUserProfile,
+      );
+
+      await notifier.signIn(email: 'alice@example.com', password: 's3cr3t');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(notifier.state.user, equals(_kUser));
+      expect(notifier.state.profileCompletionPending, isTrue);
+      verify(() => getUserProfile()).called(1);
     });
 
     test('stores error message on failed sign-in', () async {
@@ -299,6 +348,7 @@ void main() {
       'keeps profile completion pending on backend metadata errors',
       () async {
         final updateUserProfile = _MockUpdateUserProfile();
+        final reports = <String>[];
         when(
           () => mockSignUp(
             email: any(named: 'email'),
@@ -322,6 +372,9 @@ void main() {
           signOut: mockSignOut,
           getAuthState: mockGetAuthState,
           updateUserProfile: updateUserProfile,
+          profileMetadataFailureReporter: ({required flow, required reason}) {
+            reports.add('$flow:$reason');
+          },
         );
 
         await notifier.signUp(
@@ -335,6 +388,7 @@ void main() {
         expect(notifier.state.error, 'Username already in use');
         expect(notifier.state.profileCompletionPending, isTrue);
         expect(notifier.state.registrationInProgress, isFalse);
+        expect(reports, contains('sign_up:sign_up_profile_update_failed'));
       },
     );
 
@@ -604,6 +658,144 @@ void main() {
 
       await streamController.close();
     });
+
+    test(
+      'marks profile completion pending on restored incomplete profile',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => Right<Failure, UserProfile>(_kIncompleteProfile),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.user, equals(_kUser));
+        expect(notifier.state.profileCompletionPending, isTrue);
+        verify(() => getUserProfile()).called(1);
+
+        await streamController.close();
+      },
+    );
+
+    test(
+      'clears profile completion pending on restored complete profile',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(
+          () => getUserProfile(),
+        ).thenAnswer((_) async => Right<Failure, UserProfile>(_kProfile));
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        notifier.state = notifier.state.copyWith(
+          profileCompletionPending: true,
+        );
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.user, equals(_kUser));
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.error, isNull);
+        verify(() => getUserProfile()).called(1);
+
+        await streamController.close();
+      },
+    );
+
+    test('fails closed when restored profile cannot be fetched', () async {
+      final streamController = StreamController<AppUser?>.broadcast();
+      final getUserProfile = _MockGetUserProfile();
+      final reports = <String>[];
+      when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);
+      when(() => getUserProfile()).thenAnswer(
+        (_) async => const Left<Failure, UserProfile>(
+          NetworkFailure(message: 'Profile unavailable'),
+        ),
+      );
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        getUserProfile: getUserProfile,
+        profileMetadataFailureReporter: ({required flow, required reason}) {
+          reports.add('$flow:$reason');
+        },
+      );
+
+      streamController.add(_kUser);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(notifier.state.profileCompletionPending, isTrue);
+      expect(notifier.state.error, 'Profile unavailable');
+      expect(
+        reports,
+        contains('profile_completion_check:profile_completion_check_failed'),
+      );
+
+      await streamController.close();
+    });
+
+    test(
+      'does not start duplicate concurrent profile completion checks',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        final profileCompleter = Completer<Either<Failure, UserProfile>>();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer((_) => profileCompleter.future);
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController
+          ..add(_kUser)
+          ..add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+
+        verify(() => getUserProfile()).called(1);
+        profileCompleter.complete(Right<Failure, UserProfile>(_kProfile));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.profileCompletionPending, isFalse);
+
+        await streamController.close();
+      },
+    );
   });
 
   // ── clearError ────────────────────────────────────────────────────────────

@@ -165,6 +165,38 @@ void main() {
     });
 
     test(
+      'cold-start incomplete profile detection routes authenticated user to /register',
+      () {
+        final user = _FakeUser();
+        expect(
+          resolveAuthRedirect(
+            currentUser: user,
+            matchedLocation: AppRoutes.home,
+            profileCompletionPending: true,
+            registrationInProgress: false,
+          ),
+          AppRoutes.register,
+        );
+      },
+    );
+
+    test(
+      'cold-start complete profile detection allows authenticated user to continue',
+      () {
+        final user = _FakeUser();
+        expect(
+          resolveAuthRedirect(
+            currentUser: user,
+            matchedLocation: AppRoutes.home,
+            profileCompletionPending: false,
+            registrationInProgress: false,
+          ),
+          isNull,
+        );
+      },
+    );
+
+    test(
       'authenticated user can stay on /register while registration runs',
       () {
         final user = _FakeUser();
