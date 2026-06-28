@@ -20,7 +20,12 @@ void main() {
         AppRoutes.settings,
       ]) {
         expect(
-          resolveAuthRedirect(currentUser: null, matchedLocation: route),
+          resolveAuthRedirect(
+            currentUser: null,
+            matchedLocation: route,
+            profileCompletionPending: false,
+            registrationInProgress: false,
+          ),
           isNull,
           reason: 'Guest should access $route freely',
         );
@@ -32,6 +37,8 @@ void main() {
         resolveAuthRedirect(
           currentUser: null,
           matchedLocation: AppRoutes.mangaDetailPath('some-id'),
+          profileCompletionPending: false,
+          registrationInProgress: false,
         ),
         isNull,
       );
@@ -41,13 +48,20 @@ void main() {
 
     test('guest can access /login and /register', () {
       expect(
-        resolveAuthRedirect(currentUser: null, matchedLocation: AppRoutes.login),
+        resolveAuthRedirect(
+          currentUser: null,
+          matchedLocation: AppRoutes.login,
+          profileCompletionPending: false,
+          registrationInProgress: false,
+        ),
         isNull,
       );
       expect(
         resolveAuthRedirect(
           currentUser: null,
           matchedLocation: AppRoutes.register,
+          profileCompletionPending: false,
+          registrationInProgress: false,
         ),
         isNull,
       );
@@ -60,6 +74,8 @@ void main() {
         resolveAuthRedirect(
           currentUser: null,
           matchedLocation: AppRoutes.profile,
+          profileCompletionPending: false,
+          registrationInProgress: false,
         ),
         AppRoutes.login,
       );
@@ -70,21 +86,95 @@ void main() {
     test('P0-F7: authenticated user is redirected away from /login', () {
       final user = _FakeUser();
       expect(
-        resolveAuthRedirect(currentUser: user, matchedLocation: AppRoutes.login),
+        resolveAuthRedirect(
+          currentUser: user,
+          matchedLocation: AppRoutes.login,
+          profileCompletionPending: false,
+          registrationInProgress: false,
+        ),
         AppRoutes.home,
       );
     });
 
-    test('P0-F7: authenticated user is redirected away from /register', () {
+    test('authenticated user is redirected away from /register by default', () {
       final user = _FakeUser();
       expect(
         resolveAuthRedirect(
           currentUser: user,
           matchedLocation: AppRoutes.register,
+          profileCompletionPending: false,
+          registrationInProgress: false,
         ),
         AppRoutes.home,
       );
     });
+
+    test(
+      'authenticated user with pending profile completion is redirected back to /register',
+      () {
+        final user = _FakeUser();
+        for (final route in <String>[AppRoutes.home, AppRoutes.profile]) {
+          expect(
+            resolveAuthRedirect(
+              currentUser: user,
+              matchedLocation: route,
+              profileCompletionPending: true,
+              registrationInProgress: false,
+            ),
+            AppRoutes.register,
+            reason: 'Pending profile completion must not stay on $route',
+          );
+        }
+      },
+    );
+
+    test(
+      'authenticated user with in-flight registration is redirected back to /register',
+      () {
+        final user = _FakeUser();
+        for (final route in <String>[AppRoutes.home, AppRoutes.settings]) {
+          expect(
+            resolveAuthRedirect(
+              currentUser: user,
+              matchedLocation: route,
+              profileCompletionPending: false,
+              registrationInProgress: true,
+            ),
+            AppRoutes.register,
+            reason: 'In-flight registration must not stay on $route',
+          );
+        }
+      },
+    );
+
+    test('authenticated user can access /register for profile completion', () {
+      final user = _FakeUser();
+      expect(
+        resolveAuthRedirect(
+          currentUser: user,
+          matchedLocation: AppRoutes.register,
+          profileCompletionPending: true,
+          registrationInProgress: false,
+        ),
+        isNull,
+      );
+    });
+
+    test(
+      'authenticated user can stay on /register while registration runs',
+      () {
+        final user = _FakeUser();
+        expect(
+          resolveAuthRedirect(
+            currentUser: user,
+            matchedLocation: AppRoutes.register,
+            profileCompletionPending: false,
+            registrationInProgress: true,
+          ),
+          isNull,
+        );
+      },
+    );
 
     // ── Authenticated user on public and protected routes ───────────────────
 
@@ -97,7 +187,12 @@ void main() {
         AppRoutes.settings,
       ]) {
         expect(
-          resolveAuthRedirect(currentUser: user, matchedLocation: route),
+          resolveAuthRedirect(
+            currentUser: user,
+            matchedLocation: route,
+            profileCompletionPending: false,
+            registrationInProgress: false,
+          ),
           isNull,
           reason: 'Authenticated user should access $route freely',
         );
@@ -107,34 +202,51 @@ void main() {
     test('P0-F7: authenticated user can access /profile without redirect', () {
       final user = _FakeUser();
       expect(
-        resolveAuthRedirect(currentUser: user, matchedLocation: AppRoutes.profile),
+        resolveAuthRedirect(
+          currentUser: user,
+          matchedLocation: AppRoutes.profile,
+          profileCompletionPending: false,
+          registrationInProgress: false,
+        ),
         isNull,
       );
     });
 
     // ── Auth error fallback — public routes remain unblocked ────────────────
 
-    test('P0-F7: null user (auth error fallback) does not block public routes', () {
-      // After an auth stream error, AuthNotifier clears the user (null).
-      // The router must not redirect guests away from public content.
-      expect(
-        resolveAuthRedirect(currentUser: null, matchedLocation: AppRoutes.home),
-        isNull,
-      );
-      expect(
-        resolveAuthRedirect(
-          currentUser: null,
-          matchedLocation: AppRoutes.explore,
-        ),
-        isNull,
-      );
-      expect(
-        resolveAuthRedirect(
-          currentUser: null,
-          matchedLocation: AppRoutes.library,
-        ),
-        isNull,
-      );
-    });
+    test(
+      'P0-F7: null user (auth error fallback) does not block public routes',
+      () {
+        // After an auth stream error, AuthNotifier clears the user (null).
+        // The router must not redirect guests away from public content.
+        expect(
+          resolveAuthRedirect(
+            currentUser: null,
+            matchedLocation: AppRoutes.home,
+            profileCompletionPending: false,
+            registrationInProgress: false,
+          ),
+          isNull,
+        );
+        expect(
+          resolveAuthRedirect(
+            currentUser: null,
+            matchedLocation: AppRoutes.explore,
+            profileCompletionPending: false,
+            registrationInProgress: false,
+          ),
+          isNull,
+        );
+        expect(
+          resolveAuthRedirect(
+            currentUser: null,
+            matchedLocation: AppRoutes.library,
+            profileCompletionPending: false,
+            registrationInProgress: false,
+          ),
+          isNull,
+        );
+      },
+    );
   });
 }

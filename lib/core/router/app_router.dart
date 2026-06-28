@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_constants.dart';
@@ -7,6 +8,7 @@ import '../l10n/l10n.dart';
 import 'app_routes.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/explore/presentation/pages/explore_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/library/domain/entities/chapter.dart';
@@ -39,7 +41,15 @@ const _authOnlyRoutes = <String>[AppRoutes.login, AppRoutes.register];
 /// Computes the auth redirect for a given route and Firebase auth state.
 ///
 /// Redirect rules:
-/// - Authenticated user on an auth-only surface (`/login`, `/register`) → `/`
+/// - Authenticated user with pending or in-flight registration metadata on any
+///   route other than `/register` → `/register`
+/// - Authenticated user on an auth-only surface (`/login`) → `/`
+/// - Authenticated user on `/register` → `/` unless profile metadata recovery
+///   is pending or initial registration orchestration is in-flight.
+/// - `/register` remains reachable during profile metadata recovery so the
+///   backend update can be retried without creating another Firebase account.
+/// - `/register` remains reachable during initial registration so Firebase auth
+///   changes cannot race backend profile metadata submission.
 /// - Guest on a protected surface (`/profile`) → `/login`
 /// - All other combinations → `null` (no redirect, allow navigation)
 ///
@@ -48,8 +58,17 @@ const _authOnlyRoutes = <String>[AppRoutes.login, AppRoutes.register];
 String? resolveAuthRedirect({
   required User? currentUser,
   required String matchedLocation,
+  required bool profileCompletionPending,
+  required bool registrationInProgress,
 }) {
   final isLoggedIn = currentUser != null;
+
+  final mustCompleteRegistration =
+      isLoggedIn && (profileCompletionPending || registrationInProgress);
+
+  if (mustCompleteRegistration) {
+    return matchedLocation == AppRoutes.register ? null : AppRoutes.register;
+  }
 
   // Authenticated user should not stay on auth screens.
   if (isLoggedIn && _authOnlyRoutes.contains(matchedLocation)) {
@@ -62,6 +81,19 @@ String? resolveAuthRedirect({
   }
 
   return null;
+}
+
+({bool profileCompletionPending, bool registrationInProgress})
+_registrationRoutingState(BuildContext context) {
+  final authState = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(authProvider);
+
+  return (
+    profileCompletionPending: authState.profileCompletionPending,
+    registrationInProgress: authState.registrationInProgress,
+  );
 }
 
 class _FirebaseAuthStateListenable extends ChangeNotifier {
@@ -79,9 +111,14 @@ final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.home,
   refreshListenable: _authStateListenable,
   redirect: (context, state) {
+    final registrationRoutingState = _registrationRoutingState(context);
+
     return resolveAuthRedirect(
       currentUser: FirebaseAuth.instance.currentUser,
       matchedLocation: state.matchedLocation,
+      profileCompletionPending:
+          registrationRoutingState.profileCompletionPending,
+      registrationInProgress: registrationRoutingState.registrationInProgress,
     );
   },
   routes: <RouteBase>[

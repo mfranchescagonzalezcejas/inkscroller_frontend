@@ -5,6 +5,7 @@ import '../../domain/usecases/get_auth_state.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up.dart';
+import '../../../profile/domain/usecases/update_user_profile.dart';
 import 'auth_notifier.dart';
 import 'auth_state.dart';
 
@@ -18,5 +19,6 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     signUp: sl<SignUp>(),
     signOut: sl<SignOut>(),
     getAuthState: sl<GetAuthState>(),
+    updateUserProfile: sl<UpdateUserProfile>(),
   );
 });
