@@ -51,7 +51,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (!_acceptedTerms) {
+    final isProfileCompletion = currentAuthState.profileCompletionPending;
+
+    if (!isProfileCompletion && !_acceptedTerms) {
       AppFeedback.showError(context, title: context.l10n.authTermsRequired);
       return;
     }
@@ -64,6 +66,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final username = RegistrationValidators.normalizeUsername(
       _usernameController.text,
     );
+
+    if (isProfileCompletion) {
+      await ref
+          .read(authProvider.notifier)
+          .completeProfile(username: username, birthDate: birthDate);
+      if (!mounted) return;
+
+      final completedAuthState = ref.read(authProvider);
+      if (!completedAuthState.profileCompletionPending &&
+          completedAuthState.error == null) {
+        context.go(AppRoutes.home);
+      }
+      return;
+    }
 
     await ref
         .read(authProvider.notifier)
@@ -78,11 +94,27 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final completedAuthState = ref.read(authProvider);
     final registrationSucceeded =
         !completedAuthState.registrationInProgress &&
+        !completedAuthState.profileCompletionPending &&
         completedAuthState.error == null &&
         completedAuthState.user != null;
 
     if (registrationSucceeded) {
       context.go(AppRoutes.home);
+    }
+  }
+
+  Future<void> _signOutRecovery() async {
+    final currentAuthState = ref.read(authProvider);
+    if (currentAuthState.isLoading || currentAuthState.registrationInProgress) {
+      return;
+    }
+
+    await ref.read(authProvider.notifier).signOut();
+    if (!mounted) return;
+
+    final completedAuthState = ref.read(authProvider);
+    if (completedAuthState.user == null && completedAuthState.error == null) {
+      context.go(AppRoutes.login);
     }
   }
 
@@ -115,8 +147,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final isProfileCompletion = authState.profileCompletionPending;
     final isActionLocked =
         authState.isLoading || authState.registrationInProgress;
+    final isRouteLocked = isActionLocked || isProfileCompletion;
 
     ref.listen(authProvider, (previous, next) {
       if (next.error != null && next.error != previous?.error) {
@@ -124,253 +158,287 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.stage,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                // ── Back nav ──────────────────────────────────────────────────
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: AppColors.onSurfaceVariant,
-                    ),
-                    onPressed: isActionLocked
-                        ? null
-                        : () => context.go(AppRoutes.login),
+    return PopScope<void>(
+      canPop: !isRouteLocked,
+      child: Scaffold(
+        backgroundColor: AppColors.stage,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  // ── Back nav ──────────────────────────────────────────────────
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: isProfileCompletion
+                        ? const SizedBox(height: 48)
+                        : IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                            onPressed: isActionLocked
+                                ? null
+                                : () => context.go(AppRoutes.login),
+                          ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                 // ── Header ────────────────────────────────────────────────────
                 Text(
-                  context.l10n.authCreateAccountTitle,
-                  style: const TextStyle(
-                    fontFamily: AppTypography.fontFamily,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.onSurface,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  context.l10n.authCreateAccountSubtitle,
-                  style: const TextStyle(
-                    fontFamily: AppTypography.fontFamily,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-
-                const SizedBox(height: 36),
-
-                // ── Email ───────────────────────────────────────────────────
-                AuthField(
-                  controller: _emailController,
-                  label: context.l10n.authEmailLabel,
-                  icon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n.authEmailRequired;
-                    }
-                    if (!value.contains('@')) {
-                      return context.l10n.authEmailInvalid;
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 12),
-
-                // ── Username ──────────────────────────────────────────────────
-                AuthField(
-                  controller: _usernameController,
-                  label: context.l10n.authUsernameLabel,
-                  icon: Icons.alternate_email,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n.authUsernameRequired;
-                    }
-                    if (!RegistrationValidators.isValidUsername(value)) {
-                      return context.l10n.authUsernameInvalid;
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 12),
-
-                // ── Password ────────────────────────────────────────────────
-                AuthField(
-                  controller: _passwordController,
-                  label: context.l10n.authPasswordLabel,
-                  icon: Icons.lock_outline,
-                  obscureText: _obscurePassword,
-                  keyboardType: TextInputType.visiblePassword,
-                  suffixIcon: IconButton(
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.onSurfaceVariant,
-                      size: 20,
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return context.l10n.authPasswordRequired;
-                    }
-                    if (value.length < 6) {
-                      return context.l10n.authPasswordTooShort;
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 12),
-
-                // ── Confirm password ────────────────────────────────────────
-                AuthField(
-                  controller: _confirmPasswordController,
-                  label: context.l10n.authConfirmPasswordLabel,
-                  icon: Icons.lock_outline,
-                  obscureText: _obscureConfirmPassword,
-                  keyboardType: TextInputType.visiblePassword,
-                  suffixIcon: IconButton(
-                    onPressed: isActionLocked
-                        ? null
-                        : () => setState(
-                              () => _obscureConfirmPassword =
-                                  !_obscureConfirmPassword,
-                            ),
-                    icon: Icon(
-                      _obscureConfirmPassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.onSurfaceVariant,
-                      size: 20,
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return context.l10n.authConfirmPasswordRequired;
-                    }
-                    if (value != _passwordController.text) {
-                      return context.l10n.authConfirmPasswordMismatch;
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 12),
-
-                // ── Birth date ────────────────────────────────────────────────
-                AuthField(
-                  controller: _birthDateController,
-                  label: context.l10n.authBirthDateLabel,
-                  icon: Icons.cake_outlined,
-                  keyboardType: TextInputType.datetime,
-                  textInputAction: TextInputAction.done,
-                  readOnly: true,
-                  onTap: isActionLocked ? null : _pickBirthDate,
-                  onFieldSubmitted: (_) => _submit(),
-                  validator: (value) {
-                    final parsed = RegistrationValidators.parseBirthDate(
-                      value ?? '',
-                    );
-                    if (parsed == null) {
-                      return context.l10n.authBirthDateRequired;
-                    }
-                    if (!RegistrationValidators.isAllowedBirthDate(parsed)) {
-                      return context.l10n.authBirthDateInvalid;
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                CheckboxListTile(
-                  value: _acceptedTerms,
-                  onChanged: isActionLocked
-                      ? null
-                      : (value) =>
-                            setState(() => _acceptedTerms = value ?? false),
-                  contentPadding: EdgeInsets.zero,
-                  controlAffinity: ListTileControlAffinity.leading,
-                  activeColor: AppColors.primary,
-                  checkColor: Colors.white,
-                  title: Text(
-                    context.l10n.authTermsAcknowledgement,
+                  isProfileCompletion
+                      ? context.l10n.authCompleteProfileTitle
+                      : context.l10n.authCreateAccountTitle,
                     style: const TextStyle(
                       fontFamily: AppTypography.fontFamily,
-                      fontSize: 13,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onSurface,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    isProfileCompletion
+                        ? context.l10n.authCompleteProfileSubtitle
+                        : context.l10n.authCreateAccountSubtitle,
+                    style: const TextStyle(
+                      fontFamily: AppTypography.fontFamily,
+                      fontSize: 14,
                       fontWeight: FontWeight.w400,
                       color: AppColors.onSurfaceVariant,
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 36),
 
-                // ── Primary CTA ───────────────────────────────────────────────
-                AuthGradientButton(
-                  onPressed: isActionLocked ? null : _submit,
-                  isLoading: authState.isLoading,
-                  label: context.l10n.authCreateAccountButton,
-                ),
-
-                const SizedBox(height: 20),
-
-                // ── Secondary actions ─────────────────────────────────────────
-                TextButton(
-                  onPressed: isActionLocked
-                      ? null
-                      : () => context.go(AppRoutes.login),
-                  child: Text(
-                    context.l10n.authHaveAccount,
-                    style: const TextStyle(
-                      fontFamily: AppTypography.fontFamily,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
+                  if (!isProfileCompletion) ...<Widget>[
+                    // ── Email ───────────────────────────────────────────────────
+                    AuthField(
+                      controller: _emailController,
+                      label: context.l10n.authEmailLabel,
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return context.l10n.authEmailRequired;
+                        }
+                        if (!value.contains('@')) {
+                          return context.l10n.authEmailInvalid;
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                ),
 
-                TextButton(
-                  onPressed: isActionLocked
-                      ? null
-                      : () => context.go(AppRoutes.home),
-                  child: Text(
-                    context.l10n.authContinueAsGuest,
-                    style: const TextStyle(
-                      fontFamily: AppTypography.fontFamily,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.onSurfaceVariant,
+                    const SizedBox(height: 12),
+                  ],
+
+                  // ── Username ──────────────────────────────────────────────────
+                  AuthField(
+                    controller: _usernameController,
+                    label: context.l10n.authUsernameLabel,
+                    icon: Icons.alternate_email,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return context.l10n.authUsernameRequired;
+                      }
+                      if (!RegistrationValidators.isValidUsername(value)) {
+                        return context.l10n.authUsernameInvalid;
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  if (!isProfileCompletion) ...<Widget>[
+                    // ── Password ────────────────────────────────────────────────
+                    AuthField(
+                      controller: _passwordController,
+                      label: context.l10n.authPasswordLabel,
+                      icon: Icons.lock_outline,
+                      obscureText: _obscurePassword,
+                      keyboardType: TextInputType.visiblePassword,
+                      suffixIcon: IconButton(
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: AppColors.onSurfaceVariant,
+                          size: 20,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return context.l10n.authPasswordRequired;
+                        }
+                        if (value.length < 6) {
+                          return context.l10n.authPasswordTooShort;
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 24),
-              ],
+                    const SizedBox(height: 12),
+
+                    // ── Confirm password ────────────────────────────────────────
+                    AuthField(
+                      controller: _confirmPasswordController,
+                      label: context.l10n.authConfirmPasswordLabel,
+                      icon: Icons.lock_outline,
+                      obscureText: _obscureConfirmPassword,
+                      keyboardType: TextInputType.visiblePassword,
+                      suffixIcon: IconButton(
+                        onPressed: isActionLocked
+                            ? null
+                            : () => setState(
+                                  () => _obscureConfirmPassword =
+                                      !_obscureConfirmPassword,
+                                ),
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: AppColors.onSurfaceVariant,
+                          size: 20,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return context.l10n.authConfirmPasswordRequired;
+                        }
+                        if (value != _passwordController.text) {
+                          return context.l10n.authConfirmPasswordMismatch;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+                  ],
+
+                  // ── Birth date ────────────────────────────────────────────────
+                  AuthField(
+                    controller: _birthDateController,
+                    label: context.l10n.authBirthDateLabel,
+                    icon: Icons.cake_outlined,
+                    keyboardType: TextInputType.datetime,
+                    textInputAction: TextInputAction.done,
+                    readOnly: true,
+                    onTap: isActionLocked ? null : _pickBirthDate,
+                    onFieldSubmitted: (_) => _submit(),
+                    validator: (value) {
+                      final parsed = RegistrationValidators.parseBirthDate(
+                        value ?? '',
+                      );
+                      if (parsed == null) {
+                        return context.l10n.authBirthDateRequired;
+                      }
+                      if (!RegistrationValidators.isAllowedBirthDate(parsed)) {
+                        return context.l10n.authBirthDateInvalid;
+                      }
+                      return null;
+                    },
+                  ),
+
+                  if (!isProfileCompletion) ...<Widget>[
+                    const SizedBox(height: 16),
+
+                    CheckboxListTile(
+                      value: _acceptedTerms,
+                      onChanged: isActionLocked
+                          ? null
+                          : (value) =>
+                                setState(() => _acceptedTerms = value ?? false),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      activeColor: AppColors.primary,
+                      checkColor: Colors.white,
+                      title: Text(
+                        context.l10n.authTermsAcknowledgement,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 32),
+
+                  // ── Primary CTA ───────────────────────────────────────────────
+                  AuthGradientButton(
+                    onPressed: isActionLocked ? null : _submit,
+                    isLoading: authState.isLoading,
+                    label: isProfileCompletion
+                        ? context.l10n.authCompleteProfileButton
+                        : context.l10n.authCreateAccountButton,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ── Secondary actions ─────────────────────────────────────────
+                  if (!isProfileCompletion)
+                    TextButton(
+                      onPressed: isActionLocked
+                          ? null
+                          : () => context.go(AppRoutes.login),
+                      child: Text(
+                        context.l10n.authHaveAccount,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+
+                  if (!isProfileCompletion)
+                    TextButton(
+                      onPressed: isActionLocked
+                          ? null
+                          : () => context.go(AppRoutes.home),
+                      child: Text(
+                        context.l10n.authContinueAsGuest,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+
+                  if (isProfileCompletion)
+                    TextButton(
+                      onPressed: isActionLocked ? null : _signOutRecovery,
+                      child: Text(
+                        context.l10n.profileSignOutAction,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),
