@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:inkscroller_flutter/core/config/api_config.dart';
 import 'package:inkscroller_flutter/core/config/app_environment.dart';
 import 'package:inkscroller_flutter/core/network/dio_client.dart';
 import 'package:inkscroller_flutter/flavors/flavor_config.dart';
@@ -129,6 +130,9 @@ void main() {
         );
         final adapter = _FailThenSucceedAdapter();
         final client = DioClient()..dio.httpClientAdapter = adapter;
+        final expectedFallbackOrigin = Uri.parse(
+          ApiConfig.baseUrlCandidates[1],
+        ).origin;
 
         final response = await client.dio.get<dynamic>('/ping');
 
@@ -138,7 +142,7 @@ void main() {
           adapter.requests.first.uri.origin,
           AppEnvironment.devCloudBaseUrl,
         );
-        expect(adapter.requests.last.uri.origin, AppEnvironment.localBaseUrl);
+        expect(adapter.requests.last.uri.origin, expectedFallbackOrigin);
         expect(
           adapter.requests.last.headers.containsKey('Authorization'),
           isFalse,
