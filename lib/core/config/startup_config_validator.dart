@@ -85,9 +85,7 @@ abstract final class StartupConfigValidator {
     }
 
     return _isIpLiteral(normalizedHost) ||
-        _isNonCanonicalNumericIpv4Host(normalizedHost) ||
-        _isSpecialUseIpv4(normalizedHost) ||
-        _isSpecialUseIpv6(normalizedHost);
+        _isNonCanonicalNumericIpv4Host(normalizedHost);
   }
 
   static String _normalizeHostForClassification(String host) {
@@ -148,105 +146,6 @@ abstract final class StartupConfigValidator {
 
   static bool _isHexIpv4Part(String value) {
     return RegExp(r'^0x[0-9a-f]+$').hasMatch(value);
-  }
-
-  static bool _isSpecialUseIpv4(String host) {
-    final parts = host.split('.');
-    if (parts.length != 4) {
-      return false;
-    }
-
-    final octets = <int>[];
-    for (final part in parts) {
-      final octet = int.tryParse(part);
-      if (octet == null || octet < 0 || octet > 255) {
-        return false;
-      }
-
-      octets.add(octet);
-    }
-
-    return _isSpecialUseIpv4Octets(octets);
-  }
-
-  static bool _isSpecialUseIpv4Octets(List<int> octets) {
-    final first = octets[0];
-    final second = octets[1];
-    final third = octets[2];
-
-    return first == 0 ||
-        first == 10 ||
-        first == 127 ||
-        (first == 100 && second >= 64 && second <= 127) ||
-        (first == 169 && second == 254) ||
-        (first == 172 && second >= 16 && second <= 31) ||
-        (first == 192 && second == 0 && third == 0) ||
-        (first == 192 && second == 0 && third == 2) ||
-        (first == 192 && second == 168) ||
-        (first == 198 && second >= 18 && second <= 19) ||
-        (first == 198 && second == 51 && third == 100) ||
-        (first == 203 && second == 0 && third == 113) ||
-        first >= 224;
-  }
-
-  static bool _isSpecialUseIpv6(String host) {
-    final address = InternetAddress.tryParse(host);
-    if (address == null || address.type != InternetAddressType.IPv6) {
-      return false;
-    }
-
-    final bytes = address.rawAddress;
-    final isUnspecified = bytes.every((byte) => byte == 0);
-    final isLoopback =
-        bytes.take(15).every((byte) => byte == 0) && bytes[15] == 1;
-    final isIpv4Mapped =
-        bytes.take(10).every((byte) => byte == 0) &&
-        bytes[10] == 0xff &&
-        bytes[11] == 0xff;
-    final isIpv4Compatible = bytes.take(12).every((byte) => byte == 0);
-
-    if (isIpv4Mapped || isIpv4Compatible) {
-      return _isSpecialUseIpv4Octets(bytes.sublist(12, 16));
-    }
-
-    final isUniqueLocal = (bytes[0] & 0xfe) == 0xfc;
-    final isLinkLocal = bytes[0] == 0xfe && (bytes[1] & 0xc0) == 0x80;
-    final isSiteLocal = bytes[0] == 0xfe && (bytes[1] & 0xc0) == 0xc0;
-    final isDocumentation =
-        bytes[0] == 0x20 &&
-        bytes[1] == 0x01 &&
-        bytes[2] == 0x0d &&
-        bytes[3] == 0xb8;
-    final isTeredo =
-        bytes[0] == 0x20 &&
-        bytes[1] == 0x01 &&
-        bytes[2] == 0x00 &&
-        bytes[3] == 0x00;
-    final isBenchmarking =
-        bytes[0] == 0x20 &&
-        bytes[1] == 0x01 &&
-        bytes[2] == 0x00 &&
-        bytes[3] == 0x02 &&
-        bytes[4] == 0x00 &&
-        bytes[5] == 0x00;
-    final isSixToFour = bytes[0] == 0x20 && bytes[1] == 0x02;
-    final isDiscardOnly =
-        bytes[0] == 0x01 &&
-        bytes[1] == 0x00 &&
-        bytes.sublist(2, 8).every((byte) => byte == 0);
-    final isMulticast = bytes[0] == 0xff;
-
-    return isUnspecified ||
-        isLoopback ||
-        isUniqueLocal ||
-        isLinkLocal ||
-        isSiteLocal ||
-        isDocumentation ||
-        isTeredo ||
-        isBenchmarking ||
-        isSixToFour ||
-        isDiscardOnly ||
-        isMulticast;
   }
 
   static void _validateFirebaseOptions({

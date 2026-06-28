@@ -63,9 +63,10 @@ from pathlib import Path
 cfg = json.loads(Path('.dart-defines/lan.auto.json').read_text())
 print(cfg.get('API_BASE_URL', ''))
 PY
-)"
+    )"
     ENTRYPOINT="lib/main_dev.dart"
     FLAVOR="dev"
+    EXTRA_DART_DEFINES=(--dart-define-from-file=.dart-defines/firebase.json)
     ;;
   *)
     echo "ERROR: modo inválido '$MODE'. Usá: pro | staging | dev-cloud | dev-lan" >&2
