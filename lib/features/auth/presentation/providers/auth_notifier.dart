@@ -112,11 +112,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
         registrationInProgress: false,
       ),
       (_) async {
-        if (username == null || birthDate == null) {
+        if (username == null && birthDate == null) {
+          // No profile metadata to store — registration is complete.
           state = state.copyWith(
             isLoading: false,
             clearError: true,
             profileCompletionPending: false,
+            registrationInProgress: false,
+          );
+          return;
+        }
+
+        if (username == null || birthDate == null) {
+          // One field provided without the other — inconsistent state.
+          state = state.copyWith(
+            isLoading: false,
+            error: 'Profile data is incomplete.',
+            profileCompletionPending: true,
             registrationInProgress: false,
           );
           return;
