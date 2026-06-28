@@ -1,4 +1,4 @@
-﻿import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,6 +52,7 @@ import '../../features/profile/data/datasources/user_profile_remote_ds_impl.dart
 import '../../features/profile/data/repositories/user_profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/user_profile_repository.dart';
 import '../../features/profile/domain/usecases/get_user_profile.dart';
+import '../../features/profile/domain/usecases/update_user_profile.dart';
 import '../../features/settings/data/repositories/settings_cache_repository_impl.dart';
 import '../../features/settings/domain/repositories/settings_cache_repository.dart';
 import '../../features/settings/domain/usecases/clear_settings_cache.dart';
@@ -212,6 +213,9 @@ Future<void> initDI() async {
   sl.registerLazySingleton<GetUserProfile>(
     () => GetUserProfile(sl<UserProfileRepository>()),
   );
+  sl.registerLazySingleton<UpdateUserProfile>(
+    () => UpdateUserProfile(sl<UserProfileRepository>()),
+  );
 
   // Home - datasource
   sl.registerLazySingleton<HomeRemoteDataSource>(
@@ -230,7 +234,8 @@ Future<void> initDI() async {
 
   // Settings - cache repository
   sl.registerLazySingleton<SettingsCacheRepository>(
-    () => SettingsCacheRepositoryImpl(sharedPreferences: sl<SharedPreferences>()),
+    () =>
+        SettingsCacheRepositoryImpl(sharedPreferences: sl<SharedPreferences>()),
   );
 
   // Settings - cache use cases
