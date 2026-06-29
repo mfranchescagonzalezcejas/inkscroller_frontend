@@ -58,13 +58,21 @@ Future<void> completeSignUp(WidgetTester tester, TestUser user) async {
   final birthDateField = find.byKey(const Key('registerBirthDateField'));
   if (birthDateField.evaluate().isEmpty) return;
   await tester.tap(birthDateField);
+  // Wait for the date picker dialog to fully open (animation + dialog render).
+  await tester.pump(const Duration(seconds: 2));
   await tester.pumpAndSettle();
 
   // Select the birth date in the date picker.
-  final okButton = find.text('OK');
-  if (okButton.evaluate().isNotEmpty) {
-    await tester.tap(okButton);
-    await tester.pumpAndSettle();
+  // Samsung devices may use localized/alternative button text.
+  // Try multiple possible button texts to dismiss the picker.
+  const datePickerButtons = ['OK', 'Done', 'Listo', 'Hecho', 'Confirm'];
+  for (final buttonText in datePickerButtons) {
+    final btn = find.text(buttonText);
+    if (btn.evaluate().isNotEmpty) {
+      await tester.tap(btn);
+      await tester.pumpAndSettle();
+      break;
+    }
   }
 
   // Scroll down so terms checkbox and button are visible.
