@@ -93,35 +93,35 @@
 
 ## Fase 4: Tests de Autenticación
 
-- [ ] T9 — `e2e_sign_up_test.dart` — Registro con datos válidos
+- [x] T9 — `e2e_sign_up_test.dart` — Registro con datos válidos
   - **Archivos:** `integration_test/e2e_sign_up_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Medio
   - **Criterio de aceptación:** Test crea `TestUser.fresh()`, llama `completeSignUp()`, verifica que la app navega a home (encuentra widget de library o home), verifica estado autenticado. `tearDown` llama `deleteTestUser()`.
   - **Detalles:** Estructura: `setUp` crea user, `testWidgets` ejecuta flujo, `tearDown` limpia. Verificar transición de página visible, no solo estado interno. Timeout de 15s en `pumpAndSettle`.
 
-- [ ] T10 — `e2e_sign_in_test.dart` — Login con credenciales válidas
+- [x] T10 — `e2e_sign_in_test.dart` — Login con credenciales válidas
   - **Archivos:** `integration_test/e2e_sign_in_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Medio
   - **Criterio de aceptación:** `setUp` registra usuario con `completeSignUp()` + `completeSignOut()`. Test ejecuta `completeSignIn()`, verifica navegación a home. `tearDown` limpia.
   - **Detalles:** El setUp debe crear el usuario y volver a la pantalla de login antes del test.
 
-- [ ] T11 — `e2e_sign_in_invalid_test.dart` — Login con password incorrecta
+- [x] T11 — `e2e_sign_in_invalid_test.dart` — Login con password incorrecta
   - **Archivos:** `integration_test/e2e_sign_in_invalid_test.dart`
   - **Dependencias:** T5, T6, T7
   - **Esfuerzo:** Bajo
   - **Criterio de aceptación:** `setUp` registra usuario. Test ingresa email correcto + password incorrecta, verifica mensaje de error visible en pantalla, verifica que permanece en login. `tearDown` limpia.
   - **Detalles:** Buscar texto de error por widget `Text` que contenga "Credenciales" o "invalid" o "incorrecta". Verificar que NO navega a home.
 
-- [ ] T12 — `e2e_duplicate_email_test.dart` — Registro con email duplicado
+- [x] T12 — `e2e_duplicate_email_test.dart` — Registro con email duplicado
   - **Archivos:** `integration_test/e2e_duplicate_email_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Bajo
   - **Criterio de aceptación:** `setUp` registra usuario con `completeSignUp()` + `completeSignOut()`. Test intenta registrar con el mismo email, verifica mensaje de error, permanece en registro. `tearDown` limpia.
   - **Detalles:** El segundo registro debe fallar en el backend. Verificar texto de error visible.
 
-- [ ] T13 — `e2e_sign_out_test.dart` — Logout desde settings
+- [x] T13 — `e2e_sign_out_test.dart` — Logout desde settings
   - **Archivos:** `integration_test/e2e_sign_out_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Bajo
