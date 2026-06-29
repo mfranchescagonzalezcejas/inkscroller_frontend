@@ -157,6 +157,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // ── Primary CTA ───────────────────────────────────────────────
                 AuthGradientButton(
+                  key: const Key('signInButton'),
                   onPressed: authState.isLoading ? null : _submit,
                   isLoading: authState.isLoading,
                   label: context.l10n.authSignInButton,
@@ -166,6 +167,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // ── Secondary actions ─────────────────────────────────────────
                 TextButton(
+                  key: const Key('registerLink'),
                   onPressed: () => context.go(AppRoutes.register),
                   child: Text(
                     context.l10n.authNoAccount,

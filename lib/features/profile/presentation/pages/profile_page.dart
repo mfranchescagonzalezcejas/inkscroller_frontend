@@ -618,6 +618,7 @@ class _SignOutSection extends ConsumerWidget {
                   )
                 : Text(
                     context.l10n.profileSignOutAction,
+                    key: const Key('signOutButton'),
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 15,

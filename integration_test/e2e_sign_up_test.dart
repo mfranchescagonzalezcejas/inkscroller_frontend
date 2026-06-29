@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test/e2e/helpers/auth_flows.dart';
@@ -21,7 +22,10 @@ void main() {
 
     await completeSignUp(tester, user);
 
-    // Verify navigation to home — the bottom nav or Library tab should be visible.
-    expect(find.text('Library'), findsOneWidget);
+    // Wait for post-sign-up navigation to settle.
+    await tester.pumpAndSettle();
+
+    // Verify navigation to home — the nav bar should be visible (locale-agnostic).
+    expect(find.byKey(const Key('navProfile')), findsOneWidget);
   });
 }

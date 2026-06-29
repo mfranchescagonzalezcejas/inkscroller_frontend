@@ -893,7 +893,7 @@ abstract class AppLocalizations {
   /// No description provided for @authBirthDateInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Enter a birth date between 1900-01-01 and today.'**
+  /// **'You must be at least 13 years old.'**
   String get authBirthDateInvalid;
 
   /// No description provided for @authTermsAcknowledgement.
