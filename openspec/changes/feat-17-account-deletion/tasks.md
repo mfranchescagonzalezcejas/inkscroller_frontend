@@ -42,7 +42,7 @@
 
 ---
 
-### T4 — Presentation: SettingsProvider
+### T4 — Presentation: SettingsProvider [x]
 **Archivos**: `settings_provider.dart`
 **Estimación**: ~60 líneas
 
@@ -57,7 +57,7 @@
 
 ---
 
-### T5 — Presentation: DeleteAccountDialog
+### T5 — Presentation: DeleteAccountDialog [x]
 **Archivos**: `delete_account_dialog.dart`
 **Estimación**: ~80 líneas
 
@@ -72,7 +72,7 @@
 
 ---
 
-### T6 — Presentation: AccountSection
+### T6 — Presentation: AccountSection [x]
 **Archivos**: `account_section.dart`
 **Estimación**: ~40 líneas
 
@@ -82,7 +82,7 @@
 
 ---
 
-### T7 — Presentation: SettingsPage
+### T7 — Presentation: SettingsPage [x]
 **Archivos**: `settings_page.dart`
 **Estimación**: ~50 líneas
 
