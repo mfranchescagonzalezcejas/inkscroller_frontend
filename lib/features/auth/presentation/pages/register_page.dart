@@ -222,6 +222,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   if (!isProfileCompletion) ...<Widget>[
                     // ── Email ───────────────────────────────────────────────────
                     AuthField(
+                      key: const Key('registerEmailField'),
                       controller: _emailController,
                       label: context.l10n.authEmailLabel,
                       icon: Icons.email_outlined,
@@ -242,6 +243,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   // ── Username ──────────────────────────────────────────────────
                   AuthField(
+                    key: const Key('registerUsernameField'),
                     controller: _usernameController,
                     label: context.l10n.authUsernameLabel,
                     icon: Icons.alternate_email,
@@ -261,6 +263,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   if (!isProfileCompletion) ...<Widget>[
                     // ── Password ────────────────────────────────────────────────
                     AuthField(
+                      key: const Key('registerPasswordField'),
                       controller: _passwordController,
                       label: context.l10n.authPasswordLabel,
                       icon: Icons.lock_outline,
@@ -293,6 +296,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                     // ── Confirm password ────────────────────────────────────────
                     AuthField(
+                      key: const Key('registerConfirmPasswordField'),
                       controller: _confirmPasswordController,
                       label: context.l10n.authConfirmPasswordLabel,
                       icon: Icons.lock_outline,
@@ -329,6 +333,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   // ── Birth date ────────────────────────────────────────────────
                   AuthField(
+                    key: const Key('registerBirthDateField'),
                     controller: _birthDateController,
                     label: context.l10n.authBirthDateLabel,
                     icon: Icons.cake_outlined,
