@@ -49,12 +49,14 @@ class AccountSection extends ConsumerWidget {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
+    final scaffoldContext = context;
     showDialog<bool>(
-      context: context,
+      context: scaffoldContext,
       builder: (context) => const DeleteAccountDialog(),
     ).then((confirmed) {
-      if (confirmed == true && context.mounted) {
-        context.go(AppRoutes.login);
+      if (!scaffoldContext.mounted) return;
+      if (confirmed ?? false) {
+        scaffoldContext.go(AppRoutes.login);
       }
     });
   }

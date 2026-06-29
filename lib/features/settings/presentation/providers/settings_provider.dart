@@ -82,7 +82,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> _signOutAfterDeletion() async {
     try {
       await FirebaseAuth.instance.signOut();
-    } catch (_) {
+    } on FirebaseAuthException catch (_) {
       // Sign-out failure after deletion is non-critical — the backend account
       // is already deleted. The auth stream listener will pick up the state.
     }
