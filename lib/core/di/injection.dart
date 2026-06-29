@@ -53,8 +53,12 @@ import '../../features/profile/data/repositories/user_profile_repository_impl.da
 import '../../features/profile/domain/repositories/user_profile_repository.dart';
 import '../../features/profile/domain/usecases/get_user_profile.dart';
 import '../../features/profile/domain/usecases/update_user_profile.dart';
+import '../../features/settings/data/datasources/settings_remote_ds.dart';
+import '../../features/settings/data/datasources/settings_remote_ds_impl.dart';
 import '../../features/settings/data/repositories/settings_cache_repository_impl.dart';
+import '../../features/settings/data/repositories/settings_repository_impl.dart';
 import '../../features/settings/domain/repositories/settings_cache_repository.dart';
+import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/usecases/clear_settings_cache.dart';
 import '../../features/settings/domain/usecases/get_settings_cache_size.dart';
 import '../network/dio_client.dart';
@@ -244,5 +248,20 @@ Future<void> initDI() async {
   );
   sl.registerLazySingleton<GetSettingsCacheSize>(
     () => GetSettingsCacheSize(sl<SettingsCacheRepository>()),
+  );
+
+  // Settings - account deletion
+  initSettingsDI();
+}
+
+/// Registers account-level settings dependencies (remote data source +
+/// repository).
+void initSettingsDI() {
+  sl.registerLazySingleton<SettingsRemoteDataSource>(
+    () => SettingsRemoteDataSourceImpl(dioClient: sl<DioClient>()),
+  );
+
+  sl.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(remoteDataSource: sl<SettingsRemoteDataSource>()),
   );
 }
