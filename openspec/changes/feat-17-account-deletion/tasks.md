@@ -103,7 +103,7 @@
 
 ---
 
-### T9 — Routing
+### T9 — Routing [x]
 **Archivos**: `app_router.dart` (modificar)
 **Estimación**: ~15 líneas
 
@@ -112,7 +112,7 @@
 
 ---
 
-### T10 — Navigation entry point
+### T10 — Navigation entry point [x]
 **Archivos**: `library_page.dart` (modificar)
 **Estimación**: ~15 líneas
 
@@ -121,7 +121,7 @@
 
 ---
 
-### T11 — Tests de integración
+### T11 — Tests de integración [x]
 **Archivos**: tests de provider + widgets
 **Estimación**: ~100 líneas
 
