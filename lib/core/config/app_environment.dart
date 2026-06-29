@@ -78,6 +78,12 @@ abstract final class AppEnvironment {
     return candidates;
   }
 
+  /// Whether the app is running in E2E test mode.
+  ///
+  /// Enable with `--dart-define=E2E=true` at compile time.
+  /// When `false` (default), the app behaves identically to a normal run.
+  static const bool kIsE2E = bool.fromEnvironment('E2E', defaultValue: false);
+
   static String _resolveApiBaseUrl(String defaultBaseUrl) {
     final normalizedOverride = apiBaseUrlOverride.trim();
     if (normalizedOverride.isNotEmpty) {

@@ -24,6 +24,30 @@ void main() {
 
   setUp(FlavorConfig.resetForTesting);
 
+  group('kIsE2E flag', () {
+    test('is false when --dart-define=E2E is not provided', () {
+      // Without the dart-define, bool.fromEnvironment returns the default.
+      expect(AppEnvironment.kIsE2E, isFalse);
+    });
+
+    test('is a compile-time constant', () {
+      // Verify the constant is accessible and has the correct type.
+      const bool value = AppEnvironment.kIsE2E;
+      expect(value, isA<bool>());
+    });
+
+    test('E2E flavor constraint allows any flavor when flag is off', () {
+      // When kIsE2E is false, the constraint !kIsE2E || flavor == Flavor.dev
+      // is always satisfied regardless of flavor.
+      const constraintOff = !AppEnvironment.kIsE2E || Flavor.dev == Flavor.dev;
+      expect(constraintOff, isTrue);
+
+      const constraintOffStaging =
+          !AppEnvironment.kIsE2E || Flavor.staging == Flavor.dev;
+      expect(constraintOffStaging, isTrue);
+    });
+  });
+
   group('AppEnvironment cloud API defaults', () {
     test('uses the custom backend domains for every flavor', () {
       expect(
