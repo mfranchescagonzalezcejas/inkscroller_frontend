@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../core/error/failures.dart';
 import '../../domain/repositories/settings_repository.dart';
 
 /// State for account-level settings operations.

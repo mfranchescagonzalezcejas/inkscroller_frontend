@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/design_tokens.dart'
-    show AppColors, AppTypography;
+    show AppColors;
 import '../providers/settings_provider.dart';
 
 /// AlertDialog for permanent account deletion with typed confirmation.

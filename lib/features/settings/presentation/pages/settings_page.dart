@@ -58,7 +58,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final cacheSize = ref.watch(cacheSizeProvider);
-    final settingsState = ref.watch(settingsProvider);
 
     // Navigate to login after successful account deletion.
     ref.listen<SettingsState>(settingsProvider, (previous, next) {
