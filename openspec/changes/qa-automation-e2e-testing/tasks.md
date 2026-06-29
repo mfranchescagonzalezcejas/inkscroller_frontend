@@ -130,14 +130,14 @@
 
 ## Fase 5: Tests de Navegación
 
-- [ ] T14 — `e2e_guest_navigation_test.dart` — Guest browsing y redirect
+- [x] T14 — `e2e_guest_navigation_test.dart` — Guest browsing y redirect
   - **Archivos:** `integration_test/e2e_guest_navigation_test.dart`
   - **Dependencias:** T6
   - **Esfuerzo:** Medio
   - **Criterio de aceptación:** Test 1: Guest navega a Library, verifica que carga datos reales (mangas visibles), NO hay redirect a login. Test 2: Guest intenta acceder a `/profile`, verifica redirect automático a `/login`.
   - **Detalles:** No necesita `TestUser` ni cleanup. Usar `pumpE2EApp()` y navegar programáticamente con `GoRouter.of(context).go('/profile')`. Verificar que library es pública según `_protectedRoutes`.
 
-- [ ] T15 — `e2e_authenticated_navigation_test.dart` — Library → detail → reader → back
+- [x] T15 — `e2e_authenticated_navigation_test.dart` — Library → detail → reader → back
   - **Archivos:** `integration_test/e2e_authenticated_navigation_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Alto
@@ -146,7 +146,7 @@
 
 ## Fase 6: Tests de Gestión de Cuenta
 
-- [ ] T16 — `e2e_delete_account_test.dart` — Eliminación de cuenta completa
+- [x] T16 — `e2e_delete_account_test.dart` — Eliminación de cuenta completa
   - **Archivos:** `integration_test/e2e_delete_account_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Alto
