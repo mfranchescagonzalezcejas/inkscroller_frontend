@@ -68,6 +68,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           ),
           const SizedBox(height: 8),
           TextField(
+            key: const Key('deleteConfirmField'),
             controller: _controller,
             style: const TextStyle(
               fontFamily: 'Plus Jakarta Sans',
