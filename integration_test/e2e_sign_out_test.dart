@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test/e2e/helpers/auth_flows.dart';
@@ -24,12 +25,10 @@ void main() {
     // Act: sign out via the profile page.
     await completeSignOut(tester);
 
-    // Assert: guest state — either the login page or the "Sign in" CTA
-    // is visible, confirming the session was closed.
-    expect(
-      find.textContaining('Sign in').evaluate().isNotEmpty ||
-          find.text('Library').evaluate().isNotEmpty,
-      isTrue,
-    );
+    // Assert: guest state — the login page should be visible (signInButton
+    // key present) or we're back on home as guest (navProfile present).
+    final onLogin = find.byKey(const Key('signInButton')).evaluate().isNotEmpty;
+    final onHome = find.byKey(const Key('navProfile')).evaluate().isNotEmpty;
+    expect(onLogin || onHome, isTrue);
   });
 }

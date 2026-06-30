@@ -34,10 +34,12 @@ void main() {
       'WrongPassword999!',
     );
 
-    await tester.tap(find.text('Sign in'));
+    await tester.tap(find.byKey(const Key('signInButton')), warnIfMissed: false);
     await tester.pumpAndSettle(const Duration(seconds: 15));
 
-    // Assert: error message is visible.
+    // Assert: error message is visible. Firebase maps wrong-password to
+    // "INVALID_LOGIN_CREDENTIALS" which the data source surfaces as
+    // "Credenciales inválidas." in Spanish regardless of app locale.
     expect(find.textContaining('Credenciales'), findsOneWidget);
 
     // Assert: still on the login page (email field still visible).
