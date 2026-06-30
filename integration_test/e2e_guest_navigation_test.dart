@@ -8,6 +8,7 @@ void main() {
   testWidgets('Guest navigates to Library without redirect to login',
       (tester) async {
     await pumpE2EApp(tester);
+    await tester.pump(const Duration(milliseconds: 1200));
 
     // The nav bar should be visible — guest can browse.
     expect(find.byKey(const Key('navProfile')), findsOneWidget);
@@ -18,6 +19,7 @@ void main() {
 
   testWidgets('Guest accessing /profile redirects to /login', (tester) async {
     await pumpE2EApp(tester);
+    await tester.pump(const Duration(milliseconds: 1200));
 
     // Navigate programmatically to the protected /profile route.
     final context = tester.element(find.byType(Scaffold).first);

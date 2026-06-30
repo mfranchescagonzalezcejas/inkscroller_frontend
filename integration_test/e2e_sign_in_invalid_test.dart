@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_print
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,30 +22,45 @@ void main() {
 
   testWidgets('Sign in with wrong password shows error and stays on login',
       (tester) async {
-    // Arrange: register the user so the account exists, then sign out.
+    // Register user so account exists.
     await pumpE2EApp(tester);
     await completeSignUp(tester, user);
-    await completeSignOut(tester);
 
-    // Act: enter correct email but wrong password.
+    // Sign out directly via Firebase (bypasses SnackBar + provider timing).
+    await FirebaseAuth.instance.signOut();
+    await tester.pump(const Duration(seconds: 3));
+
+    // After sign-out, app stays on home (public route). Tap navProfile
+    // to trigger auth guard → redirect to /login.
+    await tester.tap(find.byKey(const Key('navProfile')));
+    await tester.pumpAndSettle();
+
+    // We should now be on the login page.
+    expect(find.byKey(const Key('emailField')), findsOneWidget);
+
+    // Enter correct email but wrong password.
     await tester.enterText(
       find.byKey(const Key('emailField')),
       user.email,
     );
+    await tester.pump(const Duration(milliseconds: 800));
+
     await tester.enterText(
       find.byKey(const Key('passwordField')),
       'WrongPassword999!',
     );
+    await tester.pump(const Duration(milliseconds: 800));
 
-    await tester.tap(find.byKey(const Key('signInButton')), warnIfMissed: false);
+    await tester.tap(
+      find.byKey(const Key('signInButton')),
+      warnIfMissed: false,
+    );
     await tester.pumpAndSettle(const Duration(seconds: 15));
 
-    // Assert: error message is visible. Firebase maps wrong-password to
-    // "INVALID_LOGIN_CREDENTIALS" which the data source surfaces as
-    // "Credenciales inválidas." in Spanish regardless of app locale.
+    // Assert: error message is visible.
     expect(find.textContaining('Credenciales'), findsOneWidget);
 
     // Assert: still on the login page (email field still visible).
     expect(find.byKey(const Key('emailField')), findsOneWidget);
-  });
+  }, timeout: const Timeout(Duration(minutes: 3)));
 }

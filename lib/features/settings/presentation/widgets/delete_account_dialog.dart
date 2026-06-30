@@ -105,6 +105,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
       ),
       actions: <Widget>[
         TextButton(
+          key: const Key('deleteCancelButton'),
           onPressed: _isDeleting
               ? null
               : () => Navigator.of(context).pop(false),
@@ -117,6 +118,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           ),
         ),
         FilledButton(
+          key: const Key('deleteConfirmButton'),
           onPressed: _canDelete && !_isDeleting
               ? () async {
                   setState(() => _isDeleting = true);

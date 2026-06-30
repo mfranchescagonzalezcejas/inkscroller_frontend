@@ -32,22 +32,29 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
-    // The library/home page shows manga tiles. Tap the first InkWell
-    // (manga cover or title) to navigate to the detail page.
+    // Look for manga tiles (InkWell covers) on the home/library page.
     final mangaTiles = find.byType(InkWell);
     if (mangaTiles.evaluate().isNotEmpty) {
+      // Human pauses before tapping a manga.
+      await tester.pump(const Duration(milliseconds: 600));
+
       await tester.tap(mangaTiles.first, warnIfMissed: false);
       await tester.pumpAndSettle(const Duration(seconds: 10));
 
       // On the detail page, look for chapter list items.
       final chapterTiles = find.byType(ListTile);
       if (chapterTiles.evaluate().isNotEmpty) {
-        // Tap the first chapter to open the reader.
+        // Human pauses before tapping a chapter.
+        await tester.pump(const Duration(milliseconds: 600));
+
         await tester.tap(chapterTiles.first, warnIfMissed: false);
         await tester.pumpAndSettle(const Duration(seconds: 10));
 
         // Verify the reader page loaded (a Scaffold is present).
         expect(find.byType(Scaffold), findsWidgets);
+
+        // Human pauses before pressing back.
+        await tester.pump(const Duration(milliseconds: 800));
 
         // Press back to return to the manga detail page.
         await tester.pageBack();

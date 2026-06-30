@@ -4,19 +4,69 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_user.dart';
 
+// ---------------------------------------------------------------------------
+// Human-like timing constants
+// ---------------------------------------------------------------------------
+
+/// Delay between individual keystrokes when typing into a field.
+const Duration _kTypingDelay = Duration(milliseconds: 50);
+
+/// Pause between focus and start of typing (human looks at the field).
+const Duration _kPreTypeDelay = Duration(milliseconds: 300);
+
+/// Pause after finishing typing in a field (human reads what they typed).
+const Duration _kPostTypeDelay = Duration(milliseconds: 500);
+
+/// Pause between a tap and the next interaction (human sees the effect).
+const Duration _kTapDelay = Duration(milliseconds: 600);
+
+/// Pause after opening a new page (human orients themselves).
+const Duration _kPageLoadDelay = Duration(milliseconds: 1200);
+
+/// Pause after closing overlays / keyboard (human waits for UI to settle).
+const Duration _kOverlayDelay = Duration(milliseconds: 800);
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 /// Closes the soft keyboard and dismisses any overlay (snackbar, error banner,
 /// dialog) that might intercept tap() calls in integration tests on physical
 /// devices.
 Future<void> _closeOverlaysAndKeyboard(WidgetTester tester) async {
-  SystemChannels.textInput.invokeMethod('TextInput.hide');
-  await tester.pump(const Duration(milliseconds: 300));
+  await SystemChannels.textInput.invokeMethod('TextInput.hide');
+  await tester.pump(_kOverlayDelay);
   await tester.sendKeyEvent(LogicalKeyboardKey.escape);
   await tester.pumpAndSettle();
+  // Extra settle time for animation to finish.
+  await tester.pump(_kOverlayDelay);
+}
+
+/// Types [text] character by character into the field found by [fieldFinder],
+/// with a small delay between each keystroke to simulate human typing speed.
+///
+/// This is NOT used for readOnly fields — see [_setReadOnlyFieldText] for those.
+Future<void> _typeTextHuman(
+  WidgetTester tester,
+  Finder fieldFinder,
+  String text,
+) async {
+  // Human pauses before typing (looks at the field).
+  await tester.pump(_kPreTypeDelay);
+  await tester.enterText(fieldFinder, text);
+  // Simulate typing delay by pumping per character.
+  for (var i = 0; i < text.length; i++) {
+    await tester.pump(_kTypingDelay);
+  }
+  // Human pauses after finishing typing (reads what they typed).
+  await tester.pump(_kPostTypeDelay);
 }
 
 /// Sets the text of a read-only [AuthField] by accessing the [EditableText]
 /// controller directly. `enterText` does not work on readOnly fields in
 /// integration tests because the platform text input is suppressed.
+///
+/// Includes a short settle delay to mimic human interaction speed.
 Future<void> _setReadOnlyFieldText(
   WidgetTester tester,
   Finder fieldFinder,
@@ -28,10 +78,39 @@ Future<void> _setReadOnlyFieldText(
   );
   if (editableFinder.evaluate().isNotEmpty) {
     final editable = tester.widget<EditableText>(editableFinder.first);
+    // Human pauses before setting date (picker interaction simulation).
+    await tester.pump(_kPreTypeDelay);
     editable.controller.text = text;
-    await tester.pump();
+    await tester.pump(_kPostTypeDelay);
   }
 }
+
+/// Human-like tap with a pause before and after the tap.
+Future<void> _tapHuman(
+  WidgetTester tester,
+  Finder finder, {
+  bool warnIfMissed = true,
+}) async {
+  await tester.pump(_kTapDelay);
+  await tester.tap(finder, warnIfMissed: warnIfMissed);
+  await tester.pump(_kTapDelay);
+}
+
+/// Human-like scroll — slower, with a small pause after.
+Future<void> _scrollHuman(
+  WidgetTester tester,
+  Finder scrollable,
+  Offset offset,
+) async {
+  await tester.pump(_kTapDelay);
+  await tester.drag(scrollable, offset);
+  await tester.pumpAndSettle();
+  await tester.pump(_kPostTypeDelay);
+}
+
+// ---------------------------------------------------------------------------
+// Public flows
+// ---------------------------------------------------------------------------
 
 /// Completes the full sign-up flow for E2E testing.
 ///
@@ -41,34 +120,75 @@ Future<void> _setReadOnlyFieldText(
 ///
 /// Locale-agnostic: uses production keys from T4 for reliable widget lookup.
 Future<void> completeSignUp(WidgetTester tester, TestUser user) async {
-  // Step 1: Navigate to login via the Profile tab (triggers auth redirect).
-  await tester.tap(find.byKey(const Key('navProfile')));
-  await tester.pumpAndSettle();
+  print('[completeSignUp] Starting with user: ${user.email}');
+  // Wait for nav bar to appear — on physical devices the app may take
+  // variable time to initialize after pumpE2EApp. Use pump() instead of
+  // pumpAndSettle() because shimmer/gradient animations never settle.
+  for (var i = 0; i < 30; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) {
+      print('[completeSignUp] navProfile found after ${(i + 1) * 0.5}s');
+      break;
+    }
+  }
+  final navVisible = find.byKey(const Key('navProfile')).evaluate().isNotEmpty;
+  print('[completeSignUp] navProfile visible=$navVisible');
+  
+  if (navVisible) {
+    // Step 1: Navigate to login via the Profile tab (triggers auth redirect).
+    await _tapHuman(tester, find.byKey(const Key('navProfile')));
+    await tester.pumpAndSettle();
+    await tester.pump(_kPageLoadDelay);
+  } else {
+    // The app may have landed on the login page directly (e.g., after a
+    // prior test deleted the account). Check if we're already there.
+    final onLogin = find.byKey(const Key('emailField')).evaluate().isNotEmpty;
+    print('[completeSignUp] fallback: onLogin=$onLogin');
+    if (!onLogin) {
+      throw StateError(
+        'completeSignUp: navProfile not found and not on login page',
+      );
+    }
+    // Already on login page — proceed directly to register.
+    await tester.pump(_kPageLoadDelay);
+  }
+
+  // Check if we're on login page.
+  final onLogin =
+      find.byKey(const Key('emailField')).evaluate().isNotEmpty;
+  final onRegister =
+      find.byKey(const Key('registerLink')).evaluate().isNotEmpty;
+  print('[completeSignUp] After navProfile — onLogin=$onLogin onRegister=$onRegister');
 
   // Step 2: Navigate to register page via the register link key.
-  await tester.tap(find.byKey(const Key('registerLink')));
+  await _tapHuman(tester, find.byKey(const Key('registerLink')));
   await tester.pumpAndSettle();
+  await tester.pump(_kPageLoadDelay);
 
-  // Fill email.
-  await tester.enterText(
+  // Fill email — human types into field.
+  await _typeTextHuman(
+    tester,
     find.byKey(const Key('registerEmailField')),
     user.email,
   );
 
   // Fill username.
-  await tester.enterText(
+  await _typeTextHuman(
+    tester,
     find.byKey(const Key('registerUsernameField')),
     user.username,
   );
 
   // Fill password.
-  await tester.enterText(
+  await _typeTextHuman(
+    tester,
     find.byKey(const Key('registerPasswordField')),
     user.password,
   );
 
   // Fill confirm password.
-  await tester.enterText(
+  await _typeTextHuman(
+    tester,
     find.byKey(const Key('registerConfirmPasswordField')),
     user.password,
   );
@@ -91,23 +211,53 @@ Future<void> completeSignUp(WidgetTester tester, TestUser user) async {
   // Scroll down so terms checkbox and button are visible.
   final scrollView = find.byType(SingleChildScrollView);
   if (scrollView.evaluate().isNotEmpty) {
-    await tester.drag(scrollView.first, const Offset(0, -300));
-    await tester.pumpAndSettle();
+    await _scrollHuman(tester, scrollView.first, const Offset(0, -300));
   }
 
   // Accept terms checkbox.
   final termsCheckbox = find.byType(CheckboxListTile);
   if (termsCheckbox.evaluate().isNotEmpty) {
-    await tester.tap(termsCheckbox.first, warnIfMissed: false);
+    await _tapHuman(tester, termsCheckbox.first, warnIfMissed: false);
     await tester.pumpAndSettle();
   }
 
   // Tap create account button by key (locale-agnostic).
-  await tester.tap(
+  await _tapHuman(
+    tester,
     find.byKey(const Key('createAccountButton')),
     warnIfMissed: false,
   );
-  await tester.pumpAndSettle(const Duration(seconds: 15));
+  // Don't use pumpAndSettle — gradient/shimmer animations never settle.
+  // Pump for 20s in small increments to let registration + navigation finish.
+  for (var i = 0; i < 40; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) break;
+  }
+  // Wait for navigation + profile sync.
+  await tester.pump(_kPageLoadDelay);
+
+  // Retry loop: the registration flow may take variable time on physical
+  // devices. Poll until navProfile appears or we exhaust retries.
+  for (var attempt = 0; attempt < 5; attempt++) {
+    final navFound = find.byKey(const Key('navProfile')).evaluate().isNotEmpty;
+    final createFound =
+        find.byKey(const Key('createAccountButton')).evaluate().isNotEmpty;
+    print(
+      '[completeSignUp] attempt=$attempt nav=$navFound create=$createFound',
+    );
+    if (navFound) break;
+    // If still on register page, the tap may not have registered.
+    // Try tapping the button again.
+    if (createFound) {
+      print('[completeSignUp] retrying tap on createAccountButton');
+      await _tapHuman(
+        tester,
+        find.byKey(const Key('createAccountButton')),
+        warnIfMissed: false,
+      );
+    }
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+  }
 }
 
 /// Completes the sign-in flow for E2E testing.
@@ -118,18 +268,28 @@ Future<void> completeSignUp(WidgetTester tester, TestUser user) async {
 ///
 /// Locale-agnostic: uses production keys for reliable widget lookup.
 Future<void> completeSignIn(WidgetTester tester, TestUser user) async {
-  // Navigate to login via the Profile tab (triggers auth redirect).
-  await tester.tap(find.byKey(const Key('navProfile')));
-  await tester.pumpAndSettle();
+  // If we're not already on the login page, navigate there via Profile tab.
+  if (find.byKey(const Key('emailField')).evaluate().isEmpty) {
+    // Wait for nav bar to appear.
+    for (var i = 0; i < 20; i++) {
+      if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) break;
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    await _tapHuman(tester, find.byKey(const Key('navProfile')));
+    await tester.pumpAndSettle();
+    await tester.pump(_kPageLoadDelay);
+  }
 
   // Fill email.
-  await tester.enterText(
+  await _typeTextHuman(
+    tester,
     find.byKey(const Key('emailField')),
     user.email,
   );
 
   // Fill password.
-  await tester.enterText(
+  await _typeTextHuman(
+    tester,
     find.byKey(const Key('passwordField')),
     user.password,
   );
@@ -138,11 +298,17 @@ Future<void> completeSignIn(WidgetTester tester, TestUser user) async {
   await _closeOverlaysAndKeyboard(tester);
 
   // Tap sign in button by key (locale-agnostic).
-  await tester.tap(
+  await _tapHuman(
+    tester,
     find.byKey(const Key('signInButton')),
     warnIfMissed: false,
   );
-  await tester.pumpAndSettle(const Duration(seconds: 15));
+  // Don't use pumpAndSettle — gradient/shimmer animations never settle.
+  // Pump for 15s total in small increments to let auth + navigation finish.
+  for (var i = 0; i < 30; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) break;
+  }
 }
 
 /// Completes the sign-out flow for E2E testing.
@@ -154,13 +320,72 @@ Future<void> completeSignIn(WidgetTester tester, TestUser user) async {
 /// Locale-agnostic: uses production keys for reliable widget lookup.
 Future<void> completeSignOut(WidgetTester tester) async {
   // Navigate to Profile tab (index 3).
-  await tester.tap(find.byKey(const Key('navProfile')));
+  await _tapHuman(tester, find.byKey(const Key('navProfile')));
   await tester.pumpAndSettle();
+  await tester.pump(_kPageLoadDelay);
 
   // Tap sign out button by key (locale-agnostic).
-  await tester.tap(
+  await _tapHuman(
+    tester,
     find.byKey(const Key('signOutButton')),
     warnIfMissed: false,
   );
-  await tester.pumpAndSettle(const Duration(seconds: 10));
+  // Don't use pumpAndSettle — SnackBar + gradient animations prevent settling.
+  // Pump for 15s in small increments to let sign-out + redirect complete.
+  for (var i = 0; i < 30; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    // After sign-out, the login page should appear (emailField on login).
+    if (find.byKey(const Key('signInButton')).evaluate().isNotEmpty) break;
+    // Or guest home if no redirect.
+    if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) break;
+  }
+  await tester.pump(_kPageLoadDelay);
+}
+
+/// Deletes the authenticated user's account via the profile page.
+///
+/// Assumes the user is authenticated and the app is on a tab page.
+/// Navigates to Profile, opens the delete dialog, types the email, confirms,
+/// and waits for navigation back to the home page.
+Future<void> completeDeleteAccount(
+  WidgetTester tester,
+  TestUser user,
+) async {
+  // Navigate to Profile tab.
+  await _tapHuman(tester, find.byKey(const Key('navProfile')));
+  await tester.pumpAndSettle();
+  await tester.pump(_kPageLoadDelay);
+
+  // Tap delete account button.
+  await _tapHuman(
+    tester,
+    find.byKey(const Key('deleteAccountButton')),
+    warnIfMissed: false,
+  );
+  await tester.pumpAndSettle();
+  await tester.pump(_kTapDelay);
+
+  // Type email to confirm deletion.
+  await _typeTextHuman(
+    tester,
+    find.byKey(const Key('deleteConfirmField')),
+    user.email,
+  );
+
+  // Close keyboard.
+  await _closeOverlaysAndKeyboard(tester);
+
+  // Tap confirm delete.
+  await _tapHuman(
+    tester,
+    find.byKey(const Key('deleteConfirmButton')),
+    warnIfMissed: false,
+  );
+  // Don't use pumpAndSettle — SnackBar + gradient animations prevent settling.
+  // Pump for 15s in small increments to let delete + redirect complete.
+  for (var i = 0; i < 30; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) break;
+  }
+  await tester.pump(_kPageLoadDelay);
 }

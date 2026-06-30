@@ -38,6 +38,7 @@ class AccountSection extends ConsumerWidget {
               ),
               const Divider(height: 1, color: AppColors.outlineVariant),
               _DangerButton(
+                key: const Key('deleteAccountButton'),
                 label: 'Eliminar cuenta',
                 onTap: () => _showDeleteAccountDialog(context),
               ),
@@ -143,7 +144,7 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _DangerButton extends StatelessWidget {
-  const _DangerButton({required this.label, required this.onTap});
+  const _DangerButton({super.key, required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
