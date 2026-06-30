@@ -67,7 +67,7 @@ No
 support@devdigi.dev
 
 ## Website
-https://mercedesgonzalez.dev (portfolio)
+https://devdigi.dev
 
 ## Privacy Policy URL
 https://privacy.devdigi.dev
