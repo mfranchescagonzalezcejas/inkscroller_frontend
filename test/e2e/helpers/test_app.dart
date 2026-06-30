@@ -24,13 +24,13 @@ Future<void> pumpE2EApp(WidgetTester tester) async {
 
   // Reset GetIt to avoid "already registered" errors when multiple tests
   // run in the same process (integration_test shares the Dart VM).
-  GetIt.instance.reset();
+  await GetIt.instance.reset();
 
   // Sign out any lingering Firebase Auth session from a prior test.
   // Firebase Auth is a native singleton — GetIt.reset() doesn't clear it.
   try {
     await FirebaseAuth.instance.signOut();
-  } catch (_) {
+  } on Exception catch (_) {
     // Ignore — Firebase may not be initialized yet on first run.
   }
 

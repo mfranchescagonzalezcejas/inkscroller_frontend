@@ -13,7 +13,7 @@ void main() {
   group('Delete account', () {
     tearDown(() async {
       // Safety net: if a test failed before UI deletion, clean up via API.
-      final u = deleteUser!;
+      final u = deleteUser;
       if (u != null) {
         await deleteTestUser(email: u.email, password: u.password);
       }
