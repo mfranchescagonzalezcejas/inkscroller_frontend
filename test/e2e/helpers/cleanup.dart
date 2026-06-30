@@ -66,7 +66,8 @@ Future<void> _deleteAccount({
 
   // If sign-in fails because the user doesn't exist, that's fine.
   if (signInBody['error'] != null) {
-    final errorCode = signInBody['error']?['message'] as String? ?? '';
+    final errorMap = signInBody['error'] as Map<String, dynamic>;
+    final errorCode = errorMap['message'] as String? ?? '';
     if (errorCode == 'EMAIL_NOT_FOUND' || errorCode == 'INVALID_PASSWORD') {
       return; // Account already gone or wrong password — treat as cleaned.
     }
@@ -94,7 +95,8 @@ Future<void> _deleteAccount({
   final deleteBody = jsonDecode(deleteResponse) as Map<String, dynamic>;
 
   if (deleteBody['error'] != null) {
-    final errorCode = deleteBody['error']?['message'] as String? ?? '';
+    final errorMap = deleteBody['error'] as Map<String, dynamic>;
+    final errorCode = errorMap['message'] as String? ?? '';
     // User already deleted — treat as success.
     if (errorCode == 'USER_NOT_FOUND' || errorCode == 'user-not-found') {
       return;
