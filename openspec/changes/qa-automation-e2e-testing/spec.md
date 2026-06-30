@@ -9,7 +9,7 @@ Helpers compartidos que todos los tests E2E utilizan: generación de usuarios te
 ### Archivos
 
 - `test/e2e/helpers/test_user.dart` — Factory `TestUser.fresh()` con email único (`test-{timestamp}-{random}@e2e.inkscroller.dev`), password fija (`TestPass123!`), username aleatorio
-- `test/e2e/helpers/test_app.dart` — `pumpE2EApp()` que inicializa `IntegrationTestWidgetsFlutterBinding`, arranca la app real con `mainCommon(flavor: Flavor.dev)` y espera a que esté estable
+- `test/e2e/helpers/test_app.dart` — `pumpE2EApp()` que inicializa `IntegrationTestWidgetsFlutterBinding`, arranca la app real con `main_dev.main()` y espera a que esté estable con pump loops (no `pumpAndSettle` — gradient/shimmer animations never settle)
 - `test/e2e/helpers/cleanup.dart` — `deleteTestUser(email, password)` vía Firebase Auth REST API (`accounts:delete`) usando la web API key del proyecto dev
 - `lib/main_common.dart` — Detección de flag `--dart-define=E2E=true` (early return que no afecta el camino normal sin el flag)
 - `lib/main_dev.dart` — Acepta y propaga el flag E2E

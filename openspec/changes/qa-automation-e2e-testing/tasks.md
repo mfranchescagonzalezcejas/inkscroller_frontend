@@ -74,15 +74,15 @@
   - **Archivos:** `test/e2e/helpers/test_app.dart`
   - **Dependencias:** T1
   - **Esfuerzo:** Medio
-  - **Criterio de aceptación:** `pumpE2EApp(tester)` inicializa `IntegrationTestWidgetsFlutterBinding`, llama `app.main()` (de `main_dev.dart`), y espera a que el widget tree esté estable con `pumpAndSettle(timeout: Duration(seconds: 15))`. Sin mocks.
-  - **Detalles:** Importar `package:integration_test/integration_test.dart` y `package:inkscroller_flutter/main_dev.dart` como `app`. Usar `TestWidgetsFlutterBinding.ensureInitialized()` como primer paso. La función no recibe parámetros de configuración — la app se configura sola vía `--dart-define`.
+  - **Criterio de aceptación:** `pumpE2EApp(tester)` inicializa `IntegrationTestWidgetsFlutterBinding`, llama `app.main()` (de `main_dev.dart`), y espera a que el widget tree esté estable con pump loops de 500ms (no `pumpAndSettle` — gradient/shimmer animations never settle). Sin mocks.
+  - **Detalles:** Importar `package:integration_test/integration_test.dart` y `package:inkscroller_flutter/main_dev.dart` como `app`. Usar `IntegrationTestWidgetsFlutterBinding.ensureInitialized()` como primer paso. La función no recibe parámetros de configuración — la app se configura sola vía `--dart-define`.
 
 - [x] T7 — Crear `deleteTestUser()` vía Firebase Auth REST API
   - **Archivos:** `test/e2e/helpers/cleanup.dart`
   - **Dependencias:** ninguna
   - **Esfuerzo:** Medio
   - **Criterio de aceptación:** `deleteTestUser(email, password)` obtiene ID token vía `signInWithPassword` REST, luego llama `accounts:delete` con la web API key. Reintentos con backoff exponencial (max 3). No falla el test si la cuenta ya no existe (trata `user-not-found` como éxito).
-  - **Detalles:** Usar `http` package. Endpoints: `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$apiKey` y `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$apiKey`. La API key viene de `const String.fromEnvironment('FIREBASE_WEB_API_KEY')`. Manejar `EMAIL_NOT_FOUND` y `INVALID_PASSWORD` como "cuenta ya no existe".
+  - **Detalles:** Usar `dart:io` `HttpClient`. Endpoints: `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$apiKey` y `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$apiKey`. La API key viene de `const String.fromEnvironment('FIREBASE_WEB_API_KEY')`. Manejar `EMAIL_NOT_FOUND` e `INVALID_LOGIN_CREDENTIALS` como "cuenta ya no existe". El `HttpClient` se dispone en `finally` block con timeouts de 15s en cada operación I/O.
 
 - [x] T8 — Crear `auth_flows.dart` con flujos reutilizables
   - **Archivos:** `test/e2e/helpers/auth_flows.dart`
@@ -93,35 +93,35 @@
 
 ## Fase 4: Tests de Autenticación
 
-- [x] T9 — `e2e_sign_up_test.dart` — Registro con datos válidos
+- [ ] T9 — `e2e_sign_up_test.dart` — Registro con datos válidos
   - **Archivos:** `integration_test/e2e_sign_up_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Medio
   - **Criterio de aceptación:** Test crea `TestUser.fresh()`, llama `completeSignUp()`, verifica que la app navega a home (encuentra widget de library o home), verifica estado autenticado. `tearDown` llama `deleteTestUser()`.
   - **Detalles:** Estructura: `setUp` crea user, `testWidgets` ejecuta flujo, `tearDown` limpia. Verificar transición de página visible, no solo estado interno. Timeout de 15s en `pumpAndSettle`.
 
-- [x] T10 — `e2e_sign_in_test.dart` — Login con credenciales válidas
+- [ ] T10 — `e2e_sign_in_test.dart` — Login con credenciales válidas
   - **Archivos:** `integration_test/e2e_sign_in_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Medio
   - **Criterio de aceptación:** `setUp` registra usuario con `completeSignUp()` + `completeSignOut()`. Test ejecuta `completeSignIn()`, verifica navegación a home. `tearDown` limpia.
   - **Detalles:** El setUp debe crear el usuario y volver a la pantalla de login antes del test.
 
-- [x] T11 — `e2e_sign_in_invalid_test.dart` — Login con password incorrecta
+- [ ] T11 — `e2e_sign_in_invalid_test.dart` — Login con password incorrecta
   - **Archivos:** `integration_test/e2e_sign_in_invalid_test.dart`
   - **Dependencias:** T5, T6, T7
   - **Esfuerzo:** Bajo
   - **Criterio de aceptación:** `setUp` registra usuario. Test ingresa email correcto + password incorrecta, verifica mensaje de error visible en pantalla, verifica que permanece en login. `tearDown` limpia.
   - **Detalles:** Buscar texto de error por widget `Text` que contenga "Credenciales" o "invalid" o "incorrecta". Verificar que NO navega a home.
 
-- [x] T12 — `e2e_duplicate_email_test.dart` — Registro con email duplicado
+- [ ] T12 — `e2e_duplicate_email_test.dart` — Registro con email duplicado
   - **Archivos:** `integration_test/e2e_duplicate_email_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Bajo
   - **Criterio de aceptación:** `setUp` registra usuario con `completeSignUp()` + `completeSignOut()`. Test intenta registrar con el mismo email, verifica mensaje de error, permanece en registro. `tearDown` limpia.
   - **Detalles:** El segundo registro debe fallar en el backend. Verificar texto de error visible.
 
-- [x] T13 — `e2e_sign_out_test.dart` — Logout desde settings
+- [ ] T13 — `e2e_sign_out_test.dart` — Logout desde settings
   - **Archivos:** `integration_test/e2e_sign_out_test.dart`
   - **Dependencias:** T5, T6, T7, T8
   - **Esfuerzo:** Bajo
