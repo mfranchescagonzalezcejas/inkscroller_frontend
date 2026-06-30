@@ -82,7 +82,7 @@ abstract final class AppEnvironment {
   ///
   /// Enable with `--dart-define=E2E=true` at compile time.
   /// When `false` (default), the app behaves identically to a normal run.
-  static const bool kIsE2E = bool.fromEnvironment('E2E', defaultValue: false);
+  static const bool kIsE2E = bool.fromEnvironment('E2E');
 
   static String _resolveApiBaseUrl(String defaultBaseUrl) {
     final normalizedOverride = apiBaseUrlOverride.trim();
