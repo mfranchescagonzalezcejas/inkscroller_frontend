@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,12 +19,17 @@ void main() {
 
   testWidgets('Sign up with valid data navigates to home', (tester) async {
     await pumpE2EApp(tester);
+
     await completeSignUp(tester, user);
 
-    // Wait for post-sign-up navigation to settle.
-    await tester.pumpAndSettle();
-
-    // Verify navigation to home (navProfile key visible = main scaffold present).
-    expect(find.byKey(const Key('navProfile')), findsOneWidget);
+    // Verify we left the auth flow — emailField should no longer be visible.
+    expect(find.byKey(const Key('emailField')), findsNothing);
+    // Verify we're on the home page — Library content or bottom nav is visible.
+    // find.text('Library') works for both EN and ES since it's the nav label.
+    expect(
+      find.text('Library').evaluate().isNotEmpty ||
+          find.text('Biblioteca').evaluate().isNotEmpty,
+      isTrue,
+    );
   });
 }

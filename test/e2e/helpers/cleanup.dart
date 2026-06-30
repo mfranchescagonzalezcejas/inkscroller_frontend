@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -67,27 +65,22 @@ Future<void> _deleteAccount({
   final signInBody = jsonDecode(signInResponse) as Map<String, dynamic>;
 
   // If sign-in fails because the user doesn't exist, that's fine.
-  final signInError = signInBody['error'] as Map<String, dynamic>?;
-  if (signInError != null) {
-    final errorCode = signInError['message'] as String? ?? '';
+  if (signInBody['error'] != null) {
+    final errorMap = signInBody['error'] as Map<String, dynamic>;
+    final errorCode = errorMap['message'] as String? ?? '';
     if (errorCode == 'EMAIL_NOT_FOUND' ||
-        errorCode == 'USER_NOT_FOUND' ||
-        errorCode == 'user-not-found') {
-      return; // Account already gone — treat as cleaned.
-    }
-    if (errorCode == 'INVALID_PASSWORD' ||
         errorCode == 'INVALID_LOGIN_CREDENTIALS') {
-      // Password mismatch — account may have been deleted by UI flow already.
-      // Log and treat as cleaned since we can't delete without valid creds.
-      print('[cleanup] $errorCode — account likely already deleted');
-      return;
+      return; // Account already gone — treat as cleaned.
     }
     throw HttpException(
       'Firebase sign-in failed: $errorCode',
     );
   }
 
-  final idToken = signInBody['idToken'] as String?;
+  final idToken = signInResponse.isNotEmpty
+      ? (jsonDecode(signInResponse) as Map<String, dynamic>)['idToken']
+          as String?
+      : null;
 
   if (idToken == null) {
     throw const HttpException('No ID token returned from sign-in');
@@ -102,9 +95,9 @@ Future<void> _deleteAccount({
 
   final deleteBody = jsonDecode(deleteResponse) as Map<String, dynamic>;
 
-  final deleteError = deleteBody['error'] as Map<String, dynamic>?;
-  if (deleteError != null) {
-    final errorCode = deleteError['message'] as String? ?? '';
+  if (deleteBody['error'] != null) {
+    final errorMap = deleteBody['error'] as Map<String, dynamic>;
+    final errorCode = errorMap['message'] as String? ?? '';
     // User already deleted — treat as success.
     if (errorCode == 'USER_NOT_FOUND' || errorCode == 'user-not-found') {
       return;
@@ -116,14 +109,23 @@ Future<void> _deleteAccount({
 }
 
 /// Sends a POST request and returns the response body as a string.
+///
+/// The [HttpClient] is disposed after each request to prevent resource leaks.
+/// All I/O operations have a 15-second timeout to avoid hanging indefinitely.
 Future<String> _post({required String url, required Map<String, dynamic> body}) async {
   final uri = Uri.parse(url);
-  final request = await HttpClient().postUrl(uri);
-  request.headers.set('Content-Type', 'application/json');
-  request.write(jsonEncode(body));
+  final client = HttpClient();
+  try {
+    client.connectionTimeout = const Duration(seconds: 15);
+    final request = await client.postUrl(uri).timeout(const Duration(seconds: 15));
+    request.headers.set('Content-Type', 'application/json');
+    request.write(jsonEncode(body));
 
-  final response = await request.close();
-  final responseBody = await response.transform(utf8.decoder).join();
+    final response = await request.close().timeout(const Duration(seconds: 15));
+    final responseBody = await response.transform(utf8.decoder).join();
 
-  return responseBody;
+    return responseBody;
+  } finally {
+    client.close(force: true);
+  }
 }
