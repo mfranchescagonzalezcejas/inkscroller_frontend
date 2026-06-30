@@ -11,10 +11,10 @@ Your manga library, beautifully organized. Read, track, and discover.
 **InkScroller** is the elegant manga reader and library manager that puts your collection front and center.
 
 **📚 YOUR LIBRARY, YOUR WAY**
-- Import your manga collection with a simple scan
+- Save your favorite manga in one place
 - Organize by status: Reading, Completed, Planning, On Hold
-- Track your progress across every title
-- Custom reading lists and favorites
+- Track your reading progress across every title
+- Quick access to your favorites
 
 **📖 SEAMLESS READING**
 - Beautiful reading experience with smooth scrolling
@@ -23,16 +23,15 @@ Your manga library, beautifully organized. Read, track, and discover.
 - Landscape and portrait support
 
 **🔍 DISCOVER NEW TITLES**
-- Explore trending and popular manga
+- Explore trending and popular manga from MangaDex
 - Search by title, author, or genre
-- Personalized recommendations based on your taste
-- See what's trending in the community
+- See what's popular in the community
+- Browse by category and status
 
-**☁️ SYNC EVERYWHERE**
+**☁️ SYNC ACROSS DEVICES**
 - Your library syncs across all your devices
 - Reading progress updates in real-time
-- Works offline with smart caching
-- Seamless cloud backup
+- Secure cloud backup for your data
 
 **🎨 BEAUTIFUL DESIGN**
 - Clean, modern Material Design interface
@@ -65,13 +64,13 @@ No
 No
 
 ## Contact Email
-inkscroller@devdigi.dev
+support@devdigi.dev
 
 ## Website
-https://inkscroller.devdigi.dev
+https://mercedesgonzalez.dev (portfolio)
 
 ## Privacy Policy URL
-https://inkscroller.devdigi.dev/privacy (to be hosted)
+https://mercedesgonzalez.dev/privacy (to be hosted)
 
 ## What's New (Initial Release)
 Welcome to InkScroller v1.0!

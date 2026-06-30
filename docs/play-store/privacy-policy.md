@@ -76,8 +76,8 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 
 If you have questions about this Privacy Policy, please contact us at:
 
-- **Email**: inkscroller@devdigi.dev
-- **Website**: https://inkscroller.devdigi.dev
+- **Email**: support@devdigi.dev
+- **Website**: https://mercedesgonzalez.dev
 
 ## Compliance
 
