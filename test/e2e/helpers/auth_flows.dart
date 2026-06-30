@@ -19,6 +19,10 @@ const Duration _kPreTypeDelay = Duration(milliseconds: 300);
 /// Pause after finishing typing in a field (human reads what they typed).
 const Duration _kPostTypeDelay = Duration(milliseconds: 500);
 
+/// Scroll offset for navigating long forms (registers page terms checkbox,
+/// settings page delete button). Matches typical mobile scroll distance.
+const Offset _kScrollOffset = Offset(0, -300);
+
 /// Pause between a tap and the next interaction (human sees the effect).
 const Duration _kTapDelay = Duration(milliseconds: 600);
 
@@ -169,7 +173,7 @@ Future<void> fillRegistrationForm(WidgetTester tester, TestUser user) async {
   // Scroll down so terms checkbox and button are visible.
   final scrollView = find.byType(SingleChildScrollView);
   if (scrollView.evaluate().isNotEmpty) {
-    await _scrollHuman(tester, scrollView.first, const Offset(0, -300));
+    await _scrollHuman(tester, scrollView.first, _kScrollOffset);
   }
 
   // Accept terms checkbox.
@@ -390,7 +394,7 @@ Future<void> openDeleteDialog(WidgetTester tester) async {
   if (deleteBtnFinder.evaluate().isEmpty) {
     final scrollable = find.byType(Scrollable).last;
     for (var i = 0; i < 5; i++) {
-      await tester.drag(scrollable, const Offset(0, -300));
+      await tester.drag(scrollable, _kScrollOffset);
       await tester.pumpAndSettle();
       if (deleteBtnFinder.evaluate().isNotEmpty) break;
     }

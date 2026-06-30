@@ -113,6 +113,13 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 800));
 
+      // Verify the confirm button is DISABLED (onPressed is null) because
+      // the text is not exactly "DELETE".
+      final confirmButton = tester.widget<FilledButton>(
+        find.byKey(const Key('deleteConfirmButton')),
+      );
+      expect(confirmButton.onPressed, isNull);
+
       // Close keyboard.
       await SystemChannels.textInput.invokeMethod('TextInput.hide');
       await tester.pump(const Duration(milliseconds: 500));
