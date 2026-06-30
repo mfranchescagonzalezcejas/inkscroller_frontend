@@ -73,6 +73,13 @@ void main() {
       // Assert: navigation to home — nav bar should be visible.
       expect(find.byKey(const Key('navProfile')), findsOneWidget);
       print('[sign_in] SUCCESS — back on home after sign in');
+
+      // Let any pending async providers (e.g. _hydrateAsync) complete
+      // before the test ends, to avoid "ProviderContainer already disposed"
+      // errors during teardown.
+      for (var i = 0; i < 4; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
     },
     timeout: const Timeout(Duration(minutes: 3)),
   );
