@@ -68,13 +68,23 @@ Future<void> _openDeleteDialog(WidgetTester tester) async {
 }
 
 void main() {
+  late TestUser deleteUser; // Tracks user for tearDown cleanup.
+
   group('Delete account', () {
+    tearDown(() async {
+      // Safety net: if a test failed before UI deletion, clean up via API.
+      await deleteTestUser(
+        email: deleteUser.email,
+        password: deleteUser.password,
+      );
+    });
+
     testWidgets(
         'Settings → delete account → type DELETE → confirm → redirect to login',
         (tester) async {
-      final user = TestUser.fresh();
+      deleteUser = TestUser.fresh();
       await pumpE2EApp(tester);
-      await completeSignUp(tester, user);
+      await completeSignUp(tester, deleteUser);
 
       await _openDeleteDialog(tester);
 
@@ -105,11 +115,11 @@ void main() {
     });
 
     testWidgets('Re-login with deleted credentials fails', (tester) async {
-      final user = TestUser.fresh();
+      deleteUser = TestUser.fresh();
       await pumpE2EApp(tester);
 
       // Register and then delete the account through the UI.
-      await completeSignUp(tester, user);
+      await completeSignUp(tester, deleteUser);
 
       await _openDeleteDialog(tester);
 
@@ -136,7 +146,7 @@ void main() {
       expect(find.byKey(const Key('signInButton')), findsWidgets);
 
       // Attempt to re-login with the same (now deleted) credentials.
-      await completeSignIn(tester, user);
+      await completeSignIn(tester, deleteUser);
 
       // The login should have failed — either error message visible or
       // still on login page.
@@ -150,9 +160,9 @@ void main() {
     testWidgets(
         'Delete dialog without DELETE text → cancel keeps account active',
         (tester) async {
-      final user = TestUser.fresh();
+      deleteUser = TestUser.fresh();
       await pumpE2EApp(tester);
-      await completeSignUp(tester, user);
+      await completeSignUp(tester, deleteUser);
 
       await _openDeleteDialog(tester);
 
@@ -176,9 +186,7 @@ void main() {
 
       // Verify the dialog is closed and the account is still active.
       expect(find.byKey(const Key('deleteAccountButton')), findsWidgets);
-
-      // Cleanup — delete the user via REST API since we didn't delete via UI.
-      await deleteTestUser(email: user.email, password: user.password);
+      // tearDown will clean up via API.
     });
   });
 }

@@ -57,8 +57,9 @@ void main() {
     );
     await tester.pumpAndSettle(const Duration(seconds: 15));
 
-    // Assert: error message is visible.
-    expect(find.textContaining('Credenciales'), findsOneWidget);
+    // Assert: error SnackBar is visible (locale-independent).
+    // AppFeedback.showError always shows a SnackBar on auth failure.
+    expect(find.byType(SnackBar), findsOneWidget);
 
     // Assert: still on the login page (email field still visible).
     expect(find.byKey(const Key('emailField')), findsOneWidget);

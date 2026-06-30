@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test/e2e/helpers/auth_flows.dart';
@@ -38,63 +37,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 1200));
 
-    // Fill the registration form with the same email.
-    await tester.enterText(
-      find.byKey(const Key('registerEmailField')),
-      user.email,
-    );
-    await tester.pump(const Duration(milliseconds: 800));
-
-    await tester.enterText(
-      find.byKey(const Key('registerUsernameField')),
-      'another_${user.username}',
-    );
-    await tester.pump(const Duration(milliseconds: 800));
-
-    await tester.enterText(
-      find.byKey(const Key('registerPasswordField')),
-      user.password,
-    );
-    await tester.pump(const Duration(milliseconds: 800));
-
-    await tester.enterText(
-      find.byKey(const Key('registerConfirmPasswordField')),
-      user.password,
-    );
-    await tester.pump(const Duration(milliseconds: 800));
-
-    // Set birth date via controller (readOnly field workaround).
-    final now = DateTime.now();
-    final birthDate = DateTime(now.year - 20, now.month, now.day);
-    final formattedDate =
-        '${birthDate.year}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}';
-    final editable = find.descendant(
-      of: find.byKey(const Key('registerBirthDateField')),
-      matching: find.byType(EditableText),
-    );
-    if (editable.evaluate().isNotEmpty) {
-      tester.widget<EditableText>(editable.first).controller.text =
-          formattedDate;
-      await tester.pump(const Duration(milliseconds: 800));
-    }
-
-    // Close keyboard.
-    await SystemChannels.textInput.invokeMethod('TextInput.hide');
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Scroll down.
-    final scrollView = find.byType(SingleChildScrollView);
-    if (scrollView.evaluate().isNotEmpty) {
-      await tester.drag(scrollView.first, const Offset(0, -300));
-      await tester.pumpAndSettle();
-    }
-
-    // Accept terms.
-    final termsCheckbox = find.byType(CheckboxListTile);
-    if (termsCheckbox.evaluate().isNotEmpty) {
-      await tester.tap(termsCheckbox.first, warnIfMissed: false);
-      await tester.pumpAndSettle();
-    }
+    // Fill the registration form with the same email (shared helper).
+    await fillRegistrationForm(tester, user);
 
     // Submit the form.
     await tester.tap(

@@ -112,59 +112,15 @@ Future<void> _scrollHuman(
 // Public flows
 // ---------------------------------------------------------------------------
 
-/// Completes the full sign-up flow for E2E testing.
+/// Fills the registration form fields for E2E testing.
 ///
-/// Starts from the home screen, navigates to login via the profile tab
-/// (triggers the auth guard redirect), then to register. Fills the form,
-/// submits, and waits for navigation to the home page.
+/// Assumes the test is already on the register page. Fills email, username,
+/// password, confirm password, birth date (readOnly workaround), scrolls
+/// down, and accepts the terms checkbox. Does NOT tap the create account
+/// button — the caller is responsible for submitting.
 ///
-/// Locale-agnostic: uses production keys from T4 for reliable widget lookup.
-Future<void> completeSignUp(WidgetTester tester, TestUser user) async {
-  print('[completeSignUp] Starting with user: ${user.email}');
-  // Wait for nav bar to appear — on physical devices the app may take
-  // variable time to initialize after pumpE2EApp. Use pump() instead of
-  // pumpAndSettle() because shimmer/gradient animations never settle.
-  for (var i = 0; i < 30; i++) {
-    await tester.pump(const Duration(milliseconds: 500));
-    if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) {
-      print('[completeSignUp] navProfile found after ${(i + 1) * 0.5}s');
-      break;
-    }
-  }
-  final navVisible = find.byKey(const Key('navProfile')).evaluate().isNotEmpty;
-  print('[completeSignUp] navProfile visible=$navVisible');
-  
-  if (navVisible) {
-    // Step 1: Navigate to login via the Profile tab (triggers auth redirect).
-    await _tapHuman(tester, find.byKey(const Key('navProfile')));
-    await tester.pumpAndSettle();
-    await tester.pump(_kPageLoadDelay);
-  } else {
-    // The app may have landed on the login page directly (e.g., after a
-    // prior test deleted the account). Check if we're already there.
-    final onLogin = find.byKey(const Key('emailField')).evaluate().isNotEmpty;
-    print('[completeSignUp] fallback: onLogin=$onLogin');
-    if (!onLogin) {
-      throw StateError(
-        'completeSignUp: navProfile not found and not on login page',
-      );
-    }
-    // Already on login page — proceed directly to register.
-    await tester.pump(_kPageLoadDelay);
-  }
-
-  // Check if we're on login page.
-  final onLogin =
-      find.byKey(const Key('emailField')).evaluate().isNotEmpty;
-  final onRegister =
-      find.byKey(const Key('registerLink')).evaluate().isNotEmpty;
-  print('[completeSignUp] After navProfile — onLogin=$onLogin onRegister=$onRegister');
-
-  // Step 2: Navigate to register page via the register link key.
-  await _tapHuman(tester, find.byKey(const Key('registerLink')));
-  await tester.pumpAndSettle();
-  await tester.pump(_kPageLoadDelay);
-
+/// Locale-agnostic: uses production keys for reliable widget lookup.
+Future<void> fillRegistrationForm(WidgetTester tester, TestUser user) async {
   // Fill email — human types into field.
   await _typeTextHuman(
     tester,
@@ -220,6 +176,63 @@ Future<void> completeSignUp(WidgetTester tester, TestUser user) async {
     await _tapHuman(tester, termsCheckbox.first, warnIfMissed: false);
     await tester.pumpAndSettle();
   }
+}
+
+/// Completes the full sign-up flow for E2E testing.
+///
+/// Starts from the home screen, navigates to login via the profile tab
+/// (triggers the auth guard redirect), then to register. Fills the form,
+/// submits, and waits for navigation to the home page.
+///
+/// Locale-agnostic: uses production keys from T4 for reliable widget lookup.
+Future<void> completeSignUp(WidgetTester tester, TestUser user) async {
+  print('[completeSignUp] Starting with user: ${user.email}');
+  // Wait for nav bar to appear — on physical devices the app may take
+  // variable time to initialize after pumpE2EApp. Use pump() instead of
+  // pumpAndSettle() because shimmer/gradient animations never settle.
+  for (var i = 0; i < 30; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    if (find.byKey(const Key('navProfile')).evaluate().isNotEmpty) {
+      print('[completeSignUp] navProfile found after ${(i + 1) * 0.5}s');
+      break;
+    }
+  }
+  final navVisible = find.byKey(const Key('navProfile')).evaluate().isNotEmpty;
+  print('[completeSignUp] navProfile visible=$navVisible');
+  
+  if (navVisible) {
+    // Step 1: Navigate to login via the Profile tab (triggers auth redirect).
+    await _tapHuman(tester, find.byKey(const Key('navProfile')));
+    await tester.pumpAndSettle();
+    await tester.pump(_kPageLoadDelay);
+  } else {
+    // The app may have landed on the login page directly (e.g., after a
+    // prior test deleted the account). Check if we're already there.
+    final onLogin = find.byKey(const Key('emailField')).evaluate().isNotEmpty;
+    print('[completeSignUp] fallback: onLogin=$onLogin');
+    if (!onLogin) {
+      throw StateError(
+        'completeSignUp: navProfile not found and not on login page',
+      );
+    }
+    // Already on login page — proceed directly to register.
+    await tester.pump(_kPageLoadDelay);
+  }
+
+  // Check if we're on login page.
+  final onLogin =
+      find.byKey(const Key('emailField')).evaluate().isNotEmpty;
+  final onRegister =
+      find.byKey(const Key('registerLink')).evaluate().isNotEmpty;
+  print('[completeSignUp] After navProfile — onLogin=$onLogin onRegister=$onRegister');
+
+  // Step 2: Navigate to register page via the register link key.
+  await _tapHuman(tester, find.byKey(const Key('registerLink')));
+  await tester.pumpAndSettle();
+  await tester.pump(_kPageLoadDelay);
+
+  // Fill the registration form.
+  await fillRegistrationForm(tester, user);
 
   // Tap create account button by key (locale-agnostic).
   await _tapHuman(
@@ -365,11 +378,11 @@ Future<void> completeDeleteAccount(
   await tester.pumpAndSettle();
   await tester.pump(_kTapDelay);
 
-  // Type email to confirm deletion.
+  // Type 'DELETE' to confirm deletion (dialog checks for this exact string).
   await _typeTextHuman(
     tester,
     find.byKey(const Key('deleteConfirmField')),
-    user.email,
+    'DELETE',
   );
 
   // Close keyboard.

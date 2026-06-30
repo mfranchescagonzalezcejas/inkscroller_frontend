@@ -68,8 +68,17 @@ Future<void> _deleteAccount({
   final signInError = signInBody['error'] as Map<String, dynamic>?;
   if (signInError != null) {
     final errorCode = signInError['message'] as String? ?? '';
-    if (errorCode == 'EMAIL_NOT_FOUND' || errorCode == 'INVALID_PASSWORD') {
-      return; // Account already gone or wrong password — treat as cleaned.
+    if (errorCode == 'EMAIL_NOT_FOUND' ||
+        errorCode == 'USER_NOT_FOUND' ||
+        errorCode == 'user-not-found') {
+      return; // Account already gone — treat as cleaned.
+    }
+    if (errorCode == 'INVALID_PASSWORD' ||
+        errorCode == 'INVALID_LOGIN_CREDENTIALS') {
+      // Password mismatch — account may have been deleted by UI flow already.
+      // Log and treat as cleaned since we can't delete without valid creds.
+      print('[cleanup] $errorCode — account likely already deleted');
+      return;
     }
     throw HttpException(
       'Firebase sign-in failed: $errorCode',

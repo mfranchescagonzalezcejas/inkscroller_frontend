@@ -34,35 +34,45 @@ void main() {
 
     // Look for manga tiles (InkWell covers) on the home/library page.
     final mangaTiles = find.byType(InkWell);
-    if (mangaTiles.evaluate().isNotEmpty) {
-      // Human pauses before tapping a manga.
-      await tester.pump(const Duration(milliseconds: 600));
-
-      await tester.tap(mangaTiles.first, warnIfMissed: false);
-      await tester.pumpAndSettle(const Duration(seconds: 10));
-
-      // On the detail page, look for chapter list items.
-      final chapterTiles = find.byType(ListTile);
-      if (chapterTiles.evaluate().isNotEmpty) {
-        // Human pauses before tapping a chapter.
-        await tester.pump(const Duration(milliseconds: 600));
-
-        await tester.tap(chapterTiles.first, warnIfMissed: false);
-        await tester.pumpAndSettle(const Duration(seconds: 10));
-
-        // Verify the reader page loaded (a Scaffold is present).
-        expect(find.byType(Scaffold), findsWidgets);
-
-        // Human pauses before pressing back.
-        await tester.pump(const Duration(milliseconds: 800));
-
-        // Press back to return to the manga detail page.
-        await tester.pageBack();
-        await tester.pumpAndSettle(const Duration(seconds: 5));
-
-        // Verify we are back on the manga detail page.
-        expect(find.byType(Scaffold), findsWidgets);
-      }
+    if (mangaTiles.evaluate().isEmpty) {
+      // No manga in library — user is freshly created with no data.
+      // Verify the home/library page loaded (nav bar visible).
+      expect(find.byKey(const Key('navProfile')), findsOneWidget);
+      // Test passes — we verified auth + library page load.
+      return;
     }
+
+    // Human pauses before tapping a manga.
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await tester.tap(mangaTiles.first, warnIfMissed: false);
+    await tester.pumpAndSettle(const Duration(seconds: 10));
+
+    // On the detail page, look for chapter list items.
+    final chapterTiles = find.byType(ListTile);
+    if (chapterTiles.evaluate().isEmpty) {
+      // Manga detail loaded but no chapters. Verify we're on detail page.
+      expect(find.byType(Scaffold), findsWidgets);
+      return;
+    }
+
+    // Human pauses before tapping a chapter.
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await tester.tap(chapterTiles.first, warnIfMissed: false);
+    await tester.pumpAndSettle(const Duration(seconds: 10));
+
+    // Verify the reader page loaded (a Scaffold is present).
+    expect(find.byType(Scaffold), findsWidgets);
+
+    // Human pauses before pressing back.
+    await tester.pump(const Duration(milliseconds: 800));
+
+    // Press back to return to the manga detail page.
+    await tester.pageBack();
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+
+    // Verify we are back on the manga detail page.
+    expect(find.byType(Scaffold), findsWidgets);
   });
 }
