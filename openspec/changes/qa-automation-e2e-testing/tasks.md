@@ -74,15 +74,15 @@
   - **Archivos:** `test/e2e/helpers/test_app.dart`
   - **Dependencias:** T1
   - **Esfuerzo:** Medio
-  - **Criterio de aceptación:** `pumpE2EApp(tester)` inicializa `IntegrationTestWidgetsFlutterBinding`, llama `app.main()` (de `main_dev.dart`), y espera a que el widget tree esté estable con `pumpAndSettle(timeout: Duration(seconds: 15))`. Sin mocks.
-  - **Detalles:** Importar `package:integration_test/integration_test.dart` y `package:inkscroller_flutter/main_dev.dart` como `app`. Usar `TestWidgetsFlutterBinding.ensureInitialized()` como primer paso. La función no recibe parámetros de configuración — la app se configura sola vía `--dart-define`.
+  - **Criterio de aceptación:** `pumpE2EApp(tester)` inicializa `IntegrationTestWidgetsFlutterBinding`, llama `app.main()` (de `main_dev.dart`), y espera a que el widget tree esté estable con pump loops de 500ms (no `pumpAndSettle` — gradient/shimmer animations never settle). Sin mocks.
+  - **Detalles:** Importar `package:integration_test/integration_test.dart` y `package:inkscroller_flutter/main_dev.dart` como `app`. Usar `IntegrationTestWidgetsFlutterBinding.ensureInitialized()` como primer paso. La función no recibe parámetros de configuración — la app se configura sola vía `--dart-define`.
 
 - [x] T7 — Crear `deleteTestUser()` vía Firebase Auth REST API
   - **Archivos:** `test/e2e/helpers/cleanup.dart`
   - **Dependencias:** ninguna
   - **Esfuerzo:** Medio
   - **Criterio de aceptación:** `deleteTestUser(email, password)` obtiene ID token vía `signInWithPassword` REST, luego llama `accounts:delete` con la web API key. Reintentos con backoff exponencial (max 3). No falla el test si la cuenta ya no existe (trata `user-not-found` como éxito).
-  - **Detalles:** Usar `http` package. Endpoints: `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$apiKey` y `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$apiKey`. La API key viene de `const String.fromEnvironment('FIREBASE_WEB_API_KEY')`. Manejar `EMAIL_NOT_FOUND` y `INVALID_PASSWORD` como "cuenta ya no existe".
+  - **Detalles:** Usar `dart:io` `HttpClient`. Endpoints: `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$apiKey` y `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$apiKey`. La API key viene de `const String.fromEnvironment('FIREBASE_WEB_API_KEY')`. Manejar `EMAIL_NOT_FOUND` e `INVALID_LOGIN_CREDENTIALS` como "cuenta ya no existe". El `HttpClient` se dispone en `finally` block con timeouts de 15s en cada operación I/O.
 
 - [x] T8 — Crear `auth_flows.dart` con flujos reutilizables
   - **Archivos:** `test/e2e/helpers/auth_flows.dart`

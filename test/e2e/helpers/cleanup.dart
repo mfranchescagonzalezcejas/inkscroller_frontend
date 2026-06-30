@@ -68,8 +68,9 @@ Future<void> _deleteAccount({
   if (signInBody['error'] != null) {
     final errorMap = signInBody['error'] as Map<String, dynamic>;
     final errorCode = errorMap['message'] as String? ?? '';
-    if (errorCode == 'EMAIL_NOT_FOUND' || errorCode == 'INVALID_PASSWORD') {
-      return; // Account already gone or wrong password — treat as cleaned.
+    if (errorCode == 'EMAIL_NOT_FOUND' ||
+        errorCode == 'INVALID_LOGIN_CREDENTIALS') {
+      return; // Account already gone — treat as cleaned.
     }
     throw HttpException(
       'Firebase sign-in failed: $errorCode',
@@ -108,14 +109,23 @@ Future<void> _deleteAccount({
 }
 
 /// Sends a POST request and returns the response body as a string.
+///
+/// The [HttpClient] is disposed after each request to prevent resource leaks.
+/// All I/O operations have a 15-second timeout to avoid hanging indefinitely.
 Future<String> _post({required String url, required Map<String, dynamic> body}) async {
   final uri = Uri.parse(url);
-  final request = await HttpClient().postUrl(uri);
-  request.headers.set('Content-Type', 'application/json');
-  request.write(jsonEncode(body));
+  final client = HttpClient();
+  try {
+    client.connectionTimeout = const Duration(seconds: 15);
+    final request = await client.postUrl(uri).timeout(const Duration(seconds: 15));
+    request.headers.set('Content-Type', 'application/json');
+    request.write(jsonEncode(body));
 
-  final response = await request.close();
-  final responseBody = await response.transform(utf8.decoder).join();
+    final response = await request.close().timeout(const Duration(seconds: 15));
+    final responseBody = await response.transform(utf8.decoder).join();
 
-  return responseBody;
+    return responseBody;
+  } finally {
+    client.close(force: true);
+  }
 }
