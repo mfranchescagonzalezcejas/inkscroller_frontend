@@ -85,10 +85,7 @@ Future<void> _deleteAccount({
     );
   }
 
-  final idToken = signInResponse.isNotEmpty
-      ? (jsonDecode(signInResponse) as Map<String, dynamic>)['idToken']
-          as String?
-      : null;
+  final idToken = signInBody['idToken'] as String?;
 
   if (idToken == null) {
     throw const HttpException('No ID token returned from sign-in');

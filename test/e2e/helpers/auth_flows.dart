@@ -355,6 +355,63 @@ Future<void> completeSignOut(WidgetTester tester) async {
   await tester.pump(_kPageLoadDelay);
 }
 
+/// Navigates from any authenticated tab to the delete account dialog.
+///
+/// Handles profile tab → settings → scroll to delete button → tap → wait
+/// for dialog animation. Assumes the user is authenticated and the app
+/// shows the bottom nav bar.
+Future<void> openDeleteDialog(WidgetTester tester) async {
+  // Navigate to Profile via the nav bar.
+  await _tapHuman(tester, find.byKey(const Key('navProfile')));
+  await tester.pumpAndSettle();
+  await tester.pump(_kPageLoadDelay);
+
+  // Check if we're on the profile page.
+  final onProfile =
+      find.byKey(const Key('settingsButton')).evaluate().isNotEmpty;
+  if (!onProfile) {
+    // Maybe we're on login (auth guard). Try again after settle.
+    await tester.pumpAndSettle();
+  }
+
+  // Tap settings icon on the profile page.
+  await _tapHuman(
+    tester,
+    find.byKey(const Key('settingsButton')),
+    warnIfMissed: false,
+  );
+  await tester.pumpAndSettle();
+  await tester.pump(_kPageLoadDelay);
+
+  // Scroll to make deleteAccountButton visible and tappable.
+  final deleteBtnFinder = find.byKey(const Key('deleteAccountButton'));
+  if (deleteBtnFinder.evaluate().isEmpty) {
+    final scrollable = find.byType(Scrollable).last;
+    for (var i = 0; i < 5; i++) {
+      await tester.drag(scrollable, const Offset(0, -300));
+      await tester.pumpAndSettle();
+      if (deleteBtnFinder.evaluate().isNotEmpty) break;
+    }
+  }
+  await tester.scrollUntilVisible(
+    deleteBtnFinder.first,
+    -100,
+    scrollable: find.byType(Scrollable).last,
+  );
+  await tester.pumpAndSettle();
+
+  // Close any overlays/snackbars that might intercept the tap.
+  await _closeOverlaysAndKeyboard(tester);
+
+  // Tap "Eliminar cuenta" to open the dialog.
+  await _tapHuman(tester, deleteBtnFinder.first, warnIfMissed: false);
+  // Pump multiple times to let the dialog animation complete.
+  for (var i = 0; i < 10; i++) {
+    await tester.pump(const Duration(milliseconds: 500));
+    if (find.byKey(const Key('deleteConfirmField')).evaluate().isNotEmpty) break;
+  }
+}
+
 /// Deletes the authenticated user's account via the profile page.
 ///
 /// Assumes the user is authenticated and the app is on a tab page.
