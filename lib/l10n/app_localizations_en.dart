@@ -437,8 +437,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authBirthDateRequired => 'Select your birth date.';
 
   @override
-  String get authBirthDateInvalid =>
-      'Enter a birth date between 1900-01-01 and today.';
+  String get authBirthDateInvalid => 'You must be at least 13 years old.';
 
   @override
   String get authTermsAcknowledgement =>

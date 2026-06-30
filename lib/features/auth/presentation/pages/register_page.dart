@@ -385,6 +385,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   // ── Primary CTA ───────────────────────────────────────────────
                   AuthGradientButton(
+                    key: const Key('createAccountButton'),
                     onPressed: isActionLocked ? null : _submit,
                     isLoading: authState.isLoading,
                     label: isProfileCompletion
