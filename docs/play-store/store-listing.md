@@ -70,7 +70,7 @@ support@devdigi.dev
 https://devdigi.dev
 
 ## Privacy Policy URL
-https://privacy.devdigi.dev
+https://inkscroller-privacy.vercel.app
 
 ## What's New (Initial Release)
 Welcome to InkScroller v1.0!
