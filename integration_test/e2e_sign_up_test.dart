@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test/e2e/helpers/auth_flows.dart';
@@ -21,7 +22,14 @@ void main() {
 
     await completeSignUp(tester, user);
 
-    // Verify navigation to home — the bottom nav or Library tab should be visible.
-    expect(find.text('Library'), findsOneWidget);
+    // Verify we left the auth flow — emailField should no longer be visible.
+    expect(find.byKey(const Key('emailField')), findsNothing);
+    // Verify we're on the home page — Library content or bottom nav is visible.
+    // find.text('Library') works for both EN and ES since it's the nav label.
+    expect(
+      find.text('Library').evaluate().isNotEmpty ||
+          find.text('Biblioteca').evaluate().isNotEmpty,
+      isTrue,
+    );
   });
 }
