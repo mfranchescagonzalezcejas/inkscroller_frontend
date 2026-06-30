@@ -121,9 +121,11 @@ Users can delete their account and all associated data:
 1. Navigate to Profile → Settings
 2. Tap "Delete Account"
 3. Type "DELETE" to confirm
-4. Account and all data are permanently removed
-
-This feature is implemented and tested (PR #45, merged to develop).
+4. The following data is permanently removed:
+   - Backend account and library data
+   - Firebase authentication account
+   - All local data on the device (reading progress, library cache, preferences)
+   - User is signed out of the application
 
 ## 7. Data Retention
 

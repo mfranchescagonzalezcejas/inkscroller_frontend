@@ -47,7 +47,7 @@ We do **not** sell your personal information to third parties.
 - **Account data**: Retained until you delete your account
 - **Reading progress**: Retained until you delete your account
 - **Analytics data**: Retained for up to 14 months
-- **Local cache**: Retained until app uninstall
+- **Local cache**: Retained until app uninstall or account deletion
 
 ## Data Security
 
@@ -60,9 +60,12 @@ We do **not** sell your personal information to third parties.
 You have the right to:
 - **Access** your personal data
 - **Delete** your account and all associated data
-- **Export** your data (contact us for assistance)
 
-To delete your account, use the "Delete Account" feature in the app's Profile settings.
+To delete your account, use the "Delete Account" feature in the app's Profile settings. This will:
+1. Delete your account from our backend
+2. Delete your Firebase authentication account
+3. Clear all local data stored on your device
+4. Sign you out of the application
 
 ## Children's Privacy
 

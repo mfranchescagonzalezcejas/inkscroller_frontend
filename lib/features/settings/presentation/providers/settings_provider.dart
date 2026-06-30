@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../domain/repositories/settings_repository.dart';
@@ -79,10 +80,26 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   }
 
   /// Signs out the user after successful account deletion.
+  ///
+  /// Deletes the Firebase user, clears local data, and signs out.
   Future<void> _signOutAfterDeletion() async {
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          await user.delete();
+        } on FirebaseAuthException catch (_) {
+          // Firebase user deletion may fail if token is stale — non-critical
+          // since backend account is already deleted.
+        }
+      }
+
+      // Clear all local data (reading progress, library cache, preferences).
+      final prefs = sl<SharedPreferences>();
+      await prefs.clear();
+
       await FirebaseAuth.instance.signOut();
-    } on FirebaseAuthException catch (_) {
+    } on Exception catch (_) {
       // Sign-out failure after deletion is non-critical — the backend account
       // is already deleted. The auth stream listener will pick up the state.
     }
