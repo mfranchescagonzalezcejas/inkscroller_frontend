@@ -72,12 +72,34 @@ https://devdigi.dev
 ## Privacy Policy URL
 https://inkscroller-privacy.vercel.app
 
+## Screenshots (8 max, min 2)
+
+| # | File | Description |
+|---|------|-------------|
+| 1 | `01-home-trending.png` | Home — trending manga carousel |
+| 2 | `02-explore-search.png` | Explore — search + full catalog |
+| 3 | `03-manga-detail.png` | Manga detail — chapters, status, description |
+| 4 | `05-reader.png` | Reader — clean reading experience |
+| 5 | `06-reader-settings.png` | Reader settings — direction, brightness, AMOLED |
+| 6 | `07-library.png` | Library — collections, stats, quick actions |
+| 7 | `08-login.png` | Login — email + Google sign-in |
+| 8 | `09-settings.png` | Profile & Settings — account, theme, language |
+
+Screenshots folder: `docs/play-store/screenshots/`
+
+## Feature Graphic (1024×500)
+- `feature-graphic.op` — OpenPencil source (editable)
+- `feature-graphic.png` — Exported PNG for Play Console
+- Uses InkScroller "Cinematic Canvas" color palette
+
+## App Icon
+512×512: `assets/icons/prod/foreground.png` (1024×1024, resize to 512×512 for upload)
+
 ## What's New (Initial Release)
 Welcome to InkScroller v1.0!
 
 - Beautiful manga library management
 - Smooth reading experience
 - Cross-device sync
-- Personalized recommendations
-- Dark mode support
+- Dark mode + AMOLED theme
 - Account deletion feature
