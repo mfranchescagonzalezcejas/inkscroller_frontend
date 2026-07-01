@@ -3,7 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 /// Runtime app version data resolved from platform package metadata.
 class AppVersionInfo {
-  /// Marketing version (e.g. 0.5.0).
+  /// Marketing version (e.g. 1.0.0).
   final String version;
 
   /// Internal build number (e.g. 21).
