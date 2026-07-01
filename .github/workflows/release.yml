@@ -54,7 +54,7 @@ jobs:
 
       - name: Guard against focused Dart tests
         run: |
-          if grep -RInE '(^|[^A-Za-z0-9_])solo_(test|group)[[:space:]]*\(' test --include='*_test.dart'; then
+          if grep -RInE '(^|[^A-Za-z0-9_])solo_(test|group)[[:space:]]*\(' test integration_test --include='*_test.dart'; then
             echo "Focused Dart tests are not allowed in release CI. Remove solo_test/solo_group before tagging."
             exit 1
           fi
