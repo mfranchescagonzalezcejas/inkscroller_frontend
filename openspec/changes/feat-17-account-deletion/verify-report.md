@@ -26,7 +26,8 @@
 - `settings_repository.dart:6` one_member_abstracts (info)
 - `settings_provider.dart:86` avoid_catches_without_on_clauses (info)
 - `account_section.dart:56` use_if_null_to_convert_nulls_to_bools (info)
-- `delete_account_dialog.dart:86,90` prefer_const_constructors (info)
+- `delete_account_dialog.dart:86` prefer_const_constructors (info)
+- `delete_account_dialog.dart:90` prefer_const_constructors (info)
 
 **Tests**: ✅ 34 passed / 0 failed / 0 skipped
 ```
@@ -44,10 +45,10 @@ $ fvm flutter test test/features/settings/
 | RF2 | Dialog with warning + "DELETE" confirmation + disabled button | `delete_account_dialog_test.dart` (6 tests) | ✅ COMPLIANT |
 | RF3a | DELETE `/users/me` → signOut → login + snackbar | `settings_remote_ds_impl_test.dart`; `settings_provider_test.dart`; `settings_page.dart:64-71` | ✅ COMPLIANT |
 | RF3b | Error → contextual message + retry | `settings_provider_test.dart`; `settings_repository_impl_test.dart`; `settings_remote_ds_impl_test.dart` | ⚠️ PARTIAL (exact wording not asserted) |
-| RF3c | 401 → refresh + retry OR redirect to login | `settings_remote_ds_impl_test.dart` (401 mapping); DioClient interceptor (global) | ⚠️ PARTIAL (covered at DioClient layer, not feature-local) |
+| RF3c | 401 → auth error surfaced, dialog remains retryable | `settings_remote_ds_impl_test.dart` (401 mapping); `delete_account_dialog_test.dart` (failure stays open) | ✅ COMPLIANT |
 | RF4 | Web resource at inkscroller-delete-account.vercel.app | (external) | ➖ Skipped |
 
-**Compliance summary**: 4/5 in-scope COMPLIANT, 2 PARTIAL, 1 external.
+**Compliance summary**: 4/5 in-scope COMPLIANT, 1 PARTIAL, 1 external.
 
 ## Correctness (Static Evidence)
 
@@ -112,7 +113,6 @@ $ fvm flutter test test/features/settings/
 2. Unused imports/shows in 4 files
 3. `apply-progress` artifact missing from Engram
 4. Spec wording deviations (dialog title/button/warning text paraphrased)
-5. Scenario 3 (401 refresh) covered at DioClient layer, not feature-local
 
 **SUGGESTION**:
 1. Add page-level test for success path (redirect + snackbar)

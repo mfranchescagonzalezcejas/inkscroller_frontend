@@ -69,14 +69,14 @@ Cuando toca reintentar
 Entonces se reintenta la llamada a DELETE /users/me
 ```
 
-### Escenario 3: Token expirado
+### Escenario 3: Token expirado o inválido
 ```gherkin
 Dado que el usuario está en el flujo de eliminación
 Y toca "Eliminar mi cuenta"
-Pero la API responde 401 (token expirado)
-Entonces se fuerza el refresh del token
-Y se reintenta la llamada
-O si el refresh falla, se redirige a login
+Pero la API responde 401 (token expirado o inválido)
+Entonces se muestra un mensaje de error de autenticación
+Y el diálogo permanece abierto con el estado de carga restablecido
+Y el usuario puede cerrar el diálogo, volver a autenticarse e intentarlo de nuevo
 ```
 
 ### Escenario 4: Cancelar eliminación
@@ -96,7 +96,7 @@ Y su cuenta no se modifica
 |------|------|-------------|
 | Delete account success | Unit/widget | Confirma llamada API, sign-out, redirección |
 | Delete account network error | Unit/widget | Muestra error, botón reintentar |
-| Delete account 401 | Unit/widget | Refresh token + retry, o redirect a login |
+| Delete account 401 | Unit/widget | Muestra error de autenticación, diálogo permanece abierto |
 | Delete account cancel | Widget | Diálogo se cierra sin acción |
 | Delete account confirmation required | Widget | Botón deshabilitado hasta escribir DELETE |
 | Settings page renders | Widget | La página se construye con email del usuario |

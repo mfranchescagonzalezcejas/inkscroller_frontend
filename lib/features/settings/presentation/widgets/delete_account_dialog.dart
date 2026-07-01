@@ -124,7 +124,12 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                   setState(() => _isDeleting = true);
                   await ref.read(settingsProvider.notifier).deleteAccount();
                   if (!context.mounted) return;
-                  Navigator.of(context).pop(true);
+                  final state = ref.read(settingsProvider);
+                  if (state.accountDeleted) {
+                    Navigator.of(context).pop(true);
+                  } else {
+                    setState(() => _isDeleting = false);
+                  }
                 }
               : null,
           style: FilledButton.styleFrom(

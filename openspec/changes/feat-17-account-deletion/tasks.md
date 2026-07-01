@@ -96,7 +96,7 @@
 ---
 
 ### T8 — DI: Injection container ✅
-**Archivos**: `injection_container.dart` (modificar)
+**Archivos**: `lib/core/di/injection.dart` (modificar)
 **Estimación**: ~10 líneas
 
 - [x] Agregar `initSettingsDI()` con registros de DataSource y Repository
