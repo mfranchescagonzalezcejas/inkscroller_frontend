@@ -88,7 +88,9 @@ https://inkscroller-privacy.vercel.app
 Screenshots folder: `docs/play-store/screenshots/`
 
 ## Feature Graphic (1024×500)
-Not created yet — user creates in Canva/Figma.
+- `feature-graphic.op` — OpenPencil source (editable)
+- `feature-graphic.png` — Exported PNG for Play Console
+- Uses InkScroller "Cinematic Canvas" color palette
 
 ## App Icon
 512×512: `assets/icons/prod/foreground.png` (1024×1024, resize to 512×512 for upload)
