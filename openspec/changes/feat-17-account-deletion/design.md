@@ -135,7 +135,7 @@ El acceso desde el área autenticada puede ser:
 | Error | UX |
 |---|---|
 | Network error | Snackbar: "Error de conexión. Intentá de nuevo." + botón reintentar |
-| 401 Unauthorized | Forzar refresh token + reintentar 1 vez. Si falla, redirigir a login |
+| 401 Unauthorized | Snackbar: "Error de autenticación. Cerrá sesión y volvé a ingresar." |
 | 500 Server error | Snackbar: "Error del servidor. Intentá más tarde." |
 | Timeout | Snackbar genérico de red + reintentar |
 
@@ -144,12 +144,12 @@ El acceso desde el área autenticada puede ser:
 ## DI (get_it)
 
 ```dart
-void initDI() {
+void initSettingsDI() {
   sl.registerLazySingleton<SettingsRemoteDataSource>(
-    () => SettingsRemoteDataSourceImpl(dio: sl()),
+    () => SettingsRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
   sl.registerLazySingleton<SettingsRepository>(
-    () => SettingsRepositoryImpl(remoteDataSource: sl()),
+    () => SettingsRepositoryImpl(remoteDataSource: sl<SettingsRemoteDataSource>()),
   );
 }
 ```
@@ -189,7 +189,7 @@ lib/features/settings/
 
 | Archivo | Cambio |
 |---|---|
-| `lib/core/di/injection_container.dart` | Agregar `initSettingsDI()` |
+| `lib/core/di/injection.dart` | Agregar `initSettingsDI()` |
 | `lib/core/router/app_router.dart` | Agregar ruta `/settings` |
 | `lib/features/library/presentation/pages/library_page.dart` | Agregar ícono de settings |
 | `lib/features/home/presentation/pages/home_page.dart` | Agregar ícono de settings (si aplica) |

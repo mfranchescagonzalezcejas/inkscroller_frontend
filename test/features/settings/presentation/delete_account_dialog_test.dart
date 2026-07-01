@@ -108,7 +108,8 @@ void main() {
     verify(() => repository.deleteAccount()).called(1);
   });
 
-  testWidgets('delete error shows error message', (tester) async {
+  testWidgets('delete error keeps dialog open and resets loading state',
+      (tester) async {
     when(() => repository.deleteAccount()).thenAnswer(
       (_) async => const Left(
         ServerFailure(message: 'Server error'),
@@ -124,8 +125,13 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Eliminar'));
     await tester.pumpAndSettle();
 
-    // The dialog should still be visible because the notifier sets deleteError
-    // but the dialog closes via Navigator.pop after the await completes
     verify(() => repository.deleteAccount()).called(1);
+    // Dialog must remain visible — not popped on failure.
+    expect(find.byType(DeleteAccountDialog), findsOneWidget);
+    // Confirm button must be re-enabled (loading state reset).
+    final eliminarButton = find.widgetWithText(FilledButton, 'Eliminar');
+    expect(eliminarButton, findsOneWidget);
+    final button = tester.widget<FilledButton>(eliminarButton);
+    expect(button.onPressed, isNotNull);
   });
 }
