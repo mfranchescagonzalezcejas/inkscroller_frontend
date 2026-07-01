@@ -91,6 +91,8 @@ android/*.jks
 android/*.keystore
 android/app/*.jks
 android/app/*.keystore
+android/app/**/*.jks
+android/app/**/*.keystore
 android/app/upload-keystore.jks
 android/key.properties
 
