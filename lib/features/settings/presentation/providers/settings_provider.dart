@@ -16,11 +16,15 @@ class SettingsState {
   /// True after the account has been successfully deleted.
   final bool accountDeleted;
 
+  /// Non-null when backend deletion succeeded but Firebase user cleanup failed.
+  final String? deleteWarning;
+
   /// Creates the initial settings state.
   const SettingsState({
     this.isDeletingAccount = false,
     this.deleteError,
     this.accountDeleted = false,
+    this.deleteWarning,
   });
 
   /// Returns a copy of this state with the provided fields overwritten.
@@ -29,11 +33,15 @@ class SettingsState {
     String? deleteError,
     bool? accountDeleted,
     bool clearError = false,
+    String? deleteWarning,
+    bool clearWarning = false,
   }) {
     return SettingsState(
       isDeletingAccount: isDeletingAccount ?? this.isDeletingAccount,
       deleteError: clearError ? null : deleteError ?? this.deleteError,
       accountDeleted: accountDeleted ?? this.accountDeleted,
+      deleteWarning:
+          clearWarning ? null : deleteWarning ?? this.deleteWarning,
     );
   }
 }
@@ -62,6 +70,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(
       isDeletingAccount: true,
       clearError: true,
+      clearWarning: true,
       accountDeleted: false,
     );
 
@@ -78,36 +87,47 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     );
 
     if (result.isRight()) {
+      String? warning;
+      var cleanupFailed = false;
       try {
-        await _signOutAfterDeletion();
-        state = state.copyWith(
-          isDeletingAccount: false,
-          accountDeleted: true,
-        );
+        warning = await _signOutAfterDeletion();
       } on Exception catch (e) {
-        state = state.copyWith(
-          isDeletingAccount: false,
-          deleteError: 'Account deleted but cleanup failed: $e',
-        );
+        warning = 'Local cleanup failed: $e';
+        cleanupFailed = true;
       }
+      state = state.copyWith(
+        isDeletingAccount: false,
+        accountDeleted: !cleanupFailed,
+        deleteError: cleanupFailed ? warning : null,
+        deleteWarning: cleanupFailed ? null : warning,
+      );
     }
   }
 
   /// Signs out the user after successful account deletion.
   ///
-  /// Deletes the Firebase user, clears local data, and signs out.
-  /// Throws if Firebase Auth operations fail, allowing the caller
-  /// to report the failure.
-  Future<void> _signOutAfterDeletion() async {
+  /// Attempts to delete the Firebase user (non-blocking on failure),
+  /// then clears local data and signs out. Returns a warning string
+  /// if Firebase user deletion failed, null otherwise.
+  Future<String?> _signOutAfterDeletion() async {
+    String? warning;
     final user = _firebaseAuth.currentUser;
     if (user != null) {
-      await user.delete();
+      try {
+        await user.delete();
+      } on Exception catch (e) {
+        warning = 'Firebase user deletion failed: $e';
+      }
     }
 
     final prefs = sl<SharedPreferences>();
-    await prefs.clear();
+    final cleared = await prefs.clear();
+    if (!cleared) {
+      throw Exception('SharedPreferences clear failed');
+    }
 
     await _firebaseAuth.signOut();
+    return warning;
   }
 
   /// Clears the current error state.
