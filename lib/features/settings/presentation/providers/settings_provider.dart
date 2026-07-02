@@ -49,17 +49,18 @@ class SettingsState {
 /// Manages account-level settings operations (e.g. account deletion).
 class SettingsNotifier extends StateNotifier<SettingsState> {
   final SettingsRepository _repository;
-  final FirebaseAuth _firebaseAuth;
+  final FirebaseAuth? _firebaseAuth;
 
   /// Creates a [SettingsNotifier] with the given [repository].
   ///
-  /// Optionally inject [firebaseAuth] for testability; defaults to
-  /// `FirebaseAuth.instance` in production.
+  /// Optionally inject [firebaseAuth] for testability. When omitted,
+  /// `FirebaseAuth.instance` is resolved lazily at deletion time to
+  /// avoid touching Firebase before `initializeApp`.
   SettingsNotifier({
     required SettingsRepository repository,
     FirebaseAuth? firebaseAuth,
   })  : _repository = repository,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+        _firebaseAuth = firebaseAuth,
         super(const SettingsState());
 
   /// Deletes the authenticated user's account.
@@ -91,14 +92,19 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       var cleanupFailed = false;
       try {
         warning = await _signOutAfterDeletion();
-      } on Exception catch (e) {
-        warning = 'Local cleanup failed: $e';
+      } on Exception catch (_) {
+        // ponytail: safe message, no raw exception text for user-facing state
+        warning = 'Local cleanup failed';
         cleanupFailed = true;
       }
+      // Surface any cleanup issue (exception or warning) as a visible error.
+      cleanupFailed = cleanupFailed || warning != null;
       state = state.copyWith(
         isDeletingAccount: false,
         accountDeleted: !cleanupFailed,
-        deleteError: cleanupFailed ? warning : null,
+        deleteError: cleanupFailed
+            ? 'Account deleted, but cleanup failed. Please sign in again if needed.'
+            : null,
         deleteWarning: cleanupFailed ? null : warning,
       );
     }
@@ -111,22 +117,31 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   /// if Firebase user deletion failed, null otherwise.
   Future<String?> _signOutAfterDeletion() async {
     String? warning;
-    final user = _firebaseAuth.currentUser;
+    final auth = _firebaseAuth ?? FirebaseAuth.instance;
+    final user = auth.currentUser;
     if (user != null) {
       try {
         await user.delete();
-      } on Exception catch (e) {
-        warning = 'Firebase user deletion failed: $e';
+      } on Exception catch (_) {
+        // ponytail: safe message, no raw exception text for user-facing state
+        warning = 'Firebase user deletion failed';
       }
     }
 
     final prefs = sl<SharedPreferences>();
-    final cleared = await prefs.clear();
-    if (!cleared) {
-      throw Exception('SharedPreferences clear failed');
+    try {
+      final cleared = await prefs.clear();
+      if (!cleared) {
+        warning =
+            warning != null ? '$warning; Prefs clear failed' : 'Prefs clear failed';
+      }
+    } on Exception catch (_) {
+      // ponytail: catch prefs.clear() exceptions so signOut always runs
+      warning =
+          warning != null ? '$warning; Prefs clear failed' : 'Prefs clear failed';
     }
 
-    await _firebaseAuth.signOut();
+    await auth.signOut();
     return warning;
   }
 
