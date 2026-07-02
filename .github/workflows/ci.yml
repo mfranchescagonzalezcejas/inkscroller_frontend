@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - develop
-      - master
+      - main
   push:
     branches:
       - develop
@@ -104,7 +104,9 @@ jobs:
             test/features/library/presentation/providers/ \
             test/features/preferences/presentation/providers/ \
             test/features/profile/presentation/providers/ \
-            test/features/settings/presentation/providers/
+            test/features/settings/presentation/providers/ \
+            test/features/settings/presentation/settings_provider_test.dart \
+            test/features/settings/presentation/delete_account_dialog_test.dart
 
   ui-smoke:
     name: UI smoke tests (routing + critical surfaces)

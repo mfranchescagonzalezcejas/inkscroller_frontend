@@ -108,6 +108,18 @@ void main() {
     expect(find.text('Limpiar datos guardados'), findsOneWidget);
   });
 
+  testWidgets(
+    'guest user does not see delete account button',
+    (tester) async {
+      await pumpSettingsPage(tester);
+      await tester.pumpAndSettle();
+
+      // The stub auth notifier has user=null (guest/unauthenticated).
+      // AccountSection must render SizedBox.shrink — no delete button.
+      expect(find.byKey(const Key('deleteAccountButton')), findsNothing);
+    },
+  );
+
   testWidgets('clears cache and shows success snackbar', (tester) async {
     await pumpSettingsPage(tester);
 

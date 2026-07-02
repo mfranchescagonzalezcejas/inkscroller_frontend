@@ -42,7 +42,7 @@ Your manga library, beautifully organized. Read, track, and discover.
 **🔒 PRIVACY FIRST**
 - Your data is encrypted and secure
 - Delete your account anytime
-- No ads, no tracking, no nonsense
+- No ads, no nonsense
 - Open and transparent privacy policy
 
 Download InkScroller today and experience your manga collection like never before.
