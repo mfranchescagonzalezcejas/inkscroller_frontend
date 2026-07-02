@@ -10,21 +10,21 @@ void main() {
       // Full integration coverage lives in integration_test/ files.
       expect(
         completeSignUp,
-        isA<Future<void> Function(dynamic, TestUser)>(),
+        isA<Future<void> Function(WidgetTester, TestUser)>(),
       );
     });
 
     test('completeSignIn has correct signature', () {
       expect(
         completeSignIn,
-        isA<Future<void> Function(dynamic, TestUser)>(),
+        isA<Future<void> Function(WidgetTester, TestUser)>(),
       );
     });
 
     test('completeSignOut has correct signature', () {
       expect(
         completeSignOut,
-        isA<Future<void> Function(dynamic)>(),
+        isA<Future<void> Function(WidgetTester)>(),
       );
     });
 
