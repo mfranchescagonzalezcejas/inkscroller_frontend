@@ -57,7 +57,7 @@
 - **Backend API** (devdigi.dev): Profile storage (username, birth date), library sync, reading progress
 
 ### Does your app have a privacy policy?
-**To be created** — Will be hosted at a public URL before release.
+**Yes** — [https://inkscroller-privacy.vercel.app](https://inkscroller-privacy.vercel.app)
 
 ### Can users request data deletion?
 **Yes** — The app implements account deletion (issue #17, merged). Users can delete their account and all associated data from the Profile page.

@@ -176,7 +176,7 @@ See [RELEASING.md](RELEASING.md) for the complete checklist.
 Quick summary:
 
 - [ ] `pubspec.yaml` version bumped (semver + build number)
-- [ ] All changes merged to `master`
+- [ ] All changes merged to `main`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured
 - [ ] Android signing secrets (`KEY_ALIAS`, `KEY_PASSWORD`, `KEYSTORE_PASSWORD`, `KEYSTORE_BASE64`) configured
