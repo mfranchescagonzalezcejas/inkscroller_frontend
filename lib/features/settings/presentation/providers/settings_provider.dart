@@ -41,11 +41,18 @@ class SettingsState {
 /// Manages account-level settings operations (e.g. account deletion).
 class SettingsNotifier extends StateNotifier<SettingsState> {
   final SettingsRepository _repository;
+  final FirebaseAuth _firebaseAuth;
 
   /// Creates a [SettingsNotifier] with the given [repository].
-  SettingsNotifier({required SettingsRepository repository})
-    : _repository = repository,
-      super(const SettingsState());
+  ///
+  /// Optionally inject [firebaseAuth] for testability; defaults to
+  /// `FirebaseAuth.instance` in production.
+  SettingsNotifier({
+    required SettingsRepository repository,
+    FirebaseAuth? firebaseAuth,
+  })  : _repository = repository,
+        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+        super(const SettingsState());
 
   /// Deletes the authenticated user's account.
   ///
@@ -71,38 +78,36 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     );
 
     if (result.isRight()) {
-      await _signOutAfterDeletion();
-      state = state.copyWith(
-        isDeletingAccount: false,
-        accountDeleted: true,
-      );
+      try {
+        await _signOutAfterDeletion();
+        state = state.copyWith(
+          isDeletingAccount: false,
+          accountDeleted: true,
+        );
+      } on Exception catch (e) {
+        state = state.copyWith(
+          isDeletingAccount: false,
+          deleteError: 'Account deleted but cleanup failed: $e',
+        );
+      }
     }
   }
 
   /// Signs out the user after successful account deletion.
   ///
   /// Deletes the Firebase user, clears local data, and signs out.
+  /// Throws if Firebase Auth operations fail, allowing the caller
+  /// to report the failure.
   Future<void> _signOutAfterDeletion() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        try {
-          await user.delete();
-        } on FirebaseAuthException catch (_) {
-          // Firebase user deletion may fail if token is stale — non-critical
-          // since backend account is already deleted.
-        }
-      }
-
-      // Clear all local data (reading progress, library cache, preferences).
-      final prefs = sl<SharedPreferences>();
-      await prefs.clear();
-
-      await FirebaseAuth.instance.signOut();
-    } on Exception catch (_) {
-      // Sign-out failure after deletion is non-critical — the backend account
-      // is already deleted. The auth stream listener will pick up the state.
+    final user = _firebaseAuth.currentUser;
+    if (user != null) {
+      await user.delete();
     }
+
+    final prefs = sl<SharedPreferences>();
+    await prefs.clear();
+
+    await _firebaseAuth.signOut();
   }
 
   /// Clears the current error state.

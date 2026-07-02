@@ -1,28 +1,55 @@
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:inkscroller_flutter/core/di/injection.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/settings/domain/repositories/settings_repository.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/providers/settings_provider.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/widgets/delete_account_dialog.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
 
+class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
 void main() {
   late SettingsRepository repository;
+  late _MockFirebaseAuth mockAuth;
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    if (!GetIt.I.isRegistered<SharedPreferences>()) {
+      final prefs = await SharedPreferences.getInstance();
+      sl.registerLazySingleton<SharedPreferences>(() => prefs);
+    }
     repository = _MockSettingsRepository();
+    mockAuth = _MockFirebaseAuth();
     when(() => repository.deleteAccount())
         .thenAnswer((_) async => const Right(null));
+    when(() => mockAuth.currentUser).thenReturn(null);
+    when(() => mockAuth.signOut()).thenAnswer((_) async {});
+  });
+
+  tearDown(() async {
+    if (GetIt.I.isRegistered<SharedPreferences>()) {
+      await GetIt.I.unregister<SharedPreferences>();
+    }
   });
 
   Widget buildDialog() {
     return ProviderScope(
       overrides: <Override>[
         settingsRepositoryProvider.overrideWithValue(repository),
+        settingsProvider.overrideWith(
+          (ref) => SettingsNotifier(
+            repository: repository,
+            firebaseAuth: mockAuth,
+          ),
+        ),
       ],
       child: const MaterialApp(
         home: Scaffold(

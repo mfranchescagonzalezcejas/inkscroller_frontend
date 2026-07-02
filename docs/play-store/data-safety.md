@@ -6,7 +6,7 @@
 
 | Data Type | Collected | Shared | Purpose | Required |
 |-----------|-----------|--------|---------|----------|
-| **Account info** (email, display name) | ✅ Yes | ✅ Yes (Firebase Auth) | App functionality (authentication) | Yes |
+| **Account info** (email, display name, username, birth date) | ✅ Yes | ✅ Yes (Firebase Auth, Backend API) | App functionality (authentication, profile storage) | Yes |
 | **Password** | ✅ Yes | ✅ Yes (Firebase Auth) | App functionality (authentication) | Yes |
 | **Usage data** (analytics events, screen views) | ✅ Yes | ✅ Yes (Firebase Analytics) | Analytics | No |
 | **App interactions** (reading progress, library) | ✅ Yes | ✅ Yes (Backend API) | App functionality | Yes |
@@ -40,7 +40,7 @@
 - Delete their account and all associated data (feature implemented in #17)
 
 ### What data does your app collect?
-- **Account info**: Email address, display name
+- **Account info**: Email address, display name, username, birth date
 - **Usage data**: App interactions, screen views, feature usage
 - **App interactions**: Reading progress, library content, manga metadata
 
@@ -54,7 +54,7 @@
 **Yes** — Data is shared with:
 - **Firebase Auth** (Google): Authentication
 - **Firebase Analytics** (Google): Analytics
-- **Backend API** (devdigi.dev): App functionality
+- **Backend API** (devdigi.dev): Profile storage (username, birth date), library sync, reading progress
 
 ### Does your app have a privacy policy?
 **To be created** — Will be hosted at a public URL before release.

@@ -10,6 +10,8 @@ InkScroller ("we", "our", or "us") operates the InkScroller mobile application. 
 When you create an account, we collect:
 - Email address
 - Display name (optional)
+- Username (for profile identity)
+- Birth date (for age verification)
 
 ### Usage Data
 We automatically collect:
@@ -29,6 +31,7 @@ The app stores on your device:
 We use the collected information to:
 - Provide and maintain the Service
 - Authenticate your account
+- Store and manage your profile (username, birth date) on our backend servers
 - Track your reading progress across devices
 - Improve app performance and user experience
 - Analyze usage patterns to enhance features
@@ -38,7 +41,7 @@ We use the collected information to:
 We share information with:
 - **Firebase Authentication** (Google) — for account management
 - **Firebase Analytics** (Google) — for usage analytics
-- **Our backend servers** — to sync your library and reading progress
+- **Our backend servers** (devdigi.dev) — to store your profile data (username, birth date), sync your library, and manage reading progress
 
 We do **not** sell your personal information to third parties.
 
