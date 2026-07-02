@@ -27,7 +27,7 @@ This file is the **frontend-side status mirror** of the product's shared plannin
 | Frontend phase state | **Sprint 3 in progress** |
 | Current sprint mirror | Sprint 3 — **active** |
 | Repo status | Active |
-| Current branch | `chore/task-027-lib-structure-alignment` → target `master` |
+| Current branch | `chore/task-027-lib-structure-alignment` → target `main` |
 | Version | v1.0.0+29 |
 | Total tests | 97+ passing |
 
