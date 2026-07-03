@@ -46,8 +46,10 @@ void main() {
     },
   );
 
-  test('user.delete fails: clears prefs, throws critical exception', () async {
-    when(() => mockUser.delete()).thenThrow(Exception('quota-exceeded'));
+  test('user.delete fails: signs out and throws critical exception', () async {
+    when(
+      () => mockUser.delete(),
+    ).thenAnswer((_) async => throw Exception('quota-exceeded'));
     when(() => mockPrefs.clear()).thenAnswer((_) async => true);
 
     await expectLater(
@@ -55,6 +57,7 @@ void main() {
       throwsA(isA<Exception>()),
     );
     verify(() => mockPrefs.clear()).called(1);
+    verify(() => mockAuth.signOut()).called(1);
   });
 
   test('prefs.clear returns false: signs out, returns prefs warning', () async {
@@ -68,9 +71,11 @@ void main() {
   });
 
   test(
-    'user.delete fails: throws critical exception even if prefs also fail',
+    'user.delete fails: signs out and throws critical exception even if prefs also fail',
     () async {
-      when(() => mockUser.delete()).thenThrow(Exception('network'));
+      when(
+        () => mockUser.delete(),
+      ).thenAnswer((_) async => throw Exception('network'));
       when(() => mockPrefs.clear()).thenAnswer((_) async => false);
 
       await expectLater(
@@ -83,6 +88,7 @@ void main() {
           ),
         ),
       );
+      verify(() => mockAuth.signOut()).called(1);
     },
   );
 }

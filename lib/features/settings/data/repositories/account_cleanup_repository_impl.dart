@@ -36,10 +36,16 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
     if (user != null) {
       // Firebase Auth deletion is critical: failure here must prevent the
       // provider from marking account deletion as successful.
-      await user.delete();
+      try {
+        await user.delete();
+      } finally {
+        // Sign out even if delete fails so the local session is torn down.
+        await _firebaseAuth.signOut();
+      }
+    } else {
+      await _firebaseAuth.signOut();
     }
 
-    await _firebaseAuth.signOut();
     return warning;
   }
 }
