@@ -1,6 +1,8 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/repositories/account_cleanup_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 
@@ -39,8 +41,7 @@ class SettingsState {
       isDeletingAccount: isDeletingAccount ?? this.isDeletingAccount,
       deleteError: clearError ? null : deleteError ?? this.deleteError,
       accountDeleted: accountDeleted ?? this.accountDeleted,
-      deleteWarning:
-          clearWarning ? null : deleteWarning ?? this.deleteWarning,
+      deleteWarning: clearWarning ? null : deleteWarning ?? this.deleteWarning,
     );
   }
 }
@@ -57,18 +58,20 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   SettingsNotifier({
     required SettingsRepository repository,
     AccountCleanupRepository? cleanup,
-  })  : _repository = repository,
-        _cleanup = cleanup,
-        super(const SettingsState());
+  }) : _repository = repository,
+       _cleanup = cleanup,
+       super(const SettingsState());
 
   AccountCleanupRepository get _cleanupRepo =>
       _cleanup ?? sl<AccountCleanupRepository>();
 
   /// Deletes the authenticated user's account.
   ///
-  /// Backend success marks deletion as complete. Cleanup thrown exceptions
-  /// are critical failures and prevent marking deletion. String warnings
-  /// from cleanup are non-critical and shown alongside success.
+  /// Backend success or "already deleted" (404) marks deletion as complete
+  /// only after Firebase Auth and local cleanup succeed. Cleanup exceptions
+  /// (e.g. Firebase Auth deletion failure) are critical and prevent marking
+  /// deletion. String warnings from cleanup are non-critical and shown
+  /// alongside success.
   Future<void> deleteAccount() async {
     state = state.copyWith(
       isDeletingAccount: true,
@@ -79,25 +82,27 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
     final result = await _repository.deleteAccount();
 
-    result.fold(
-      (failure) {
+    result.fold((failure) {
+      // On retry, backend may already be deleted (404) — treat as success
+      // and proceed to Firebase/local cleanup.
+      final isAlreadyDeleted = failure is ServerFailure && failure.code == 404;
+      if (!isAlreadyDeleted) {
         state = state.copyWith(
           isDeletingAccount: false,
           deleteError: failure.message,
         );
-      },
-      (_) {},
-    );
+        return;
+      }
+    }, (_) {});
 
-    if (result.isRight()) {
+    if (result.isRight() || _isAlreadyDeleted(result)) {
       String? warning;
       try {
         warning = await _cleanupRepo.cleanUpAfterDeletion();
       } on Exception catch (_) {
-        // ponytail: critical cleanup failure — do not mark account deleted
         state = state.copyWith(
           isDeletingAccount: false,
-          deleteError: 'Error durante la limpieza local',
+          deleteError: 'Error durante la limpieza',
         );
         return;
       }
@@ -108,6 +113,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         deleteWarning: warning,
       );
     }
+  }
+
+  bool _isAlreadyDeleted(Either<Failure, void> result) {
+    return result.fold(
+      (failure) => failure is ServerFailure && failure.code == 404,
+      (_) => false,
+    );
   }
 
   /// Clears the current error state.

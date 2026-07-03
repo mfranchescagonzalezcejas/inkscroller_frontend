@@ -10,6 +10,7 @@ import '../../domain/usecases/sign_up.dart';
 import '../../../profile/domain/entities/user_profile.dart';
 import '../../../profile/domain/usecases/get_user_profile.dart';
 import '../../../profile/domain/usecases/update_user_profile.dart';
+import '../../../../core/error/failures.dart';
 import 'auth_state.dart';
 
 const String _signUpProfileMetadataFailureReason =
@@ -129,10 +130,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
           flow: 'profile_completion_check',
           reason: _profileCompletionCheckFailureReason,
         );
+        // Transient failures (network, timeout, generic server errors) must not
+        // clear profileCompletionPending if it was already true — only an
+        // explicit incomplete-profile response should force the /register
+        // redirect. Preserve the existing pending state on transient failures.
+        final isTransientFailure =
+            failure is! ServerFailure ||
+            !(failure.message.toLowerCase().contains('incomplete') ||
+                failure.message.toLowerCase().contains('missing'));
         state = state.copyWith(
           isLoading: false,
           error: failure.message,
-          profileCompletionPending: true,
+          profileCompletionPending: isTransientFailure
+              ? null
+              : !isTransientFailure,
         );
       },
       (profile) {

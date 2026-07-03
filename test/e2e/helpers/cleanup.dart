@@ -33,8 +33,11 @@ Future<void> deleteTestUser({
 }) async {
   final effectiveApiKey = firebaseApiKey ?? firebaseWebApiKey;
   if (effectiveApiKey.isEmpty) {
-    // No API key configured — skip cleanup silently.
-    return;
+    throw StateError(
+      'FIREBASE_WEB_API_KEY is required for Firebase cleanup. '
+      'Provide it via --dart-define=FIREBASE_WEB_API_KEY=<key> or '
+      'via .dart-defines/firebase.json.',
+    );
   }
 
   const maxRetries = 3;
@@ -88,11 +91,7 @@ Future<void> _deleteAccount({
   final signInResponse = await _post(
     url:
         'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$firebaseApiKey',
-    body: {
-      'email': email,
-      'password': password,
-      'returnSecureToken': true,
-    },
+    body: {'email': email, 'password': password, 'returnSecureToken': true},
     postFn: postFn,
   );
 
@@ -106,14 +105,12 @@ Future<void> _deleteAccount({
         errorCode == 'INVALID_LOGIN_CREDENTIALS') {
       return; // Account already gone — treat as cleaned.
     }
-    throw HttpException(
-      'Firebase sign-in failed: $errorCode',
-    );
+    throw HttpException('Firebase sign-in failed: $errorCode');
   }
 
   final idToken = signInResponse.isNotEmpty
       ? (jsonDecode(signInResponse) as Map<String, dynamic>)['idToken']
-          as String?
+            as String?
       : null;
 
   if (idToken == null) {
@@ -144,9 +141,7 @@ Future<void> _deleteAccount({
     if (errorCode == 'USER_NOT_FOUND' || errorCode == 'user-not-found') {
       return;
     }
-    throw HttpException(
-      'Firebase account deletion failed: $errorCode',
-    );
+    throw HttpException('Firebase account deletion failed: $errorCode');
   }
 }
 
@@ -175,8 +170,9 @@ Future<int> _httpDelete(Uri uri, String idToken) async {
   final client = HttpClient();
   try {
     client.connectionTimeout = const Duration(seconds: 15);
-    final request =
-        await client.deleteUrl(uri).timeout(const Duration(seconds: 15));
+    final request = await client
+        .deleteUrl(uri)
+        .timeout(const Duration(seconds: 15));
     request.headers.set('Authorization', 'Bearer $idToken');
 
     final response = await request.close().timeout(const Duration(seconds: 15));
@@ -195,9 +191,7 @@ void assertBackendCleanupStatus(int statusCode) {
 
   // Non-2xx/non-404 must fail before Firebase deletion so retry can
   // still clean backend while the Firebase user exists.
-  throw HttpException(
-    'Backend cleanup failed with status $statusCode',
-  );
+  throw HttpException('Backend cleanup failed with status $statusCode');
 }
 
 /// Sends a POST request and returns the response body as a string.
@@ -215,7 +209,9 @@ Future<String> _post({
   final client = HttpClient();
   try {
     client.connectionTimeout = const Duration(seconds: 15);
-    final request = await client.postUrl(uri).timeout(const Duration(seconds: 15));
+    final request = await client
+        .postUrl(uri)
+        .timeout(const Duration(seconds: 15));
     request.headers.set('Content-Type', 'application/json');
     request.write(jsonEncode(body));
 
