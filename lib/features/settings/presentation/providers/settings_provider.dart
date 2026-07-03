@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
@@ -67,12 +66,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   /// Deletes the authenticated user's account.
   ///
-  /// Backend success or "already deleted" (404) marks deletion as complete
-  /// only after Firebase Auth and local cleanup succeed. Cleanup exceptions
-  /// (e.g. Firebase Auth deletion failure) are critical and prevent marking
-  /// deletion. String warnings from cleanup are non-critical and shown
-  /// alongside success.
+  /// Backend success marks deletion as complete only after Firebase Auth
+  /// and local cleanup succeed. Backend failures, including 404, do not run
+  /// cleanup. Cleanup exceptions are critical and prevent marking deletion.
+  /// String warnings from cleanup are non-critical and shown alongside success.
   Future<void> deleteAccount() async {
+    if (state.isDeletingAccount) return;
+
     state = state.copyWith(
       isDeletingAccount: true,
       clearError: true,
@@ -82,43 +82,30 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
     final result = await _repository.deleteAccount();
 
-    result.fold((failure) {
-      // On retry, backend may already be deleted (404) — treat as success
-      // and proceed to Firebase/local cleanup.
-      final isAlreadyDeleted = failure is ServerFailure && failure.code == 404;
-      if (!isAlreadyDeleted) {
-        state = state.copyWith(
-          isDeletingAccount: false,
-          deleteError: failure.message,
-        );
-        return;
-      }
-    }, (_) {});
-
-    if (result.isRight() || _isAlreadyDeleted(result)) {
-      String? warning;
-      try {
-        warning = await _cleanupRepo.cleanUpAfterDeletion();
-      } on Exception catch (_) {
-        state = state.copyWith(
-          isDeletingAccount: false,
-          deleteError: 'Error durante la limpieza',
-        );
-        return;
-      }
-
+    final failure = result.fold<Failure?>((failure) => failure, (_) => null);
+    if (failure != null) {
       state = state.copyWith(
         isDeletingAccount: false,
-        accountDeleted: true,
-        deleteWarning: warning,
+        deleteError: failure.message,
       );
+      return;
     }
-  }
 
-  bool _isAlreadyDeleted(Either<Failure, void> result) {
-    return result.fold(
-      (failure) => failure is ServerFailure && failure.code == 404,
-      (_) => false,
+    String? warning;
+    try {
+      warning = await _cleanupRepo.cleanUpAfterDeletion();
+    } on Exception catch (_) {
+      state = state.copyWith(
+        isDeletingAccount: false,
+        deleteError: 'Error durante la limpieza',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isDeletingAccount: false,
+      accountDeleted: true,
+      deleteWarning: warning,
     );
   }
 

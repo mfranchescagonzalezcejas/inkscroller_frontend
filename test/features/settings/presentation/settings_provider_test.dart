@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
@@ -52,6 +54,59 @@ void main() {
       expect(notifier.state.deleteError, isNull);
       expect(notifier.state.deleteWarning, isNull);
     });
+
+    test('deleteAccount does not accept later 404 after success', () async {
+      when(
+        () => repository.deleteAccount(),
+      ).thenAnswer((_) async => const Right(null));
+
+      final notifier = SettingsNotifier(
+        repository: repository,
+        cleanup: mockCleanup,
+      );
+
+      await notifier.deleteAccount();
+
+      verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
+
+      // A later 404 should not be treated as "already deleted".
+      when(() => repository.deleteAccount()).thenAnswer(
+        (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
+      );
+
+      await notifier.deleteAccount();
+
+      expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.deleteError, 'Not found');
+      verifyNoMoreInteractions(mockCleanup);
+    });
+
+    test(
+      'deleteAccount ignores reentrant calls while deletion is in flight',
+      () async {
+        final deleteCompleter = Completer<Either<Failure, void>>();
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) => deleteCompleter.future);
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+
+        final firstDelete = notifier.deleteAccount();
+        await Future<void>.delayed(Duration.zero);
+
+        await notifier.deleteAccount();
+        deleteCompleter.complete(const Right(null));
+        await firstDelete;
+
+        expect(notifier.state.accountDeleted, true);
+        expect(notifier.state.isDeletingAccount, false);
+        verify(() => repository.deleteAccount()).called(1);
+        verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
+      },
+    );
 
     test('deleteAccount sets error state on failure', () async {
       when(() => repository.deleteAccount()).thenAnswer(
@@ -233,15 +288,11 @@ void main() {
       expect(notifier.state.accountDeleted, true);
     });
 
-    test('deleteAccount treats backend 404 on retry as already-deleted — '
-        'still proceeds to cleanup', () async {
-      // First call: backend already deleted (404)
+    test('deleteAccount first-attempt backend 404 → error, '
+        'no cleanup', () async {
       when(() => repository.deleteAccount()).thenAnswer(
         (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
       );
-      when(
-        () => mockCleanup.cleanUpAfterDeletion(),
-      ).thenAnswer((_) async => null);
 
       final notifier = SettingsNotifier(
         repository: repository,
@@ -250,38 +301,110 @@ void main() {
 
       await notifier.deleteAccount();
 
-      // 404 treated as "already deleted" → cleanup runs → account marked deleted.
-      expect(notifier.state.accountDeleted, true);
+      // First-attempt 404 with no prior success → error, cleanup NOT called.
+      expect(notifier.state.accountDeleted, false);
       expect(notifier.state.isDeletingAccount, false);
-      expect(notifier.state.deleteError, isNull);
-      verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
+      expect(notifier.state.deleteError, 'Not found');
+      verifyNever(() => mockCleanup.cleanUpAfterDeletion());
     });
 
-    test(
-      'deleteAccount backend 404 + Firebase Auth delete fails → error',
-      () async {
-        when(() => repository.deleteAccount()).thenAnswer(
-          (_) async =>
-              const Left(ServerFailure(message: 'Not found', code: 404)),
-        );
-        when(
-          () => mockCleanup.cleanUpAfterDeletion(),
-        ).thenThrow(Exception('Firebase Auth deletion failed'));
+    test('deleteAccount retry after backend success + cleanup failure: '
+        '404 → error, no cleanup', () async {
+      // Call 1: backend succeeds, cleanup throws.
+      when(
+        () => repository.deleteAccount(),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () => mockCleanup.cleanUpAfterDeletion(),
+      ).thenThrow(Exception('Firebase Auth deletion failed'));
 
-        final notifier = SettingsNotifier(
-          repository: repository,
-          cleanup: mockCleanup,
-        );
+      final notifier = SettingsNotifier(
+        repository: repository,
+        cleanup: mockCleanup,
+      );
+      await notifier.deleteAccount();
 
-        await notifier.deleteAccount();
+      expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.deleteError, 'Error durante la limpieza');
+      verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
 
-        // Backend 404 → cleanup attempted → Firebase Auth failure → error.
-        expect(notifier.state.accountDeleted, false);
-        expect(notifier.state.isDeletingAccount, false);
-        expect(notifier.state.deleteError, 'Error durante la limpieza');
-        verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
-      },
-    );
+      // Call 2: backend returns 404, which must still fail without cleanup.
+      when(() => repository.deleteAccount()).thenAnswer(
+        (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
+      );
+
+      await notifier.deleteAccount();
+
+      expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.deleteError, 'Not found');
+      // Cleanup only called in call 1 (threw). Not called again.
+      verifyNoMoreInteractions(mockCleanup);
+    });
+
+    test('deleteAccount after critical cleanup failure: '
+        'later 404 does NOT mark success or call cleanup', () async {
+      // Call 1: backend succeeds, cleanup throws.
+      when(
+        () => repository.deleteAccount(),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () => mockCleanup.cleanUpAfterDeletion(),
+      ).thenThrow(Exception('Firebase Auth deletion failed'));
+
+      final notifier = SettingsNotifier(
+        repository: repository,
+        cleanup: mockCleanup,
+      );
+      await notifier.deleteAccount();
+
+      expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.deleteError, 'Error durante la limpieza');
+      verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
+
+      // Call 2: backend 404 must not be treated as deletion success.
+      when(() => repository.deleteAccount()).thenAnswer(
+        (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
+      );
+
+      await notifier.deleteAccount();
+
+      // 404 remains a backend failure → error, no cleanup.
+      expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.deleteError, 'Not found');
+      verifyNoMoreInteractions(mockCleanup);
+    });
+
+    test('deleteAccount retry after backend success + cleanup failure: '
+        'non-404 error → error, no cleanup', () async {
+      // Call 1: backend succeeds, cleanup throws.
+      when(
+        () => repository.deleteAccount(),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () => mockCleanup.cleanUpAfterDeletion(),
+      ).thenThrow(Exception('Firebase Auth deletion failed'));
+
+      final notifier = SettingsNotifier(
+        repository: repository,
+        cleanup: mockCleanup,
+      );
+      await notifier.deleteAccount();
+
+      // Call 2: different server error (not 404).
+      // Reset cleanup mock to avoid conflict with setUp stub.
+      reset(mockCleanup);
+      when(() => repository.deleteAccount()).thenAnswer(
+        (_) async =>
+            const Left(ServerFailure(message: 'Server error', code: 500)),
+      );
+
+      await notifier.deleteAccount();
+
+      // Non-404 → error, cleanup NOT called this time.
+      expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.deleteError, 'Server error');
+      verifyNever(() => mockCleanup.cleanUpAfterDeletion());
+    });
 
     test('deleteAccount reports error when Firebase Auth deletion fails '
         '— does NOT mark deleted', () async {
