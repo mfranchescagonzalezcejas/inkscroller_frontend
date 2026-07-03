@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/repositories/account_cleanup_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 
@@ -39,8 +40,7 @@ class SettingsState {
       isDeletingAccount: isDeletingAccount ?? this.isDeletingAccount,
       deleteError: clearError ? null : deleteError ?? this.deleteError,
       accountDeleted: accountDeleted ?? this.accountDeleted,
-      deleteWarning:
-          clearWarning ? null : deleteWarning ?? this.deleteWarning,
+      deleteWarning: clearWarning ? null : deleteWarning ?? this.deleteWarning,
     );
   }
 }
@@ -57,19 +57,22 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   SettingsNotifier({
     required SettingsRepository repository,
     AccountCleanupRepository? cleanup,
-  })  : _repository = repository,
-        _cleanup = cleanup,
-        super(const SettingsState());
+  }) : _repository = repository,
+       _cleanup = cleanup,
+       super(const SettingsState());
 
   AccountCleanupRepository get _cleanupRepo =>
       _cleanup ?? sl<AccountCleanupRepository>();
 
   /// Deletes the authenticated user's account.
   ///
-  /// Backend success marks deletion as complete. Cleanup thrown exceptions
-  /// are critical failures and prevent marking deletion. String warnings
-  /// from cleanup are non-critical and shown alongside success.
+  /// Backend success marks deletion as complete only after Firebase Auth
+  /// and local cleanup succeed. Backend failures, including 404, do not run
+  /// cleanup. Cleanup exceptions are critical and prevent marking deletion.
+  /// String warnings from cleanup are non-critical and shown alongside success.
   Future<void> deleteAccount() async {
+    if (state.isDeletingAccount) return;
+
     state = state.copyWith(
       isDeletingAccount: true,
       clearError: true,
@@ -79,35 +82,31 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
     final result = await _repository.deleteAccount();
 
-    result.fold(
-      (failure) {
-        state = state.copyWith(
-          isDeletingAccount: false,
-          deleteError: failure.message,
-        );
-      },
-      (_) {},
-    );
-
-    if (result.isRight()) {
-      String? warning;
-      try {
-        warning = await _cleanupRepo.cleanUpAfterDeletion();
-      } on Exception catch (_) {
-        // ponytail: critical cleanup failure — do not mark account deleted
-        state = state.copyWith(
-          isDeletingAccount: false,
-          deleteError: 'Error durante la limpieza local',
-        );
-        return;
-      }
-
+    final failure = result.fold<Failure?>((failure) => failure, (_) => null);
+    if (failure != null) {
       state = state.copyWith(
         isDeletingAccount: false,
-        accountDeleted: true,
-        deleteWarning: warning,
+        deleteError: failure.message,
       );
+      return;
     }
+
+    String? warning;
+    try {
+      warning = await _cleanupRepo.cleanUpAfterDeletion();
+    } on Exception catch (_) {
+      state = state.copyWith(
+        isDeletingAccount: false,
+        deleteError: 'Error durante la limpieza',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isDeletingAccount: false,
+      accountDeleted: true,
+      deleteWarning: warning,
+    );
   }
 
   /// Clears the current error state.

@@ -658,6 +658,40 @@ void main() {
     );
 
     test(
+      'marks profile completion pending on missing-only profile response',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Profile missing — no profile found'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        // Isolates the 'missing' branch — no 'incomplete' keyword present.
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.error, 'Profile missing — no profile found');
+
+        await streamController.close();
+      },
+    );
+
+    test(
       'clears profile completion pending on restored complete profile',
       () async {
         final streamController = StreamController<AppUser?>.broadcast();
@@ -693,14 +727,81 @@ void main() {
       },
     );
 
-    test('fails closed when restored profile cannot be fetched', () async {
+    test(
+      'sets profileCompletionPending on explicit incomplete profile response',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Profile incomplete — missing metadata'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.error, 'Profile incomplete — missing metadata');
+
+        await streamController.close();
+      },
+    );
+
+    test(
+      'does not set profileCompletionPending on bare 404 ServerFailure',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Not found', code: 404),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        // Bare 404 does NOT trigger profile completion — only explicit
+        // incomplete/missing-profile messages do.
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.error, 'Not found');
+
+        await streamController.close();
+      },
+    );
+
+    test('bare 404 does not clear existing profileCompletionPending', () async {
       final streamController = StreamController<AppUser?>.broadcast();
       final getUserProfile = _MockGetUserProfile();
-      final reports = <String>[];
       when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);
       when(() => getUserProfile()).thenAnswer(
         (_) async => const Left<Failure, UserProfile>(
-          NetworkFailure(message: 'Profile unavailable'),
+          ServerFailure(message: 'Not found', code: 404),
         ),
       );
 
@@ -710,24 +811,201 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         getUserProfile: getUserProfile,
-        profileMetadataFailureReporter: ({required flow, required reason}) {
-          reports.add('$flow:$reason');
-        },
       );
+
+      // Pre-set pending state (e.g. from a prior incomplete profile check).
+      notifier.state = notifier.state.copyWith(profileCompletionPending: true);
 
       streamController.add(_kUser);
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(Duration.zero);
 
+      // Bare 404 must NOT clear the existing pending flag.
       expect(notifier.state.profileCompletionPending, isTrue);
-      expect(notifier.state.error, 'Profile unavailable');
-      expect(
-        reports,
-        contains('profile_completion_check:profile_completion_check_failed'),
-      );
+      expect(notifier.state.error, 'Not found');
 
       await streamController.close();
     });
+
+    test(
+      'does not set profileCompletionPending on generic server failure',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Internal server error'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.error, 'Internal server error');
+
+        await streamController.close();
+      },
+    );
+
+    test(
+      'does not set profileCompletionPending on Missing authorization header',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Missing authorization header'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.error, 'Missing authorization header');
+
+        await streamController.close();
+      },
+    );
+
+    test(
+      'sets profileCompletionPending on case-insensitive incomplete profile response',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Profile INCOMPLETE — Missing metadata'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.error, 'Profile INCOMPLETE — Missing metadata');
+
+        await streamController.close();
+      },
+    );
+
+    test(
+      'does not set profileCompletionPending on transient profile fetch failure',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        final reports = <String>[];
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            NetworkFailure(message: 'Profile unavailable'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+          profileMetadataFailureReporter: ({required flow, required reason}) {
+            reports.add('$flow:$reason');
+          },
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        // Transient failure: profileCompletionPending must stay false
+        expect(notifier.state.profileCompletionPending, isFalse);
+        expect(notifier.state.error, 'Profile unavailable');
+        expect(
+          reports,
+          contains('profile_completion_check:profile_completion_check_failed'),
+        );
+
+        await streamController.close();
+      },
+    );
+
+    test(
+      'transient failure does not clear existing profileCompletionPending',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            NetworkFailure(message: 'Connection timeout'),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        // Pre-set pending state (e.g. from a prior incomplete profile check).
+        notifier.state = notifier.state.copyWith(
+          profileCompletionPending: true,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        // Transient failure must NOT clear the existing pending flag.
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.error, 'Connection timeout');
+
+        await streamController.close();
+      },
+    );
 
     test(
       'does not start duplicate concurrent profile completion checks',

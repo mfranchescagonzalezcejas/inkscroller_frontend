@@ -8,7 +8,18 @@ import 'package:inkscroller_flutter/core/constants/api_endpoints.dart';
 /// Firebase Web API key for the dev project.
 ///
 /// Provide via `--dart-define=FIREBASE_WEB_API_KEY=...` at compile time.
-const String firebaseWebApiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
+const _firebaseWebApiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
+
+/// Resolves the Firebase cleanup API key.
+///
+/// Returns [webApiKey] when non-empty. Extracted so tests can call it with
+/// fake values without needing compile-time dart-defines.
+String resolveFirebaseCleanupApiKey({String? webApiKey}) {
+  final effectiveWebApiKey = webApiKey ?? _firebaseWebApiKey;
+  return effectiveWebApiKey;
+}
+
+String get firebaseWebApiKey => resolveFirebaseCleanupApiKey();
 
 /// Deletes a test user from both the backend and Firebase Auth.
 ///
@@ -28,13 +39,19 @@ Future<void> deleteTestUser({
   required String password,
   String? backendBaseUrl,
   String? firebaseApiKey,
+  String Function()? resolveApiKey,
   Future<String> Function(String url, Map<String, Object?> body)? postFn,
   Future<int> Function(Uri uri, String idToken)? deleteFn,
 }) async {
-  final effectiveApiKey = firebaseApiKey ?? firebaseWebApiKey;
+  final effectiveApiKey =
+      firebaseApiKey ??
+      (resolveApiKey?.call() ?? resolveFirebaseCleanupApiKey());
   if (effectiveApiKey.isEmpty) {
-    // No API key configured — skip cleanup silently.
-    return;
+    throw StateError(
+      'No Firebase API key available for cleanup. '
+      'Provide it via --dart-define=FIREBASE_WEB_API_KEY=<key>. '
+      'Keys are accepted via dart-defines or project config.',
+    );
   }
 
   const maxRetries = 3;
@@ -88,11 +105,7 @@ Future<void> _deleteAccount({
   final signInResponse = await _post(
     url:
         'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$firebaseApiKey',
-    body: {
-      'email': email,
-      'password': password,
-      'returnSecureToken': true,
-    },
+    body: {'email': email, 'password': password, 'returnSecureToken': true},
     postFn: postFn,
   );
 
@@ -106,14 +119,12 @@ Future<void> _deleteAccount({
         errorCode == 'INVALID_LOGIN_CREDENTIALS') {
       return; // Account already gone — treat as cleaned.
     }
-    throw HttpException(
-      'Firebase sign-in failed: $errorCode',
-    );
+    throw HttpException('Firebase sign-in failed: $errorCode');
   }
 
   final idToken = signInResponse.isNotEmpty
       ? (jsonDecode(signInResponse) as Map<String, dynamic>)['idToken']
-          as String?
+            as String?
       : null;
 
   if (idToken == null) {
@@ -144,9 +155,7 @@ Future<void> _deleteAccount({
     if (errorCode == 'USER_NOT_FOUND' || errorCode == 'user-not-found') {
       return;
     }
-    throw HttpException(
-      'Firebase account deletion failed: $errorCode',
-    );
+    throw HttpException('Firebase account deletion failed: $errorCode');
   }
 }
 
@@ -175,8 +184,9 @@ Future<int> _httpDelete(Uri uri, String idToken) async {
   final client = HttpClient();
   try {
     client.connectionTimeout = const Duration(seconds: 15);
-    final request =
-        await client.deleteUrl(uri).timeout(const Duration(seconds: 15));
+    final request = await client
+        .deleteUrl(uri)
+        .timeout(const Duration(seconds: 15));
     request.headers.set('Authorization', 'Bearer $idToken');
 
     final response = await request.close().timeout(const Duration(seconds: 15));
@@ -195,9 +205,7 @@ void assertBackendCleanupStatus(int statusCode) {
 
   // Non-2xx/non-404 must fail before Firebase deletion so retry can
   // still clean backend while the Firebase user exists.
-  throw HttpException(
-    'Backend cleanup failed with status $statusCode',
-  );
+  throw HttpException('Backend cleanup failed with status $statusCode');
 }
 
 /// Sends a POST request and returns the response body as a string.
@@ -215,7 +223,9 @@ Future<String> _post({
   final client = HttpClient();
   try {
     client.connectionTimeout = const Duration(seconds: 15);
-    final request = await client.postUrl(uri).timeout(const Duration(seconds: 15));
+    final request = await client
+        .postUrl(uri)
+        .timeout(const Duration(seconds: 15));
     request.headers.set('Content-Type', 'application/json');
     request.write(jsonEncode(body));
 

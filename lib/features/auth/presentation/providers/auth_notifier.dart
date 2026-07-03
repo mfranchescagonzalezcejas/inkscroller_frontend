@@ -10,6 +10,7 @@ import '../../domain/usecases/sign_up.dart';
 import '../../../profile/domain/entities/user_profile.dart';
 import '../../../profile/domain/usecases/get_user_profile.dart';
 import '../../../profile/domain/usecases/update_user_profile.dart';
+import '../../../../core/error/failures.dart';
 import 'auth_state.dart';
 
 const String _signUpProfileMetadataFailureReason =
@@ -129,10 +130,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
           flow: 'profile_completion_check',
           reason: _profileCompletionCheckFailureReason,
         );
+        // Transient failures (network, timeout, generic server errors) must not
+        // clear profileCompletionPending if it was already true — only an
+        // explicit incomplete-profile response should force the /register
+        // redirect. Preserve the existing pending state on transient failures.
+        //
+        // A bare 404 (e.g. message 'Not found') does NOT mean incomplete — it
+        // can mean a real server error. Only explicit incomplete/missing-profile
+        // messages trigger profile completion.
+        // Only explicit incomplete/missing-profile messages force /register.
+        // Generic messages like "Missing authorization header" must NOT match,
+        // so 'missing' requires a profile-context keyword to avoid false positives.
+        final msg = failure.message.toLowerCase();
+        final isProfileMissing =
+            failure is ServerFailure &&
+            (msg.contains('incomplete') ||
+                (msg.contains('missing') &&
+                    (msg.contains('profile') || msg.contains('metadata'))));
         state = state.copyWith(
           isLoading: false,
           error: failure.message,
-          profileCompletionPending: true,
+          profileCompletionPending: isProfileMissing ? true : null,
         );
       },
       (profile) {

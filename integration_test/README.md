@@ -24,6 +24,13 @@ cat .dart-defines/firebase.json
 # Should contain: FIREBASE_API_KEY, FIREBASE_APP_ID, FIREBASE_PROJECT_ID, etc.
 ```
 
+> **REST cleanup requires `FIREBASE_WEB_API_KEY`** — the Firebase Identity
+> Toolkit REST API (`accounts:signInWithPassword`, `accounts:delete`) needs the
+> *Web* API key, not the Android/iOS platform keys. Add it to your
+> `.dart-defines/firebase.json` or pass it via
+> `--dart-define=FIREBASE_WEB_API_KEY=<key>`. Without it, `deleteTestUser()`
+> throws a `StateError` during cleanup/tearDown — fail-fast, no silent fallback.
+
 ## Running Tests
 
 ### All tests

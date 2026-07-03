@@ -46,47 +46,82 @@ void main() {
     },
   );
 
+  test('user.delete fails: signs out and throws critical exception', () async {
+    when(
+      () => mockUser.delete(),
+    ).thenAnswer((_) async => throw Exception('quota-exceeded'));
+    when(() => mockPrefs.clear()).thenAnswer((_) async => true);
+
+    await expectLater(
+      repository.cleanUpAfterDeletion(),
+      throwsA(isA<Exception>()),
+    );
+    verify(() => mockPrefs.clear()).called(1);
+    verify(() => mockAuth.signOut()).called(1);
+  });
+
+  test('prefs.clear returns false: signs out, returns prefs warning', () async {
+    when(() => mockUser.delete()).thenAnswer((_) async {});
+    when(() => mockPrefs.clear()).thenAnswer((_) async => false);
+
+    final result = await repository.cleanUpAfterDeletion();
+
+    expect(result, 'Prefs clear failed');
+    verify(() => mockAuth.signOut()).called(1);
+  });
+
   test(
-    'user.delete fails: clears prefs, signs out, returns Firebase warning',
+    'user.delete fails: signs out and throws critical exception even if prefs also fail',
     () async {
-      when(() => mockUser.delete()).thenThrow(
-        Exception('quota-exceeded'),
-      );
-      when(() => mockPrefs.clear()).thenAnswer((_) async => true);
-
-      final result = await repository.cleanUpAfterDeletion();
-
-      expect(result, 'Firebase user deletion failed');
-      verify(() => mockPrefs.clear()).called(1);
-      verify(() => mockAuth.signOut()).called(1);
-    },
-  );
-
-  test(
-    'prefs.clear returns false: signs out, returns prefs warning',
-    () async {
-      when(() => mockUser.delete()).thenAnswer((_) async {});
+      when(
+        () => mockUser.delete(),
+      ).thenAnswer((_) async => throw Exception('network'));
       when(() => mockPrefs.clear()).thenAnswer((_) async => false);
 
-      final result = await repository.cleanUpAfterDeletion();
-
-      expect(result, 'Prefs clear failed');
-      verify(() => mockAuth.signOut()).called(1);
-    },
-  );
-
-  test(
-    'both fail: returns combined warning',
-    () async {
-      when(() => mockUser.delete()).thenThrow(
-        Exception('network'),
+      await expectLater(
+        repository.cleanUpAfterDeletion(),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            'toString',
+            contains('network'),
+          ),
+        ),
       );
-      when(() => mockPrefs.clear()).thenAnswer((_) async => false);
-
-      final result = await repository.cleanUpAfterDeletion();
-
-      expect(result, 'Firebase user deletion failed; Prefs clear failed');
       verify(() => mockAuth.signOut()).called(1);
     },
   );
+
+  test('user-not-found is treated as success and signs out', () async {
+    when(() => mockUser.delete()).thenAnswer(
+      (_) async => throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'The user account has been deleted.',
+      ),
+    );
+    when(() => mockPrefs.clear()).thenAnswer((_) async => true);
+
+    final result = await repository.cleanUpAfterDeletion();
+
+    // Already-missing user is not an error — no exception thrown.
+    expect(result, isNull);
+    verify(() => mockUser.delete()).called(1);
+    verify(() => mockAuth.signOut()).called(1);
+  });
+
+  test('generic FirebaseAuthException still throws and signs out', () async {
+    when(() => mockUser.delete()).thenAnswer(
+      (_) async => throw FirebaseAuthException(
+        code: 'quota-exceeded',
+        message: 'Project quota exceeded.',
+      ),
+    );
+    when(() => mockPrefs.clear()).thenAnswer((_) async => true);
+
+    await expectLater(
+      repository.cleanUpAfterDeletion(),
+      throwsA(isA<FirebaseAuthException>()),
+    );
+    verify(() => mockAuth.signOut()).called(1);
+  });
 }

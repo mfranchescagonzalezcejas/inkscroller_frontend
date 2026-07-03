@@ -18,125 +18,127 @@ void main() {
       expect(AppEnvironment.apiBaseUrl, isNotEmpty);
     });
 
-    test('sign-in happens before backend DELETE before Firebase DELETE',
-        () async {
-      final calls = <String>[];
+    test(
+      'sign-in happens before backend DELETE before Firebase DELETE',
+      () async {
+        final calls = <String>[];
 
-      await deleteTestUser(
-        email: 'test@example.com',
-        password: 'pass123',
-        firebaseApiKey: 'fake-test-key',
-        postFn: (url, body) async {
-          if (url.contains('signInWithPassword')) {
-            calls.add('signin');
-            return '{"idToken":"tok123","email":"test@example.com"}';
-          }
-          // accounts:delete
-          calls.add('firebase');
-          return '{}';
-        },
-        deleteFn: (uri, idToken) async {
-          calls.add('backend');
-          return 200;
-        },
-      );
-
-      expect(calls, ['signin', 'backend', 'firebase']);
-    });
-
-    test('backend 500 retries 3 times, then throws; Firebase never reached',
-        () async {
-      final calls = <String>[];
-
-      await expectLater(
-        () => deleteTestUser(
+        await deleteTestUser(
           email: 'test@example.com',
           password: 'pass123',
           firebaseApiKey: 'fake-test-key',
           postFn: (url, body) async {
-            calls.add('signin');
-            return '{"idToken":"tok123","email":"test@example.com"}';
+            if (url.contains('signInWithPassword')) {
+              calls.add('signin');
+              return '{"idToken":"tok123","email":"test@example.com"}';
+            }
+            // accounts:delete
+            calls.add('firebase');
+            return '{}';
           },
           deleteFn: (uri, idToken) async {
             calls.add('backend');
-            return 500;
+            return 200;
           },
-        ),
-        throwsA(isA<HttpException>()),
-      );
+        );
 
-      // ponytail: production retries 3x on HttpException — assert all attempts
-      expect(
-        calls,
-        [
+        expect(calls, ['signin', 'backend', 'firebase']);
+      },
+    );
+
+    test(
+      'backend 500 retries 3 times, then throws; Firebase never reached',
+      () async {
+        final calls = <String>[];
+
+        await expectLater(
+          () => deleteTestUser(
+            email: 'test@example.com',
+            password: 'pass123',
+            firebaseApiKey: 'fake-test-key',
+            postFn: (url, body) async {
+              calls.add('signin');
+              return '{"idToken":"tok123","email":"test@example.com"}';
+            },
+            deleteFn: (uri, idToken) async {
+              calls.add('backend');
+              return 500;
+            },
+          ),
+          throwsA(isA<HttpException>()),
+        );
+
+        // ponytail: production retries 3x on HttpException — assert all attempts
+        expect(calls, [
           'signin',
           'backend',
           'signin',
           'backend',
           'signin',
           'backend',
-        ],
-      );
-    });
+        ]);
+      },
+    );
 
-    test('backend timeout retries 3 times, then throws; Firebase never reached',
-        () async {
-      final calls = <String>[];
+    test(
+      'backend timeout retries 3 times, then throws; Firebase never reached',
+      () async {
+        final calls = <String>[];
 
-      await expectLater(
-        () => deleteTestUser(
+        await expectLater(
+          () => deleteTestUser(
+            email: 'test@example.com',
+            password: 'pass123',
+            firebaseApiKey: 'fake-test-key',
+            postFn: (url, body) async {
+              calls.add('signin');
+              return '{"idToken":"tok123","email":"test@example.com"}';
+            },
+            deleteFn: (uri, idToken) async {
+              calls.add('backend');
+              throw TimeoutException('backend timeout');
+            },
+          ),
+          throwsA(isA<TimeoutException>()),
+        );
+
+        expect(calls, [
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+        ]);
+      },
+    );
+
+    test(
+      'backend 404 is treated as success and Firebase DELETE still happens',
+      () async {
+        final calls = <String>[];
+
+        await deleteTestUser(
           email: 'test@example.com',
           password: 'pass123',
           firebaseApiKey: 'fake-test-key',
           postFn: (url, body) async {
-            calls.add('signin');
-            return '{"idToken":"tok123","email":"test@example.com"}';
+            if (url.contains('signInWithPassword')) {
+              calls.add('signin');
+              return '{"idToken":"tok123","email":"test@example.com"}';
+            }
+            calls.add('firebase');
+            return '{}';
           },
           deleteFn: (uri, idToken) async {
             calls.add('backend');
-            throw TimeoutException('backend timeout');
+            return 404;
           },
-        ),
-        throwsA(isA<TimeoutException>()),
-      );
+        );
 
-      expect(
-        calls,
-        [
-          'signin',
-          'backend',
-          'signin',
-          'backend',
-          'signin',
-          'backend',
-        ],
-      );
-    });
-
-    test('backend 404 is treated as success and Firebase DELETE still happens',
-        () async {
-      final calls = <String>[];
-
-      await deleteTestUser(
-        email: 'test@example.com',
-        password: 'pass123',
-        firebaseApiKey: 'fake-test-key',
-        postFn: (url, body) async {
-          if (url.contains('signInWithPassword')) {
-            calls.add('signin');
-            return '{"idToken":"tok123","email":"test@example.com"}';
-          }
-          calls.add('firebase');
-          return '{}';
-        },
-        deleteFn: (uri, idToken) async {
-          calls.add('backend');
-          return 404;
-        },
-      );
-
-      expect(calls, ['signin', 'backend', 'firebase']);
-    });
+        expect(calls, ['signin', 'backend', 'firebase']);
+      },
+    );
 
     test('normalizes trailing slash before backend DELETE path', () async {
       late Uri backendUri;
@@ -182,26 +184,127 @@ void main() {
       expect(calls, ['signin']);
     });
 
-    test('no firebaseApiKey (empty const) skips cleanup silently', () async {
-      final calls = <String>[];
-
-      // firebaseWebApiKey const is '' without dart-define; no override passed.
-      await deleteTestUser(
-        email: 'test@example.com',
-        password: 'pass123',
-        firebaseApiKey: '',
-        postFn: (url, body) async {
-          calls.add('post');
-          return '{}';
-        },
-        deleteFn: (uri, idToken) async {
-          calls.add('delete');
-          return 200;
-        },
+    test('no firebaseApiKey (empty const) throws StateError', () async {
+      await expectLater(
+        () => deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: '',
+          postFn: (url, body) async {
+            return '{}';
+          },
+          deleteFn: (uri, idToken) async {
+            return 200;
+          },
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'message',
+            contains('FIREBASE_WEB_API_KEY'),
+          ),
+        ),
       );
-
-      expect(calls, isEmpty);
     });
+
+    test(
+      'explicit firebaseApiKey param overrides compile-time constant',
+      () async {
+        late String usedApiKey;
+
+        await deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: 'explicit-key-override',
+          postFn: (url, body) async {
+            usedApiKey = Uri.parse(url).queryParameters['key'] ?? '';
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            return 200;
+          },
+        );
+
+        expect(usedApiKey, 'explicit-key-override');
+      },
+    );
+
+    test(
+      'resolveApiKey seam: fallback key is used when no explicit key',
+      () async {
+        late String usedApiKey;
+
+        await deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          resolveApiKey: () => 'fallback-android-key',
+          postFn: (url, body) async {
+            usedApiKey = Uri.parse(url).queryParameters['key'] ?? '';
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            return 200;
+          },
+        );
+
+        expect(usedApiKey, 'fallback-android-key');
+      },
+    );
+
+    test(
+      'resolveApiKey seam: explicit param still wins over resolveApiKey',
+      () async {
+        late String usedApiKey;
+
+        await deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: 'explicit-wins',
+          resolveApiKey: () => 'should-not-be-used',
+          postFn: (url, body) async {
+            usedApiKey = Uri.parse(url).queryParameters['key'] ?? '';
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            return 200;
+          },
+        );
+
+        expect(usedApiKey, 'explicit-wins');
+      },
+    );
+
+    test('resolveApiKey seam: empty fallback throws StateError', () async {
+      await expectLater(
+        () => deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          resolveApiKey: () => '',
+          postFn: (url, body) async => '{}',
+          deleteFn: (uri, idToken) async => 200,
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+  });
+
+  group('resolveFirebaseCleanupApiKey', () {
+    test('web key returned when present', () {
+      expect(
+        resolveFirebaseCleanupApiKey(webApiKey: 'web-key-123'),
+        'web-key-123',
+      );
+    });
+
+    test(
+      'returns compile-time constant when no param — no Android fallback',
+      () {
+        // Prove the default resolver has no Android fallback: the returned value
+        // must exactly equal the compile-time dart-define.
+        final result = resolveFirebaseCleanupApiKey();
+        expect(result, const String.fromEnvironment('FIREBASE_WEB_API_KEY'));
+      },
+    );
   });
 
   group('assertBackendCleanupStatus', () {
