@@ -48,23 +48,27 @@ class SettingsState {
 /// Manages account-level settings operations (e.g. account deletion).
 class SettingsNotifier extends StateNotifier<SettingsState> {
   final SettingsRepository _repository;
-  final AccountCleanupRepository _cleanup;
+  final AccountCleanupRepository? _cleanup;
 
   /// Creates a [SettingsNotifier] with the given [repository] and [cleanup].
   ///
-  /// Optionally inject [cleanup] for testability. When omitted, resolves from
-  /// `sl` at deletion time.
+  /// Optionally inject [cleanup] for testability. When omitted, resolves
+  /// lazily from `sl` inside [deleteAccount] after backend success.
   SettingsNotifier({
     required SettingsRepository repository,
     AccountCleanupRepository? cleanup,
   })  : _repository = repository,
-        _cleanup = cleanup ?? sl<AccountCleanupRepository>(),
+        _cleanup = cleanup,
         super(const SettingsState());
+
+  AccountCleanupRepository get _cleanupRepo =>
+      _cleanup ?? sl<AccountCleanupRepository>();
 
   /// Deletes the authenticated user's account.
   ///
-  /// Backend success always marks deletion as complete. Firebase/prefs cleanup
-  /// failures surface as warnings, not blocking errors.
+  /// Backend success marks deletion as complete. Cleanup thrown exceptions
+  /// are critical failures and prevent marking deletion. String warnings
+  /// from cleanup are non-critical and shown alongside success.
   Future<void> deleteAccount() async {
     state = state.copyWith(
       isDeletingAccount: true,
@@ -88,9 +92,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     if (result.isRight()) {
       String? warning;
       try {
-        warning = await _cleanup.cleanUpAfterDeletion();
+        warning = await _cleanupRepo.cleanUpAfterDeletion();
       } on Exception catch (_) {
-        warning = 'Local cleanup failed';
+        // ponytail: critical cleanup failure — do not mark account deleted
+        state = state.copyWith(
+          isDeletingAccount: false,
+          deleteError: 'Error durante la limpieza local',
+        );
+        return;
       }
 
       state = state.copyWith(
