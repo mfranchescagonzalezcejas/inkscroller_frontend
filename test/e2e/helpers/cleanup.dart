@@ -159,7 +159,8 @@ Future<void> _deleteBackendAccount({
   required String idToken,
   Future<int> Function(Uri uri, String idToken)? deleteFn,
 }) async {
-  final url = '$backendBaseUrl${ApiEndpoints.usersMe}';
+  final normalizedBaseUrl = backendBaseUrl.replaceFirst(RegExp(r'/+$'), '');
+  final url = '$normalizedBaseUrl${ApiEndpoints.usersMe}';
   final uri = Uri.parse(url);
 
   final statusCode = deleteFn != null

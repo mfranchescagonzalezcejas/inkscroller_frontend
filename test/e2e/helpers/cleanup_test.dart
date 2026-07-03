@@ -138,6 +138,29 @@ void main() {
       expect(calls, ['signin', 'backend', 'firebase']);
     });
 
+    test('normalizes trailing slash before backend DELETE path', () async {
+      late Uri backendUri;
+
+      await deleteTestUser(
+        email: 'test@example.com',
+        password: 'pass123',
+        backendBaseUrl: 'https://api.example.test/',
+        firebaseApiKey: 'fake-test-key',
+        postFn: (url, body) async {
+          if (url.contains('signInWithPassword')) {
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          }
+          return '{}';
+        },
+        deleteFn: (uri, idToken) async {
+          backendUri = uri;
+          return 200;
+        },
+      );
+
+      expect(backendUri.toString(), 'https://api.example.test/users/me');
+    });
+
     test('sign-in failure EMAIL_NOT_FOUND skips silently', () async {
       final calls = <String>[];
 
