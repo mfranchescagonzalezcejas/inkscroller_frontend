@@ -8,28 +8,15 @@ import 'package:inkscroller_flutter/core/constants/api_endpoints.dart';
 /// Firebase Web API key for the dev project.
 ///
 /// Provide via `--dart-define=FIREBASE_WEB_API_KEY=...` at compile time.
-/// Falls back to `FIREBASE_ANDROID_DEV_API_KEY` — Firebase API keys are
-/// project-level, so the Android key works for the REST cleanup endpoint too.
 const _firebaseWebApiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
-const _firebaseAndroidDevApiKey = String.fromEnvironment(
-  'FIREBASE_ANDROID_DEV_API_KEY',
-);
 
-/// Resolves the Firebase cleanup API key with explicit priority.
+/// Resolves the Firebase cleanup API key.
 ///
-/// Returns [webApiKey] when non-empty, otherwise [androidDevApiKey].
-/// Extracted so tests can call it with fake values to prove the fallback
-/// decision without needing compile-time dart-defines.
-String resolveFirebaseCleanupApiKey({
-  String? webApiKey,
-  String? androidDevApiKey,
-}) {
+/// Returns [webApiKey] when non-empty. Extracted so tests can call it with
+/// fake values without needing compile-time dart-defines.
+String resolveFirebaseCleanupApiKey({String? webApiKey}) {
   final effectiveWebApiKey = webApiKey ?? _firebaseWebApiKey;
-  final effectiveAndroidDevApiKey =
-      androidDevApiKey ?? _firebaseAndroidDevApiKey;
-  return effectiveWebApiKey.isNotEmpty
-      ? effectiveWebApiKey
-      : effectiveAndroidDevApiKey;
+  return effectiveWebApiKey;
 }
 
 String get firebaseWebApiKey => resolveFirebaseCleanupApiKey();
@@ -62,8 +49,7 @@ Future<void> deleteTestUser({
   if (effectiveApiKey.isEmpty) {
     throw StateError(
       'No Firebase API key available for cleanup. '
-      'Provide it via --dart-define=FIREBASE_WEB_API_KEY=<key> (primary) or '
-      '--dart-define=FIREBASE_ANDROID_DEV_API_KEY=<key> (fallback). '
+      'Provide it via --dart-define=FIREBASE_WEB_API_KEY=<key>. '
       'Keys are accepted via dart-defines or project config.',
     );
   }

@@ -135,13 +135,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
         // explicit incomplete-profile response should force the /register
         // redirect. Preserve the existing pending state on transient failures.
         //
-        // A 404 from /users/profile means the profile does not exist yet —
-        // treat it the same as an explicit "incomplete" response.
+        // A bare 404 (e.g. message 'Not found') does NOT mean incomplete — it
+        // can mean a real server error. Only explicit incomplete/missing-profile
+        // messages trigger profile completion.
+        // Only explicit incomplete/missing-profile messages force /register.
+        // Generic messages like "Missing authorization header" must NOT match,
+        // so 'missing' requires a profile-context keyword to avoid false positives.
+        final msg = failure.message.toLowerCase();
         final isProfileMissing =
             failure is ServerFailure &&
-            (failure.code == 404 ||
-                failure.message.toLowerCase().contains('incomplete') ||
-                failure.message.toLowerCase().contains('missing'));
+            (msg.contains('incomplete') ||
+                (msg.contains('missing') &&
+                    (msg.contains('profile') || msg.contains('metadata'))));
         state = state.copyWith(
           isLoading: false,
           error: failure.message,

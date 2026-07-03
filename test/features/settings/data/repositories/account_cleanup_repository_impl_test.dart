@@ -91,4 +91,37 @@ void main() {
       verify(() => mockAuth.signOut()).called(1);
     },
   );
+
+  test('user-not-found is treated as success and signs out', () async {
+    when(() => mockUser.delete()).thenAnswer(
+      (_) async => throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'The user account has been deleted.',
+      ),
+    );
+    when(() => mockPrefs.clear()).thenAnswer((_) async => true);
+
+    final result = await repository.cleanUpAfterDeletion();
+
+    // Already-missing user is not an error — no exception thrown.
+    expect(result, isNull);
+    verify(() => mockUser.delete()).called(1);
+    verify(() => mockAuth.signOut()).called(1);
+  });
+
+  test('generic FirebaseAuthException still throws and signs out', () async {
+    when(() => mockUser.delete()).thenAnswer(
+      (_) async => throw FirebaseAuthException(
+        code: 'quota-exceeded',
+        message: 'Project quota exceeded.',
+      ),
+    );
+    when(() => mockPrefs.clear()).thenAnswer((_) async => true);
+
+    await expectLater(
+      repository.cleanUpAfterDeletion(),
+      throwsA(isA<FirebaseAuthException>()),
+    );
+    verify(() => mockAuth.signOut()).called(1);
+  });
 }

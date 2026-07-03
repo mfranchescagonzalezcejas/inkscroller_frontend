@@ -36,8 +36,14 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
     if (user != null) {
       // Firebase Auth deletion is critical: failure here must prevent the
       // provider from marking account deletion as successful.
+      //
+      // `user-not-found` means the Firebase user was already deleted (e.g.
+      // by a prior backend call or manual cleanup). Treat it as success.
       try {
         await user.delete();
+      } on FirebaseAuthException catch (e) {
+        if (e.code != 'user-not-found') rethrow;
+        // Already missing — fall through to sign-out.
       } finally {
         // Sign out even if delete fails so the local session is torn down.
         await _firebaseAuth.signOut();

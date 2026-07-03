@@ -201,10 +201,7 @@ void main() {
           isA<StateError>().having(
             (e) => e.message,
             'message',
-            allOf(
-              contains('FIREBASE_WEB_API_KEY'),
-              contains('FIREBASE_ANDROID_DEV_API_KEY'),
-            ),
+            contains('FIREBASE_WEB_API_KEY'),
           ),
         ),
       );
@@ -292,32 +289,22 @@ void main() {
   });
 
   group('resolveFirebaseCleanupApiKey', () {
-    test('web key wins when present', () {
+    test('web key returned when present', () {
       expect(
-        resolveFirebaseCleanupApiKey(
-          webApiKey: 'web-key-123',
-          androidDevApiKey: 'android-key-456',
-        ),
+        resolveFirebaseCleanupApiKey(webApiKey: 'web-key-123'),
         'web-key-123',
       );
     });
 
-    test('android dev key fallback when web key is empty', () {
-      expect(
-        resolveFirebaseCleanupApiKey(
-          webApiKey: '',
-          androidDevApiKey: 'android-key-456',
-        ),
-        'android-key-456',
-      );
-    });
-
-    test('empty when neither is present', () {
-      expect(
-        resolveFirebaseCleanupApiKey(webApiKey: '', androidDevApiKey: ''),
-        '',
-      );
-    });
+    test(
+      'returns compile-time constant when no param — no Android fallback',
+      () {
+        // Prove the default resolver has no Android fallback: the returned value
+        // must exactly equal the compile-time dart-define.
+        final result = resolveFirebaseCleanupApiKey();
+        expect(result, const String.fromEnvironment('FIREBASE_WEB_API_KEY'));
+      },
+    );
   });
 
   group('assertBackendCleanupStatus', () {
