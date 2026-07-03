@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -78,6 +79,40 @@ void main() {
       );
     });
 
+    test('backend timeout retries 3 times, then throws; Firebase never reached',
+        () async {
+      final calls = <String>[];
+
+      await expectLater(
+        () => deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: 'fake-test-key',
+          postFn: (url, body) async {
+            calls.add('signin');
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            calls.add('backend');
+            throw TimeoutException('backend timeout');
+          },
+        ),
+        throwsA(isA<TimeoutException>()),
+      );
+
+      expect(
+        calls,
+        [
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+        ],
+      );
+    });
+
     test('backend 404 is treated as success and Firebase DELETE still happens',
         () async {
       final calls = <String>[];
@@ -131,6 +166,7 @@ void main() {
       await deleteTestUser(
         email: 'test@example.com',
         password: 'pass123',
+        firebaseApiKey: '',
         postFn: (url, body) async {
           calls.add('post');
           return '{}';

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -27,7 +28,7 @@ Future<void> deleteTestUser({
   required String password,
   String? backendBaseUrl,
   String? firebaseApiKey,
-  Future<String> Function(String url, Map<String, dynamic> body)? postFn,
+  Future<String> Function(String url, Map<String, Object?> body)? postFn,
   Future<int> Function(Uri uri, String idToken)? deleteFn,
 }) async {
   final effectiveApiKey = firebaseApiKey ?? firebaseWebApiKey;
@@ -58,6 +59,12 @@ Future<void> deleteTestUser({
       await Future<void>.delayed(
         Duration(milliseconds: 1000 * (1 << (attempt - 1))),
       );
+    } on TimeoutException {
+      attempt++;
+      if (attempt >= maxRetries) rethrow;
+      await Future<void>.delayed(
+        Duration(milliseconds: 1000 * (1 << (attempt - 1))),
+      );
     } on HttpException {
       attempt++;
       if (attempt >= maxRetries) rethrow;
@@ -74,7 +81,7 @@ Future<void> _deleteAccount({
   required String password,
   required String backendBaseUrl,
   required String firebaseApiKey,
-  Future<String> Function(String url, Map<String, dynamic> body)? postFn,
+  Future<String> Function(String url, Map<String, Object?> body)? postFn,
   Future<int> Function(Uri uri, String idToken)? deleteFn,
 }) async {
   // Step 1: Sign in to get the ID token.
@@ -198,8 +205,8 @@ void assertBackendCleanupStatus(int statusCode) {
 /// All I/O operations have a 15-second timeout to avoid hanging indefinitely.
 Future<String> _post({
   required String url,
-  required Map<String, dynamic> body,
-  Future<String> Function(String url, Map<String, dynamic> body)? postFn,
+  required Map<String, Object?> body,
+  Future<String> Function(String url, Map<String, Object?> body)? postFn,
 }) async {
   if (postFn != null) return postFn(url, body);
 
