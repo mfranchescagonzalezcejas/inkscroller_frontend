@@ -106,7 +106,8 @@ jobs:
             test/features/profile/presentation/providers/ \
             test/features/settings/presentation/providers/ \
             test/features/settings/presentation/settings_provider_test.dart \
-            test/features/settings/presentation/delete_account_dialog_test.dart
+            test/features/settings/presentation/delete_account_dialog_test.dart \
+            test/e2e/helpers/cleanup_test.dart
 
   ui-smoke:
     name: UI smoke tests (routing + critical surfaces)

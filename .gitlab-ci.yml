@@ -58,6 +58,7 @@ tests:
       test/features/preferences/presentation/providers/
       test/features/profile/presentation/providers/
       test/features/settings/presentation/providers/
+      test/e2e/helpers/cleanup_test.dart
     - >-
       fvm flutter test
       test/core/router/app_router_test.dart

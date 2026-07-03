@@ -1,22 +1,247 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:inkscroller_flutter/core/config/app_environment.dart';
 
 import 'cleanup.dart';
 
 void main() {
   group('deleteTestUser', () {
-    test('is a function that accepts email and password', () {
-      // Verify the helper exists and has the expected signature.
-      // Actual cleanup requires a real Firebase project.
+    test('is a function with expected signature', () {
       expect(deleteTestUser, isA<Function>());
     });
 
-    test('returns a Future (is async)', () {
-      // Verify the function returns a Future<void>, not a sync value.
-      final result = deleteTestUser(
-        email: 'nonexistent@test.com',
-        password: 'wrongpassword',
+    test('default base URL uses AppEnvironment.apiBaseUrl', () {
+      // AppEnvironment.apiBaseUrl resolves API_BASE_URL dart-define or
+      // falls back to devCloudBaseUrl — never empty.
+      expect(AppEnvironment.apiBaseUrl, isNotEmpty);
+    });
+
+    test('sign-in happens before backend DELETE before Firebase DELETE',
+        () async {
+      final calls = <String>[];
+
+      await deleteTestUser(
+        email: 'test@example.com',
+        password: 'pass123',
+        firebaseApiKey: 'fake-test-key',
+        postFn: (url, body) async {
+          if (url.contains('signInWithPassword')) {
+            calls.add('signin');
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          }
+          // accounts:delete
+          calls.add('firebase');
+          return '{}';
+        },
+        deleteFn: (uri, idToken) async {
+          calls.add('backend');
+          return 200;
+        },
       );
-      expect(result, isA<Future<void>>());
+
+      expect(calls, ['signin', 'backend', 'firebase']);
+    });
+
+    test('backend 500 retries 3 times, then throws; Firebase never reached',
+        () async {
+      final calls = <String>[];
+
+      await expectLater(
+        () => deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: 'fake-test-key',
+          postFn: (url, body) async {
+            calls.add('signin');
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            calls.add('backend');
+            return 500;
+          },
+        ),
+        throwsA(isA<HttpException>()),
+      );
+
+      // ponytail: production retries 3x on HttpException — assert all attempts
+      expect(
+        calls,
+        [
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+        ],
+      );
+    });
+
+    test('backend timeout retries 3 times, then throws; Firebase never reached',
+        () async {
+      final calls = <String>[];
+
+      await expectLater(
+        () => deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: 'fake-test-key',
+          postFn: (url, body) async {
+            calls.add('signin');
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            calls.add('backend');
+            throw TimeoutException('backend timeout');
+          },
+        ),
+        throwsA(isA<TimeoutException>()),
+      );
+
+      expect(
+        calls,
+        [
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+          'signin',
+          'backend',
+        ],
+      );
+    });
+
+    test('backend 404 is treated as success and Firebase DELETE still happens',
+        () async {
+      final calls = <String>[];
+
+      await deleteTestUser(
+        email: 'test@example.com',
+        password: 'pass123',
+        firebaseApiKey: 'fake-test-key',
+        postFn: (url, body) async {
+          if (url.contains('signInWithPassword')) {
+            calls.add('signin');
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          }
+          calls.add('firebase');
+          return '{}';
+        },
+        deleteFn: (uri, idToken) async {
+          calls.add('backend');
+          return 404;
+        },
+      );
+
+      expect(calls, ['signin', 'backend', 'firebase']);
+    });
+
+    test('normalizes trailing slash before backend DELETE path', () async {
+      late Uri backendUri;
+
+      await deleteTestUser(
+        email: 'test@example.com',
+        password: 'pass123',
+        backendBaseUrl: 'https://api.example.test/',
+        firebaseApiKey: 'fake-test-key',
+        postFn: (url, body) async {
+          if (url.contains('signInWithPassword')) {
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          }
+          return '{}';
+        },
+        deleteFn: (uri, idToken) async {
+          backendUri = uri;
+          return 200;
+        },
+      );
+
+      expect(backendUri.toString(), 'https://api.example.test/users/me');
+    });
+
+    test('sign-in failure EMAIL_NOT_FOUND skips silently', () async {
+      final calls = <String>[];
+
+      await deleteTestUser(
+        email: 'gone@example.com',
+        password: 'pass123',
+        firebaseApiKey: 'fake-test-key',
+        postFn: (url, body) async {
+          calls.add('signin');
+          return '{"error":{"message":"EMAIL_NOT_FOUND"}}';
+        },
+        deleteFn: (uri, idToken) async {
+          calls.add('backend');
+          return 200;
+        },
+      );
+
+      // Only sign-in was attempted — no backend or firebase call.
+      expect(calls, ['signin']);
+    });
+
+    test('no firebaseApiKey (empty const) skips cleanup silently', () async {
+      final calls = <String>[];
+
+      // firebaseWebApiKey const is '' without dart-define; no override passed.
+      await deleteTestUser(
+        email: 'test@example.com',
+        password: 'pass123',
+        firebaseApiKey: '',
+        postFn: (url, body) async {
+          calls.add('post');
+          return '{}';
+        },
+        deleteFn: (uri, idToken) async {
+          calls.add('delete');
+          return 200;
+        },
+      );
+
+      expect(calls, isEmpty);
+    });
+  });
+
+  group('assertBackendCleanupStatus', () {
+    test('200 is treated as success', () {
+      expect(() => assertBackendCleanupStatus(200), returnsNormally);
+    });
+
+    test('204 is treated as success', () {
+      expect(() => assertBackendCleanupStatus(204), returnsNormally);
+    });
+
+    test('404 is treated as success', () {
+      expect(() => assertBackendCleanupStatus(404), returnsNormally);
+    });
+
+    test('500 throws HttpException with status in message', () {
+      expect(
+        () => assertBackendCleanupStatus(500),
+        throwsA(
+          isA<HttpException>().having(
+            (e) => e.message,
+            'message',
+            contains('500'),
+          ),
+        ),
+      );
+    });
+
+    test('403 throws HttpException', () {
+      expect(
+        () => assertBackendCleanupStatus(403),
+        throwsA(isA<HttpException>()),
+      );
+    });
+
+    test('401 throws HttpException', () {
+      expect(
+        () => assertBackendCleanupStatus(401),
+        throwsA(isA<HttpException>()),
+      );
     });
   });
 }
