@@ -57,6 +57,8 @@ import '../../features/settings/data/datasources/settings_remote_ds.dart';
 import '../../features/settings/data/datasources/settings_remote_ds_impl.dart';
 import '../../features/settings/data/repositories/settings_cache_repository_impl.dart';
 import '../../features/settings/data/repositories/settings_repository_impl.dart';
+import '../../features/settings/data/repositories/account_cleanup_repository_impl.dart';
+import '../../features/settings/domain/repositories/account_cleanup_repository.dart';
 import '../../features/settings/domain/repositories/settings_cache_repository.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/usecases/clear_settings_cache.dart';
@@ -268,5 +270,12 @@ void initSettingsDI() {
 
   _registerIfAbsent<SettingsRepository>(
     () => SettingsRepositoryImpl(remoteDataSource: sl<SettingsRemoteDataSource>()),
+  );
+
+  _registerIfAbsent<AccountCleanupRepository>(
+    () => AccountCleanupRepositoryImpl(
+      firebaseAuth: sl<FirebaseAuth>(),
+      prefs: sl<SharedPreferences>(),
+    ),
   );
 }
