@@ -727,6 +727,39 @@ void main() {
     );
 
     test(
+      'sets profileCompletionPending on 404 ServerFailure from profile fetch',
+      () async {
+        final streamController = StreamController<AppUser?>.broadcast();
+        final getUserProfile = _MockGetUserProfile();
+        when(
+          () => mockGetAuthState(),
+        ).thenAnswer((_) => streamController.stream);
+        when(() => getUserProfile()).thenAnswer(
+          (_) async => const Left<Failure, UserProfile>(
+            ServerFailure(message: 'Not found', code: 404),
+          ),
+        );
+
+        final notifier = _makeNotifier(
+          signIn: mockSignIn,
+          signUp: mockSignUp,
+          signOut: mockSignOut,
+          getAuthState: mockGetAuthState,
+          getUserProfile: getUserProfile,
+        );
+
+        streamController.add(_kUser);
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(notifier.state.profileCompletionPending, isTrue);
+        expect(notifier.state.error, 'Not found');
+
+        await streamController.close();
+      },
+    );
+
+    test(
       'does not set profileCompletionPending on generic server failure',
       () async {
         final streamController = StreamController<AppUser?>.broadcast();

@@ -201,9 +201,121 @@ void main() {
           isA<StateError>().having(
             (e) => e.message,
             'message',
-            contains('FIREBASE_WEB_API_KEY'),
+            allOf(
+              contains('FIREBASE_WEB_API_KEY'),
+              contains('FIREBASE_ANDROID_DEV_API_KEY'),
+            ),
           ),
         ),
+      );
+    });
+
+    test(
+      'explicit firebaseApiKey param overrides compile-time constant',
+      () async {
+        late String usedApiKey;
+
+        await deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: 'explicit-key-override',
+          postFn: (url, body) async {
+            usedApiKey = Uri.parse(url).queryParameters['key'] ?? '';
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            return 200;
+          },
+        );
+
+        expect(usedApiKey, 'explicit-key-override');
+      },
+    );
+
+    test(
+      'resolveApiKey seam: fallback key is used when no explicit key',
+      () async {
+        late String usedApiKey;
+
+        await deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          resolveApiKey: () => 'fallback-android-key',
+          postFn: (url, body) async {
+            usedApiKey = Uri.parse(url).queryParameters['key'] ?? '';
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            return 200;
+          },
+        );
+
+        expect(usedApiKey, 'fallback-android-key');
+      },
+    );
+
+    test(
+      'resolveApiKey seam: explicit param still wins over resolveApiKey',
+      () async {
+        late String usedApiKey;
+
+        await deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          firebaseApiKey: 'explicit-wins',
+          resolveApiKey: () => 'should-not-be-used',
+          postFn: (url, body) async {
+            usedApiKey = Uri.parse(url).queryParameters['key'] ?? '';
+            return '{"idToken":"tok123","email":"test@example.com"}';
+          },
+          deleteFn: (uri, idToken) async {
+            return 200;
+          },
+        );
+
+        expect(usedApiKey, 'explicit-wins');
+      },
+    );
+
+    test('resolveApiKey seam: empty fallback throws StateError', () async {
+      await expectLater(
+        () => deleteTestUser(
+          email: 'test@example.com',
+          password: 'pass123',
+          resolveApiKey: () => '',
+          postFn: (url, body) async => '{}',
+          deleteFn: (uri, idToken) async => 200,
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+  });
+
+  group('resolveFirebaseCleanupApiKey', () {
+    test('web key wins when present', () {
+      expect(
+        resolveFirebaseCleanupApiKey(
+          webApiKey: 'web-key-123',
+          androidDevApiKey: 'android-key-456',
+        ),
+        'web-key-123',
+      );
+    });
+
+    test('android dev key fallback when web key is empty', () {
+      expect(
+        resolveFirebaseCleanupApiKey(
+          webApiKey: '',
+          androidDevApiKey: 'android-key-456',
+        ),
+        'android-key-456',
+      );
+    });
+
+    test('empty when neither is present', () {
+      expect(
+        resolveFirebaseCleanupApiKey(webApiKey: '', androidDevApiKey: ''),
+        '',
       );
     });
   });

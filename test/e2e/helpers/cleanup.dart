@@ -8,7 +8,31 @@ import 'package:inkscroller_flutter/core/constants/api_endpoints.dart';
 /// Firebase Web API key for the dev project.
 ///
 /// Provide via `--dart-define=FIREBASE_WEB_API_KEY=...` at compile time.
-const String firebaseWebApiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
+/// Falls back to `FIREBASE_ANDROID_DEV_API_KEY` — Firebase API keys are
+/// project-level, so the Android key works for the REST cleanup endpoint too.
+const _firebaseWebApiKey = String.fromEnvironment('FIREBASE_WEB_API_KEY');
+const _firebaseAndroidDevApiKey = String.fromEnvironment(
+  'FIREBASE_ANDROID_DEV_API_KEY',
+);
+
+/// Resolves the Firebase cleanup API key with explicit priority.
+///
+/// Returns [webApiKey] when non-empty, otherwise [androidDevApiKey].
+/// Extracted so tests can call it with fake values to prove the fallback
+/// decision without needing compile-time dart-defines.
+String resolveFirebaseCleanupApiKey({
+  String? webApiKey,
+  String? androidDevApiKey,
+}) {
+  final effectiveWebApiKey = webApiKey ?? _firebaseWebApiKey;
+  final effectiveAndroidDevApiKey =
+      androidDevApiKey ?? _firebaseAndroidDevApiKey;
+  return effectiveWebApiKey.isNotEmpty
+      ? effectiveWebApiKey
+      : effectiveAndroidDevApiKey;
+}
+
+String get firebaseWebApiKey => resolveFirebaseCleanupApiKey();
 
 /// Deletes a test user from both the backend and Firebase Auth.
 ///
@@ -28,15 +52,19 @@ Future<void> deleteTestUser({
   required String password,
   String? backendBaseUrl,
   String? firebaseApiKey,
+  String Function()? resolveApiKey,
   Future<String> Function(String url, Map<String, Object?> body)? postFn,
   Future<int> Function(Uri uri, String idToken)? deleteFn,
 }) async {
-  final effectiveApiKey = firebaseApiKey ?? firebaseWebApiKey;
+  final effectiveApiKey =
+      firebaseApiKey ??
+      (resolveApiKey?.call() ?? resolveFirebaseCleanupApiKey());
   if (effectiveApiKey.isEmpty) {
     throw StateError(
-      'FIREBASE_WEB_API_KEY is required for Firebase cleanup. '
-      'Provide it via --dart-define=FIREBASE_WEB_API_KEY=<key> or '
-      'via .dart-defines/firebase.json.',
+      'No Firebase API key available for cleanup. '
+      'Provide it via --dart-define=FIREBASE_WEB_API_KEY=<key> (primary) or '
+      '--dart-define=FIREBASE_ANDROID_DEV_API_KEY=<key> (fallback). '
+      'Keys are accepted via dart-defines or project config.',
     );
   }
 

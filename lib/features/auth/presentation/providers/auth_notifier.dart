@@ -134,16 +134,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
         // clear profileCompletionPending if it was already true — only an
         // explicit incomplete-profile response should force the /register
         // redirect. Preserve the existing pending state on transient failures.
-        final isTransientFailure =
-            failure is! ServerFailure ||
-            !(failure.message.toLowerCase().contains('incomplete') ||
+        //
+        // A 404 from /users/profile means the profile does not exist yet —
+        // treat it the same as an explicit "incomplete" response.
+        final isProfileMissing =
+            failure is ServerFailure &&
+            (failure.code == 404 ||
+                failure.message.toLowerCase().contains('incomplete') ||
                 failure.message.toLowerCase().contains('missing'));
         state = state.copyWith(
           isLoading: false,
           error: failure.message,
-          profileCompletionPending: isTransientFailure
-              ? null
-              : !isTransientFailure,
+          profileCompletionPending: isProfileMissing ? true : null,
         );
       },
       (profile) {
