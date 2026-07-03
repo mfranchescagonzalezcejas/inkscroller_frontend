@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
@@ -13,6 +14,7 @@ import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_no
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
+import 'package:inkscroller_flutter/features/settings/domain/repositories/account_cleanup_repository.dart';
 import 'package:inkscroller_flutter/features/settings/domain/repositories/settings_repository.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/pages/settings_page.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/providers/settings_cache_controller.dart';
@@ -25,6 +27,8 @@ class _MockSettingsCacheController extends Mock
     implements SettingsCacheController {}
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
+class _MockAccountCleanupRepository extends Mock
+    implements AccountCleanupRepository {}
 
 /// Creates a stub [AuthNotifier] that stays in the initial state.
 AuthNotifier _makeStubAuthNotifier() {
@@ -131,5 +135,63 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     verify(() => controller.clearLibraryCache()).called(1);
+  });
+
+  testWidgets('shows cleanup warning after deleted account success',
+      (tester) async {
+    final cleanup = _MockAccountCleanupRepository();
+    final container = ProviderContainer(
+      overrides: <Override>[
+        settingsCacheControllerProvider.overrideWithValue(controller),
+        settingsRepositoryProvider.overrideWithValue(settingsRepository),
+        settingsProvider.overrideWith(
+          (_) => SettingsNotifier(
+            repository: settingsRepository,
+            cleanup: cleanup,
+          ),
+        ),
+        authProvider.overrideWith((_) => _makeStubAuthNotifier()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    when(() => settingsRepository.deleteAccount())
+        .thenAnswer((_) async => const Right(null));
+    when(() => cleanup.cleanUpAfterDeletion()).thenAnswer(
+      (_) async => 'Firebase user deletion failed',
+    );
+
+    final router = GoRouter(
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/',
+          builder: (context, state) => UncontrolledProviderScope(
+            container: container,
+            child: const SettingsPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const Scaffold(
+            body: Text('Login'),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+
+    await container.read(settingsProvider.notifier).deleteAccount();
+    await tester.pump();
+
+    expect(find.text('Firebase user deletion failed'), findsOneWidget);
   });
 }

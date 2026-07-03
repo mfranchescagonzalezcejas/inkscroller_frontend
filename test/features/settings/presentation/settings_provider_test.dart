@@ -130,7 +130,7 @@ void main() {
     );
 
     test(
-      'deleteAccount handles cleanup exception — still marks deleted',
+      'deleteAccount handles cleanup exception — does NOT mark deleted',
       () async {
         when(() => repository.deleteAccount())
             .thenAnswer((_) async => const Right(null));
@@ -144,10 +144,11 @@ void main() {
 
         await notifier.deleteAccount();
 
-        // Backend succeeded → accountDeleted true, cleanup failure is warning.
-        expect(notifier.state.accountDeleted, true);
+        // Critical cleanup failure → account NOT marked deleted, error shown.
+        expect(notifier.state.accountDeleted, false);
         expect(notifier.state.isDeletingAccount, false);
-        expect(notifier.state.deleteWarning, 'Local cleanup failed');
+        expect(notifier.state.deleteError, isNotNull);
+        expect(notifier.state.deleteWarning, isNull);
       },
     );
 

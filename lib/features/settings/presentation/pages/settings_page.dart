@@ -62,10 +62,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     // Navigate to login after successful account deletion.
     ref.listen<SettingsState>(settingsProvider, (previous, next) {
       if (next.accountDeleted && mounted) {
-        AppFeedback.showSuccess(
-          context,
-          title: 'Cuenta eliminada correctamente',
-        );
+        if (next.deleteWarning != null) {
+          AppFeedback.showWarning(
+            context,
+            title: 'Cuenta eliminada con advertencias',
+            body: next.deleteWarning,
+          );
+        } else {
+          AppFeedback.showSuccess(
+            context,
+            title: 'Cuenta eliminada correctamente',
+          );
+        }
         context.go(AppRoutes.login);
       }
       if (next.deleteError != null && mounted) {
