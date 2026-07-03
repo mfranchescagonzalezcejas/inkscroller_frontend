@@ -1,43 +1,30 @@
 import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-import 'package:inkscroller_flutter/core/di/injection.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
+import 'package:inkscroller_flutter/features/settings/domain/repositories/account_cleanup_repository.dart';
 import 'package:inkscroller_flutter/features/settings/domain/repositories/settings_repository.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/providers/settings_provider.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/widgets/delete_account_dialog.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
 
-class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
+class _MockAccountCleanupRepository extends Mock
+    implements AccountCleanupRepository {}
 
 void main() {
   late SettingsRepository repository;
-  late _MockFirebaseAuth mockAuth;
+  late _MockAccountCleanupRepository mockCleanup;
 
-  setUp(() async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
-    if (!GetIt.I.isRegistered<SharedPreferences>()) {
-      final prefs = await SharedPreferences.getInstance();
-      sl.registerLazySingleton<SharedPreferences>(() => prefs);
-    }
+  setUp(() {
     repository = _MockSettingsRepository();
-    mockAuth = _MockFirebaseAuth();
+    mockCleanup = _MockAccountCleanupRepository();
     when(() => repository.deleteAccount())
         .thenAnswer((_) async => const Right(null));
-    when(() => mockAuth.currentUser).thenReturn(null);
-    when(() => mockAuth.signOut()).thenAnswer((_) async {});
-  });
-
-  tearDown(() async {
-    if (GetIt.I.isRegistered<SharedPreferences>()) {
-      await GetIt.I.unregister<SharedPreferences>();
-    }
+    when(() => mockCleanup.cleanUpAfterDeletion())
+        .thenAnswer((_) async => null);
   });
 
   Widget buildDialog() {
@@ -47,7 +34,7 @@ void main() {
         settingsProvider.overrideWith(
           (ref) => SettingsNotifier(
             repository: repository,
-            firebaseAuth: mockAuth,
+            cleanup: mockCleanup,
           ),
         ),
       ],
