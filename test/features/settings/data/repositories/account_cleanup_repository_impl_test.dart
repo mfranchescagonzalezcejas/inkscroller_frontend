@@ -46,19 +46,22 @@ void main() {
     },
   );
 
-  test('user.delete fails: signs out and throws critical exception', () async {
-    when(
-      () => mockUser.delete(),
-    ).thenAnswer((_) async => throw Exception('quota-exceeded'));
-    when(() => mockPrefs.clear()).thenAnswer((_) async => true);
+  test(
+    'user.delete fails: does NOT sign out and throws critical exception',
+    () async {
+      when(
+        () => mockUser.delete(),
+      ).thenAnswer((_) async => throw Exception('quota-exceeded'));
+      when(() => mockPrefs.clear()).thenAnswer((_) async => true);
 
-    await expectLater(
-      repository.cleanUpAfterDeletion(),
-      throwsA(isA<Exception>()),
-    );
-    verify(() => mockPrefs.clear()).called(1);
-    verify(() => mockAuth.signOut()).called(1);
-  });
+      await expectLater(
+        repository.cleanUpAfterDeletion(),
+        throwsA(isA<Exception>()),
+      );
+      verify(() => mockPrefs.clear()).called(1);
+      verifyNever(() => mockAuth.signOut());
+    },
+  );
 
   test('prefs.clear returns false: signs out, returns prefs warning', () async {
     when(() => mockUser.delete()).thenAnswer((_) async {});
@@ -71,7 +74,7 @@ void main() {
   });
 
   test(
-    'user.delete fails: signs out and throws critical exception even if prefs also fail',
+    'user.delete fails: does NOT sign out and throws critical exception even if prefs also fail',
     () async {
       when(
         () => mockUser.delete(),
@@ -88,7 +91,7 @@ void main() {
           ),
         ),
       );
-      verify(() => mockAuth.signOut()).called(1);
+      verifyNever(() => mockAuth.signOut());
     },
   );
 
@@ -109,7 +112,7 @@ void main() {
     verify(() => mockAuth.signOut()).called(1);
   });
 
-  test('generic FirebaseAuthException still throws and signs out', () async {
+  test('generic FirebaseAuthException does NOT sign out and throws', () async {
     when(() => mockUser.delete()).thenAnswer(
       (_) async => throw FirebaseAuthException(
         code: 'quota-exceeded',
@@ -122,6 +125,6 @@ void main() {
       repository.cleanUpAfterDeletion(),
       throwsA(isA<FirebaseAuthException>()),
     );
-    verify(() => mockAuth.signOut()).called(1);
+    verifyNever(() => mockAuth.signOut());
   });
 }
