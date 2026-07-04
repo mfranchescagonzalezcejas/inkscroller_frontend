@@ -20,6 +20,7 @@ void main() {
   setUp(() {
     repository = _MockSettingsRepository();
     mockCleanup = _MockAccountCleanupRepository();
+    when(() => mockCleanup.currentCleanupUserId).thenReturn('uid-1');
     when(
       () => mockCleanup.cleanUpAfterDeletion(password: any(named: 'password')),
     ).thenAnswer((_) async => null);
@@ -31,7 +32,7 @@ void main() {
     ).thenAnswer((_) async {});
     when(
       () => mockCleanup.clearDeletionCleanupPending(),
-    ).thenAnswer((_) async => {});
+    ).thenAnswer((_) async {});
   });
 
   group('SettingsNotifier', () {
@@ -92,7 +93,7 @@ void main() {
       },
     );
 
-    test('deleteAccount does not accept later 404 after success', () async {
+    test('deleteAccount calls backend again after full success', () async {
       when(
         () => repository.deleteAccount(),
       ).thenAnswer((_) async => const Right(null));
@@ -104,16 +105,18 @@ void main() {
 
       await notifier.deleteAccount();
 
-      // A later 404 should not be treated as "already deleted".
+      // Second attempt: backend was already cleaned up successfully,
+      // but the in-memory flag resets after cleanup — so backend must
+      // be called again. A 404 here is a real error, not stale state.
       when(() => repository.deleteAccount()).thenAnswer(
         (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
       );
 
       await notifier.deleteAccount();
 
+      // Backend WAS called again — flag was reset after first success.
       expect(notifier.state.accountDeleted, false);
       expect(notifier.state.deleteError, 'Not found');
-      // Backend called again, but cleanup NOT called (backend failed).
       verify(() => repository.deleteAccount()).called(2);
     });
 
@@ -588,5 +591,99 @@ void main() {
       expect(notifier.state.cleanupRecoveryPending, true);
       expect(notifier.state.isDeletingAccount, false);
     });
+
+    test(
+      'deleteAccount marker write failure + cleanup failure — '
+      'retry skips backend via in-memory flag',
+      () async {
+        // Call 1: backend succeeds, marker write throws, cleanup throws.
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          () => mockCleanup.markDeletionCleanupPending(),
+        ).thenThrow(Exception('storage full'));
+        when(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(Exception('Firebase Auth deletion failed'));
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+        await notifier.deleteAccount();
+
+        expect(notifier.state.accountDeleted, false);
+        expect(notifier.state.cleanupRecoveryPending, true);
+        verify(() => repository.deleteAccount()).called(1);
+
+        // Call 2: same UID — retry should skip backend (in-memory flag)
+        // even though hasDeletionCleanupPending returns false (marker was
+        // never written to storage).
+        when(
+          () => mockCleanup.hasDeletionCleanupPending(),
+        ).thenAnswer((_) async => false);
+        when(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => null);
+
+        await notifier.deleteAccount(password: 'newpass');
+
+        // Backend NOT called again — in-memory flag preserved the signal.
+        verifyNoMoreInteractions(repository);
+        verify(
+          () => mockCleanup.cleanUpAfterDeletion(password: 'newpass'),
+        ).called(1);
+        expect(notifier.state.accountDeleted, true);
+        expect(notifier.state.cleanupRecoveryPending, false);
+      },
+    );
+
+    test(
+      'deleteAccount marker write failure + cleanup failure then UID changes — '
+      'retry calls backend again (no cross-user skip)',
+      () async {
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          () => mockCleanup.markDeletionCleanupPending(),
+        ).thenThrow(Exception('storage full'));
+        when(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(Exception('Firebase Auth deletion failed'));
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+        await notifier.deleteAccount();
+
+        expect(notifier.state.cleanupRecoveryPending, true);
+
+        // UID changes (different user logged in, or session recycled).
+        when(() => mockCleanup.currentCleanupUserId).thenReturn('uid-2');
+        when(
+          () => mockCleanup.hasDeletionCleanupPending(),
+        ).thenAnswer((_) async => false);
+        when(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => null);
+
+        await notifier.deleteAccount();
+
+        // Backend MUST be called — in-memory flag was for uid-1, not uid-2.
+        verify(() => repository.deleteAccount()).called(2);
+        expect(notifier.state.accountDeleted, true);
+      },
+    );
   });
 }

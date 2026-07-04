@@ -21,6 +21,7 @@ void main() {
   setUp(() {
     repository = _MockSettingsRepository();
     mockCleanup = _MockAccountCleanupRepository();
+    when(() => mockCleanup.currentCleanupUserId).thenReturn('uid-1');
     when(
       () => repository.deleteAccount(),
     ).thenAnswer((_) async => const Right(null));

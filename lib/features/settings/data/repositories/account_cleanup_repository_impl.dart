@@ -124,4 +124,7 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
     await _prefs.remove(_deletionCleanupPendingKey);
     await _prefs.remove(_deletionCleanupPendingUidKey);
   }
+
+  @override
+  String? get currentCleanupUserId => _firebaseAuth.currentUser?.uid;
 }
