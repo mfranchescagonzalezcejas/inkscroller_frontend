@@ -151,12 +151,15 @@ class _BaseUrlFallbackInterceptor extends Interceptor {
   }
 }
 
-/// Returns `true` when [path] targets a backend route that requires a Firebase
-/// ID token (i.e. a route under `/users`).
+/// Returns `true` when [path] targets a backend route that should carry a
+/// Firebase ID token when available. This includes:
 ///
-/// Public routes such as `/ping` and `/manga` return `false` and are forwarded
-/// without an `Authorization` header so unauthenticated access continues to
-/// work normally.
+/// - `/users` — always requires auth.
+/// - `/manga` and `/chapters` — use optional auth to resolve `user_age` for
+///   age-gated catalogue results (e.g. `suggestive` content).
+///
+/// Truly public routes such as `/ping` return `false` and are forwarded
+/// without an `Authorization` header.
 bool isProtectedAuthPath(String path) {
   return _AuthInterceptor.isProtectedPath(path);
 }
@@ -179,7 +182,7 @@ Future<void> attachAuthHeaderForRequest(
 }
 
 class _AuthInterceptor extends Interceptor {
-  static const _protectedPaths = <String>['/users'];
+  static const _protectedPaths = <String>['/users', '/manga', '/chapters'];
 
   final Future<String?> Function() _tokenProvider;
 
@@ -189,7 +192,9 @@ class _AuthInterceptor extends Interceptor {
   static Future<String?> _emptyTokenProvider() async => null;
 
   static bool isProtectedPath(String path) {
-    return _protectedPaths.any(path.startsWith);
+    return _protectedPaths.any(
+      (prefix) => path == prefix || path.startsWith('$prefix/'),
+    );
   }
 
   static Future<void> attachAuthHeader(
