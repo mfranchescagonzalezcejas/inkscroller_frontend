@@ -8,8 +8,42 @@
 abstract class AccountCleanupRepository {
   /// Clears local state and signs the user out after backend account deletion.
   ///
+  /// When [password] is provided and the Firebase user still exists, the user
+  /// is reauthenticated before deletion.
+  ///
   /// Returns a warning string if any non-critical step failed, or `null` on
   /// full success. Throws on critical failures (e.g. Firebase Auth deletion)
   /// that prevent the caller from marking deletion as complete.
-  Future<String?> cleanUpAfterDeletion();
+  Future<String?> cleanUpAfterDeletion({String? password});
+
+  /// Marks that a deletion cleanup is pending (backend succeeded but
+  /// Firebase/local cleanup has not completed).
+  Future<void> markDeletionCleanupPending();
+
+  /// Whether a deletion cleanup is pending.
+  Future<bool> hasDeletionCleanupPending();
+
+  /// Clears the pending deletion cleanup marker.
+  Future<void> clearDeletionCleanupPending();
+}
+
+/// Thrown when Firebase account deletion fails with a recoverable error.
+///
+/// [requiresRecentLogin] indicates the user must re-authenticate before
+/// retrying the deletion.
+class AccountCleanupException implements Exception {
+  /// Creates an [AccountCleanupException].
+  const AccountCleanupException({
+    required this.message,
+    required this.requiresRecentLogin,
+  });
+
+  /// User-facing error message.
+  final String message;
+
+  /// Whether the user must re-login before retrying.
+  final bool requiresRecentLogin;
+
+  @override
+  String toString() => 'AccountCleanupException: $message';
 }

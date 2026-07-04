@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:integration_test/integration_test.dart';
 
 import '../test/e2e/helpers/test_app.dart';
 
 void main() {
-  testWidgets('Guest navigates to Library without redirect to login',
-      (tester) async {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('Guest navigates to Library without redirect to login', (
+    tester,
+  ) async {
     await pumpE2EApp(tester);
     await tester.pump(const Duration(milliseconds: 1200));
 

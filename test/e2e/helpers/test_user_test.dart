@@ -18,8 +18,11 @@ void main() {
 
       // Pattern: test-{digits}-{4digits}@e2e.inkscroller.dev
       final emailPattern = RegExp(r'^test-\d+-\d{4}@e2e\.inkscroller\.dev$');
-      expect(emailPattern.hasMatch(user.email), isTrue,
-          reason: 'Email "${user.email}" does not match expected pattern');
+      expect(
+        emailPattern.hasMatch(user.email),
+        isTrue,
+        reason: 'Email "${user.email}" does not match expected pattern',
+      );
     });
 
     test('has a fixed test password', () {
@@ -30,10 +33,28 @@ void main() {
     test('username matches the expected pattern', () {
       final user = TestUser.fresh();
 
-      // Pattern: TestUser_{4digits}
-      final usernamePattern = RegExp(r'^TestUser_\d{4}$');
-      expect(usernamePattern.hasMatch(user.username), isTrue,
-          reason: 'Username "${user.username}" does not match expected pattern');
+      // Pattern: TestUser_{digits}_{4digits}
+      final usernamePattern = RegExp(r'^TestUser_\d+_\d{4}$');
+      expect(
+        usernamePattern.hasMatch(user.username),
+        isTrue,
+        reason: 'Username "${user.username}" does not match expected pattern',
+      );
+    });
+
+    test('username uses the same monotonic counter as email', () {
+      final user = TestUser.fresh();
+
+      final emailMatch = RegExp(
+        r'^test-(\d+)-\d{4}@e2e\.inkscroller\.dev$',
+      ).firstMatch(user.email);
+      final usernameMatch = RegExp(
+        r'^TestUser_(\d+)_\d{4}$',
+      ).firstMatch(user.username);
+
+      expect(emailMatch, isNotNull);
+      expect(usernameMatch, isNotNull);
+      expect(usernameMatch!.group(1), emailMatch!.group(1));
     });
 
     test('birthDate is approximately 20 years ago', () {
@@ -51,9 +72,8 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 2));
       final user2 = TestUser.fresh();
 
-      // Usernames include random component, so they should differ.
-      // Note: there's a tiny collision risk with 4 random digits, but
-      // it's acceptable for test helpers.
+      // Usernames include monotonic counter + random component,
+      // so collision is effectively impossible.
       expect(user1.username, isNot(equals(user2.username)));
     });
   });

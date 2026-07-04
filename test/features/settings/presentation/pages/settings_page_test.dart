@@ -157,9 +157,19 @@ void main() {
 
     when(() => settingsRepository.deleteAccount())
         .thenAnswer((_) async => const Right(null));
-    when(() => cleanup.cleanUpAfterDeletion()).thenAnswer(
+    when(
+      () => cleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+    ).thenAnswer(
       (_) async => 'Firebase user deletion failed',
     );
+    when(() => cleanup.hasDeletionCleanupPending())
+        .thenAnswer((_) async => false);
+    when(() => cleanup.markDeletionCleanupPending())
+        .thenAnswer((_) async {});
+    when(() => cleanup.clearDeletionCleanupPending())
+        .thenAnswer((_) async => {});
 
     final router = GoRouter(
       routes: <RouteBase>[

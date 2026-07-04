@@ -15,7 +15,7 @@ class TestUser {
   /// The user's password (fixed for all test users).
   final String password;
 
-  /// The user's display name (randomized per call to [fresh]).
+  /// The user's display name (unique per call to [fresh]).
   final String username;
 
   /// The user's birth date (approximately 20 years ago).
@@ -32,7 +32,7 @@ class TestUser {
   ///
   /// Email format: `test-{counter}-{random4}@e2e.inkscroller.dev`
   /// Password: `TestPass123!`
-  /// Username: `TestUser_{random4}`
+  /// Username: `TestUser_{counter}_{random4}`
   /// BirthDate: today minus 20 years.
   factory TestUser.fresh() {
     final now = DateTime.now();
@@ -47,7 +47,7 @@ class TestUser {
     return TestUser._(
       email: 'test-$seq-$suffix@e2e.inkscroller.dev',
       password: 'TestPass123!',
-      username: 'TestUser_$suffix',
+      username: 'TestUser_${seq}_$suffix',
       birthDate: DateTime(now.year - 20, now.month, now.day),
     );
   }

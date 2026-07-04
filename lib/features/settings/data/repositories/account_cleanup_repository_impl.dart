@@ -12,6 +12,11 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
   final FirebaseAuth _firebaseAuth;
   final SharedPreferences _prefs;
 
+  static const _deletionCleanupPendingKey =
+      'settings.accountDeletionCleanupPending';
+  static const _deletionCleanupPendingUidKey =
+      'settings.accountDeletionCleanupPendingUid';
+
   /// Creates an [AccountCleanupRepositoryImpl].
   const AccountCleanupRepositoryImpl({
     required FirebaseAuth firebaseAuth,
@@ -20,9 +25,67 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
        _prefs = prefs;
 
   @override
-  Future<String?> cleanUpAfterDeletion() async {
-    String? warning;
+  Future<String?> cleanUpAfterDeletion({String? password}) async {
+    final user = _firebaseAuth.currentUser;
+    if (user != null) {
+      // Reauthenticate if password is provided — needed when Firebase
+      // requires a recent login for sensitive operations.
+      if (password != null) {
+        try {
+          await user.reauthenticateWithCredential(
+            EmailAuthProvider.credential(
+              email: user.email!,
+              password: password,
+            ),
+          );
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'requires-recent-login') {
+            throw const AccountCleanupException(
+              message: 'Volvé a iniciar sesión para completar la eliminación.',
+              requiresRecentLogin: true,
+            );
+          }
+          rethrow;
+        }
+      }
 
+      // Firebase Auth deletion is critical: failure here must prevent the
+      // provider from marking account deletion as successful.
+      //
+      // `user-not-found` means the Firebase user was already deleted (e.g.
+      // by a prior backend call or manual cleanup). Treat it as success.
+      //
+      // `requires-recent-login` means the user must re-authenticate.
+      // Throw a typed exception so the caller can prompt for login.
+      //
+      // On non-user-not-found failure, preserve the session — the caller
+      // still owns the account and must not be signed out.
+      var shouldSignOut = true;
+      try {
+        await user.delete();
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found') {
+          // Already deleted — treat as success.
+        } else if (e.code == 'requires-recent-login') {
+          throw const AccountCleanupException(
+            message: 'Volvé a iniciar sesión para completar la eliminación.',
+            requiresRecentLogin: true,
+          );
+        } else {
+          shouldSignOut = false;
+          throw const AccountCleanupException(
+            message:
+                'No pudimos eliminar tu cuenta de Firebase. Intentá de nuevo.',
+            requiresRecentLogin: false,
+          );
+        }
+      }
+      if (shouldSignOut) await _firebaseAuth.signOut();
+    } else {
+      await _firebaseAuth.signOut();
+    }
+
+    String? warning;
     try {
       final cleared = await _prefs.clear();
       if (!cleared) {
@@ -32,26 +95,33 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
       warning = 'Prefs clear failed';
     }
 
-    final user = _firebaseAuth.currentUser;
-    if (user != null) {
-      // Firebase Auth deletion is critical: failure here must prevent the
-      // provider from marking account deletion as successful.
-      //
-      // `user-not-found` means the Firebase user was already deleted (e.g.
-      // by a prior backend call or manual cleanup). Treat it as success.
-      try {
-        await user.delete();
-      } on FirebaseAuthException catch (e) {
-        if (e.code != 'user-not-found') rethrow;
-        // Already missing — fall through to sign-out.
-      } finally {
-        // Sign out even if delete fails so the local session is torn down.
-        await _firebaseAuth.signOut();
-      }
-    } else {
-      await _firebaseAuth.signOut();
-    }
-
     return warning;
+  }
+
+  @override
+  Future<void> markDeletionCleanupPending() async {
+    await _prefs.setBool(_deletionCleanupPendingKey, true);
+    final uid = _firebaseAuth.currentUser?.uid;
+    if (uid == null) {
+      await _prefs.remove(_deletionCleanupPendingUidKey);
+      return;
+    }
+    await _prefs.setString(_deletionCleanupPendingUidKey, uid);
+  }
+
+  @override
+  Future<bool> hasDeletionCleanupPending() async {
+    final pending = _prefs.getBool(_deletionCleanupPendingKey) ?? false;
+    if (!pending) return false;
+
+    final pendingUid = _prefs.getString(_deletionCleanupPendingUidKey);
+    final currentUid = _firebaseAuth.currentUser?.uid;
+    return pendingUid != null && pendingUid == currentUid;
+  }
+
+  @override
+  Future<void> clearDeletionCleanupPending() async {
+    await _prefs.remove(_deletionCleanupPendingKey);
+    await _prefs.remove(_deletionCleanupPendingUidKey);
   }
 }
