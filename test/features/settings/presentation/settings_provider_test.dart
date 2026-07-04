@@ -539,6 +539,33 @@ void main() {
       },
     );
 
+    test(
+      'deleteAccount proceeds when markDeletionCleanupPending throws',
+      () async {
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          () => mockCleanup.markDeletionCleanupPending(),
+        ).thenThrow(Exception('storage full'));
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+
+        await notifier.deleteAccount(password: 'pw');
+
+        // cleanUpAfterDeletion still called despite marker failure.
+        verify(
+          () => mockCleanup.cleanUpAfterDeletion(password: 'pw'),
+        ).called(1);
+        verify(() => mockCleanup.clearDeletionCleanupPending()).called(1);
+        expect(notifier.state.accountDeleted, true);
+        expect(notifier.state.deleteError, isNull);
+      },
+    );
+
     test('deleteAccount retry fail remains pending', () async {
       final notifier = SettingsNotifier(
         repository: repository,
