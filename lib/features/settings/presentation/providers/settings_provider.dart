@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/error/failures.dart';
+import '../../../library/presentation/providers/per_title_override_provider.dart';
 import '../../../library/presentation/providers/reading_progress_provider.dart';
+import '../../../library/presentation/providers/user_library_provider.dart';
+import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../../profile/presentation/providers/user_profile_provider.dart';
 import '../../domain/repositories/account_cleanup_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
@@ -110,7 +113,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     // confirms backend already succeeded.
     final currentUserId = _cleanup.currentCleanupUserId;
     final shouldSkipBackend =
-        (_backendSucceededUid != null && _backendSucceededUid == currentUserId) ||
+        (_backendSucceededUid != null &&
+            _backendSucceededUid == currentUserId) ||
         await _cleanup.hasDeletionCleanupPending();
 
     if (!shouldSkipBackend) {
@@ -190,8 +194,9 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
 });
 
 /// Account cleanup repository provider bridging get_it to Riverpod.
-final accountCleanupRepositoryProvider =
-    Provider<AccountCleanupRepository>((ref) {
+final accountCleanupRepositoryProvider = Provider<AccountCleanupRepository>((
+  ref,
+) {
   return sl<AccountCleanupRepository>();
 });
 
@@ -204,6 +209,9 @@ final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
       onAccountDeleted: () {
         ref.invalidate(readingProgressProvider);
         ref.invalidate(userProfileProvider);
+        ref.invalidate(userLibraryProvider);
+        ref.invalidate(preferencesProvider);
+        ref.invalidate(perTitleOverrideProvider);
       },
     );
   },

@@ -49,9 +49,9 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     this._repository, {
     VoidCallback? onSyncStart,
     VoidCallback? onSyncEnd,
-  })  : _onSyncStart = onSyncStart,
-        _onSyncEnd = onSyncEnd,
-        super(const <String, UserLibraryEntry>{}) {
+  }) : _onSyncStart = onSyncStart,
+       _onSyncEnd = onSyncEnd,
+       super(const <String, UserLibraryEntry>{}) {
     _load();
   }
 
@@ -61,7 +61,9 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   String? _activeUserId;
 
   Future<void> _load() async {
-    state = await _repository.getAll(userId: _activeUserId);
+    final loaded = await _repository.getAll();
+    if (!mounted) return;
+    state = loaded;
   }
 
   Future<void> onAuthStateChanged(String? userId) async {
@@ -72,12 +74,17 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     _activeUserId = userId;
 
     if (userId == null) {
-      state = await _repository.getAll();
+      final loaded = await _repository.getAll();
+      if (!mounted || _activeUserId != null) return;
+      state = loaded;
       return;
     }
 
     // Hydrate with local-first: load local data immediately, then sync in background.
-    state = await _repository.getAll(userId: userId);
+    final loaded = await _repository.getAll(userId: userId);
+    // Guard: skip if disposed or a newer user signed in during load.
+    if (!mounted || _activeUserId != userId) return;
+    state = loaded;
 
     // Background async hydration (fire and forget, updates state when done).
     // ignore: unawaited_futures
@@ -87,7 +94,10 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   Future<void> _hydrateAsync(String userId) async {
     _onSyncStart?.call();
     try {
-      state = await _repository.hydrate(userId);
+      final hydrated = await _repository.hydrate(userId);
+      // Guard: skip if disposed or a newer user signed in during hydration.
+      if (!mounted || _activeUserId != userId) return;
+      state = hydrated;
     } on Object {
       // Best-effort background sync; keep local data on failure.
     } finally {
