@@ -19,12 +19,20 @@ class SettingsState {
   /// Non-null when backend deletion succeeded but local cleanup failed.
   final String? deleteWarning;
 
+  /// True when backend deletion succeeded but cleanup is pending retry.
+  final bool cleanupRecoveryPending;
+
+  /// True when the cleanup exception requires recent login to proceed.
+  final bool requiresRecentLogin;
+
   /// Creates the initial settings state.
   const SettingsState({
     this.isDeletingAccount = false,
     this.deleteError,
     this.accountDeleted = false,
     this.deleteWarning,
+    this.cleanupRecoveryPending = false,
+    this.requiresRecentLogin = false,
   });
 
   /// Returns a copy of this state with the provided fields overwritten.
@@ -35,12 +43,17 @@ class SettingsState {
     bool clearError = false,
     String? deleteWarning,
     bool clearWarning = false,
+    bool? cleanupRecoveryPending,
+    bool? requiresRecentLogin,
   }) {
     return SettingsState(
       isDeletingAccount: isDeletingAccount ?? this.isDeletingAccount,
       deleteError: clearError ? null : deleteError ?? this.deleteError,
       accountDeleted: accountDeleted ?? this.accountDeleted,
       deleteWarning: clearWarning ? null : deleteWarning ?? this.deleteWarning,
+      cleanupRecoveryPending:
+          cleanupRecoveryPending ?? this.cleanupRecoveryPending,
+      requiresRecentLogin: requiresRecentLogin ?? this.requiresRecentLogin,
     );
   }
 }
@@ -66,45 +79,69 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   /// Deletes the authenticated user's account.
   ///
-  /// Backend success marks deletion as complete only after Firebase Auth
-  /// and local cleanup succeed. Backend failures, including 404, do not run
-  /// cleanup. Cleanup exceptions are critical and prevent marking deletion.
-  /// String warnings from cleanup are non-critical and shown alongside success.
-  Future<void> deleteAccount() async {
+  /// Supports a retry state machine: if the backend succeeded but Firebase
+  /// cleanup failed previously, retrying skips the backend call and goes
+  /// straight to cleanup with the provided [password].
+  Future<void> deleteAccount({String? password}) async {
     if (state.isDeletingAccount) return;
+
+    final isRetry = state.cleanupRecoveryPending;
 
     state = state.copyWith(
       isDeletingAccount: true,
       clearError: true,
       clearWarning: true,
       accountDeleted: false,
+      requiresRecentLogin: isRetry && state.requiresRecentLogin,
     );
 
-    final result = await _repository.deleteAccount();
+    // Skip backend only when the persisted cleanup marker belongs to the
+    // current Firebase user. The in-memory flag drives UI state only; it must
+    // not bypass the scoped marker check.
+    final shouldSkipBackend = await _cleanupRepo.hasDeletionCleanupPending();
 
-    final failure = result.fold<Failure?>((failure) => failure, (_) => null);
-    if (failure != null) {
-      state = state.copyWith(
-        isDeletingAccount: false,
-        deleteError: failure.message,
-      );
-      return;
+    if (!shouldSkipBackend) {
+      final result = await _repository.deleteAccount();
+
+      final failure = result.fold<Failure?>((failure) => failure, (_) => null);
+      if (failure != null) {
+        state = state.copyWith(
+          isDeletingAccount: false,
+          deleteError: failure.message,
+          requiresRecentLogin: false,
+        );
+        return;
+      }
+
+      await _cleanupRepo.markDeletionCleanupPending();
     }
 
     String? warning;
     try {
-      warning = await _cleanupRepo.cleanUpAfterDeletion();
+      warning = await _cleanupRepo.cleanUpAfterDeletion(password: password);
+    } on AccountCleanupException catch (e) {
+      state = state.copyWith(
+        isDeletingAccount: false,
+        cleanupRecoveryPending: true,
+        deleteError: e.message,
+        requiresRecentLogin: e.requiresRecentLogin,
+      );
+      return;
     } on Exception catch (_) {
       state = state.copyWith(
         isDeletingAccount: false,
+        cleanupRecoveryPending: true,
         deleteError: 'Error durante la limpieza',
       );
       return;
     }
 
+    await _cleanupRepo.clearDeletionCleanupPending();
     state = state.copyWith(
       isDeletingAccount: false,
       accountDeleted: true,
+      cleanupRecoveryPending: false,
+      requiresRecentLogin: false,
       deleteWarning: warning,
     );
   }

@@ -21,8 +21,17 @@ void main() {
     repository = _MockSettingsRepository();
     mockCleanup = _MockAccountCleanupRepository();
     when(
-      () => mockCleanup.cleanUpAfterDeletion(),
+      () => mockCleanup.cleanUpAfterDeletion(password: any(named: 'password')),
     ).thenAnswer((_) async => null);
+    when(
+      () => mockCleanup.hasDeletionCleanupPending(),
+    ).thenAnswer((_) async => false);
+    when(
+      () => mockCleanup.markDeletionCleanupPending(),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockCleanup.clearDeletionCleanupPending(),
+    ).thenAnswer((_) async => {});
   });
 
   group('SettingsNotifier', () {
@@ -35,6 +44,8 @@ void main() {
       expect(notifier.state.isDeletingAccount, false);
       expect(notifier.state.deleteError, isNull);
       expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.cleanupRecoveryPending, false);
+      expect(notifier.state.requiresRecentLogin, false);
     });
 
     test('deleteAccount sets loading then success state', () async {
@@ -53,7 +64,29 @@ void main() {
       expect(notifier.state.accountDeleted, true);
       expect(notifier.state.deleteError, isNull);
       expect(notifier.state.deleteWarning, isNull);
+      expect(notifier.state.cleanupRecoveryPending, false);
     });
+
+    test(
+      'deleteAccount marks pending then cleans up on backend success',
+      () async {
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+
+        await notifier.deleteAccount();
+
+        verify(() => mockCleanup.markDeletionCleanupPending()).called(1);
+        verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
+        verify(() => mockCleanup.clearDeletionCleanupPending()).called(1);
+        expect(notifier.state.accountDeleted, true);
+      },
+    );
 
     test('deleteAccount does not accept later 404 after success', () async {
       when(
@@ -67,8 +100,6 @@ void main() {
 
       await notifier.deleteAccount();
 
-      verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
-
       // A later 404 should not be treated as "already deleted".
       when(() => repository.deleteAccount()).thenAnswer(
         (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
@@ -78,7 +109,8 @@ void main() {
 
       expect(notifier.state.accountDeleted, false);
       expect(notifier.state.deleteError, 'Not found');
-      verifyNoMoreInteractions(mockCleanup);
+      // Backend called again, but cleanup NOT called (backend failed).
+      verify(() => repository.deleteAccount()).called(2);
     });
 
     test(
@@ -159,13 +191,37 @@ void main() {
     });
 
     test(
+      'resetState keeps recent-login recovery flag while cleanup pending',
+      () {
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+
+        notifier.state = notifier.state.copyWith(
+          cleanupRecoveryPending: true,
+          requiresRecentLogin: true,
+          deleteError: 'Volvé a iniciar sesión para completar la eliminación.',
+        );
+
+        notifier.resetState();
+
+        expect(notifier.state.deleteError, isNull);
+        expect(notifier.state.cleanupRecoveryPending, true);
+        expect(notifier.state.requiresRecentLogin, true);
+      },
+    );
+
+    test(
       'deleteAccount reports warning when prefs clear fails but marks deleted',
       () async {
         when(
           () => repository.deleteAccount(),
         ).thenAnswer((_) async => const Right(null));
         when(
-          () => mockCleanup.cleanUpAfterDeletion(),
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
         ).thenAnswer((_) async => 'Prefs clear failed');
 
         final notifier = SettingsNotifier(
@@ -175,7 +231,6 @@ void main() {
 
         await notifier.deleteAccount();
 
-        // Backend succeeded → accountDeleted is true even with prefs warning.
         expect(notifier.state.accountDeleted, true);
         expect(notifier.state.isDeletingAccount, false);
         expect(notifier.state.deleteWarning, 'Prefs clear failed');
@@ -184,13 +239,15 @@ void main() {
     );
 
     test(
-      'deleteAccount handles cleanup exception — does NOT mark deleted',
+      'deleteAccount handles cleanup exception — sets pending and error',
       () async {
         when(
           () => repository.deleteAccount(),
         ).thenAnswer((_) async => const Right(null));
         when(
-          () => mockCleanup.cleanUpAfterDeletion(),
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
         ).thenThrow(Exception('unexpected'));
 
         final notifier = SettingsNotifier(
@@ -200,13 +257,45 @@ void main() {
 
         await notifier.deleteAccount();
 
-        // Critical cleanup failure → account NOT marked deleted, error shown.
         expect(notifier.state.accountDeleted, false);
         expect(notifier.state.isDeletingAccount, false);
+        expect(notifier.state.cleanupRecoveryPending, true);
         expect(notifier.state.deleteError, 'Error durante la limpieza');
         expect(notifier.state.deleteWarning, isNull);
       },
     );
+
+    test('deleteAccount handles AccountCleanupException — preserves pending '
+        'and sets requiresRecentLogin', () async {
+      when(
+        () => repository.deleteAccount(),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () =>
+            mockCleanup.cleanUpAfterDeletion(password: any(named: 'password')),
+      ).thenThrow(
+        const AccountCleanupException(
+          message: 'Volvé a iniciar sesión para completar la eliminación.',
+          requiresRecentLogin: true,
+        ),
+      );
+
+      final notifier = SettingsNotifier(
+        repository: repository,
+        cleanup: mockCleanup,
+      );
+
+      await notifier.deleteAccount();
+
+      expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.isDeletingAccount, false);
+      expect(notifier.state.cleanupRecoveryPending, true);
+      expect(notifier.state.requiresRecentLogin, true);
+      expect(
+        notifier.state.deleteError,
+        'Volvé a iniciar sesión para completar la eliminación.',
+      );
+    });
 
     test(
       'deleteAccount clears stale deleteError on retry after success',
@@ -229,7 +318,9 @@ void main() {
           () => repository.deleteAccount(),
         ).thenAnswer((_) async => const Right(null));
         when(
-          () => mockCleanup.cleanUpAfterDeletion(),
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
         ).thenAnswer((_) async => 'Warning');
 
         await notifier.deleteAccount();
@@ -256,7 +347,6 @@ void main() {
         );
         await notifier.deleteAccount();
 
-        // Warning cleared on retry start, error set from failure
         expect(notifier.state.deleteWarning, isNull);
         expect(notifier.state.deleteError, 'Server error');
       },
@@ -275,12 +365,13 @@ void main() {
       await notifier.deleteAccount();
       expect(notifier.state.deleteError, 'Server error');
 
-      // Second call succeeds — error should be cleared
+      // Second call succeeds
       when(
         () => repository.deleteAccount(),
       ).thenAnswer((_) async => const Right(null));
       when(
-        () => mockCleanup.cleanUpAfterDeletion(),
+        () =>
+            mockCleanup.cleanUpAfterDeletion(password: any(named: 'password')),
       ).thenAnswer((_) async => null);
 
       await notifier.deleteAccount();
@@ -288,165 +379,179 @@ void main() {
       expect(notifier.state.accountDeleted, true);
     });
 
-    test('deleteAccount first-attempt backend 404 → error, '
-        'no cleanup', () async {
-      when(() => repository.deleteAccount()).thenAnswer(
-        (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
-      );
+    test(
+      'deleteAccount first-attempt backend 404 → error, no cleanup',
+      () async {
+        when(() => repository.deleteAccount()).thenAnswer(
+          (_) async =>
+              const Left(ServerFailure(message: 'Not found', code: 404)),
+        );
 
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+
+        await notifier.deleteAccount();
+
+        expect(notifier.state.accountDeleted, false);
+        expect(notifier.state.isDeletingAccount, false);
+        expect(notifier.state.deleteError, 'Not found');
+        verifyNever(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'deleteAccount retry skips backend when pending from prior cleanup failure',
+      () async {
+        // Call 1: backend succeeds, cleanup throws.
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(Exception('Firebase Auth deletion failed'));
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+        await notifier.deleteAccount();
+
+        expect(notifier.state.accountDeleted, false);
+        expect(notifier.state.cleanupRecoveryPending, true);
+        verify(() => repository.deleteAccount()).called(1);
+
+        // Call 2: should skip backend, go straight to cleanup.
+        when(
+          () => mockCleanup.hasDeletionCleanupPending(),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => null);
+
+        await notifier.deleteAccount(password: 'newpass');
+
+        // Backend NOT called again.
+        verifyNoMoreInteractions(repository);
+        verify(
+          () => mockCleanup.cleanUpAfterDeletion(password: 'newpass'),
+        ).called(1);
+        expect(notifier.state.accountDeleted, true);
+        expect(notifier.state.cleanupRecoveryPending, false);
+      },
+    );
+
+    test(
+      'deleteAccount stale in-memory pending does not skip backend without scoped marker',
+      () async {
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+        notifier.state = const SettingsState(cleanupRecoveryPending: true);
+        when(() => repository.deleteAccount()).thenAnswer(
+          (_) async =>
+              const Left(ServerFailure(message: 'Not found', code: 404)),
+        );
+
+        await notifier.deleteAccount();
+
+        verify(() => repository.deleteAccount()).called(1);
+        verifyNever(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        );
+        expect(notifier.state.cleanupRecoveryPending, true);
+        expect(notifier.state.deleteError, 'Not found');
+      },
+    );
+
+    test(
+      'deleteAccount retry with hasDeletionCleanupPending skips backend',
+      () async {
+        when(
+          () => mockCleanup.hasDeletionCleanupPending(),
+        ).thenAnswer((_) async => true);
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+
+        await notifier.deleteAccount(password: 'pass');
+
+        // Backend NOT called — pending flag was already true.
+        verifyNever(() => repository.deleteAccount());
+        verify(
+          () => mockCleanup.cleanUpAfterDeletion(password: 'pass'),
+        ).called(1);
+        expect(notifier.state.accountDeleted, true);
+      },
+    );
+
+    test(
+      'deleteAccount retry success clears pending and accountDeleted true',
+      () async {
+        // Simulate a prior failure that left pending state.
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+        notifier.state = const SettingsState(
+          cleanupRecoveryPending: true,
+          deleteError: 'Error durante la limpieza',
+        );
+
+        when(
+          () => mockCleanup.hasDeletionCleanupPending(),
+        ).thenAnswer((_) async => true);
+
+        when(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => null);
+
+        await notifier.deleteAccount(password: 'pass');
+
+        expect(notifier.state.accountDeleted, true);
+        expect(notifier.state.cleanupRecoveryPending, false);
+        expect(notifier.state.deleteError, isNull);
+        expect(notifier.state.isDeletingAccount, false);
+      },
+    );
+
+    test('deleteAccount retry fail remains pending', () async {
       final notifier = SettingsNotifier(
         repository: repository,
         cleanup: mockCleanup,
       );
+      notifier.state = const SettingsState(cleanupRecoveryPending: true);
+
+      when(
+        () => mockCleanup.hasDeletionCleanupPending(),
+      ).thenAnswer((_) async => true);
+
+      when(
+        () =>
+            mockCleanup.cleanUpAfterDeletion(password: any(named: 'password')),
+      ).thenThrow(Exception('still failing'));
 
       await notifier.deleteAccount();
 
-      // First-attempt 404 with no prior success → error, cleanup NOT called.
       expect(notifier.state.accountDeleted, false);
+      expect(notifier.state.cleanupRecoveryPending, true);
       expect(notifier.state.isDeletingAccount, false);
-      expect(notifier.state.deleteError, 'Not found');
-      verifyNever(() => mockCleanup.cleanUpAfterDeletion());
-    });
-
-    test('deleteAccount retry after backend success + cleanup failure: '
-        '404 → error, no cleanup', () async {
-      // Call 1: backend succeeds, cleanup throws.
-      when(
-        () => repository.deleteAccount(),
-      ).thenAnswer((_) async => const Right(null));
-      when(
-        () => mockCleanup.cleanUpAfterDeletion(),
-      ).thenThrow(Exception('Firebase Auth deletion failed'));
-
-      final notifier = SettingsNotifier(
-        repository: repository,
-        cleanup: mockCleanup,
-      );
-      await notifier.deleteAccount();
-
-      expect(notifier.state.accountDeleted, false);
-      expect(notifier.state.deleteError, 'Error durante la limpieza');
-      verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
-
-      // Call 2: backend returns 404, which must still fail without cleanup.
-      when(() => repository.deleteAccount()).thenAnswer(
-        (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
-      );
-
-      await notifier.deleteAccount();
-
-      expect(notifier.state.accountDeleted, false);
-      expect(notifier.state.deleteError, 'Not found');
-      // Cleanup only called in call 1 (threw). Not called again.
-      verifyNoMoreInteractions(mockCleanup);
-    });
-
-    test('deleteAccount after critical cleanup failure: '
-        'later 404 does NOT mark success or call cleanup', () async {
-      // Call 1: backend succeeds, cleanup throws.
-      when(
-        () => repository.deleteAccount(),
-      ).thenAnswer((_) async => const Right(null));
-      when(
-        () => mockCleanup.cleanUpAfterDeletion(),
-      ).thenThrow(Exception('Firebase Auth deletion failed'));
-
-      final notifier = SettingsNotifier(
-        repository: repository,
-        cleanup: mockCleanup,
-      );
-      await notifier.deleteAccount();
-
-      expect(notifier.state.accountDeleted, false);
-      expect(notifier.state.deleteError, 'Error durante la limpieza');
-      verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
-
-      // Call 2: backend 404 must not be treated as deletion success.
-      when(() => repository.deleteAccount()).thenAnswer(
-        (_) async => const Left(ServerFailure(message: 'Not found', code: 404)),
-      );
-
-      await notifier.deleteAccount();
-
-      // 404 remains a backend failure → error, no cleanup.
-      expect(notifier.state.accountDeleted, false);
-      expect(notifier.state.deleteError, 'Not found');
-      verifyNoMoreInteractions(mockCleanup);
-    });
-
-    test('deleteAccount retry after backend success + cleanup failure: '
-        'non-404 error → error, no cleanup', () async {
-      // Call 1: backend succeeds, cleanup throws.
-      when(
-        () => repository.deleteAccount(),
-      ).thenAnswer((_) async => const Right(null));
-      when(
-        () => mockCleanup.cleanUpAfterDeletion(),
-      ).thenThrow(Exception('Firebase Auth deletion failed'));
-
-      final notifier = SettingsNotifier(
-        repository: repository,
-        cleanup: mockCleanup,
-      );
-      await notifier.deleteAccount();
-
-      // Call 2: different server error (not 404).
-      // Reset cleanup mock to avoid conflict with setUp stub.
-      reset(mockCleanup);
-      when(() => repository.deleteAccount()).thenAnswer(
-        (_) async =>
-            const Left(ServerFailure(message: 'Server error', code: 500)),
-      );
-
-      await notifier.deleteAccount();
-
-      // Non-404 → error, cleanup NOT called this time.
-      expect(notifier.state.accountDeleted, false);
-      expect(notifier.state.deleteError, 'Server error');
-      verifyNever(() => mockCleanup.cleanUpAfterDeletion());
-    });
-
-    test('deleteAccount reports error when Firebase Auth deletion fails '
-        '— does NOT mark deleted', () async {
-      when(
-        () => repository.deleteAccount(),
-      ).thenAnswer((_) async => const Right(null));
-      when(
-        () => mockCleanup.cleanUpAfterDeletion(),
-      ).thenThrow(Exception('Firebase Auth deletion failed'));
-
-      final notifier = SettingsNotifier(
-        repository: repository,
-        cleanup: mockCleanup,
-      );
-
-      await notifier.deleteAccount();
-
-      // Firebase Auth deletion is critical → account NOT marked deleted.
-      expect(notifier.state.accountDeleted, false);
-      expect(notifier.state.isDeletingAccount, false);
-      expect(notifier.state.deleteError, 'Error durante la limpieza');
-      expect(notifier.state.deleteWarning, isNull);
-    });
-
-    test('non-404 failure with "not found" text does NOT '
-        'treat account as already deleted', () async {
-      when(() => repository.deleteAccount()).thenAnswer(
-        (_) async =>
-            const Left(ServerFailure(message: 'Resource not found', code: 500)),
-      );
-
-      final notifier = SettingsNotifier(
-        repository: repository,
-        cleanup: mockCleanup,
-      );
-
-      await notifier.deleteAccount();
-
-      // Non-404 with "not found" text → NOT treated as already deleted.
-      expect(notifier.state.accountDeleted, false);
-      expect(notifier.state.deleteError, 'Resource not found');
-      verifyNever(() => mockCleanup.cleanUpAfterDeletion());
     });
   });
 }
