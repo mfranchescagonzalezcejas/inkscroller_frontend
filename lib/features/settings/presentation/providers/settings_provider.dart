@@ -113,7 +113,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         return;
       }
 
-      await _cleanupRepo.markDeletionCleanupPending();
+      try {
+        await _cleanupRepo.markDeletionCleanupPending();
+      } on Exception catch (_) {
+        // Marker persistence is recovery bookkeeping — best-effort.
+      }
     }
 
     String? warning;

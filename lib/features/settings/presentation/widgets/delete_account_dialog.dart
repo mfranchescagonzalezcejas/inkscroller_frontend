@@ -40,7 +40,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
     final bool busy = _isDeleting || isPending;
 
     final bool canConfirm = isPending
-        ? !_isDeleting
+        ? !_isDeleting && (!needsPassword || _passwordController.text.isNotEmpty)
         : _canDelete && !_isDeleting;
 
     return PopScope(
@@ -146,6 +146,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 key: const Key('deletePasswordField'),
                 controller: _passwordController,
                 obscureText: true,
+                onChanged: (_) => setState(() {}),
                 style: const TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,

@@ -240,6 +240,54 @@ void main() {
     expect(find.byKey(const Key('deleteConfirmField')), findsNothing);
   });
 
+  testWidgets(
+    'confirm button disabled when requiresRecentLogin and password empty',
+    (tester) async {
+      await tester.pumpWidget(
+        buildDialog(
+          initialState: const SettingsState(
+            cleanupRecoveryPending: true,
+            requiresRecentLogin: true,
+            deleteError: 'Volvé a iniciar sesión para completar la eliminación.',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final button = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Finalizar'),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'confirm button enabled when requiresRecentLogin and password non-empty',
+    (tester) async {
+      await tester.pumpWidget(
+        buildDialog(
+          initialState: const SettingsState(
+            cleanupRecoveryPending: true,
+            requiresRecentLogin: true,
+            deleteError: 'Volvé a iniciar sesión para completar la eliminación.',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('deletePasswordField')),
+        'secret123',
+      );
+      await tester.pump();
+
+      final button = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Finalizar'),
+      );
+      expect(button.onPressed, isNotNull);
+    },
+  );
+
   testWidgets('retry passes password to notifier', (tester) async {
     await tester.pumpWidget(
       buildDialog(

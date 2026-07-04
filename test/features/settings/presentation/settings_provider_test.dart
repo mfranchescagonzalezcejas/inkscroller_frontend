@@ -82,7 +82,11 @@ void main() {
         await notifier.deleteAccount();
 
         verify(() => mockCleanup.markDeletionCleanupPending()).called(1);
-        verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
+        verify(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).called(1);
         verify(() => mockCleanup.clearDeletionCleanupPending()).called(1);
         expect(notifier.state.accountDeleted, true);
       },
@@ -136,7 +140,11 @@ void main() {
         expect(notifier.state.accountDeleted, true);
         expect(notifier.state.isDeletingAccount, false);
         verify(() => repository.deleteAccount()).called(1);
-        verify(() => mockCleanup.cleanUpAfterDeletion()).called(1);
+        verify(
+          () => mockCleanup.cleanUpAfterDeletion(
+            password: any(named: 'password'),
+          ),
+        ).called(1);
       },
     );
 
