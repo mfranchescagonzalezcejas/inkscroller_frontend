@@ -20,10 +20,23 @@ void main() {
       expect(isProtectedAuthPath('/users/preferences'), isTrue);
     });
 
-    test('P0-F6: public paths are not protected', () {
+    test('P0-F6: catalogue paths with optional auth are protected', () {
+      expect(isProtectedAuthPath('/manga'), isTrue);
+      expect(isProtectedAuthPath('/manga/search'), isTrue);
+      expect(isProtectedAuthPath('/chapters'), isTrue);
+      expect(isProtectedAuthPath('/chapters/manga/abc123'), isTrue);
+      expect(isProtectedAuthPath('/chapters/def456/pages'), isTrue);
+    });
+
+    test('P0-F6: truly public paths are not protected', () {
       expect(isProtectedAuthPath('/ping'), isFalse);
-      expect(isProtectedAuthPath('/manga'), isFalse);
-      expect(isProtectedAuthPath('/chapters/latest'), isFalse);
+    });
+
+    test('sibling paths that share a prefix are not protected', () {
+      expect(isProtectedAuthPath('/mangadex'), isFalse);
+      expect(isProtectedAuthPath('/manga-public'), isFalse);
+      expect(isProtectedAuthPath('/chapters-old'), isFalse);
+      expect(isProtectedAuthPath('/users-public'), isFalse);
     });
   });
 
@@ -63,15 +76,37 @@ void main() {
       expect(options.headers.containsKey('Authorization'), isFalse);
     });
 
-    test('does not attach token to /manga routes', () async {
-      final options = RequestOptions(path: '/manga');
+    test('attaches Bearer token to /manga routes', () async {
+      final options = RequestOptions(path: '/manga/search');
 
       await attachAuthHeaderForRequest(
         options,
         tokenProvider: () async => 'token-123',
       );
 
-      expect(options.headers.containsKey('Authorization'), isFalse);
+      expect(options.headers['Authorization'], 'Bearer token-123');
+    });
+
+    test('attaches Bearer token to /chapters/manga/<id>', () async {
+      final options = RequestOptions(path: '/chapters/manga/abc123');
+
+      await attachAuthHeaderForRequest(
+        options,
+        tokenProvider: () async => 'tok-ch',
+      );
+
+      expect(options.headers['Authorization'], 'Bearer tok-ch');
+    });
+
+    test('attaches Bearer token to /chapters/<id>/pages', () async {
+      final options = RequestOptions(path: '/chapters/def456/pages');
+
+      await attachAuthHeaderForRequest(
+        options,
+        tokenProvider: () async => 'tok-pg',
+      );
+
+      expect(options.headers['Authorization'], 'Bearer tok-pg');
     });
 
     test('P0-F7: silently skips auth header when token provider throws — '
@@ -117,6 +152,43 @@ void main() {
         expect(options.headers.containsKey('Authorization'), isFalse);
       },
     );
+
+    test('P0-F7: catalogue path omits header when token is null', () async {
+      final options = RequestOptions(path: '/manga/search');
+
+      await attachAuthHeaderForRequest(
+        options,
+        tokenProvider: () async => null,
+      );
+
+      expect(options.headers.containsKey('Authorization'), isFalse);
+    });
+
+    test('P0-F7: catalogue path omits header when token is empty', () async {
+      final options = RequestOptions(path: '/manga/search');
+
+      await attachAuthHeaderForRequest(
+        options,
+        tokenProvider: () async => '',
+      );
+
+      expect(options.headers.containsKey('Authorization'), isFalse);
+    });
+
+    test('P0-F7: catalogue path does not throw when token provider throws',
+        () async {
+      final options = RequestOptions(path: '/manga/search');
+
+      await expectLater(
+        attachAuthHeaderForRequest(
+          options,
+          tokenProvider: () async => throw Exception('token revoked'),
+        ),
+        completes,
+      );
+
+      expect(options.headers.containsKey('Authorization'), isFalse);
+    });
   });
 
   group('DioClient base URL fallback', () {
@@ -169,6 +241,28 @@ void main() {
       expect(
         adapter.requests.single.headers['Authorization'],
         'Bearer token-123',
+      );
+    });
+
+    test('does not retry authenticated /manga/search across origins', () async {
+      FlavorConfig(
+        flavor: Flavor.dev,
+        apiBaseUrl: AppEnvironment.devCloudBaseUrl,
+        name: 'InkScroller Test',
+      );
+      final adapter = _FailThenSucceedAdapter();
+      final client = DioClient(tokenProvider: () async => 'token-456')
+        ..dio.httpClientAdapter = adapter;
+
+      await expectLater(
+        client.dio.get<dynamic>('/manga/search'),
+        throwsA(isA<DioException>()),
+      );
+
+      expect(adapter.requests, hasLength(1));
+      expect(
+        adapter.requests.single.headers['Authorization'],
+        'Bearer token-456',
       );
     });
 
