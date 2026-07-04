@@ -100,13 +100,15 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
 
   @override
   Future<void> markDeletionCleanupPending() async {
-    await _prefs.setBool(_deletionCleanupPendingKey, true);
+    // UID-first: a crash between writes leaves pending=false with a UID (safe),
+    // never pending=true without UID (which would skip backend for wrong user).
     final uid = _firebaseAuth.currentUser?.uid;
     if (uid == null) {
       await _prefs.remove(_deletionCleanupPendingUidKey);
       return;
     }
     await _prefs.setString(_deletionCleanupPendingUidKey, uid);
+    await _prefs.setBool(_deletionCleanupPendingKey, true);
   }
 
   @override

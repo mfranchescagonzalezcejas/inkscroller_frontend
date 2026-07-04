@@ -1,8 +1,15 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_reading_progress.dart';
+import 'package:inkscroller_flutter/features/library/domain/repositories/reading_progress_repository.dart';
+import 'package:inkscroller_flutter/features/library/presentation/providers/reading_progress_provider.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
+import 'package:inkscroller_flutter/features/profile/presentation/providers/user_profile_notifier.dart';
+import 'package:inkscroller_flutter/features/profile/presentation/providers/user_profile_provider.dart';
 import 'package:inkscroller_flutter/features/settings/domain/repositories/account_cleanup_repository.dart';
 import 'package:inkscroller_flutter/features/settings/domain/repositories/settings_repository.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/providers/settings_provider.dart';
@@ -12,6 +19,25 @@ class _MockSettingsRepository extends Mock implements SettingsRepository {}
 
 class _MockAccountCleanupRepository extends Mock
     implements AccountCleanupRepository {}
+
+/// Tracks which providers were invalidated during a test.
+class _TrackingObserver extends ProviderObserver {
+  final List<ProviderBase<Object?>> invalidated;
+  _TrackingObserver(this.invalidated);
+
+  @override
+  void didDisposeProvider(
+    ProviderBase<Object?> provider,
+    ProviderContainer container,
+  ) {
+    invalidated.add(provider);
+  }
+}
+
+class _MockReadingProgressRepo extends Mock
+    implements ReadingProgressRepository {}
+
+class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 void main() {
   late SettingsRepository repository;
@@ -683,6 +709,107 @@ void main() {
         // Backend MUST be called — in-memory flag was for uid-1, not uid-2.
         verify(() => repository.deleteAccount()).called(2);
         expect(notifier.state.accountDeleted, true);
+      },
+    );
+
+    test(
+      'deleteAccount calls onAccountDeleted before publishing success',
+      () async {
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+
+        // Capture state at callback time via a holder that the callback writes to.
+        bool? accountDeletedAtCallback;
+        late SettingsNotifier notifier;
+        notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+          onAccountDeleted: () {
+            accountDeletedAtCallback = notifier.state.accountDeleted;
+          },
+        );
+
+        await notifier.deleteAccount();
+
+        // Proves the callback fires BEFORE accountDeleted is set to true.
+        expect(accountDeletedAtCallback, false);
+        expect(notifier.state.accountDeleted, true);
+      },
+    );
+
+    test(
+      'ProviderContainer: deleteAccount invalidates readingProgress and userProfile',
+      () async {
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+
+        final invalidated = <ProviderBase<Object?>>[];
+        final observer = _TrackingObserver(invalidated);
+
+        // Stub mocks so the fakes' constructors succeed.
+        final mockReadingRepo = _MockReadingProgressRepo();
+        when(() => mockReadingRepo.getAll())
+            .thenAnswer((_) async => const <String, MangaReadingProgress>{});
+        final mockGetProfile = _MockGetUserProfile();
+        when(() => mockGetProfile()).thenAnswer(
+          (_) async => const Left(ServerFailure(message: 'stub')),
+        );
+
+        final container = ProviderContainer(
+          overrides: <Override>[
+            settingsRepositoryProvider.overrideWithValue(repository),
+            accountCleanupRepositoryProvider.overrideWithValue(mockCleanup),
+            readingProgressProvider.overrideWith(
+              (ref) => ReadingProgressNotifier(mockReadingRepo),
+            ),
+            userProfileProvider.overrideWith(
+              (ref) => UserProfileNotifier(getUserProfile: mockGetProfile),
+            ),
+          ],
+          observers: <ProviderObserver>[observer],
+        );
+        addTearDown(container.dispose);
+
+        // Read providers to initialize their state so invalidation disposes them.
+        container.read(readingProgressProvider);
+        container.read(userProfileProvider);
+
+        // Trigger deletion through the real settingsProvider wiring.
+        await container.read(settingsProvider.notifier).deleteAccount();
+
+        expect(container.read(settingsProvider).accountDeleted, true);
+        expect(
+          invalidated,
+          containsAll([
+            readingProgressProvider,
+            userProfileProvider,
+          ]),
+        );
+      },
+    );
+
+    test(
+      'deleteAccount succeeds when clearDeletionCleanupPending throws',
+      () async {
+        when(
+          () => repository.deleteAccount(),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          () => mockCleanup.clearDeletionCleanupPending(),
+        ).thenThrow(Exception('storage gone'));
+
+        final notifier = SettingsNotifier(
+          repository: repository,
+          cleanup: mockCleanup,
+        );
+
+        await notifier.deleteAccount();
+
+        expect(notifier.state.accountDeleted, true);
+        expect(notifier.state.isDeletingAccount, false);
+        expect(notifier.state.deleteError, isNull);
       },
     );
   });
