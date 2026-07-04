@@ -332,6 +332,47 @@ void main() {
       ).called(1);
     });
 
+    test(
+      'hasDeletionCleanupPending returns true for UID-only marker with same UID',
+      () async {
+        when(
+          () =>
+              mockPrefs.getString('settings.accountDeletionCleanupPendingUid'),
+        ).thenReturn('firebase-user-1');
+        when(
+          () => mockPrefs.getBool('settings.accountDeletionCleanupPending'),
+        ).thenReturn(null);
+
+        expect(await repository.hasDeletionCleanupPending(), true);
+      },
+    );
+
+    test(
+      'hasDeletionCleanupPending returns false for UID-only marker with different UID',
+      () async {
+        when(
+          () =>
+              mockPrefs.getString('settings.accountDeletionCleanupPendingUid'),
+        ).thenReturn('firebase-user-1');
+        when(() => mockUser.uid).thenReturn('firebase-user-2');
+
+        expect(await repository.hasDeletionCleanupPending(), false);
+      },
+    );
+
+    test(
+      'hasDeletionCleanupPending returns false for UID-only marker with no current user',
+      () async {
+        when(() => mockAuth.currentUser).thenReturn(null);
+        when(
+          () =>
+              mockPrefs.getString('settings.accountDeletionCleanupPendingUid'),
+        ).thenReturn('firebase-user-1');
+
+        expect(await repository.hasDeletionCleanupPending(), false);
+      },
+    );
+
     test('markDeletionCleanupPending writes UID before pending bool', () async {
       final callOrder = <String>[];
       when(() => mockPrefs.setString(any(), any())).thenAnswer((_) async {
@@ -374,10 +415,14 @@ void main() {
           throwsA(isA<Exception>()),
         );
 
-        // UID was written but pending was NOT — safe state.
-        expect(store['settings.accountDeletionCleanupPendingUid'], 'firebase-user-1');
+        // UID was written but pending was NOT — UID-only is treated as
+        // pending (the backend DELETE succeeded but cleanup never completed).
+        expect(
+          store['settings.accountDeletionCleanupPendingUid'],
+          'firebase-user-1',
+        );
         expect(store['settings.accountDeletionCleanupPending'], isNull);
-        expect(await repo.hasDeletionCleanupPending(), false);
+        expect(await repo.hasDeletionCleanupPending(), true);
       },
     );
   });

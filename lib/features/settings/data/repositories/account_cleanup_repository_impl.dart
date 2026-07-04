@@ -113,12 +113,13 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
 
   @override
   Future<bool> hasDeletionCleanupPending() async {
-    final pending = _prefs.getBool(_deletionCleanupPendingKey) ?? false;
-    if (!pending) return false;
-
     final pendingUid = _prefs.getString(_deletionCleanupPendingUidKey);
     final currentUid = _firebaseAuth.currentUser?.uid;
-    return pendingUid != null && pendingUid == currentUid;
+    if (pendingUid == null || pendingUid != currentUid) return false;
+
+    // UID-only marker (crash between UID write and bool write) is still
+    // pending — the backend DELETE succeeded but cleanup never completed.
+    return _prefs.getBool(_deletionCleanupPendingKey) ?? true;
   }
 
   @override

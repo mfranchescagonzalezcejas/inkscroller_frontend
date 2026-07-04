@@ -209,6 +209,7 @@ final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
       onAccountDeleted: () {
         ref.invalidate(readingProgressProvider);
         ref.invalidate(userProfileProvider);
+        ref.invalidate(userLibrarySyncingProvider);
         ref.invalidate(userLibraryProvider);
         ref.invalidate(preferencesProvider);
         ref.invalidate(perTitleOverrideProvider);

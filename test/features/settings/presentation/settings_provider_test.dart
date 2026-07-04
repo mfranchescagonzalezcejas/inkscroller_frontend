@@ -10,6 +10,7 @@ import 'package:inkscroller_flutter/features/library/domain/entities/user_librar
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_status.dart';
 import 'package:inkscroller_flutter/features/library/domain/repositories/reading_progress_repository.dart';
 import 'package:inkscroller_flutter/features/library/domain/repositories/user_library_repository.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/reading_preferences.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_per_title_override.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/remove_per_title_override.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/save_per_title_override.dart';
@@ -735,6 +736,82 @@ void main() {
       },
     );
 
+    test('deleteAccount resets userLibrarySyncingProvider to false', () async {
+      when(
+        () => repository.deleteAccount(),
+      ).thenAnswer((_) async => const Right(null));
+
+      final mockReadingRepo = _MockReadingProgressRepo();
+      when(
+        () => mockReadingRepo.getAll(),
+      ).thenAnswer((_) async => const <String, MangaReadingProgress>{});
+      final mockGetProfile = _MockGetUserProfile();
+      when(
+        () => mockGetProfile(),
+      ).thenAnswer((_) async => const Left(ServerFailure(message: 'stub')));
+      final mockLibraryRepo = _MockUserLibraryRepo();
+      when(
+        () => mockLibraryRepo.getAll(),
+      ).thenAnswer((_) async => const <String, UserLibraryEntry>{});
+      final mockGetPrefs = _MockGetPreferences();
+      when(
+        () => mockGetPrefs(),
+      ).thenAnswer((_) async => const Left(ServerFailure(message: 'stub')));
+      final mockUpdatePrefs = _MockUpdatePreferences();
+      final mockGetOverride = _MockGetPerTitleOverride();
+      final mockSaveOverride = _MockSavePerTitleOverride();
+      final mockRemoveOverride = _MockRemovePerTitleOverride();
+      when(() => mockGetOverride(any())).thenAnswer((_) async => null);
+
+      final container = ProviderContainer(
+        overrides: <Override>[
+          settingsRepositoryProvider.overrideWithValue(repository),
+          accountCleanupRepositoryProvider.overrideWithValue(mockCleanup),
+          readingProgressProvider.overrideWith(
+            (ref) => ReadingProgressNotifier(mockReadingRepo),
+          ),
+          userProfileProvider.overrideWith(
+            (ref) => UserProfileNotifier(getUserProfile: mockGetProfile),
+          ),
+          userLibraryProvider.overrideWith(
+            (ref) => UserLibraryNotifier(mockLibraryRepo),
+          ),
+          preferencesProvider.overrideWith(
+            (ref) => PreferencesNotifier(
+              getPreferences: mockGetPrefs,
+              updatePreferences: mockUpdatePrefs,
+            ),
+          ),
+          perTitleOverrideProvider('test-manga').overrideWith(
+            (ref) => PerTitleOverrideNotifier(
+              mangaId: 'test-manga',
+              getOverride: mockGetOverride,
+              saveOverride: mockSaveOverride,
+              removeOverride: mockRemoveOverride,
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Simulate an in-progress background hydration.
+      container.read(userLibrarySyncingProvider.notifier).state = true;
+      expect(container.read(userLibrarySyncingProvider), isTrue);
+
+      // Also initialize providers so invalidation actually disposes them.
+      container.read(userLibraryProvider);
+      container.read(readingProgressProvider);
+      container.read(userProfileProvider);
+      container.read(preferencesProvider);
+      container.read(perTitleOverrideProvider('test-manga'));
+
+      await container.read(settingsProvider.notifier).deleteAccount();
+
+      expect(container.read(settingsProvider).accountDeleted, true);
+      // The syncing flag must be back to false — no stuck progress.
+      expect(container.read(userLibrarySyncingProvider), isFalse);
+    });
+
     test(
       'deleteAccount calls onAccountDeleted before publishing success',
       () async {
@@ -1089,6 +1166,70 @@ void main() {
 
         // Complete new hydration so no pending futures leak.
         await Future<void>.delayed(Duration.zero);
+      },
+    );
+    test(
+      'UserLibraryNotifier._hydrateAsync skips sync callbacks after dispose',
+      () async {
+        final mockRepo = _MockUserLibraryRepo();
+        final completer = Completer<Map<String, UserLibraryEntry>>();
+        when(
+          () => mockRepo.getAll(),
+        ).thenAnswer((_) async => const <String, UserLibraryEntry>{});
+        when(
+          () => mockRepo.getAll(userId: any(named: 'userId')),
+        ).thenAnswer((_) async => const <String, UserLibraryEntry>{});
+        when(
+          () => mockRepo.hydrate('uid-1'),
+        ).thenAnswer((_) => completer.future);
+
+        final syncingValues = <bool>[];
+        final notifier = UserLibraryNotifier(
+          mockRepo,
+          onSyncStart: () => syncingValues.add(true),
+          onSyncEnd: () => syncingValues.add(false),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        // Trigger hydration — intentionally unawaited.
+        // ignore: unawaited_futures
+        notifier.onAuthStateChanged('uid-1');
+        await Future<void>.delayed(Duration.zero);
+        expect(syncingValues, [true]);
+
+        // Dispose before hydrate completes.
+        notifier.dispose();
+
+        // Complete after dispose — callbacks must not throw.
+        completer.complete(const <String, UserLibraryEntry>{});
+        await completer.future;
+        // onSyncEnd was NOT called because mounted is false.
+        expect(syncingValues, [true]);
+      },
+    );
+
+    test(
+      'PerTitleOverrideNotifier._load skips state write after dispose',
+      () async {
+        final mockGetOverride = _MockGetPerTitleOverride();
+        final mockSaveOverride = _MockSavePerTitleOverride();
+        final mockRemoveOverride = _MockRemovePerTitleOverride();
+        final completer = Completer<PerTitleOverride?>();
+        when(
+          () => mockGetOverride('test-manga'),
+        ).thenAnswer((_) => completer.future);
+
+        final notifier = PerTitleOverrideNotifier(
+          mangaId: 'test-manga',
+          getOverride: mockGetOverride,
+          saveOverride: mockSaveOverride,
+          removeOverride: mockRemoveOverride,
+        );
+        // _load called in constructor — future is pending.
+        notifier.dispose();
+        // Complete after dispose — mounted guard should prevent state write.
+        completer.complete(null);
+        await completer.future;
       },
     );
   });

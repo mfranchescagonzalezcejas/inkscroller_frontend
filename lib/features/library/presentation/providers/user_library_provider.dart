@@ -92,6 +92,7 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   }
 
   Future<void> _hydrateAsync(String userId) async {
+    if (!mounted) return;
     _onSyncStart?.call();
     try {
       final hydrated = await _repository.hydrate(userId);
@@ -101,7 +102,7 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     } on Object {
       // Best-effort background sync; keep local data on failure.
     } finally {
-      _onSyncEnd?.call();
+      if (mounted) _onSyncEnd?.call();
     }
   }
 
