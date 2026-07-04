@@ -157,6 +157,7 @@ void main() {
 
     when(() => settingsRepository.deleteAccount())
         .thenAnswer((_) async => const Right(null));
+    when(() => cleanup.currentCleanupUserId).thenReturn('uid-1');
     when(
       () => cleanup.cleanUpAfterDeletion(
             password: any(named: 'password'),

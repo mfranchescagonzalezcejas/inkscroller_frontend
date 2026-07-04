@@ -28,7 +28,7 @@ void main() {
     await completeSignOut(tester);
 
     // Navigate to register page.
-    final createAccountLink = find.text("Don't have an account? Create one");
+    final createAccountLink = find.byKey(const Key('registerLink'));
     if (createAccountLink.evaluate().isNotEmpty) {
       await tester.tap(createAccountLink);
       await tester.pumpAndSettle();
@@ -69,7 +69,7 @@ void main() {
     }
 
     // Submit the form.
-    await tester.tap(find.text('Create account'));
+    await tester.tap(find.byKey(const Key('createAccountButton')));
     await tester.pumpAndSettle(const Duration(seconds: 15));
 
     // Assert: error message about duplicate email is visible.

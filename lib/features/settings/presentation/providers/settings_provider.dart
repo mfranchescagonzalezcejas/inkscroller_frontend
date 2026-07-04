@@ -61,21 +61,21 @@ class SettingsState {
 /// Manages account-level settings operations (e.g. account deletion).
 class SettingsNotifier extends StateNotifier<SettingsState> {
   final SettingsRepository _repository;
-  final AccountCleanupRepository? _cleanup;
+  final AccountCleanupRepository _cleanup;
+
+  /// In-memory recovery signal: stores the UID for which the backend DELETE
+  /// was called successfully. Retries skip the backend only when the stored
+  /// UID matches the current cleanup user identity, preventing cross-user
+  /// or cross-session stale skips.
+  String? _backendSucceededUid;
 
   /// Creates a [SettingsNotifier] with the given [repository] and [cleanup].
-  ///
-  /// Optionally inject [cleanup] for testability. When omitted, resolves
-  /// lazily from `sl` inside [deleteAccount] after backend success.
   SettingsNotifier({
     required SettingsRepository repository,
-    AccountCleanupRepository? cleanup,
+    required AccountCleanupRepository cleanup,
   }) : _repository = repository,
        _cleanup = cleanup,
        super(const SettingsState());
-
-  AccountCleanupRepository get _cleanupRepo =>
-      _cleanup ?? sl<AccountCleanupRepository>();
 
   /// Deletes the authenticated user's account.
   ///
@@ -95,10 +95,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       requiresRecentLogin: isRetry && state.requiresRecentLogin,
     );
 
-    // Skip backend only when the persisted cleanup marker belongs to the
-    // current Firebase user. The in-memory flag drives UI state only; it must
-    // not bypass the scoped marker check.
-    final shouldSkipBackend = await _cleanupRepo.hasDeletionCleanupPending();
+    // Skip backend when either the persisted marker (scoped to current UID)
+    // OR the in-memory flag (scoped to the current session's user identity)
+    // confirms backend already succeeded.
+    final currentUserId = _cleanup.currentCleanupUserId;
+    final shouldSkipBackend =
+        (_backendSucceededUid != null && _backendSucceededUid == currentUserId) ||
+        await _cleanup.hasDeletionCleanupPending();
 
     if (!shouldSkipBackend) {
       final result = await _repository.deleteAccount();
@@ -113,16 +116,21 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         return;
       }
 
+      _backendSucceededUid = currentUserId;
+
       try {
-        await _cleanupRepo.markDeletionCleanupPending();
+        await _cleanup.markDeletionCleanupPending();
       } on Exception catch (_) {
-        // Marker persistence is recovery bookkeeping — best-effort.
+        // Marker write failed after backend succeeded. The UID-scoped
+        // _backendSucceededUid preserves the recovery signal so retries
+        // within this session skip the backend. The durable marker
+        // handles cross-session retries.
       }
     }
 
     String? warning;
     try {
-      warning = await _cleanupRepo.cleanUpAfterDeletion(password: password);
+      warning = await _cleanup.cleanUpAfterDeletion(password: password);
     } on AccountCleanupException catch (e) {
       state = state.copyWith(
         isDeletingAccount: false,
@@ -140,7 +148,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       return;
     }
 
-    await _cleanupRepo.clearDeletionCleanupPending();
+    await _cleanup.clearDeletionCleanupPending();
+    _backendSucceededUid = null;
     state = state.copyWith(
       isDeletingAccount: false,
       accountDeleted: true,
@@ -161,9 +170,18 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   return sl<SettingsRepository>();
 });
 
+/// Account cleanup repository provider bridging get_it to Riverpod.
+final accountCleanupRepositoryProvider =
+    Provider<AccountCleanupRepository>((ref) {
+  return sl<AccountCleanupRepository>();
+});
+
 /// StateNotifier provider for account-level settings.
 final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
   (ref) {
-    return SettingsNotifier(repository: ref.watch(settingsRepositoryProvider));
+    return SettingsNotifier(
+      repository: ref.watch(settingsRepositoryProvider),
+      cleanup: ref.watch(accountCleanupRepositoryProvider),
+    );
   },
 );

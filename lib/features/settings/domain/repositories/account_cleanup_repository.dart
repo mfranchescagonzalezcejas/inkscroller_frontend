@@ -25,6 +25,9 @@ abstract class AccountCleanupRepository {
 
   /// Clears the pending deletion cleanup marker.
   Future<void> clearDeletionCleanupPending();
+
+  /// Returns the UID of the current Firebase user, or `null` if signed out.
+  String? get currentCleanupUserId;
 }
 
 /// Thrown when Firebase account deletion fails with a recoverable error.
