@@ -15,6 +15,50 @@ class _MockPrefs extends Mock implements SharedPreferences {}
 
 class _FakeAuthCredential extends Fake implements AuthCredential {}
 
+/// Minimal stateful SharedPreferences fake for crash-window tests.
+class _StatefulPrefs implements SharedPreferences {
+  final Map<String, Object?> store;
+  final void Function(String key, {required bool value})? onSetBool;
+
+  _StatefulPrefs({required this.store, this.onSetBool});
+
+  @override
+  Future<bool> setBool(String key, bool value) async {
+    onSetBool?.call(key, value: value);
+    store[key] = value;
+    return true;
+  }
+
+  @override
+  bool? getBool(String key) => store[key] as bool?;
+
+  @override
+  Future<bool> setString(String key, String value) async {
+    store[key] = value;
+    return true;
+  }
+
+  @override
+  String? getString(String key) => store[key] as String?;
+
+  @override
+  Future<bool> remove(String key) async {
+    store.remove(key);
+    return true;
+  }
+
+  @override
+  Future<bool> clear() async {
+    store.clear();
+    return true;
+  }
+
+  // Unused members — throw to catch accidental usage.
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName}');
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -287,5 +331,99 @@ void main() {
         () => mockPrefs.remove('settings.accountDeletionCleanupPendingUid'),
       ).called(1);
     });
+
+    test(
+      'hasDeletionCleanupPending returns true for UID-only marker with same UID',
+      () async {
+        when(
+          () =>
+              mockPrefs.getString('settings.accountDeletionCleanupPendingUid'),
+        ).thenReturn('firebase-user-1');
+        when(
+          () => mockPrefs.getBool('settings.accountDeletionCleanupPending'),
+        ).thenReturn(null);
+
+        expect(await repository.hasDeletionCleanupPending(), true);
+      },
+    );
+
+    test(
+      'hasDeletionCleanupPending returns false for UID-only marker with different UID',
+      () async {
+        when(
+          () =>
+              mockPrefs.getString('settings.accountDeletionCleanupPendingUid'),
+        ).thenReturn('firebase-user-1');
+        when(() => mockUser.uid).thenReturn('firebase-user-2');
+
+        expect(await repository.hasDeletionCleanupPending(), false);
+      },
+    );
+
+    test(
+      'hasDeletionCleanupPending returns false for UID-only marker with no current user',
+      () async {
+        when(() => mockAuth.currentUser).thenReturn(null);
+        when(
+          () =>
+              mockPrefs.getString('settings.accountDeletionCleanupPendingUid'),
+        ).thenReturn('firebase-user-1');
+
+        expect(await repository.hasDeletionCleanupPending(), false);
+      },
+    );
+
+    test('markDeletionCleanupPending writes UID before pending bool', () async {
+      final callOrder = <String>[];
+      when(() => mockPrefs.setString(any(), any())).thenAnswer((_) async {
+        callOrder.add('setString');
+        return true;
+      });
+      when(() => mockPrefs.setBool(any(), any())).thenAnswer((_) async {
+        callOrder.add('setBool');
+        return true;
+      });
+
+      await repository.markDeletionCleanupPending();
+
+      expect(callOrder, ['setString', 'setBool']);
+    });
+
+    test(
+      'pending-without-UID never happens: crash between writes leaves safe state',
+      () async {
+        // Stateful fake: stores values in a map, setBool throws on first call.
+        final store = <String, Object?>{};
+        var boolCallCount = 0;
+        final fakePrefs = _StatefulPrefs(
+          store: store,
+          onSetBool: (key, {required value}) {
+            boolCallCount++;
+            if (boolCallCount == 1) {
+              throw Exception('crash before pending write');
+            }
+          },
+        );
+
+        final repo = AccountCleanupRepositoryImpl(
+          firebaseAuth: mockAuth,
+          prefs: fakePrefs,
+        );
+
+        await expectLater(
+          repo.markDeletionCleanupPending(),
+          throwsA(isA<Exception>()),
+        );
+
+        // UID was written but pending was NOT — UID-only is treated as
+        // pending (the backend DELETE succeeded but cleanup never completed).
+        expect(
+          store['settings.accountDeletionCleanupPendingUid'],
+          'firebase-user-1',
+        );
+        expect(store['settings.accountDeletionCleanupPending'], isNull);
+        expect(await repo.hasDeletionCleanupPending(), true);
+      },
+    );
   });
 }

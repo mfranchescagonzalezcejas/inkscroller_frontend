@@ -1,7 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/error/failures.dart';
+import '../../../library/presentation/providers/per_title_override_provider.dart';
+import '../../../library/presentation/providers/reading_progress_provider.dart';
+import '../../../library/presentation/providers/user_library_provider.dart';
+import '../../../preferences/presentation/providers/preferences_provider.dart';
+import '../../../profile/presentation/providers/user_profile_provider.dart';
 import '../../domain/repositories/account_cleanup_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 
@@ -62,6 +68,7 @@ class SettingsState {
 class SettingsNotifier extends StateNotifier<SettingsState> {
   final SettingsRepository _repository;
   final AccountCleanupRepository _cleanup;
+  final VoidCallback? _onAccountDeleted;
 
   /// In-memory recovery signal: stores the UID for which the backend DELETE
   /// was called successfully. Retries skip the backend only when the stored
@@ -70,11 +77,17 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   String? _backendSucceededUid;
 
   /// Creates a [SettingsNotifier] with the given [repository] and [cleanup].
+  ///
+  /// [onAccountDeleted] is called after Firebase/local cleanup succeeds and
+  /// before publishing `accountDeleted: true`. Use it to invalidate
+  /// user-scoped providers (e.g. reading progress).
   SettingsNotifier({
     required SettingsRepository repository,
     required AccountCleanupRepository cleanup,
+    VoidCallback? onAccountDeleted,
   }) : _repository = repository,
        _cleanup = cleanup,
+       _onAccountDeleted = onAccountDeleted,
        super(const SettingsState());
 
   /// Deletes the authenticated user's account.
@@ -100,7 +113,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     // confirms backend already succeeded.
     final currentUserId = _cleanup.currentCleanupUserId;
     final shouldSkipBackend =
-        (_backendSucceededUid != null && _backendSucceededUid == currentUserId) ||
+        (_backendSucceededUid != null &&
+            _backendSucceededUid == currentUserId) ||
         await _cleanup.hasDeletionCleanupPending();
 
     if (!shouldSkipBackend) {
@@ -148,8 +162,17 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       return;
     }
 
-    await _cleanup.clearDeletionCleanupPending();
+    // ponytail: best-effort marker clear — account is gone, don't block success.
+    try {
+      await _cleanup.clearDeletionCleanupPending();
+    } on Exception catch (_) {
+      // Marker clear failed after backend + Firebase cleanup succeeded.
+      // The account is already deleted; a stale marker will not match a new
+      // user's UID, so this is safe to swallow.
+    }
+
     _backendSucceededUid = null;
+    _onAccountDeleted?.call();
     state = state.copyWith(
       isDeletingAccount: false,
       accountDeleted: true,
@@ -171,8 +194,9 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
 });
 
 /// Account cleanup repository provider bridging get_it to Riverpod.
-final accountCleanupRepositoryProvider =
-    Provider<AccountCleanupRepository>((ref) {
+final accountCleanupRepositoryProvider = Provider<AccountCleanupRepository>((
+  ref,
+) {
   return sl<AccountCleanupRepository>();
 });
 
@@ -182,6 +206,14 @@ final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
     return SettingsNotifier(
       repository: ref.watch(settingsRepositoryProvider),
       cleanup: ref.watch(accountCleanupRepositoryProvider),
+      onAccountDeleted: () {
+        ref.invalidate(readingProgressProvider);
+        ref.invalidate(userProfileProvider);
+        ref.invalidate(userLibrarySyncingProvider);
+        ref.invalidate(userLibraryProvider);
+        ref.invalidate(preferencesProvider);
+        ref.invalidate(perTitleOverrideProvider);
+      },
     );
   },
 );
