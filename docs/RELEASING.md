@@ -16,8 +16,8 @@ Editable source: [`release-flow.drawio`](diagrams/release-flow.drawio)
 
 ```
 1. Bump version in pubspec.yaml
-2. Commit, PR → develop → master (normal flow)
-3. Run the release script from master
+2. Commit, PR → develop → main (normal flow)
+3. Run the release script from main
 4. CI does the rest automatically
 ```
 
@@ -31,9 +31,9 @@ version: 1.2.3+45   # semver+build-number
 - The **semver** (`1.2.3`) must match the tag you will create.
 - The **build number** (`+45`) must be incremented on every release.
 
-### Step 2 — Merge to master
+### Step 2 — Merge to main
 
-All changes must be on `master` before tagging. The release scripts enforce this.
+All changes must be on `main` before tagging. The release scripts enforce this.
 
 ### Step 3 — Run the release script
 
@@ -51,11 +51,11 @@ The script runs 6 pre-flight checks before creating the tag:
 
 | Check | What it validates |
 |-------|------------------|
-| Branch | Must be on `master` |
+| Branch | Must be on `main` |
 | Clean tree | No uncommitted changes |
 | Semver format | Argument must be `X.Y.Z` |
 | pubspec match | Arg must match `pubspec.yaml` semver |
-| Sync | Local `master` == `origin/master` |
+| Sync | Local `main` == `origin/main` |
 | No duplicate tag | `vX.Y.Z` must not already exist |
 
 If any check fails, the script exits with a clear error — no tag is created.
@@ -87,13 +87,62 @@ Go to **Settings → Secrets and variables → Actions** and verify these are se
 |--------|-------------|
 | `FIREBASE_DART_DEFINES_JSON` | Full contents of `.dart-defines/firebase.json` — all Firebase keys for all flavors |
 
+### Android release signing
+
+Use one of these secure approaches:
+
+1. **local file** `android/key.properties` (non-committed)
+2. **environment variables** in CI/local shells
+
+#### Gradle/local signing values used by `android/app/build.gradle.kts`
+
+| Secret / Env | Description |
+|--------------|-------------|
+| `KEY_ALIAS` | Keystore key alias |
+| `KEY_PASSWORD` | Password for the signing key |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEYSTORE_FILE_PATH` *(optional)* | Relative path to keystore file (resolved from `android/app`); defaults to `upload-keystore.jks`, which maps to `android/app/upload-keystore.jks` |
+
+#### CI restore secret used by `.github/workflows/release.yml`
+
+| Secret | Description |
+|--------|-------------|
+| `KEYSTORE_BASE64` | Base64-encoded keystore contents for CI restore |
+
+`KEYSTORE_FILE_PATH` is optional when your `android/key.properties` contains `storeFile`.
+
+`android/key.properties` example (with placeholders):
+
+```properties
+storePassword=<keystore-password>
+keyPassword=<key-password>
+keyAlias=<key-alias>
+storeFile=upload-keystore.jks
+```
+
+#### Local setup
+
+1. Generate/import your upload keystore as `android/app/upload-keystore.jks`.
+2. Create `android/key.properties` (ignored by git) with the values above.
+3. Run release tasks.
+
+#### CI setup
+
+1. Store keystore and signing values as GitHub secrets.
+2. In release workflow, restore keystore from `KEYSTORE_BASE64` to `android/app/$KEYSTORE_FILE_PATH` (or `android/app/upload-keystore.jks` by default).
+3. Write `android/key.properties` with `${{ secrets.KEY_ALIAS }}`, `${{ secrets.KEY_PASSWORD }}`, `${{ secrets.KEYSTORE_PASSWORD }}`.
+
+If these values are not present, release builds fail fast with a clear message instead of using debug signing.
+
 ### API Base URLs
 
 | Secret | Description |
 |--------|-------------|
-| `API_BASE_URL_DEV` | Backend URL for DEV builds |
-| `API_BASE_URL_STAGING` | Backend URL for STAGING builds |
-| `API_BASE_URL_PRO` | Backend URL for PRO builds |
+| `API_BASE_URL_DEV` | Backend URL for DEV builds (`https://api.dev.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_STAGING` | Backend URL for STAGING builds (`https://api.stg.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_PRO` | Backend URL for PRO builds (`https://api.inkscroller.devdigi.dev`) |
+
+Before cutting a release, verify these GitHub secrets contain the custom backend domains above. The release workflow passes them as explicit `API_BASE_URL` values, so stale Railway URLs in secrets take precedence over Flutter flavor defaults.
 
 ### Firebase App Distribution
 
@@ -114,7 +163,7 @@ Go to **Settings → Secrets and variables → Actions** and verify these are se
 If a release has a critical bug:
 
 1. **Do not delete the tag** — it stays for history.
-2. Fix the bug on a branch, merge to `master`.
+2. Fix the bug on a branch, merge to `main`.
 3. Bump `pubspec.yaml` to the next patch version (e.g. `1.2.4`).
 4. Run the release script again with the new version.
 
@@ -126,9 +175,10 @@ the new build as an update.
 ## Checklist
 
 - [ ] `pubspec.yaml` version bumped (semver + build number)
-- [ ] All changes merged to `master`
+- [ ] All changes merged to `main`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured (see table above)
+- [ ] Android signing config (`android/key.properties` or signing env vars) is configured for release
 - [ ] Run `./scripts/release.sh X.Y.Z` (or `.ps1` on Windows)
 - [ ] Confirm GitHub Release created and APKs attached
 - [ ] Confirm Firebase App Distribution emails sent

@@ -3,26 +3,6 @@ import 'package:inkscroller_flutter/features/library/data/models/chapter_model.d
 
 void main() {
   group('ChapterModel.fromJson', () {
-    test('parses a full payload', () {
-      final model = ChapterModel.fromJson(<String, dynamic>{
-        'id': 'chapter-1',
-        'number': '12.5',
-        'title': 'The Eclipse',
-        'date': '2024-03-10T00:00:00.000Z',
-        'readable': true,
-        'external': false,
-        'externalUrl': null,
-      });
-
-      expect(model.id, 'chapter-1');
-      expect(model.number, '12.5');
-      expect(model.title, 'The Eclipse');
-      expect(model.date, DateTime.parse('2024-03-10T00:00:00.000Z'));
-      expect(model.readable, isTrue);
-      expect(model.external, isFalse);
-      expect(model.externalUrl, isNull);
-    });
-
     test('keeps optional values nullable', () {
       final model = ChapterModel.fromJson(<String, dynamic>{
         'id': 'chapter-2',

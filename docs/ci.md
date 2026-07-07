@@ -50,13 +50,25 @@ Go to: **Settings → Secrets and variables → Actions**
 |--------|-------------|
 | `FIREBASE_DART_DEFINES_JSON` | Full contents of `.dart-defines/firebase.json` — all Firebase keys for all flavors |
 
+### Android release signing
+
+| Secret | Description |
+|--------|-------------|
+| `KEY_ALIAS` | Keystore key alias |
+| `KEY_PASSWORD` | Password for signing key |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEYSTORE_FILE_PATH` | Optional override for signing keystore path relative to `android/app` (defaults to `upload-keystore.jks`, i.e., `android/app/upload-keystore.jks`) |
+| `KEYSTORE_BASE64` | Base64-encoded upload keystore for CI restoration |
+
 ### API Base URLs
 
 | Secret | Description |
 |--------|-------------|
-| `API_BASE_URL_DEV` | Backend base URL for DEV builds |
-| `API_BASE_URL_STAGING` | Backend base URL for STAGING builds |
-| `API_BASE_URL_PRO` | Backend base URL for PRODUCTION builds |
+| `API_BASE_URL_DEV` | Backend base URL for DEV builds (`https://api.dev.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_STAGING` | Backend base URL for STAGING builds (`https://api.stg.inkscroller.devdigi.dev`) |
+| `API_BASE_URL_PRO` | Backend base URL for PRODUCTION builds (`https://api.inkscroller.devdigi.dev`) |
+
+Keep these GitHub secrets aligned with the custom backend domains above. The release workflow reads the secret values directly, so stale Railway URLs in secrets override the app defaults.
 
 ### Firebase App Distribution
 
@@ -164,7 +176,8 @@ See [RELEASING.md](RELEASING.md) for the complete checklist.
 Quick summary:
 
 - [ ] `pubspec.yaml` version bumped (semver + build number)
-- [ ] All changes merged to `master`
+- [ ] All changes merged to `main`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured
+- [ ] Android signing secrets (`KEY_ALIAS`, `KEY_PASSWORD`, `KEYSTORE_PASSWORD`, `KEYSTORE_BASE64`) configured
 - [ ] Run `./scripts/release.sh X.Y.Z` (or `.ps1` on Windows)

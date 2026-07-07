@@ -5,4 +5,10 @@ import '../models/user_profile_model.dart';
 abstract class UserProfileRemoteDataSource {
   /// Reads `/users/me`.
   Future<UserProfileModel> getProfile();
+
+  /// Updates authenticated profile metadata via `/users/me`.
+  Future<UserProfileModel> updateProfile({
+    required String username,
+    required DateTime birthDate,
+  });
 }

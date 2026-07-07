@@ -27,8 +27,8 @@ This file is the **frontend-side status mirror** of the product's shared plannin
 | Frontend phase state | **Sprint 3 in progress** |
 | Current sprint mirror | Sprint 3 — **active** |
 | Repo status | Active |
-| Current branch | `chore/task-027-lib-structure-alignment` → target `master` |
-| Version | v0.5.0+21 |
+| Current branch | `chore/task-027-lib-structure-alignment` → target `main` |
+| Version | v1.0.0+29 |
 | Total tests | 97+ passing |
 
 ---
@@ -100,7 +100,7 @@ This file is the **frontend-side status mirror** of the product's shared plannin
 | `/users/me` | ✅ Implemented | Live validation pending Firebase env |
 | `/users/me/preferences` | ✅ Implemented | Required for real preference sync |
 | Firebase token verification | ✅ Implemented | Requires backend env config |
-| Deploy target / stable URLs | ✅ Deployed & tested | Railway — active backend hosting target for current docs/design |
+| Deploy target / stable URLs | ✅ Deployed & tested | Custom backend domains are the active frontend targets |
 
 ### Backend URL Configuration
 
@@ -111,31 +111,33 @@ El frontend usa `app_environment.dart` para manejar múltiples environments:
 static const String localBaseUrl = 'http://127.0.0.1:8000';
 static const String androidEmulatorBaseUrl = 'http://10.0.2.2:8000';
 
-// Railway deployment URL:
-static const String railwayBaseUrl = 'https://<inkscroller-backend>.up.railway.app';
+static const String devCloudBaseUrl = 'https://api.dev.inkscroller.devdigi.dev';
+static const String stagingCloudBaseUrl = 'https://api.stg.inkscroller.devdigi.dev';
+static const String proCloudBaseUrl = 'https://api.inkscroller.devdigi.dev';
 ```
 
 #### Deployment URLs por Flavor
 
 | Flavor | Firebase Project | Backend URL | Run Config |
 |--------|------------------|-------------|------------|
-| dev | `inkscroller-aed59` | `localhost:8000` (local) / Railway | Dev Physical / Dev Physical (Railway) |
-| staging | `inkscroller-stg` | Railway | Staging Physical (Railway) |
-| prod | `inkscroller-8fa87` | Railway | Pro Physical (Railway) |
+| dev | `inkscroller-aed59` | `http://127.0.0.1:8000` (local) / `https://api.dev.inkscroller.devdigi.dev` | Dev Physical / Dev Cloud |
+| staging | `inkscroller-stg` | `https://api.stg.inkscroller.devdigi.dev` | Staging Cloud |
+| prod | `inkscroller-8fa87` | `https://api.inkscroller.devdigi.dev` | Pro Cloud |
 
-#### Railway URLs
+#### Backend Custom Domains
 
 | Environment | URL |
 |------------|-----|
-| dev | Railway backend URL configured outside this repo |
-| staging | Railway backend URL configured outside this repo |
-| prod | Railway backend URL configured outside this repo |
+| dev | `https://api.dev.inkscroller.devdigi.dev` |
+| staging | `https://api.stg.inkscroller.devdigi.dev` |
+| prod | `https://api.inkscroller.devdigi.dev` |
 
 #### Run Configurations Actualizadas
 
-Los `.run` configs para staging y prod deben usar la URL Railway correspondiente:
-- `Flutter Staging Physical.run.xml` → Railway URL
-- `Flutter Pro Physical.run.xml` → Railway URL
+Los run configs cloud deben usar el dominio custom correspondiente:
+- `scripts/run_dev_cloud.sh` → `https://api.dev.inkscroller.devdigi.dev`
+- `scripts/run_staging_cloud.sh` → `https://api.stg.inkscroller.devdigi.dev`
+- `scripts/run_pro_cloud.sh` → `https://api.inkscroller.devdigi.dev`
 
 Para development local, seguir usando `localhost` o IP LAN (`192.168.1.38:8000`).
 

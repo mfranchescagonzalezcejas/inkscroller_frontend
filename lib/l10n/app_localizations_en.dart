@@ -106,6 +106,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCacheClearFailedMessage => 'Could not clear cached data';
 
   @override
+  String get settingsCleanupFailedMessage => 'Error during cleanup';
+
+  @override
+  String get settingsAccountDeletedSuccess => 'Account deleted successfully';
+
+  @override
+  String get settingsAccountDeletedWithWarnings =>
+      'Account deleted with warnings';
+
+  @override
+  String get settingsAccountSectionTitle => 'ACCOUNT';
+
+  @override
+  String get settingsAccountEmailLabel => 'Email';
+
+  @override
+  String get settingsAccountDeleteButton => 'Delete account';
+
+  @override
+  String get settingsDeleteDialogTitle => 'Delete account';
+
+  @override
+  String get settingsDeleteDialogRecoveryMessage =>
+      'The deletion is incomplete. You need to finish the data cleanup.';
+
+  @override
+  String get settingsDeleteDialogWarning =>
+      'This action is permanent and irreversible. All your data will be deleted, including your profile, preferences, and reading progress.';
+
+  @override
+  String get settingsDeleteDialogConfirmHint => 'Type DELETE to confirm:';
+
+  @override
+  String get settingsDeleteDialogPasswordHint =>
+      'Enter your password to retry:';
+
+  @override
+  String get settingsDeleteDialogPasswordFieldHint => 'Password';
+
+  @override
+  String get settingsDeleteDialogDeleteButton => 'Delete';
+
+  @override
+  String get settingsDeleteDialogFinishButton => 'Finish';
+
+  @override
+  String get settingsDeleteDialogCancelButton => 'Cancel';
+
+  @override
   String get loadingChapter => 'Loading chapter';
 
   @override
@@ -399,7 +448,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCreateAccountButton => 'Create account';
 
   @override
+  String get authCompleteProfileTitle => 'Complete your profile';
+
+  @override
+  String get authCompleteProfileSubtitle =>
+      'Your account was created. Add the required profile details to continue.';
+
+  @override
+  String get authCompleteProfileButton => 'Complete profile';
+
+  @override
   String get authHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get authUsernameLabel => 'Username';
+
+  @override
+  String get authUsernameRequired => 'Choose a username.';
+
+  @override
+  String get authUsernameInvalid =>
+      'Use 3–30 lowercase letters, numbers, underscores, or hyphens.';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get authConfirmPasswordRequired => 'Confirm your password.';
+
+  @override
+  String get authConfirmPasswordMismatch => 'Passwords do not match.';
+
+  @override
+  String get authBirthDateLabel => 'Birth date';
+
+  @override
+  String get authBirthDateRequired => 'Select your birth date.';
+
+  @override
+  String get authBirthDateInvalid => 'You must be at least 13 years old.';
+
+  @override
+  String get authTermsAcknowledgement =>
+      'I agree to the Terms and Privacy Policy.';
+
+  @override
+  String get authTermsRequired =>
+      'You must agree to the Terms and Privacy Policy.';
 
   @override
   String get readerSettingsDirection => 'Reading direction';

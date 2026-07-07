@@ -27,13 +27,13 @@ fi
 
 case "$MODE" in
   pro)
-    BASE_URL="https://inkscroller-backend-806863502436.us-central1.run.app"
+    BASE_URL="https://api.inkscroller.devdigi.dev"
     ;;
   staging)
-    BASE_URL="https://inkscroller-backend-391760656950.us-central1.run.app"
+    BASE_URL="https://api.stg.inkscroller.devdigi.dev"
     ;;
   dev-cloud)
-    BASE_URL="https://inkscroller-backend-708894048002.us-central1.run.app"
+    BASE_URL="https://api.dev.inkscroller.devdigi.dev"
     ;;
   *)
     echo "ERROR: modo inválido '$MODE'. Usá: pro | staging | dev-cloud" >&2

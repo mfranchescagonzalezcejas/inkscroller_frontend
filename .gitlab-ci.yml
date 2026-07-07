@@ -37,13 +37,20 @@ analyze:
 tests:
   stage: test
   script:
+    - |
+      if grep -RInE '(^|[^A-Za-z0-9_])solo_(test|group)[[:space:]]*\(' test --include='*_test.dart'; then
+        echo "Focused Dart tests are not allowed in CI. Remove solo_test/solo_group before pushing."
+        exit 1
+      fi
     - >-
       fvm flutter test
       test/core/
       test/features/library/domain/
       test/features/settings/domain/
+      test/features/auth/presentation/validation/
       test/features/library/data/
       test/features/preferences/data/
+      test/features/profile/data/
       test/features/settings/data/
       test/features/auth/presentation/providers/
       test/features/home/presentation/providers/
@@ -51,10 +58,14 @@ tests:
       test/features/preferences/presentation/providers/
       test/features/profile/presentation/providers/
       test/features/settings/presentation/providers/
+      test/e2e/helpers/cleanup_test.dart
     - >-
       fvm flutter test
       test/core/router/app_router_test.dart
       test/core/router/app_routes_test.dart
+      test/features/auth/presentation/pages/register_page_test.dart
       test/features/settings/presentation/pages/settings_page_test.dart
       test/features/library/presentation/widgets/library_widgets_test.dart
       test/features/home/presentation/pages/home_hero_overflow_test.dart
+      test/features/settings/presentation/settings_provider_test.dart
+      test/features/settings/presentation/delete_account_dialog_test.dart

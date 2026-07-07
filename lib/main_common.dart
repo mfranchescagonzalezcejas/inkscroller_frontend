@@ -5,6 +5,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/config/app_environment.dart';
+import 'core/config/startup_config_validator.dart';
 import 'core/di/injection.dart';
 import 'core/network/ipv4_http_override.dart';
 import 'firebase_options.dart';
@@ -26,8 +28,13 @@ Future<void> mainCommon({
   required String apiBaseUrl,
   required String name,
 }) async {
+  assert(
+    !AppEnvironment.kIsE2E || flavor == Flavor.dev,
+    'E2E mode requires dev flavor',
+  );
+
   final WidgetsBinding widgetsBinding =
-  WidgetsFlutterBinding.ensureInitialized();
+      WidgetsFlutterBinding.ensureInitialized();
 
   // ⛔ Evita que Flutter renderice la primera frame
   widgetsBinding.deferFirstFrame();
@@ -41,9 +48,16 @@ Future<void> mainCommon({
     name: name,
   );
 
+  final FirebaseOptions firebaseOptions = FirebaseOptionsSelector.current;
+  StartupConfigValidator.validate(
+    flavor: flavor,
+    apiBaseUrl: apiBaseUrl,
+    firebaseOptions: firebaseOptions,
+  );
+
   try {
     await Firebase.initializeApp(
-      options: FirebaseOptionsSelector.current,
+      options: firebaseOptions,
     );
   } on FirebaseException catch (e) {
     if (e.code != 'duplicate-app') rethrow;

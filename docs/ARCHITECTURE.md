@@ -704,11 +704,15 @@ Build-time entry point
   main_dev.dart / main_staging.dart / main_pro.dart
         │
         ▼
-AppEnvironment.apiBaseUrl
-  └─ String.fromEnvironment('API_BASE_URL', defaultValue: 'http://192.168.1.38:8000')
+AppEnvironment.<flavor>ApiBaseUrl
+  ├─ String.fromEnvironment('API_BASE_URL') override when provided
+  └─ flavor default custom domain
+       dev     → https://api.dev.inkscroller.devdigi.dev
+       staging → https://api.stg.inkscroller.devdigi.dev
+       pro     → https://api.inkscroller.devdigi.dev
         │
         ▼
-mainCommon(flavor: Flavor.X, apiBaseUrl: AppEnvironment.apiBaseUrl, name: "Inkscroller")
+mainCommon(flavor: Flavor.X, apiBaseUrl: AppEnvironment.<flavor>ApiBaseUrl, name: "Inkscroller")
         │
         ▼
 FlavorConfig._instance = FlavorConfig._(flavor, apiBaseUrl, name)
