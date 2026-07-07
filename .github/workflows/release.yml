@@ -198,6 +198,23 @@ jobs:
           path: build/app/outputs/flutter-apk/${{ matrix.apk_name }}
           if-no-files-found: error
 
+      - name: Build ${{ matrix.flavor }} AAB
+        if: matrix.flavor == 'pro'
+        run: |
+          fvm flutter build appbundle \
+            --flavor "${{ matrix.flavor }}" \
+            -t "${{ matrix.target }}" \
+            --dart-define="API_BASE_URL=$API_BASE_URL" \
+            --dart-define-from-file=.dart-defines/firebase.json
+
+      - name: Upload ${{ matrix.flavor }} AAB
+        if: matrix.flavor == 'pro'
+        uses: actions/upload-artifact@v7
+        with:
+          name: aab-${{ matrix.flavor }}
+          path: build/app/outputs/bundle/${{ matrix.flavor }}Release/app-${{ matrix.flavor }}-release.aab
+          if-no-files-found: error
+
   create-release:
     name: Create GitHub Release
     needs:
@@ -218,6 +235,12 @@ jobs:
           pattern: apk-*
           path: release-assets
 
+      - name: Download AAB artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: aab-*
+          path: release-assets
+
       - name: Create or update GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -228,12 +251,14 @@ jobs:
           DEV_APK="release-assets/apk-dev/app-dev-release.apk"
           STAGING_APK="release-assets/apk-staging/app-staging-release.apk"
           PRO_APK="release-assets/apk-pro/app-pro-release.apk"
+          PRO_AAB="release-assets/aab-pro/app-pro-release.aab"
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" \
               "$DEV_APK" \
               "$STAGING_APK" \
               "$PRO_APK" \
+              "$PRO_AAB" \
               --clobber
           else
             gh release create "$TAG" \
@@ -241,7 +266,8 @@ jobs:
               --notes-file release-metadata/release_notes_dev.txt \
               "$DEV_APK" \
               "$STAGING_APK" \
-              "$PRO_APK"
+              "$PRO_APK" \
+              "$PRO_AAB"
           fi
 
   distribute:
