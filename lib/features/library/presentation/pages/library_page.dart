@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:inkscroller_flutter/core/design/design_tokens.dart';
 import 'package:inkscroller_flutter/core/feedback/app_feedback.dart';
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
-import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/core/widgets/app_top_bar.dart';
 import 'package:inkscroller_flutter/core/widgets/catalog_tab_bar.dart';
 import 'package:inkscroller_flutter/core/widgets/offline_banner.dart';
@@ -70,17 +68,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
-      appBar: AppTopBar(
-        authState: authState,
-        rightWidget: GestureDetector(
-          onTap: () => context.push(AppRoutes.settings),
-          child: const Icon(
-            Icons.settings_outlined,
-            color: AppColors.onSurfaceVariant,
-            size: 24,
-          ),
-        ),
-      ),
+      appBar: AppTopBar(authState: authState),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

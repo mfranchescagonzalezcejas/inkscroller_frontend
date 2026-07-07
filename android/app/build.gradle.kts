@@ -1,46 +1,8 @@
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-}
-
-val keyProperties = Properties()
-val keyPropertiesFile = rootProject.file("key.properties")
-
-if (keyPropertiesFile.exists()) {
-    keyPropertiesFile.inputStream().use { keyProperties.load(it) }
-}
-
-fun resolveSigningProperty(key: String, envVar: String): String? =
-    keyProperties[key]?.toString()?.ifBlank { null } ?: System.getenv(envVar)?.ifBlank { null }
-
-val releaseStoreFilePath = resolveSigningProperty("storeFile", "KEYSTORE_FILE_PATH") ?: "upload-keystore.jks"
-val releaseStorePassword = resolveSigningProperty("storePassword", "KEYSTORE_PASSWORD")
-val releaseKeyPassword = resolveSigningProperty("keyPassword", "KEY_PASSWORD")
-val releaseKeyAlias = resolveSigningProperty("keyAlias", "KEY_ALIAS")
-val releaseStoreFile = file(releaseStoreFilePath)
-
-val isReleaseSigningConfigured = listOf(releaseStorePassword, releaseKeyPassword, releaseKeyAlias).all { !it.isNullOrBlank() } &&
-    releaseStoreFile.exists()
-
-gradle.taskGraph.whenReady {
-    val isReleaseTask = allTasks.any { task ->
-        task.path.contains("Release") &&
-            (task.name.contains("assemble", ignoreCase = true) ||
-                task.name.contains("bundle", ignoreCase = true) ||
-                task.name.contains("package", ignoreCase = true) ||
-                task.name.contains("install", ignoreCase = true))
-    }
-
-    if (isReleaseTask && !isReleaseSigningConfigured) {
-        throw GradleException(
-            "Release signing is not configured. Provide android/key.properties with storeFile/storePassword/keyPassword/keyAlias " +
-                "or set KEYSTORE_FILE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD before running release builds."
-        )
-    }
 }
 
 val googleServicesFiles = listOf(
@@ -52,6 +14,39 @@ val googleServicesFiles = listOf(
 
 if (googleServicesFiles.any { file(it).isFile }) {
     apply(plugin = "com.google.gms.google-services")
+}
+
+// Release signing config — loaded lazily at top level so non-release builds
+// (debug, dev, staging) are not blocked when key.properties is absent.
+val releaseSigningProps: Map<String, String>? = run {
+    val propsFile = rootProject.file("key.properties")
+    if (!propsFile.isFile) {
+        logger.warn("Release signing disabled: key.properties not found at ${propsFile.absolutePath}")
+        null
+    } else {
+        val lines = propsFile.readLines()
+        val props = mutableMapOf<String, String>()
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("#") || trimmed.isEmpty()) continue
+            val eq = trimmed.indexOf('=')
+            if (eq > 0) {
+                props[trimmed.substring(0, eq).trim()] =
+                    trimmed.substring(eq + 1).trim()
+            }
+        }
+        val required = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+        val missing = required.filter { props[it].isNullOrBlank() }
+        if (missing.isNotEmpty()) {
+            logger.warn("Release signing disabled: missing properties in key.properties: $missing")
+            null
+        } else if (!rootProject.file(props["storeFile"]!!).isFile) {
+            logger.warn("Release signing disabled: keystore not found at ${rootProject.file(props["storeFile"]!!).absolutePath}")
+            null
+        } else {
+            props
+        }
+    }
 }
 
 android {
@@ -69,7 +64,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "dev.devdigi.inkscroller"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -80,17 +74,21 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            keyAlias = releaseKeyAlias ?: "RELEASE_SIGNING_NOT_CONFIGURED"
-            keyPassword = releaseKeyPassword ?: "RELEASE_SIGNING_NOT_CONFIGURED"
-            storePassword = releaseStorePassword ?: "RELEASE_SIGNING_NOT_CONFIGURED"
-            storeFile = releaseStoreFile
+        if (releaseSigningProps != null) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigningProps["storeFile"]!!)
+                storePassword = releaseSigningProps["storePassword"]!!
+                keyAlias = releaseSigningProps["keyAlias"]!!
+                keyPassword = releaseSigningProps["keyPassword"]!!
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            releaseSigningProps?.let {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

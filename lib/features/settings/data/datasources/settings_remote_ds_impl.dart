@@ -25,6 +25,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
   AppException _mapDioException(DioException error) {
     if (error.type == DioExceptionType.connectionError ||
         error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
         error.type == DioExceptionType.receiveTimeout) {
       return NetworkException(
         message:

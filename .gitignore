@@ -21,10 +21,6 @@ migrate_working_dir/
 # VS Code workspace settings are local because launch/tasks often contain
 # machine-specific SDK paths or private dart-define files.
 .vscode/
-.cursor/
-
-# CodeGraph local index/cache
-.codegraph/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -60,6 +56,11 @@ app.*.map.json
 .atl/
 .engram/
 
+# Local tooling artifacts — machine-specific, never commit
+.codegraph/
+.cursor/
+.vercel/
+
 # Editor backup files
 *~
 
@@ -89,11 +90,6 @@ ios/Flutter/flutter_export_environment.sh
 # Android signing
 android/*.jks
 android/*.keystore
-android/app/*.jks
-android/app/*.keystore
-android/app/**/*.jks
-android/app/**/*.keystore
-android/app/upload-keystore.jks
 android/key.properties
 
 # iOS signing (fastlane / manual certs)
@@ -102,4 +98,3 @@ ios/**/*.p12
 ios/**/*.mobileprovision
 *.p12
 *.mobileprovision
-.vercel

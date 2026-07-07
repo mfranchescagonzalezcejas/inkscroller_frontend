@@ -407,7 +407,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authCompleteProfileSubtitle =>
-      'Tu cuenta fue creada. Agregá los datos obligatorios del perfil para continuar.';
+      'Tu cuenta fue creada. Agregá los datos obligatorios para continuar.';
 
   @override
   String get authCompleteProfileButton => 'Completar perfil';
@@ -416,7 +416,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authHaveAccount => '¿Ya tenés cuenta? Iniciá sesión';
 
   @override
-  String get authUsernameLabel => 'Nombre de usuario';
+  String get authUsernameLabel => 'Usuario';
 
   @override
   String get authUsernameRequired => 'Elegí un nombre de usuario.';
@@ -438,7 +438,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authBirthDateLabel => 'Fecha de nacimiento';
 
   @override
-  String get authBirthDateRequired => 'Seleccioná tu fecha de nacimiento.';
+  String get authBirthDateRequired => 'Elegí tu fecha de nacimiento.';
 
   @override
   String get authBirthDateInvalid => 'Tenés que tener al menos 13 años.';

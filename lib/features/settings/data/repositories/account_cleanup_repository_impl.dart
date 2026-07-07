@@ -45,7 +45,12 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
               requiresRecentLogin: true,
             );
           }
-          rethrow;
+          // Wrap other reauth errors (wrong password, user mismatch, etc.)
+          // so the caller can display the Firebase error message.
+          throw AccountCleanupException(
+            message: _describeReauthError(e),
+            requiresRecentLogin: false,
+          );
         }
       }
 
@@ -130,4 +135,20 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
 
   @override
   String? get currentCleanupUserId => _firebaseAuth.currentUser?.uid;
+
+  /// Returns a user-facing message for a Firebase reauth error code.
+  String _describeReauthError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'wrong-password':
+        return 'Contraseña incorrecta.';
+      case 'user-mismatch':
+        return 'El usuario no coincide con la sesión actual.';
+      case 'invalid-credential':
+        return 'Credencial inválida.';
+      case 'too-many-requests':
+        return 'Demasiados intentos. Esperá un momento y volvé a intentar.';
+      default:
+        return e.message ?? 'Error de autenticación.';
+    }
+  }
 }

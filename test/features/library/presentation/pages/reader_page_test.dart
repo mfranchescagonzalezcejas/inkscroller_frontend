@@ -18,6 +18,8 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/chapter.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
@@ -31,8 +33,6 @@ import 'package:inkscroller_flutter/features/preferences/domain/usecases/get_pre
 import 'package:inkscroller_flutter/features/preferences/domain/usecases/update_preferences.dart';
 import 'package:inkscroller_flutter/features/preferences/presentation/providers/preferences_notifier.dart';
 import 'package:inkscroller_flutter/features/preferences/presentation/providers/preferences_provider.dart';
-import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
-import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -118,7 +118,10 @@ Future<void> pumpReaderPage(
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: ReaderPage(chapterId: chapterId, chapter: chapter),
+        home: ReaderPage(
+          chapterId: chapterId,
+          chapter: chapter,
+        ),
       ),
     ),
   );
@@ -133,7 +136,9 @@ void main() {
   late ResolveReaderMode resolveReaderMode;
 
   setUpAll(() {
-    registerFallbackValue(const ReaderContentMetadata(pageCount: 0));
+    registerFallbackValue(
+      const ReaderContentMetadata(pageCount: 0),
+    );
   });
 
   setUp(() {

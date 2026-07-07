@@ -162,7 +162,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       return;
     }
 
-    // ponytail: best-effort marker clear — account is gone, don't block success.
+    // Best-effort marker clear — account is gone, don't block success.
     try {
       await _cleanup.clearDeletionCleanupPending();
     } on Exception catch (_) {

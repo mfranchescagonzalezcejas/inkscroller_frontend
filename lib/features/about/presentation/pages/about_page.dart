@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/design/design_tokens.dart' show AppColors;
-import '../../../../core/l10n/l10n.dart';
 
 /// About screen — app version, legal disclaimer, and API credits.
 ///
@@ -47,22 +44,20 @@ class AboutPage extends StatelessWidget {
 
 // ── App identity ──────────────────────────────────────────────────────────────
 
-class _AppIdentitySection extends ConsumerWidget {
+class _AppIdentitySection extends StatelessWidget {
   const _AppIdentitySection();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appVersion = ref.watch(appVersionProvider);
-
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(24),
-      child: Column(
+      child: const Column(
         children: <Widget>[
-          const Text(
+          Text(
             AppConstants.appName,
             style: TextStyle(
               fontFamily: 'Plus Jakarta Sans',
@@ -71,24 +66,17 @@ class _AppIdentitySection extends ConsumerWidget {
               color: AppColors.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
-            appVersion.when(
-              data: (info) => context.l10n.profileVersionLabel(
-                info.version,
-                info.buildNumber,
-              ),
-              error: (_, _) => context.l10n.profileVersionLabel('-', '-'),
-              loading: () => context.l10n.profileVersionLabel('-', '-'),
-            ),
-            style: const TextStyle(
+            'Versión 0.4.2 (Build 20)',
+            style: TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 13,
               color: AppColors.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 4),
-          const Text(
+          SizedBox(height: 4),
+          Text(
             'Manga reader personal — open source',
             style: TextStyle(
               fontFamily: 'Plus Jakarta Sans',

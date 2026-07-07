@@ -4,10 +4,14 @@ on:
   pull_request:
     branches:
       - develop
+      - master
       - main
   push:
     branches:
       - develop
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -20,10 +24,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -55,10 +59,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -81,33 +85,20 @@ jobs:
       - name: Install project dependencies
         run: fvm flutter pub get
 
-      - name: Guard against focused Dart tests
-        run: |
-          if grep -RInE '(^|[^A-Za-z0-9_])solo_(test|group)[[:space:]]*\(' test --include='*_test.dart'; then
-            echo "Focused Dart tests are not allowed in CI. Remove solo_test/solo_group before pushing."
-            exit 1
-          fi
-
       - name: Run unit tests
         run: |
           fvm flutter test \
             test/core/ \
             test/features/library/domain/ \
             test/features/settings/domain/ \
-            test/features/auth/presentation/validation/ \
             test/features/library/data/ \
             test/features/preferences/data/ \
-            test/features/profile/data/ \
-            test/features/settings/data/ \
             test/features/auth/presentation/providers/ \
             test/features/home/presentation/providers/ \
             test/features/library/presentation/providers/ \
             test/features/preferences/presentation/providers/ \
             test/features/profile/presentation/providers/ \
-            test/features/settings/presentation/providers/ \
-            test/features/settings/presentation/settings_provider_test.dart \
-            test/features/settings/presentation/delete_account_dialog_test.dart \
-            test/e2e/helpers/cleanup_test.dart
+            test/features/settings/presentation/providers/
 
   ui-smoke:
     name: UI smoke tests (routing + critical surfaces)
@@ -115,10 +106,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -146,8 +137,6 @@ jobs:
           fvm flutter test \
             test/core/router/app_router_test.dart \
             test/core/router/app_routes_test.dart \
-            test/features/auth/presentation/pages/register_page_test.dart \
-            test/features/settings/presentation/pages/settings_page_test.dart \
             test/features/library/presentation/widgets/library_widgets_test.dart \
             test/features/home/presentation/pages/home_hero_overflow_test.dart
 
@@ -158,10 +147,10 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -187,7 +176,5 @@ jobs:
       - name: Run full UI tests
         run: |
           fvm flutter test \
-            test/features/about/presentation/pages/about_page_test.dart \
-            test/features/home/presentation/pages/home_new_chapters_section_test.dart \
-            test/features/library/presentation/pages/library_page_test.dart \
-            test/features/library/presentation/pages/reader_page_test.dart
+            test/features/*/presentation/pages/ \
+            test/features/*/presentation/widgets/

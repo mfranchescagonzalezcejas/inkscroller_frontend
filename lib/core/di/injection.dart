@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,9 +55,9 @@ import '../../features/profile/domain/usecases/get_user_profile.dart';
 import '../../features/profile/domain/usecases/update_user_profile.dart';
 import '../../features/settings/data/datasources/settings_remote_ds.dart';
 import '../../features/settings/data/datasources/settings_remote_ds_impl.dart';
+import '../../features/settings/data/repositories/account_cleanup_repository_impl.dart';
 import '../../features/settings/data/repositories/settings_cache_repository_impl.dart';
 import '../../features/settings/data/repositories/settings_repository_impl.dart';
-import '../../features/settings/data/repositories/account_cleanup_repository_impl.dart';
 import '../../features/settings/domain/repositories/account_cleanup_repository.dart';
 import '../../features/settings/domain/repositories/settings_cache_repository.dart';
 import '../../features/settings/domain/repositories/settings_repository.dart';
@@ -258,20 +258,12 @@ Future<void> initDI() async {
   );
 
   // Settings - account deletion
-  initSettingsDI();
-}
-
-/// Registers account-level settings dependencies (remote data source +
-/// repository). Idempotent — safe to call multiple times.
-void initSettingsDI() {
   _registerIfAbsent<SettingsRemoteDataSource>(
     () => SettingsRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
-
   _registerIfAbsent<SettingsRepository>(
     () => SettingsRepositoryImpl(remoteDataSource: sl<SettingsRemoteDataSource>()),
   );
-
   _registerIfAbsent<AccountCleanupRepository>(
     () => AccountCleanupRepositoryImpl(
       firebaseAuth: sl<FirebaseAuth>(),
