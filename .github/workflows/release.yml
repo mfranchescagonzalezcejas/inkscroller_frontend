@@ -208,10 +208,13 @@ jobs:
           esac
 
       - name: Build ${{ matrix.flavor }} APK
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
         run: |
           fvm flutter build apk \
             --flavor "${{ matrix.flavor }}" \
             -t "${{ matrix.target }}" \
+            --build-number="$BUILD_NUMBER" \
             --dart-define="API_BASE_URL=$API_BASE_URL" \
             --dart-define-from-file=.dart-defines/firebase.json
 
@@ -224,10 +227,13 @@ jobs:
 
       - name: Build ${{ matrix.flavor }} AAB
         if: matrix.flavor == 'pro'
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
         run: |
           fvm flutter build appbundle \
             --flavor "${{ matrix.flavor }}" \
             -t "${{ matrix.target }}" \
+            --build-number="$BUILD_NUMBER" \
             --dart-define="API_BASE_URL=$API_BASE_URL" \
             --dart-define-from-file=.dart-defines/firebase.json
 
