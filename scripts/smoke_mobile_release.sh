@@ -8,7 +8,6 @@ set -euo pipefail
 
 MODE="${1:-pro}"
 DEVICE_ID="${2:-}"
-EXTRA_DART_DEFINES=()
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -40,20 +39,17 @@ case "$MODE" in
   pro)
     ENTRYPOINT="lib/main_pro.dart"
     FLAVOR="pro"
-    BASE_URL="https://api.inkscroller.devdigi.dev"
-    EXTRA_DART_DEFINES=(--dart-define-from-file=.dart-defines/firebase.json)
+    BASE_URL="https://inkscroller-backend-806863502436.us-central1.run.app"
     ;;
   staging)
     ENTRYPOINT="lib/main_staging.dart"
     FLAVOR="staging"
-    BASE_URL="https://api.stg.inkscroller.devdigi.dev"
-    EXTRA_DART_DEFINES=(--dart-define-from-file=.dart-defines/firebase.json)
+    BASE_URL="https://inkscroller-backend-391760656950.us-central1.run.app"
     ;;
   dev-cloud)
     ENTRYPOINT="lib/main_dev.dart"
     FLAVOR="dev"
-    BASE_URL="https://api.dev.inkscroller.devdigi.dev"
-    EXTRA_DART_DEFINES=(--dart-define-from-file=.dart-defines/firebase.json)
+    BASE_URL="https://inkscroller-backend-708894048002.us-central1.run.app"
     ;;
   dev-lan)
     "$PROJECT_DIR/scripts/update_lan_dart_defines.sh"
@@ -63,10 +59,9 @@ from pathlib import Path
 cfg = json.loads(Path('.dart-defines/lan.auto.json').read_text())
 print(cfg.get('API_BASE_URL', ''))
 PY
-    )"
+)"
     ENTRYPOINT="lib/main_dev.dart"
     FLAVOR="dev"
-    EXTRA_DART_DEFINES=(--dart-define-from-file=.dart-defines/firebase.json)
     ;;
   *)
     echo "ERROR: modo inválido '$MODE'. Usá: pro | staging | dev-cloud | dev-lan" >&2
@@ -85,7 +80,6 @@ timeout 160s fvm flutter run \
   --flavor "$FLAVOR" \
   -t "$ENTRYPOINT" \
   --dart-define=API_BASE_URL="$BASE_URL" \
-  "${EXTRA_DART_DEFINES[@]}" \
   -d "$DEVICE_ID" \
   >"$RUN_LOG" 2>&1
 RUN_EXIT=$?

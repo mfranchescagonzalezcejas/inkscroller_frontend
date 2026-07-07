@@ -3,7 +3,7 @@
 This document is the canonical planning source for the product-level UX/UI flow diagram. It connects the Phase 6 visual refresh with the user journeys that reviewers, designers, and implementers need to reason about.
 
 > Jira: [INK-83](https://devdigi.atlassian.net/browse/INK-83)  
-> Design source of truth: [`design/DESIGN.md`](../../design/DESIGN.md) + `design/designApp.pen`  
+> Design source of truth: [`design/DESIGN.md`](../../design/DESIGN.md) + `design/designApp`  
 > Product source: [`docs/PRD/phase-6-visual-refresh.md`](../PRD/phase-6-visual-refresh.md)
 
 > **Recommended editable source:** [`ux-ui-flow.drawio`](ux-ui-flow.drawio).  

@@ -124,22 +124,22 @@ class ApiConfig {
 
 | Flavor | Entry Point | Base URL | Notes |
 |--------|-------------|----------|-------|
-| `dev` | `main_dev.dart` | `--dart-define=API_BASE_URL=...` | Defaults to `https://api.dev.inkscroller.devdigi.dev` if omitted |
-| `staging` | `main_staging.dart` | `--dart-define=API_BASE_URL=...` | Defaults to `https://api.stg.inkscroller.devdigi.dev` if omitted |
-| `pro` | `main_pro.dart` | `--dart-define=API_BASE_URL=...` | Defaults to `https://api.inkscroller.devdigi.dev` if omitted |
+| `dev` | `main_dev.dart` | `--dart-define=API_BASE_URL=...` | Falls back to local LAN URL if omitted |
+| `staging` | `main_staging.dart` | `--dart-define=API_BASE_URL=...` | Falls back to local LAN URL if omitted |
+| `pro` | `main_pro.dart` | `--dart-define=API_BASE_URL=...` | Must be set to public API for release |
 
-> **Note:** Local development remains supported by passing `API_BASE_URL` explicitly, for example `http://127.0.0.1:8000`, `http://10.0.2.2:8000`, or a LAN IP.
+> **Note:** If `API_BASE_URL` is omitted, the app uses `http://192.168.1.38:8000` as a developer-friendly default.
 
 **File:** `lib/core/config/app_environment.dart`
 
 ```dart
 abstract final class AppEnvironment {
-  static const String localBaseUrl = 'http://127.0.0.1:8000';
-  static const String devCloudBaseUrl = 'https://api.dev.inkscroller.devdigi.dev';
-  static const String stagingCloudBaseUrl = 'https://api.stg.inkscroller.devdigi.dev';
-  static const String proCloudBaseUrl = 'https://api.inkscroller.devdigi.dev';
+  static const String localBaseUrl = 'http://192.168.1.38:8000';
 
-  static const String apiBaseUrlOverride = String.fromEnvironment('API_BASE_URL');
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: localBaseUrl,
+  );
 }
 ```
 

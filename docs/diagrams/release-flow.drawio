@@ -10,13 +10,13 @@
         <mxCell id="version" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Bump pubspec.yaml&#xa;version X.Y.Z+build" vertex="1">
           <mxGeometry height="80" width="220" x="70" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="merge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Merge changes&#xa;PR → develop → main" vertex="1">
+        <mxCell id="merge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Merge changes&#xa;PR → develop → master" vertex="1">
           <mxGeometry height="80" width="220" x="360" y="200" as="geometry" />
         </mxCell>
         <mxCell id="script" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;" value="Run release script&#xa;release.sh / release.ps1" vertex="1">
           <mxGeometry height="80" width="230" x="650" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="checks" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="6 pre-flight checks&#xa;main · clean tree · semver · pubspec match · synced origin · no duplicate tag" vertex="1">
+        <mxCell id="checks" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#242B2C;strokeColor=#F4C95D;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="6 pre-flight checks&#xa;master · clean tree · semver · pubspec match · synced origin · no duplicate tag" vertex="1">
           <mxGeometry height="130" width="290" x="950" y="170" as="geometry" />
         </mxCell>
         <mxCell id="tag" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A2122;strokeColor=#80D5CB;strokeWidth=2;fontColor=#E2E4E6;fontSize=15;fontStyle=1;" value="Push tag&#xa;vX.Y.Z" vertex="1">

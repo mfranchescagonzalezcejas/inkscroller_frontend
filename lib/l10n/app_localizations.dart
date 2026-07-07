@@ -818,95 +818,11 @@ abstract class AppLocalizations {
   /// **'Create account'**
   String get authCreateAccountButton;
 
-  /// No description provided for @authCompleteProfileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete your profile'**
-  String get authCompleteProfileTitle;
-
-  /// No description provided for @authCompleteProfileSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Your account was created. Add the required profile details to continue.'**
-  String get authCompleteProfileSubtitle;
-
-  /// No description provided for @authCompleteProfileButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete profile'**
-  String get authCompleteProfileButton;
-
   /// No description provided for @authHaveAccount.
   ///
   /// In en, this message translates to:
   /// **'Already have an account? Sign in'**
   String get authHaveAccount;
-
-  /// No description provided for @authUsernameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get authUsernameLabel;
-
-  /// No description provided for @authUsernameRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a username.'**
-  String get authUsernameRequired;
-
-  /// No description provided for @authUsernameInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Use 3–30 lowercase letters, numbers, underscores, or hyphens.'**
-  String get authUsernameInvalid;
-
-  /// No description provided for @authConfirmPasswordLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm password'**
-  String get authConfirmPasswordLabel;
-
-  /// No description provided for @authConfirmPasswordRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm your password.'**
-  String get authConfirmPasswordRequired;
-
-  /// No description provided for @authConfirmPasswordMismatch.
-  ///
-  /// In en, this message translates to:
-  /// **'Passwords do not match.'**
-  String get authConfirmPasswordMismatch;
-
-  /// No description provided for @authBirthDateLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Birth date'**
-  String get authBirthDateLabel;
-
-  /// No description provided for @authBirthDateRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Select your birth date.'**
-  String get authBirthDateRequired;
-
-  /// No description provided for @authBirthDateInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'You must be at least 13 years old.'**
-  String get authBirthDateInvalid;
-
-  /// No description provided for @authTermsAcknowledgement.
-  ///
-  /// In en, this message translates to:
-  /// **'I agree to the Terms and Privacy Policy.'**
-  String get authTermsAcknowledgement;
-
-  /// No description provided for @authTermsRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'You must agree to the Terms and Privacy Policy.'**
-  String get authTermsRequired;
 
   /// No description provided for @readerSettingsDirection.
   ///

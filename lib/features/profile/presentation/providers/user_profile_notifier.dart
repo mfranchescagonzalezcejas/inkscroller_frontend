@@ -16,7 +16,6 @@ class UserProfileNotifier extends StateNotifier<UserProfileState> {
 
     final result = await getUserProfile();
 
-    if (!mounted) return;
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,

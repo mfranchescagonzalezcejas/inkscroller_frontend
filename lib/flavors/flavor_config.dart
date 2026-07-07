@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 /// Application build flavors used to differentiate dev, staging, and production environments.
 enum Flavor{
   /// Local development build — points to the pre-production API and shows a red debug banner.
@@ -54,10 +52,4 @@ class FlavorConfig {
 
   /// Returns `true` when the active flavor is [Flavor.pro].
   static bool isPro() => instance.flavor == Flavor.pro;
-
-  /// Resets the singleton instance between tests.
-  @visibleForTesting
-  static void resetForTesting() {
-    _instance = null;
-  }
 }

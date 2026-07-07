@@ -20,11 +20,8 @@ class ApiConfig {
     }
 
     addCandidate(baseUrl);
-
-    if (FlavorConfig.isDev()) {
-      for (final candidate in AppEnvironment.apiBaseUrlCandidates) {
-        addCandidate(candidate);
-      }
+    for (final candidate in AppEnvironment.apiBaseUrlCandidates) {
+      addCandidate(candidate);
     }
 
     return candidates;

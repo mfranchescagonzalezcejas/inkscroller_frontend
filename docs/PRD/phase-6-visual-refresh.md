@@ -239,7 +239,7 @@ The Pencil source includes dedicated boards for loading, empty, error, and offli
 | Title Detail mockup | [`design/title_detail/`](../../design/title_detail/) | ✅ HTML + PNG |
 | Reader Settings mockup | [`design/reader_settings_open/`](../../design/reader_settings_open/) | ✅ HTML + PNG |
 | Profile mockup | [`design/profile_with_theme_toggle/`](../../design/profile_with_theme_toggle/) | ✅ HTML + PNG |
-| Active Pencil design board | [`design/designApp.pen`](../../design/designApp.pen) | ✅ Editable `.pen` source including main tabs, Profile guest, Auth, Settings, About, Reader, runtime states, Offline/Fallback, and Component Library Phase 6 |
+| Active Pencil design board | [`design/designApp`](../../design/designApp) | ✅ Editable `.pen` source including main tabs, Profile guest, Auth, Settings, About, Reader, runtime states, Offline/Fallback, and Component Library Phase 6 |
 | Nocturnal Canvas | [`design/nocturnal_canvas/DESIGN.md`](../../design/nocturnal_canvas/DESIGN.md) | Deprecated pointer to canonical `design/DESIGN.md` |
 
 ---
@@ -248,7 +248,7 @@ The Pencil source includes dedicated boards for loading, empty, error, and offli
 
 ### ✅ Canonical design source resolved
 
-`design/DESIGN.md` is the canonical design system document and `design/designApp.pen` is the active editable Pencil source. `design/nocturnal_canvas/DESIGN.md` is deprecated and only points back to the canonical document.
+`design/DESIGN.md` is the canonical design system document and `design/designApp` is the active editable Pencil source. `design/nocturnal_canvas/DESIGN.md` is deprecated and only points back to the canonical document.
 
 ### 🟡 Design token strategy
 

@@ -107,7 +107,6 @@ class _FloatingBottomBar extends StatelessWidget {
                   label: l10n.navLibrary,
                 ),
                 _NavItem(
-                  key: const Key('navProfile'),
                   icon: Icons.person_outlined,
                   activeIcon: Icons.person,
                   isActive: currentIndex == 3,
@@ -133,7 +132,6 @@ class _NavItem extends StatelessWidget {
   final String label;
 
   const _NavItem({
-    super.key,
     required this.icon,
     required this.activeIcon,
     required this.isActive,

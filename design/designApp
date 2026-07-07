@@ -103,8 +103,7 @@
                   "content": "Discover your next story",
                   "lineHeight": 1.4,
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
+                  "fontSize": 14
                 }
               ]
             },
@@ -1006,8 +1005,7 @@
                   "fill": "#888D93",
                   "content": "24 collections",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
+                  "fontSize": 14
                 }
               ]
             },
@@ -1694,8 +1692,7 @@
                   "fill": "#4A4F55",
                   "content": "Search manga…",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
+                  "fontSize": 14
                 }
               ]
             },
@@ -2147,8 +2144,7 @@
                   "fill": "#B8BEC4",
                   "content": "kaelen@example.com",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
+                  "fontSize": 13
                 }
               ]
             },
@@ -2173,8 +2169,8 @@
               "cornerRadius": 20,
               "layout": "vertical",
               "padding": [
-                12,
-                16
+                10,
+                18
               ],
               "children": [
                 {
@@ -2452,8 +2448,8 @@
               "cornerRadius": 20,
               "layout": "vertical",
               "padding": [
-                12,
-                16
+                10,
+                18
               ],
               "children": [
                 {
@@ -2682,8 +2678,7 @@
                   "fill": "#4A4F55",
                   "content": "Version - (Build -)",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 11,
-                  "fontWeight": "normal"
+                  "fontSize": 11
                 }
               ]
             }
@@ -3098,8 +3093,7 @@
                       "fill": "#888D93",
                       "content": "MYSTERY",
                       "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "fontSize": 11
                     }
                   ]
                 },
@@ -3121,8 +3115,7 @@
                       "fill": "#888D93",
                       "content": "SEINEN",
                       "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "fontSize": 11
                     }
                   ]
                 }
@@ -3167,8 +3160,7 @@
                   "content": "★ 4.9 · 820k readers",
                   "textAlign": "center",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
+                  "fontSize": 13
                 }
               ]
             },
@@ -3206,8 +3198,7 @@
                   "width": "fill_container",
                   "content": "A covert archive of forbidden memories draws an exiled reader into a city where every chapter rewrites the truth.",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
+                  "fontSize": 14
                 }
               ]
             },
@@ -3641,8 +3632,7 @@
                           "fill": "#888D93",
                           "content": "The Final Awakening · Twilight Scans",
                           "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "fontSize": 11
                         }
                       ]
                     },
@@ -4143,8 +4133,7 @@
                   "width": "fill_container",
                   "content": "Sync your library and reading preferences across devices.",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
+                  "fontSize": 14
                 }
               ]
             },
@@ -4484,8 +4473,7 @@
                   "width": "fill_container",
                   "content": "Start with Google or email. Guest browsing stays available.",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
+                  "fontSize": 14
                 }
               ]
             },
@@ -4822,8 +4810,7 @@
               "fill": "#888D93",
               "content": "‹",
               "fontFamily": "Plus Jakarta Sans",
-              "fontSize": 32,
-              "fontWeight": "normal"
+              "fontSize": 32
             }
           ]
         },
@@ -5335,21 +5322,20 @@
               "alignItems": "center",
               "children": [
                 {
-                  "type": "icon_font",
-                  "id": "YVECA",
-                  "name": "clear icon material",
-                  "width": 20,
-                  "height": 20,
-                  "iconFontName": "close",
-                  "iconFontFamily": "Material Symbols Rounded",
-                  "weight": 500,
-                  "fill": "#FF5A6A"
+                  "type": "text",
+                  "id": "vjW8w",
+                  "name": "clearIcon",
+                  "fill": "#FF6B6B",
+                  "content": "✕",
+                  "fontFamily": "Plus Jakarta Sans",
+                  "fontSize": 14,
+                  "fontWeight": "800"
                 },
                 {
                   "type": "text",
                   "id": "MdKJA",
                   "name": "clearText",
-                  "fill": "#FF5A6A",
+                  "fill": "#FF6B6B",
                   "content": "Clear saved data",
                   "fontFamily": "Plus Jakarta Sans",
                   "fontSize": 14,
@@ -5692,8 +5678,7 @@
                       "fill": "#888D93",
                       "content": "Popular",
                       "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "fontSize": 11
                     }
                   ]
                 },
@@ -5717,8 +5702,7 @@
                       "fill": "#888D93",
                       "content": "Romance",
                       "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "fontSize": 11
                     }
                   ]
                 },
@@ -5800,7 +5784,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "images/generated-1778084186048.png",
+                            "url": "./images/generated-1778084186048.png",
                             "mode": "fill"
                           },
                           "cornerRadius": 16,
@@ -5917,7 +5901,7 @@
                           "fill": {
                             "type": "image",
                             "enabled": true,
-                            "url": "images/generated-1778084182481.png",
+                            "url": "./images/generated-1778084182481.png",
                             "mode": "fill"
                           },
                           "cornerRadius": 16,
@@ -6120,8 +6104,7 @@
                       "fill": "#888D93",
                       "content": "2h",
                       "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "fontSize": 11
                     }
                   ]
                 },
@@ -6188,8 +6171,7 @@
                       "fill": "#888D93",
                       "content": "5h",
                       "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "fontSize": 11
                     }
                   ]
                 }
@@ -6434,8 +6416,7 @@
               "width": "fill_container",
               "content": "Component/state reference for ReaderPage, VerticalReaderView, PagedReaderView and ReaderSettingsSheet",
               "fontFamily": "Plus Jakarta Sans",
-              "fontSize": 13,
-              "fontWeight": "normal"
+              "fontSize": 13
             }
           ]
         },
@@ -6911,8 +6892,7 @@
                               "fill": "#888D93",
                               "content": "Save battery on OLED screens",
                               "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 11,
-                              "fontWeight": "normal"
+                              "fontSize": 11
                             }
                           ]
                         },
@@ -6974,8 +6954,7 @@
                               "fill": "#888D93",
                               "content": "Hide system navigation bars",
                               "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 11,
-                              "fontWeight": "normal"
+                              "fontSize": 11
                             }
                           ]
                         },
@@ -7071,8 +7050,7 @@
                           "fill": "#E2E4E6",
                           "content": "Loading chapter",
                           "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 18,
-                          "fontWeight": "normal"
+                          "fontSize": 18
                         },
                         {
                           "type": "frame",
@@ -7113,8 +7091,7 @@
                           "fill": "#888D93",
                           "content": "12 / 24 pages",
                           "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 12,
-                          "fontWeight": "normal"
+                          "fontSize": 12
                         }
                       ]
                     },
@@ -7172,8 +7149,7 @@
                               "width": "fill_container",
                               "content": "Opens on original site, not inside reader",
                               "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
+                              "fontSize": 12
                             }
                           ]
                         }
@@ -7266,7 +7242,7 @@
       "y": 44,
       "name": "00 Component Library — InkScroller",
       "width": 1320,
-      "height": 2020,
+      "height": 1700,
       "fill": "#080F10",
       "layout": "vertical",
       "gap": 18,
@@ -7277,6 +7253,7 @@
           "id": "J9vMh",
           "name": "Library Header",
           "width": "fill_container",
+          "height": 72,
           "layout": "vertical",
           "gap": 6,
           "children": [
@@ -7289,6 +7266,17 @@
               "fontFamily": "Plus Jakarta Sans",
               "fontSize": 28,
               "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "tkRYB",
+              "name": "subtitle",
+              "fill": "#888D93",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Current UI/UX component contracts extracted from the redesigned screens: navigation, surfaces, actions, profile/auth/settings, reader and runtime states.",
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": 13
             }
           ]
         },
@@ -7381,7 +7369,7 @@
                   "id": "Unsl2",
                   "name": "bottomNav",
                   "width": "fill_container",
-                  "height": 104,
+                  "height": 88,
                   "padding": [
                     0,
                     16,
@@ -7396,9 +7384,9 @@
                       "id": "u0SMtJ",
                       "name": "pill",
                       "width": 358,
-                      "height": 84,
+                      "height": 72,
                       "fill": "#11141680",
-                      "cornerRadius": 30,
+                      "cornerRadius": 28,
                       "effect": [
                         {
                           "type": "background_blur",
@@ -7425,7 +7413,7 @@
                           "width": "fill_container",
                           "height": "fill_container",
                           "layout": "vertical",
-                          "gap": 6,
+                          "gap": 4,
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
@@ -7440,18 +7428,18 @@
                                 24
                               ],
                               "fill": "#888D93",
-                              "width": 24,
-                              "height": 24
+                              "width": 18,
+                              "height": 18
                             },
                             {
                               "type": "text",
                               "id": "nQjc5",
                               "name": "p1l",
                               "fill": "#888D93",
-                              "content": "Home",
+                              "content": "home",
                               "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 12,
-                              "fontWeight": "600"
+                              "fontSize": 10,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -7462,7 +7450,7 @@
                           "width": "fill_container",
                           "height": "fill_container",
                           "layout": "vertical",
-                          "gap": 6,
+                          "gap": 4,
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
@@ -7477,18 +7465,18 @@
                                 24
                               ],
                               "fill": "#888D93",
-                              "width": 24,
-                              "height": 24
+                              "width": 18,
+                              "height": 18
                             },
                             {
                               "type": "text",
                               "id": "D8E7Hp",
                               "name": "p2l",
                               "fill": "#888D93",
-                              "content": "Explore",
+                              "content": "explore",
                               "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 12,
-                              "fontWeight": "600"
+                              "fontSize": 10,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -7499,7 +7487,7 @@
                           "width": "fill_container",
                           "height": "fill_container",
                           "layout": "vertical",
-                          "gap": 6,
+                          "gap": 4,
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
@@ -7514,18 +7502,18 @@
                                 24
                               ],
                               "fill": "#888D93",
-                              "width": 24,
-                              "height": 24
+                              "width": 18,
+                              "height": 18
                             },
                             {
                               "type": "text",
                               "id": "M8bHbZ",
                               "name": "p3l",
                               "fill": "#888D93",
-                              "content": "Library",
+                              "content": "library",
                               "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 12,
-                              "fontWeight": "600"
+                              "fontSize": 10,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -7536,7 +7524,7 @@
                           "width": "fill_container",
                           "height": "fill_container",
                           "layout": "vertical",
-                          "gap": 6,
+                          "gap": 4,
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
@@ -7551,18 +7539,18 @@
                                 24
                               ],
                               "fill": "#80D5CB",
-                              "width": 24,
-                              "height": 24
+                              "width": 18,
+                              "height": 18
                             },
                             {
                               "type": "text",
                               "id": "K00cj7",
                               "name": "p4l",
                               "fill": "#80D5CB",
-                              "content": "Profile",
+                              "content": "person",
                               "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 12,
-                              "fontWeight": "700"
+                              "fontSize": 10,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -7575,10 +7563,11 @@
                   "id": "OiAZw",
                   "name": "Page header contract",
                   "width": "fill_container",
-                  "height": 72,
+                  "height": 116,
                   "fill": "#111416",
                   "cornerRadius": 18,
                   "layout": "vertical",
+                  "gap": 6,
                   "padding": 18,
                   "children": [
                     {
@@ -7590,63 +7579,19 @@
                       "fontFamily": "Plus Jakarta Sans",
                       "fontSize": 22,
                       "fontWeight": "700"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "G9bkfa",
-                  "name": "EditorialSectionHeader",
-                  "width": "fill_container",
-                  "height": 92,
-                  "fill": "#111416",
-                  "cornerRadius": 18,
-                  "layout": "vertical",
-                  "gap": 8,
-                  "padding": 18,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Nq3yo",
-                      "name": "section eyebrow",
-                      "fill": "#F4C95D",
-                      "content": "EDITORIAL PICK",
-                      "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 11,
-                      "fontWeight": "800",
-                      "letterSpacing": 0.8
                     },
                     {
-                      "type": "frame",
-                      "id": "Xu1Yf",
-                      "name": "section title row",
+                      "type": "text",
+                      "id": "DYgPr",
+                      "name": "hCopy",
+                      "fill": "#888D93",
+                      "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "gap": 12,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "LatXn",
-                          "name": "section title",
-                          "fill": "#E2E4E6",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Because you read seinen",
-                          "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 20,
-                          "fontWeight": "800"
-                        },
-                        {
-                          "type": "text",
-                          "id": "rs3On",
-                          "name": "section action",
-                          "fill": "#80D5CB",
-                          "content": "See all",
-                          "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 12,
-                          "fontWeight": "700"
-                        }
-                      ]
+                      "content": "Large title + compact supporting copy. Used in boards and non-tab subroutes.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 12,
+                      "fontWeight": "500"
                     }
                   ]
                 },
@@ -7673,17 +7618,15 @@
                       "fontWeight": "700"
                     },
                     {
-                      "type": "icon_font",
-                      "id": "HtW1d",
+                      "type": "text",
+                      "id": "dHQPI",
                       "x": 18,
-                      "y": 16,
-                      "name": "back arrow material",
-                      "width": 24,
-                      "height": 24,
-                      "iconFontName": "arrow_back",
-                      "iconFontFamily": "Material Symbols Rounded",
-                      "weight": 500,
-                      "fill": "#888D93"
+                      "y": 8,
+                      "name": "back arrow",
+                      "fill": "#888D93",
+                      "content": "‹",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 32
                     }
                   ]
                 }
@@ -7774,7 +7717,7 @@
                       "type": "text",
                       "id": "d3uIt",
                       "name": "dangerText",
-                      "fill": "#FF5A6A",
+                      "fill": "#FF6B6B",
                       "content": "CLEAR SAVED DATA",
                       "fontFamily": "Plus Jakarta Sans",
                       "fontSize": 13,
@@ -7866,131 +7809,6 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "ztznb",
-                  "name": "MangaCoverCard sampled glow",
-                  "width": "fill_container",
-                  "height": 250,
-                  "fill": "#111416",
-                  "cornerRadius": 22,
-                  "layout": "vertical",
-                  "gap": 14,
-                  "padding": 18,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "lk1mz",
-                      "name": "cover visual shell",
-                      "width": "fill_container",
-                      "height": 214,
-                      "fill": "#080F10",
-                      "cornerRadius": 18,
-                      "layout": "none",
-                      "children": [
-                        {
-                          "type": "ellipse",
-                          "id": "vSe5W",
-                          "x": 63,
-                          "y": 28,
-                          "name": "sampled cover glow",
-                          "fill": "#80D5CB55",
-                          "width": 220,
-                          "height": 156,
-                          "effect": {
-                            "type": "blur",
-                            "radius": 36
-                          }
-                        },
-                        {
-                          "type": "frame",
-                          "id": "e4LNj",
-                          "x": 107,
-                          "y": 14,
-                          "name": "2 by 3 manga cover",
-                          "width": 132,
-                          "height": 198,
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 25,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#2FAFA3",
-                                "position": 0
-                              },
-                              {
-                                "color": "#111416",
-                                "position": 0.52
-                              },
-                              {
-                                "color": "#F4C95D",
-                                "position": 1
-                              }
-                            ]
-                          },
-                          "cornerRadius": 16,
-                          "effect": {
-                            "type": "shadow",
-                            "shadowType": "outer",
-                            "color": "#00000080",
-                            "offset": {
-                              "x": 0,
-                              "y": 16
-                            },
-                            "blur": 30
-                          },
-                          "layout": "none",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "uTnYI",
-                              "x": 10,
-                              "y": 144,
-                              "name": "metadata overlay",
-                              "width": 112,
-                              "height": 44,
-                              "fill": "#080F10AA",
-                              "cornerRadius": 12,
-                              "layout": "vertical",
-                              "gap": 2,
-                              "padding": [
-                                8,
-                                6
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "Gkigp",
-                                  "name": "cover title",
-                                  "fill": "#E2E4E6",
-                                  "content": "Featured",
-                                  "fontFamily": "Plus Jakarta Sans",
-                                  "fontSize": 11,
-                                  "fontWeight": "800"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "nVPBm",
-                                  "name": "cover metadata",
-                                  "fill": "#80D5CB",
-                                  "content": "2:3 · sampled glow",
-                                  "fontFamily": "Plus Jakarta Sans",
-                                  "fontSize": 9,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
                   "type": "text",
                   "id": "O8ohV",
                   "name": "cardLabel",
@@ -8003,167 +7821,6 @@
                 },
                 {
                   "type": "frame",
-                  "id": "CE7VI",
-                  "name": "GenreGradientTile",
-                  "width": "fill_container",
-                  "height": 124,
-                  "fill": {
-                    "type": "gradient",
-                    "gradientType": "linear",
-                    "enabled": true,
-                    "rotation": 135,
-                    "size": {
-                      "height": 1
-                    },
-                    "colors": [
-                      {
-                        "color": "#1A2122",
-                        "position": 0
-                      },
-                      {
-                        "color": "#2FAFA3",
-                        "position": 0.55
-                      },
-                      {
-                        "color": "#F4C95D",
-                        "position": 1
-                      }
-                    ]
-                  },
-                  "cornerRadius": 22,
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#00000055",
-                    "offset": {
-                      "x": 0,
-                      "y": 14
-                    },
-                    "blur": 26
-                  },
-                  "layout": "vertical",
-                  "gap": 8,
-                  "padding": 18,
-                  "justifyContent": "end",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "fG5Vo",
-                      "name": "genre title",
-                      "fill": "#E2E4E6",
-                      "content": "Mystery",
-                      "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 19,
-                      "fontWeight": "800"
-                    },
-                    {
-                      "type": "text",
-                      "id": "ke3yu",
-                      "name": "genre metadata",
-                      "fill": "#080F10",
-                      "content": "Atmospheric picks · 128 titles",
-                      "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 12,
-                      "fontWeight": "700"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "chriy",
-                  "name": "OfficialAvailabilityCard",
-                  "width": "fill_container",
-                  "height": 128,
-                  "fill": "#111416",
-                  "cornerRadius": 20,
-                  "layout": "vertical",
-                  "gap": 12,
-                  "padding": 18,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "lq3D9",
-                      "name": "official top row",
-                      "width": "fill_container",
-                      "gap": 12,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "NBcNy",
-                          "name": "official badge",
-                          "width": 42,
-                          "height": 42,
-                          "fill": "#242B2C",
-                          "cornerRadius": 14,
-                          "layout": "vertical",
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "g05dPJ",
-                              "name": "official verified icon material",
-                              "width": 24,
-                              "height": 24,
-                              "iconFontName": "verified",
-                              "iconFontFamily": "Material Symbols Rounded",
-                              "weight": 500,
-                              "fill": "#80D5CB"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "OCSII",
-                          "name": "official copy",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 3,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "NKwkS",
-                              "name": "official title",
-                              "fill": "#E2E4E6",
-                              "content": "Official availability",
-                              "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 15,
-                              "fontWeight": "800"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "g1IHx",
-                      "name": "official tonal CTA",
-                      "width": "fill_container",
-                      "height": 40,
-                      "fill": "#1A2122",
-                      "cornerRadius": 14,
-                      "layout": "vertical",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "HDOyH",
-                          "name": "official CTA text",
-                          "fill": "#80D5CB",
-                          "content": "VIEW OFFICIAL SOURCES",
-                          "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 12,
-                          "fontWeight": "800",
-                          "letterSpacing": 0.3
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
                   "id": "Y716NR",
                   "name": "prefCard",
                   "width": "fill_container",
@@ -8172,8 +7829,8 @@
                   "cornerRadius": 20,
                   "layout": "vertical",
                   "padding": [
-                    12,
-                    16
+                    10,
+                    18
                   ],
                   "children": [
                     {
@@ -8466,15 +8123,14 @@
                           "alignItems": "center",
                           "children": [
                             {
-                              "type": "icon_font",
-                              "id": "rCfxW",
-                              "name": "app info icon material",
-                              "width": 22,
-                              "height": 22,
-                              "iconFontName": "info",
-                              "iconFontFamily": "Material Symbols Rounded",
-                              "weight": 500,
-                              "fill": "#80D5CB"
+                              "type": "text",
+                              "id": "RRKrO",
+                              "name": "glyph1",
+                              "fill": "#80D5CB",
+                              "content": "I",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 16,
+                              "fontWeight": "800"
                             }
                           ]
                         },
@@ -8532,15 +8188,14 @@
                           "alignItems": "center",
                           "children": [
                             {
-                              "type": "icon_font",
-                              "id": "O2l7l",
-                              "name": "flavor science icon material",
-                              "width": 22,
-                              "height": 22,
-                              "iconFontName": "science",
-                              "iconFontFamily": "Material Symbols Rounded",
-                              "weight": 500,
-                              "fill": "#80D5CB"
+                              "type": "text",
+                              "id": "a7EZP9",
+                              "name": "glyph2",
+                              "fill": "#80D5CB",
+                              "content": "DEV",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 10,
+                              "fontWeight": "800"
                             }
                           ]
                         },
@@ -8598,15 +8253,14 @@
                           "alignItems": "center",
                           "children": [
                             {
-                              "type": "icon_font",
-                              "id": "sFjNu",
-                              "name": "api code icon material",
-                              "width": 22,
-                              "height": 22,
-                              "iconFontName": "code",
-                              "iconFontFamily": "Material Symbols Rounded",
-                              "weight": 500,
-                              "fill": "#888D93"
+                              "type": "text",
+                              "id": "OIRwr",
+                              "name": "glyph3",
+                              "fill": "#888D93",
+                              "content": "{}",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 13,
+                              "fontWeight": "800"
                             }
                           ]
                         },
@@ -8680,15 +8334,14 @@
                           "alignItems": "center",
                           "children": [
                             {
-                              "type": "icon_font",
-                              "id": "Xtrpq",
-                              "name": "cache storage icon material",
-                              "width": 24,
-                              "height": 24,
-                              "iconFontName": "database",
-                              "iconFontFamily": "Material Symbols Rounded",
-                              "weight": 500,
-                              "fill": "#80D5CB"
+                              "type": "text",
+                              "id": "twngW",
+                              "name": "cacheGlyph",
+                              "fill": "#80D5CB",
+                              "content": "≡",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 22,
+                              "fontWeight": "700"
                             }
                           ]
                         },
@@ -8878,107 +8531,60 @@
                 },
                 {
                   "type": "frame",
-                  "id": "jGPSQ",
-                  "name": "ReaderTopBar glass controls",
+                  "id": "prgyL",
+                  "name": "readerApp",
                   "width": "fill_container",
                   "height": 56,
-                  "fill": "#11141680",
-                  "cornerRadius": 22,
-                  "effect": [
-                    {
-                      "type": "background_blur",
-                      "radius": 32
-                    },
-                    {
-                      "type": "shadow",
-                      "shadowType": "outer",
-                      "color": "#00000066",
-                      "offset": {
-                        "x": 0,
-                        "y": 12
-                      },
-                      "blur": 32
-                    }
-                  ],
-                  "gap": 12,
-                  "padding": [
-                    14,
-                    12
-                  ],
-                  "alignItems": "center",
+                  "fill": "#080F10",
+                  "layout": "none",
                   "children": [
                     {
-                      "type": "frame",
-                      "id": "JlYV9",
-                      "name": "reader back glass button",
-                      "width": 40,
-                      "height": 40,
-                      "fill": "#1A2122CC",
-                      "cornerRadius": 14,
-                      "layout": "vertical",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "Tlr8C",
-                          "name": "reader back icon material",
-                          "width": 24,
-                          "height": 24,
-                          "iconFontName": "arrow_back",
-                          "iconFontFamily": "Material Symbols Rounded",
-                          "weight": 500,
-                          "fill": "#E2E4E6"
-                        }
-                      ]
+                      "type": "path",
+                      "id": "tPiyL",
+                      "x": 16,
+                      "y": 16,
+                      "name": "back",
+                      "geometry": "M20 11h-12.17l5.59-5.59-1.42-1.41-8 8 8 8 1.41-1.41-5.58-5.59h12.17v-2z",
+                      "viewBox": [
+                        0,
+                        0,
+                        24,
+                        24
+                      ],
+                      "fill": "#E2E4E6",
+                      "width": 24,
+                      "height": 24
                     },
                     {
-                      "type": "frame",
-                      "id": "hPHLJ",
-                      "name": "reader title copy",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 2,
-                      "justifyContent": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "djCLS",
-                          "name": "reader title",
-                          "fill": "#E2E4E6",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "Reading chapter",
-                          "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 15,
-                          "fontWeight": "700"
-                        }
-                      ]
+                      "type": "text",
+                      "id": "h3I3Uq",
+                      "x": 56,
+                      "y": 18,
+                      "name": "reading title",
+                      "fill": "#E2E4E6",
+                      "textGrowth": "fixed-width",
+                      "width": 250,
+                      "content": "Reading chapter",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "600"
                     },
                     {
-                      "type": "frame",
-                      "id": "ah6F3",
-                      "name": "reader settings glass button",
-                      "width": 40,
-                      "height": 40,
-                      "fill": "#1A2122CC",
-                      "cornerRadius": 14,
-                      "layout": "vertical",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "S5ZWLj",
-                          "name": "reader tune icon material",
-                          "width": 22,
-                          "height": 22,
-                          "iconFontName": "tune",
-                          "iconFontFamily": "Material Symbols Rounded",
-                          "weight": 500,
-                          "fill": "#E2E4E6"
-                        }
-                      ]
+                      "type": "path",
+                      "id": "cmOjz",
+                      "x": 350,
+                      "y": 16,
+                      "name": "tune_outlined",
+                      "geometry": "M3 17v2h6v-2h-6z m0-12v2h10v-2h-10z m10 16v-2h8v-2h-8v-2h-2v6h2z m-6-12v2h-4v2h4v2h2v-6h-2z m14 4v-2h-10v2h10z m-6-4h2v-2h4v-2h-4v-2h-2v6z",
+                      "viewBox": [
+                        0,
+                        0,
+                        24,
+                        24
+                      ],
+                      "fill": "#E2E4E6",
+                      "width": 24,
+                      "height": 24
                     }
                   ]
                 },
@@ -9044,7 +8650,6 @@
                           "width": "fill_container",
                           "height": 38,
                           "gap": 8,
-                          "justifyContent": "center",
                           "children": [
                             {
                               "type": "frame",
@@ -9151,7 +8756,6 @@
                           "width": "fill_container",
                           "height": 38,
                           "gap": 8,
-                          "justifyContent": "center",
                           "children": [
                             {
                               "type": "frame",
@@ -9272,7 +8876,7 @@
                   "id": "jl7No",
                   "name": "offlineCard",
                   "width": "fill_container",
-                  "height": 140,
+                  "height": 200,
                   "fill": "#111416",
                   "cornerRadius": 18,
                   "layout": "vertical",
@@ -9324,93 +8928,56 @@
                           "fontWeight": "700"
                         }
                       ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "k5cFQU",
+                      "name": "c1copy",
+                      "fill": "#888D93",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Keep the reader usable when pages already exist locally. Avoid blocking overlays; use a quiet banner.",
+                      "lineHeight": 1.45,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 12,
+                      "fontWeight": "500"
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "UiJ3g",
-                  "name": "Empty Error State CTA card",
+                  "id": "ZQeEs",
+                  "name": "State design rule",
                   "width": "fill_container",
-                  "height": 190,
-                  "fill": "#111416",
-                  "cornerRadius": 20,
+                  "height": 112,
+                  "fill": "#1A2122",
+                  "cornerRadius": 18,
                   "layout": "vertical",
-                  "gap": 14,
+                  "gap": 8,
                   "padding": 18,
-                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "frame",
-                      "id": "V8iIdb",
-                      "name": "state icon container",
-                      "width": 52,
-                      "height": 52,
-                      "fill": "#1A2122",
-                      "cornerRadius": 18,
-                      "layout": "vertical",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "U7Tsx",
-                          "name": "state icon material",
-                          "width": 26,
-                          "height": 26,
-                          "iconFontName": "error_outline",
-                          "iconFontFamily": "Material Symbols Rounded",
-                          "weight": 500,
-                          "fill": "#80D5CB"
-                        }
-                      ]
+                      "type": "text",
+                      "id": "u0ZpB",
+                      "name": "stateTitle",
+                      "fill": "#E2E4E6",
+                      "content": "State rule",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
                     },
                     {
-                      "type": "frame",
-                      "id": "a08aHu",
-                      "name": "state copy",
+                      "type": "text",
+                      "id": "ZxvCi",
+                      "name": "stateCopy",
+                      "fill": "#888D93",
+                      "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 6,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "ZCVBq",
-                          "name": "state title",
-                          "fill": "#E2E4E6",
-                          "content": "Nothing here yet",
-                          "textAlign": "center",
-                          "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 17,
-                          "fontWeight": "700"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "r8VSb1",
-                      "name": "state primary CTA",
-                      "width": "fill_container",
-                      "height": 44,
-                      "fill": "#80D5CB",
-                      "cornerRadius": 14,
-                      "layout": "vertical",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "iuz1f",
-                          "name": "state CTA text",
-                          "fill": "#080F10",
-                          "content": "TRY AGAIN",
-                          "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 13,
-                          "fontWeight": "700",
-                          "letterSpacing": 0.3
-                        }
-                      ]
+                      "content": "Preserve user context first: partial content beats blank pages; cached data needs timestamp/offline cue; external chapters leave the reader.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 12,
+                      "fontWeight": "500"
                     }
                   ]
                 },
@@ -9448,110 +9015,6 @@
                       "fontFamily": "Plus Jakarta Sans",
                       "fontSize": 13,
                       "fontWeight": "500"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "TEYcu",
-                  "name": "CommunityTeaserCard",
-                  "width": "fill_container",
-                  "height": 132,
-                  "fill": "#1A2122",
-                  "cornerRadius": 20,
-                  "layout": "vertical",
-                  "gap": 12,
-                  "padding": 18,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "YZVAf",
-                      "name": "community top row",
-                      "width": "fill_container",
-                      "gap": 12,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "cxWED",
-                          "name": "community icon",
-                          "width": 42,
-                          "height": 42,
-                          "fill": "#242B2C",
-                          "cornerRadius": 14,
-                          "layout": "vertical",
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "zn3lJ",
-                              "name": "community forum icon material",
-                              "width": 22,
-                              "height": 22,
-                              "iconFontName": "forum",
-                              "iconFontFamily": "Material Symbols Rounded",
-                              "weight": 500,
-                              "fill": "#F4C95D"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "pnlf6",
-                          "name": "community copy",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 3,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "Y85Hn",
-                              "name": "community title",
-                              "fill": "#E2E4E6",
-                              "content": "Community signals",
-                              "fontFamily": "Plus Jakarta Sans",
-                              "fontSize": 15,
-                              "fontWeight": "800"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "JVydx",
-                      "name": "community stat pill",
-                      "width": "fill_container",
-                      "height": 40,
-                      "fill": "#111416",
-                      "cornerRadius": 14,
-                      "gap": 8,
-                      "padding": [
-                        14,
-                        10
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "ellipse",
-                          "id": "EfRfC",
-                          "name": "community signal dot",
-                          "fill": "#80D5CB",
-                          "width": 8,
-                          "height": 8
-                        },
-                        {
-                          "type": "text",
-                          "id": "o9QxES",
-                          "name": "community stat text",
-                          "fill": "#E2E4E6",
-                          "content": "2.4k readers added this to library",
-                          "fontFamily": "Plus Jakarta Sans",
-                          "fontSize": 12,
-                          "fontWeight": "700"
-                        }
-                      ]
                     }
                   ]
                 },
@@ -10347,8 +9810,7 @@
                   "content": "La ruta solicitada no existe.",
                   "textAlign": "center",
                   "fontFamily": "Plus Jakarta Sans",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
+                  "fontSize": 14
                 },
                 {
                   "type": "frame",
@@ -10781,8 +10243,7 @@
                       "content": "Cargando capítulo",
                       "textAlign": "center",
                       "fontFamily": "Plus Jakarta Sans",
-                      "fontSize": 18,
-                      "fontWeight": "normal"
+                      "fontSize": 18
                     },
                     {
                       "type": "frame",
@@ -13807,8 +13268,7 @@
           "content": "What the current Flutter auth flow must show during submit, failure, and future reset-password scope.",
           "lineHeight": 1.45,
           "fontFamily": "Plus Jakarta Sans",
-          "fontSize": 13,
-          "fontWeight": "normal"
+          "fontSize": 13
         },
         {
           "type": "frame",
@@ -13842,8 +13302,7 @@
               "content": "Primary CTA is disabled and swaps label for spinner. Fields stay visible; no full-screen loader.",
               "lineHeight": 1.35,
               "fontFamily": "Plus Jakarta Sans",
-              "fontSize": 12,
-              "fontWeight": "normal"
+              "fontSize": 12
             }
           ]
         },
@@ -13879,8 +13338,7 @@
               "content": "Validation errors live on fields. Firebase/server failures use AppFeedback toast; preserve entered email/password state.",
               "lineHeight": 1.35,
               "fontFamily": "Plus Jakarta Sans",
-              "fontSize": 12,
-              "fontWeight": "normal"
+              "fontSize": 12
             }
           ]
         },
@@ -13916,8 +13374,7 @@
               "content": "Not implemented in current code. Treat as follow-up task, not a hidden link in this pass; add screen only when Firebase reset flow exists.",
               "lineHeight": 1.35,
               "fontFamily": "Plus Jakarta Sans",
-              "fontSize": 12,
-              "fontWeight": "normal"
+              "fontSize": 12
             }
           ]
         },
@@ -14764,8 +14221,7 @@
               "width": "fill_container",
               "content": "User-facing states for network loss, stale cache, partial data and external chapters. These complement loading/empty/error boards.",
               "fontFamily": "Plus Jakarta Sans",
-              "fontSize": 13,
-              "fontWeight": "normal"
+              "fontSize": 13
             }
           ]
         },

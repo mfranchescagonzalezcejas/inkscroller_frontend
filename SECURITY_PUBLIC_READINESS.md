@@ -26,7 +26,7 @@
 |---------------------|--------|------------------|
 | `android/app/src/*/google-services.json` | API keys de Firebase (aunque limitadas por reglas de seguridad, son rastreables) | Nunca commitear — usar CI injection |
 | `ios/config/*/GoogleService-Info.plist` | Equivalente iOS de Firebase config | Nunca commitear — usar CI injection |
-| `android/app/*.jks` / `android/app/*.keystore` | Keystore de firma de la app | Nunca commitear — usar GitHub Secrets |
+| `android/app/*.jks` / `*.keystore` | Keystore de firma de la app | Nunca commitear — usar GitHub Secrets |
 | `android/key.properties` | Contraseña del keystore + alias | Nunca commitear — usar CI injection |
 | `.dart-defines/*.json` | Podría contener URLs o flags internos | Excluido por `.gitignore` |
 | Cualquier archivo con API keys hardcodeadas | Exposición de credenciales | Auditá `lib/` antes de publicar |
@@ -99,12 +99,12 @@ base64 -i ios/config/dev/GoogleService-Info.plist | pbcopy
 
 - name: Restore keystore
   run: |
-    echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+    echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
     cat > android/key.properties <<EOF
     storePassword=${{ secrets.KEYSTORE_PASSWORD }}
     keyPassword=${{ secrets.KEY_PASSWORD }}
     keyAlias=${{ secrets.KEY_ALIAS }}
-    storeFile=upload-keystore.jks
+    storeFile=../release.jks
     EOF
 ```
 
@@ -118,7 +118,7 @@ Ejecutar esta checklist antes de cambiar el repo a público:
 
 - [ ] `android/app/src/*/google-services.json` **NO está commiteado** en ningún branch
 - [ ] `ios/config/*/GoogleService-Info.plist` **NO está commiteado** en ningún branch
-- [ ] `android/*.jks`, `android/app/*.jks` / `android/*.keystore`, `android/app/*.keystore` **NO está commiteado**
+- [ ] `android/*.jks` / `android/*.keystore` **NO está commiteado**
 - [ ] `android/key.properties` **NO está commiteado**
 - [ ] `.dart-defines/` **NO está commiteado** (cubierto por `.gitignore`)
 - [ ] `.dart-defines/firebase.example.json` se mantiene como template seguro (sin valores reales)
