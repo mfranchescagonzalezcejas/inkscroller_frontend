@@ -326,7 +326,7 @@ void main() {
         expect(notifier.state.accountDeleted, false);
         expect(notifier.state.isDeletingAccount, false);
         expect(notifier.state.cleanupRecoveryPending, true);
-        expect(notifier.state.deleteError, 'Error durante la limpieza');
+        expect(notifier.state.deleteError, 'settingsCleanupFailedMessage');
         expect(notifier.state.deleteWarning, isNull);
       },
     );

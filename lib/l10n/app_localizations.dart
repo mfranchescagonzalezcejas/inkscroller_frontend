@@ -356,6 +356,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get settingsDeleteDialogDeleteButton;
 
+  /// No description provided for @settingsDeleteDialogFinishButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get settingsDeleteDialogFinishButton;
+
   /// No description provided for @settingsDeleteDialogCancelButton.
   ///
   /// In en, this message translates to:

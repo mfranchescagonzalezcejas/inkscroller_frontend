@@ -151,6 +151,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsDeleteDialogDeleteButton => 'Eliminar';
 
   @override
+  String get settingsDeleteDialogFinishButton => 'Finalizar';
+
+  @override
   String get settingsDeleteDialogCancelButton => 'Cancelar';
 
   @override

@@ -221,7 +221,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                     ),
                   )
                 : Text(
-                    isPending ? context.l10n.settingsDeleteDialogDeleteButton : context.l10n.settingsDeleteDialogDeleteButton,
+                    isPending ? context.l10n.settingsDeleteDialogFinishButton : context.l10n.settingsDeleteDialogDeleteButton,
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       color: AppColors.voidLowest,

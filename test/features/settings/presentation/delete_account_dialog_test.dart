@@ -7,6 +7,7 @@ import 'package:inkscroller_flutter/features/settings/domain/repositories/accoun
 import 'package:inkscroller_flutter/features/settings/domain/repositories/settings_repository.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/providers/settings_provider.dart';
 import 'package:inkscroller_flutter/features/settings/presentation/widgets/delete_account_dialog.dart';
+import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
@@ -55,7 +56,11 @@ void main() {
           return notifier;
         }),
       ],
-      child: const MaterialApp(home: Scaffold(body: DeleteAccountDialog())),
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: DeleteAccountDialog()),
+      ),
     );
   }
 
@@ -75,6 +80,8 @@ void main() {
         }),
       ],
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) {
             return Scaffold(
@@ -99,11 +106,10 @@ void main() {
     await tester.pumpWidget(buildDialog());
     await tester.pumpAndSettle();
 
-    expect(find.text('Eliminar cuenta'), findsOneWidget);
+    expect(find.text('Delete account'), findsOneWidget);
     expect(
       find.text(
-        'Esta acción es permanente e irreversible. Se eliminarán todos tus datos, '
-        'incluyendo tu perfil, preferencias y progreso de lectura.',
+        'This action is permanent and irreversible. All your data will be deleted, including your profile, preferences, and reading progress.',
       ),
       findsOneWidget,
     );
@@ -113,7 +119,7 @@ void main() {
     await tester.pumpWidget(buildDialog());
     await tester.pumpAndSettle();
 
-    final eliminarButton = find.widgetWithText(FilledButton, 'Eliminar');
+    final eliminarButton = find.widgetWithText(FilledButton, 'Delete');
     expect(eliminarButton, findsOneWidget);
 
     final button = tester.widget<FilledButton>(eliminarButton);
@@ -128,7 +134,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'DELETEIT');
     await tester.pump();
 
-    final eliminarButton = find.widgetWithText(FilledButton, 'Eliminar');
+    final eliminarButton = find.widgetWithText(FilledButton, 'Delete');
     final button = tester.widget<FilledButton>(eliminarButton);
     expect(button.onPressed, isNull);
   });
@@ -142,7 +148,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'DELETE');
     await tester.pump();
 
-    final eliminarButton = find.widgetWithText(FilledButton, 'Eliminar');
+    final eliminarButton = find.widgetWithText(FilledButton, 'Delete');
     final button = tester.widget<FilledButton>(eliminarButton);
     expect(button.onPressed, isNotNull);
   });
@@ -151,7 +157,7 @@ void main() {
     await tester.pumpWidget(buildDialog());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(TextButton, 'Cancelar'));
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
     await tester.pumpAndSettle();
 
     // Dialog should be closed
@@ -167,7 +173,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'DELETE');
     await tester.pump();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Eliminar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await tester.pumpAndSettle();
 
     verify(() => repository.deleteAccount()).called(1);
@@ -186,14 +192,14 @@ void main() {
     await tester.enterText(find.byType(TextField), 'DELETE');
     await tester.pump();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Eliminar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await tester.pumpAndSettle();
 
     verify(() => repository.deleteAccount()).called(1);
     // Dialog must remain visible — not popped on failure.
     expect(find.byType(DeleteAccountDialog), findsOneWidget);
     // Confirm button must be re-enabled (loading state reset).
-    final eliminarButton = find.widgetWithText(FilledButton, 'Eliminar');
+    final eliminarButton = find.widgetWithText(FilledButton, 'Delete');
     expect(eliminarButton, findsOneWidget);
     final button = tester.widget<FilledButton>(eliminarButton);
     expect(button.onPressed, isNotNull);
@@ -217,9 +223,9 @@ void main() {
     // Recovery message shown.
     expect(find.byKey(const Key('deleteRecoveryMessage')), findsOneWidget);
     // Confirm button shows "Finalizar" and is enabled.
-    expect(find.widgetWithText(FilledButton, 'Finalizar'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Finish'), findsOneWidget);
     // Cancel is disabled.
-    final cancelBtn = find.widgetWithText(TextButton, 'Cancelar');
+    final cancelBtn = find.widgetWithText(TextButton, 'Cancel');
     final cancelWidget = tester.widget<TextButton>(cancelBtn);
     expect(cancelWidget.onPressed, isNull);
   });
@@ -256,7 +262,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Finalizar'),
+        find.widgetWithText(FilledButton, 'Finish'),
       );
       expect(button.onPressed, isNull);
     },
@@ -283,7 +289,7 @@ void main() {
       await tester.pump();
 
       final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Finalizar'),
+        find.widgetWithText(FilledButton, 'Finish'),
       );
       expect(button.onPressed, isNotNull);
     },
@@ -307,7 +313,7 @@ void main() {
       'secret123',
     );
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Finish'));
     await tester.pumpAndSettle();
 
     // Cleanup was called with the password.
@@ -332,7 +338,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Finalizar'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Finish'));
     await tester.pumpAndSettle();
 
     // Dialog closed after success.

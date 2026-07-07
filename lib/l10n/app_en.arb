@@ -55,6 +55,7 @@
   "settingsDeleteDialogPasswordHint": "Enter your password to retry:",
   "settingsDeleteDialogPasswordFieldHint": "Password",
   "settingsDeleteDialogDeleteButton": "Delete",
+  "settingsDeleteDialogFinishButton": "Finish",
   "settingsDeleteDialogCancelButton": "Cancel",
   "loadingChapter": "Loading chapter",
   "chapterPagesProgress": "{loadedPages} / {totalPages} pages",

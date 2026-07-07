@@ -55,6 +55,7 @@
   "settingsDeleteDialogPasswordHint": "Ingresá tu contraseña para reintentar:",
   "settingsDeleteDialogPasswordFieldHint": "Contraseña",
   "settingsDeleteDialogDeleteButton": "Eliminar",
+  "settingsDeleteDialogFinishButton": "Finalizar",
   "settingsDeleteDialogCancelButton": "Cancelar",
   "loadingChapter": "Cargando capítulo",
   "chapterPagesProgress": "{loadedPages} / {totalPages} páginas",

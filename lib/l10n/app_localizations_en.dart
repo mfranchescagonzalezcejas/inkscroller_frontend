@@ -149,6 +149,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDeleteDialogDeleteButton => 'Delete';
 
   @override
+  String get settingsDeleteDialogFinishButton => 'Finish';
+
+  @override
   String get settingsDeleteDialogCancelButton => 'Cancel';
 
   @override
