@@ -88,13 +88,23 @@ jobs:
 
           mkdir -p release-metadata
 
-          COMMIT_FILTER='^(feat|fix|perf|refactor|test)(\([^)]+\))?: '
-          EXCLUDE_FILTER='^chore\(release\): bump version to '
+          COMMITS=$(git log $RANGE --pretty=format:"%s" \
+            | grep -E '^(feat|fix|perf|refactor|test)')
 
-          git log $RANGE --pretty=format:"%s" \
-            | grep -E "$COMMIT_FILTER" \
-            | grep -Ev "$EXCLUDE_FILTER" \
-            | sed 's/^/- /' > release-metadata/release_notes_dev.txt || true
+          if [ -z "$COMMITS" ]; then
+            echo "- Internal improvements and QA fixes" > release-metadata/release_notes_dev.txt
+          else
+            {
+              echo "### 🚀 Features"
+              echo "$COMMITS" | grep '^feat' | sed 's/^/- /'
+              echo ""
+              echo "### 🐛 Bug Fixes"
+              echo "$COMMITS" | grep '^fix' | sed 's/^/- /'
+              echo ""
+              echo "### 🔧 Refactors & Improvements"
+              echo "$COMMITS" | grep -E '^(perf|refactor|test)' | sed 's/^/- /'
+            } > release-metadata/release_notes_dev.txt
+          fi
 
           cp release-metadata/release_notes_dev.txt release-metadata/release_notes_staging.txt
           cp release-metadata/release_notes_dev.txt release-metadata/release_notes_pro.txt
@@ -164,6 +174,17 @@ jobs:
         run: |
           mkdir -p .dart-defines
           echo '${{ secrets.FIREBASE_DART_DEFINES_JSON }}' > .dart-defines/firebase.json
+
+      - name: Write Android signing config
+        run: |
+          mkdir -p android/app
+          echo '${{ secrets.KEYSTORE_BASE64 }}' | base64 -d > android/app/release-keystore.jks
+          cat > android/key.properties << 'EOF'
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=app/release-keystore.jks
+          EOF
 
       - name: Resolve flavor configuration
         run: |
