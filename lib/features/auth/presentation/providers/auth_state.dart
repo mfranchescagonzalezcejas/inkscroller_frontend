@@ -14,10 +14,20 @@ class AuthState {
   /// or null when there is no error.
   final String? error;
 
+  /// True when Firebase account creation succeeded but backend profile
+  /// metadata still needs to be completed.
+  final bool profileCompletionPending;
+
+  /// True while the initial Firebase account creation plus backend profile
+  /// metadata submission orchestration is in-flight.
+  final bool registrationInProgress;
+
   const AuthState({
     this.isLoading = false,
     this.user,
     this.error,
+    this.profileCompletionPending = false,
+    this.registrationInProgress = false,
   });
 
   /// Convenience getter — true when a user is signed in.
@@ -28,6 +38,8 @@ class AuthState {
     bool? isLoading,
     AppUser? user,
     String? error,
+    bool? profileCompletionPending,
+    bool? registrationInProgress,
     bool clearUser = false,
     bool clearError = false,
   }) {
@@ -35,6 +47,12 @@ class AuthState {
       isLoading: isLoading ?? this.isLoading,
       user: clearUser ? null : user ?? this.user,
       error: clearError ? null : error ?? this.error,
+      profileCompletionPending:
+          profileCompletionPending ??
+              (!clearUser && this.profileCompletionPending),
+      registrationInProgress:
+          registrationInProgress ??
+              (!clearUser && this.registrationInProgress),
     );
   }
 }

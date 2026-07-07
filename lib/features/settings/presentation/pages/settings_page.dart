@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/api_config.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -8,11 +9,14 @@ import '../../../../core/design/design_tokens.dart'
     show AppColors, AppTypography;
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/info_list_card.dart';
 import '../../../../flavors/flavor_config.dart';
 import '../providers/settings_cache_controller.dart';
+import '../providers/settings_provider.dart';
+import '../widgets/account_section.dart';
 
-/// Settings page — cache maintenance and app environment info.
+/// Settings page — cache maintenance, app environment info, and account actions.
 ///
 /// Accessible from Profile → "Caché y datos guardados".
 class SettingsPage extends ConsumerStatefulWidget {
@@ -54,6 +58,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final cacheSize = ref.watch(cacheSizeProvider);
+
+    // Navigate to login after successful account deletion.
+    ref.listen<SettingsState>(settingsProvider, (previous, next) {
+      if (next.accountDeleted && mounted) {
+        if (next.deleteWarning != null) {
+          AppFeedback.showWarning(
+            context,
+            title: 'Cuenta eliminada con advertencias',
+            body: next.deleteWarning,
+          );
+        } else {
+          AppFeedback.showSuccess(
+            context,
+            title: 'Cuenta eliminada correctamente',
+          );
+        }
+        context.go(AppRoutes.login);
+      }
+      if (next.deleteError != null && mounted) {
+        AppFeedback.showError(
+          context,
+          title: next.deleteError!,
+        );
+        ref.read(settingsProvider.notifier).resetState();
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.stage,
@@ -140,6 +170,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: _isClearingCache ? null : _clearCache,
               label: context.l10n.settingsClearCacheAction,
             ),
+
+            // ── Account ──────────────────────────────────────────────────
+            const SizedBox(height: 24),
+            const AccountSection(),
           ],
         ),
       ),
