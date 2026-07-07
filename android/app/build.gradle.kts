@@ -55,10 +55,17 @@ android {
                             trimmed.substring(eq + 1).trim()
                     }
                 }
-                storeFile = rootProject.file(props["storeFile"] ?: "")
-                storePassword = props["storePassword"] ?: ""
-                keyAlias = props["keyAlias"] ?: ""
-                keyPassword = props["keyPassword"] ?: ""
+                val required = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+                for (key in required) {
+                    val value = props[key]
+                    if (value.isNullOrBlank()) {
+                        throw GradleException("Missing required signing property: $key in key.properties")
+                    }
+                }
+                storeFile = rootProject.file(props["storeFile"]!!)
+                storePassword = props["storePassword"]!!
+                keyAlias = props["keyAlias"]!!
+                keyPassword = props["keyPassword"]!!
             }
         }
     }
