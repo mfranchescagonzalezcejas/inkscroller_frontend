@@ -56,6 +56,11 @@ app.*.map.json
 .atl/
 .engram/
 
+# Local tooling artifacts — machine-specific, never commit
+.codegraph/
+.cursor/
+.vercel/
+
 # Editor backup files
 *~
 
