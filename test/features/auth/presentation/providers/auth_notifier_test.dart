@@ -82,7 +82,6 @@ void main() {
           firebaseUid: 'uid-123',
           email: 'alice@example.com',
           username: 'alice',
-          birthDate: DateTime(2000, 1, 1),
           createdAt: DateTime(2024),
         ),
       ),

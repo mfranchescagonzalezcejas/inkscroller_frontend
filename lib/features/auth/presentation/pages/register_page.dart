@@ -387,7 +387,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   AuthGradientButton(
                     key: const Key('createAccountButton'),
                     onPressed: isActionLocked ? null : _submit,
-                    isLoading: authState.isLoading,
+                    isLoading: authState.isLoading || authState.registrationInProgress,
                     label: isProfileCompletion
                         ? context.l10n.authCompleteProfileButton
                         : context.l10n.authCreateAccountButton,

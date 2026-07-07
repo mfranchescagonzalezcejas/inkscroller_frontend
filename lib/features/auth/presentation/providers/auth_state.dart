@@ -48,10 +48,11 @@ class AuthState {
       user: clearUser ? null : user ?? this.user,
       error: clearError ? null : error ?? this.error,
       profileCompletionPending:
-          !clearUser &&
-          (profileCompletionPending ?? this.profileCompletionPending),
+          profileCompletionPending ??
+              (!clearUser && this.profileCompletionPending),
       registrationInProgress:
-          !clearUser && (registrationInProgress ?? this.registrationInProgress),
+          registrationInProgress ??
+              (!clearUser && this.registrationInProgress),
     );
   }
 }
