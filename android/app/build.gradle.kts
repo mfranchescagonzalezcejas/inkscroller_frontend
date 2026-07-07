@@ -16,10 +16,38 @@ if (googleServicesFiles.any { file(it).isFile }) {
     apply(plugin = "com.google.gms.google-services")
 }
 
+// Release signing config — loaded lazily at top level so non-release builds
+// (debug, dev, staging) are not blocked when key.properties is absent.
+val releaseSigningProps: Map<String, String>? = run {
+    val propsFile = rootProject.file("key.properties")
+    if (!propsFile.isFile) {
+        logger.warn("Release signing disabled: key.properties not found at ${propsFile.absolutePath}")
+        null
+    } else {
+        val lines = propsFile.readLines()
+        val props = mutableMapOf<String, String>()
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("#") || trimmed.isEmpty()) continue
+            val eq = trimmed.indexOf('=')
+            if (eq > 0) {
+                props[trimmed.substring(0, eq).trim()] =
+                    trimmed.substring(eq + 1).trim()
+            }
+        }
+        val required = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+        val missing = required.filter { props[it].isNullOrBlank() }
+        if (missing.isNotEmpty()) {
+            logger.warn("Release signing disabled: missing properties in key.properties: $missing")
+            null
+        } else {
+            props
+        }
+    }
+}
+
 android {
-    // ponytail: namespace is the Flutter default "com.example" prefix.
-    // Replace with a real reverse-domain before Play Store release.
-    namespace = "com.example.inkscroller"
+    namespace = "dev.devdigi.inkscroller"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -33,8 +61,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.inkscroller"
+        applicationId = "dev.devdigi.inkscroller"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -43,11 +70,20 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseSigningProps != null) {
+                storeFile = rootProject.file(releaseSigningProps["storeFile"]!!)
+                storePassword = releaseSigningProps["storePassword"]!!
+                keyAlias = releaseSigningProps["keyAlias"]!!
+                keyPassword = releaseSigningProps["keyPassword"]!!
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // ponytail: Debug keystore for now. Add a real keystore + signingConfig
-            // before Play Store distribution. Don't commit the keystore file.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
