@@ -1,0 +1,45 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.2)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    name: Create release tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate and create tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          TAG="v${VERSION}"
+
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ Invalid version format. Use semver: X.Y.Z (e.g. 1.0.2)"
+            exit 1
+          fi
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "❌ Tag $TAG already exists"
+            exit 1
+          fi
+
+          git tag "$TAG"
+          git push origin "$TAG"
+
+          echo ""
+          echo "✅ Tag $TAG created!"
+          echo "🚀 Release workflow triggered automatically."
+          echo "📝 Version: ${VERSION}+$(git rev-list --count HEAD) (from tag + commit count)"
