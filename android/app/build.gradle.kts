@@ -71,8 +71,8 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            if (releaseSigningProps != null) {
+        if (releaseSigningProps != null) {
+            create("release") {
                 storeFile = rootProject.file(releaseSigningProps["storeFile"]!!)
                 storePassword = releaseSigningProps["storePassword"]!!
                 keyAlias = releaseSigningProps["keyAlias"]!!
@@ -83,7 +83,9 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            releaseSigningProps?.let {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
