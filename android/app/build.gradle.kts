@@ -43,30 +43,31 @@ android {
     signingConfigs {
         create("release") {
             val keystorePropsFile = rootProject.file("key.properties")
-            if (keystorePropsFile.isFile) {
-                val lines = keystorePropsFile.readLines()
-                val props = mutableMapOf<String, String>()
-                for (line in lines) {
-                    val trimmed = line.trim()
-                    if (trimmed.startsWith("#") || trimmed.isEmpty()) continue
-                    val eq = trimmed.indexOf('=')
-                    if (eq > 0) {
-                        props[trimmed.substring(0, eq).trim()] =
-                            trimmed.substring(eq + 1).trim()
-                    }
-                }
-                val required = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
-                for (key in required) {
-                    val value = props[key]
-                    if (value.isNullOrBlank()) {
-                        throw GradleException("Missing required signing property: $key in key.properties")
-                    }
-                }
-                storeFile = rootProject.file(props["storeFile"]!!)
-                storePassword = props["storePassword"]!!
-                keyAlias = props["keyAlias"]!!
-                keyPassword = props["keyPassword"]!!
+            if (!keystorePropsFile.isFile) {
+                throw GradleException("Missing signing config: key.properties not found at ${keystorePropsFile.absolutePath}")
             }
+            val lines = keystorePropsFile.readLines()
+            val props = mutableMapOf<String, String>()
+            for (line in lines) {
+                val trimmed = line.trim()
+                if (trimmed.startsWith("#") || trimmed.isEmpty()) continue
+                val eq = trimmed.indexOf('=')
+                if (eq > 0) {
+                    props[trimmed.substring(0, eq).trim()] =
+                        trimmed.substring(eq + 1).trim()
+                }
+            }
+            val required = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+            for (key in required) {
+                val value = props[key]
+                if (value.isNullOrBlank()) {
+                    throw GradleException("Missing required signing property: $key in key.properties")
+                }
+            }
+            storeFile = rootProject.file(props["storeFile"]!!)
+            storePassword = props["storePassword"]!!
+            keyAlias = props["keyAlias"]!!
+            keyPassword = props["keyPassword"]!!
         }
     }
 
