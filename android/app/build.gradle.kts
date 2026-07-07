@@ -40,6 +40,9 @@ val releaseSigningProps: Map<String, String>? = run {
         if (missing.isNotEmpty()) {
             logger.warn("Release signing disabled: missing properties in key.properties: $missing")
             null
+        } else if (!rootProject.file(props["storeFile"]!!).isFile) {
+            logger.warn("Release signing disabled: keystore not found at ${rootProject.file(props["storeFile"]!!).absolutePath}")
+            null
         } else {
             props
         }
