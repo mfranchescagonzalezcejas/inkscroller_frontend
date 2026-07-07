@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/design_tokens.dart' show AppColors;
-import '../../../../core/l10n/l10n.dart';
 import '../providers/settings_provider.dart';
 
 /// AlertDialog for permanent account deletion with typed confirmation.
@@ -49,9 +48,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
       child: AlertDialog(
         backgroundColor: AppColors.stage,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          context.l10n.settingsDeleteDialogTitle,
-          style: const TextStyle(
+        title: const Text(
+          'Eliminar cuenta',
+          style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -65,7 +64,8 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
             if (isPending) ...[
               Text(
                 state.deleteError ??
-                    context.l10n.settingsDeleteDialogRecoveryMessage,
+                    'La eliminación está incompleta. '
+                        'Es necesario finalizar la limpieza de datos.',
                 key: const Key('deleteRecoveryMessage'),
                 style: const TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
@@ -74,18 +74,20 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 ),
               ),
             ] else ...[
-              Text(
-                context.l10n.settingsDeleteDialogWarning,
-                style: const TextStyle(
+              const Text(
+                'Esta acción es permanente e irreversible. Se eliminarán todos '
+                'tus datos, incluyendo tu perfil, preferencias y progreso '
+                'de lectura.',
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                context.l10n.settingsDeleteDialogConfirmHint,
-                style: const TextStyle(
+              const Text(
+                'Escribí DELETE para confirmar:',
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -130,9 +132,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
             ],
             if (needsPassword) ...[
               const SizedBox(height: 16),
-              Text(
-                context.l10n.settingsDeleteDialogPasswordHint,
-                style: const TextStyle(
+              const Text(
+                'Ingresá tu contraseña para reintentar:',
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -151,7 +153,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                   color: AppColors.onSurface,
                 ),
                 decoration: InputDecoration(
-                  hintText: context.l10n.settingsDeleteDialogPasswordFieldHint,
+                  hintText: 'Contraseña',
                   hintStyle: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
@@ -182,9 +184,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           TextButton(
             key: const Key('deleteCancelButton'),
             onPressed: busy ? null : () => Navigator.of(context).pop(false),
-            child: Text(
-              context.l10n.settingsDeleteDialogCancelButton,
-              style: const TextStyle(
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 color: AppColors.onSurfaceVariant,
               ),
@@ -221,7 +223,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                     ),
                   )
                 : Text(
-                    isPending ? context.l10n.settingsDeleteDialogFinishButton : context.l10n.settingsDeleteDialogDeleteButton,
+                    isPending ? 'Finalizar' : 'Eliminar',
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       color: AppColors.voidLowest,

@@ -154,11 +154,10 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       );
       return;
     } on Exception catch (_) {
-      // ponytail: use a key that the presentation layer maps to l10n.
       state = state.copyWith(
         isDeletingAccount: false,
         cleanupRecoveryPending: true,
-        deleteError: 'settingsCleanupFailedMessage',
+        deleteError: 'Error durante la limpieza',
       );
       return;
     }
