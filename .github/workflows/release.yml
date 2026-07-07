@@ -214,6 +214,7 @@ jobs:
           fvm flutter build apk \
             --flavor "${{ matrix.flavor }}" \
             -t "${{ matrix.target }}" \
+            --build-name="${GITHUB_REF_NAME#v}" \
             --build-number="$BUILD_NUMBER" \
             --dart-define="API_BASE_URL=$API_BASE_URL" \
             --dart-define-from-file=.dart-defines/firebase.json
@@ -233,6 +234,7 @@ jobs:
           fvm flutter build appbundle \
             --flavor "${{ matrix.flavor }}" \
             -t "${{ matrix.target }}" \
+            --build-name="${GITHUB_REF_NAME#v}" \
             --build-number="$BUILD_NUMBER" \
             --dart-define="API_BASE_URL=$API_BASE_URL" \
             --dart-define-from-file=.dart-defines/firebase.json
