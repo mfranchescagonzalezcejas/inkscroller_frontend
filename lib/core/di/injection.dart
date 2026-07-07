@@ -52,14 +52,28 @@ import '../../features/profile/data/datasources/user_profile_remote_ds_impl.dart
 import '../../features/profile/data/repositories/user_profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/user_profile_repository.dart';
 import '../../features/profile/domain/usecases/get_user_profile.dart';
+import '../../features/settings/data/datasources/settings_remote_ds.dart';
+import '../../features/settings/data/datasources/settings_remote_ds_impl.dart';
+import '../../features/settings/data/repositories/account_cleanup_repository_impl.dart';
 import '../../features/settings/data/repositories/settings_cache_repository_impl.dart';
+import '../../features/settings/data/repositories/settings_repository_impl.dart';
+import '../../features/settings/domain/repositories/account_cleanup_repository.dart';
 import '../../features/settings/domain/repositories/settings_cache_repository.dart';
+import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/usecases/clear_settings_cache.dart';
 import '../../features/settings/domain/usecases/get_settings_cache_size.dart';
 import '../network/dio_client.dart';
 
 /// Global get_it service locator instance used across the app.
 final sl = GetIt.instance;
+
+/// Registers [factory] as a [LazySingleton] only if [T] is not already
+/// registered in [sl]. Skips silently when the type is present.
+void _registerIfAbsent<T extends Object>(T Function() factory) {
+  if (!sl.isRegistered<T>()) {
+    sl.registerLazySingleton<T>(factory);
+  }
+}
 
 /// Registers all infrastructure dependencies as lazy singletons.
 ///
@@ -239,5 +253,27 @@ Future<void> initDI() async {
   );
   sl.registerLazySingleton<GetSettingsCacheSize>(
     () => GetSettingsCacheSize(sl<SettingsCacheRepository>()),
+  );
+
+  // Settings - account deletion
+  initSettingsDI();
+}
+
+/// Registers account-level settings dependencies (remote data source +
+/// repository). Idempotent — safe to call multiple times.
+void initSettingsDI() {
+  _registerIfAbsent<SettingsRemoteDataSource>(
+    () => SettingsRemoteDataSourceImpl(dioClient: sl<DioClient>()),
+  );
+
+  _registerIfAbsent<SettingsRepository>(
+    () => SettingsRepositoryImpl(remoteDataSource: sl<SettingsRemoteDataSource>()),
+  );
+
+  _registerIfAbsent<AccountCleanupRepository>(
+    () => AccountCleanupRepositoryImpl(
+      firebaseAuth: sl<FirebaseAuth>(),
+      prefs: sl<SharedPreferences>(),
+    ),
   );
 }
