@@ -222,8 +222,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: mfranchescagonzalezcejas/inkscroller_flutter
+          TAG: ${{ needs.quality-gates.outputs.tag }}
         run: |
-          TAG="${{ needs.quality-gates.outputs.tag }}"
 
           DEV_APK="release-assets/apk-dev/app-dev-release.apk"
           STAGING_APK="release-assets/apk-staging/app-staging-release.apk"

@@ -61,7 +61,9 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   String? _activeUserId;
 
   Future<void> _load() async {
-    state = await _repository.getAll(userId: _activeUserId);
+    final entries = await _repository.getAll(userId: _activeUserId);
+    if (!mounted) return;
+    state = entries;
   }
 
   Future<void> onAuthStateChanged(String? userId) async {

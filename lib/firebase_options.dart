@@ -10,7 +10,8 @@ class FirebaseOptionsSelector {
     //show a log of witch flavor is being used in terminal
     if (kDebugMode) {
       debugPrint('Flavor: ${FlavorConfig.instance.flavor}');
-    }    switch (defaultTargetPlatform) {
+    }
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return _android();
       case TargetPlatform.iOS:
