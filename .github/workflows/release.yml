@@ -104,7 +104,7 @@ jobs:
             && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_dev.txt
           [ ! -s release-metadata/release_notes_staging.txt ] \
             && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_staging.txt
-          [ ! -s release-metadata/release_notes_pro.txt ] \
+          [ ! -s release-metadata/release_notes_pro.txt ] || true \
             && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_pro.txt
 
       - name: Upload release metadata
