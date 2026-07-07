@@ -5,11 +5,11 @@
 #   version  Semver without the 'v' prefix (e.g. 1.2.3)
 #
 # Pre-flight checks (all must pass before tagging):
-#   1. Must run from the main branch
+#   1. Must run from the master branch
 #   2. Working tree must be clean
 #   3. Version argument must be a valid semver (X.Y.Z)
 #   4. Version must match pubspec.yaml
-#   5. Local main must be in sync with origin/main
+#   5. Local master must be in sync with origin/master
 #   6. Tag must not already exist
 #
 # On success: creates and pushes vX.Y.Z tag → triggers release.yml in CI
@@ -28,10 +28,10 @@ info() { echo -e "${YELLOW}[INFO]${NC}  $1"; }
 # ── 1. Branch check ──────────────────────────────────────────────────────────
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [ "$CURRENT_BRANCH" != "main" ]; then
-  fail "Must release from main. Current branch: $CURRENT_BRANCH"
+if [ "$CURRENT_BRANCH" != "master" ]; then
+  fail "Must release from master. Current branch: $CURRENT_BRANCH"
 fi
-ok "On main branch"
+ok "On master branch"
 
 # ── 2. Clean tree ────────────────────────────────────────────────────────────
 
@@ -64,15 +64,15 @@ ok "pubspec.yaml version matches: $PUBSPEC_VERSION"
 
 # ── 5. Local/origin sync ─────────────────────────────────────────────────────
 
-git fetch origin main --quiet
+git fetch origin master --quiet
 
 LOCAL=$(git rev-parse HEAD)
-REMOTE=$(git rev-parse origin/main)
+REMOTE=$(git rev-parse origin/master)
 
 if [ "$LOCAL" != "$REMOTE" ]; then
-  fail "Local main is out of sync with origin/main. Pull or push before releasing."
+  fail "Local master is out of sync with origin/master. Pull or push before releasing."
 fi
-ok "Local main is in sync with origin"
+ok "Local master is in sync with origin"
 
 # ── 6. Tag must not exist ────────────────────────────────────────────────────
 

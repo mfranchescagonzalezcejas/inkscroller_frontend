@@ -24,7 +24,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          persist-credentials: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -52,13 +51,6 @@ jobs:
 
       - name: Analyze
         run: fvm flutter analyze
-
-      - name: Guard against focused Dart tests
-        run: |
-          if grep -RInE '(^|[^A-Za-z0-9_])solo_(test|group)[[:space:]]*\(' test integration_test --include='*_test.dart'; then
-            echo "Focused Dart tests are not allowed in release CI. Remove solo_test/solo_group before tagging."
-            exit 1
-          fi
 
       - name: Run tests
         run: fvm flutter test
@@ -143,8 +135,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          persist-credentials: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -174,33 +164,6 @@ jobs:
         run: |
           mkdir -p .dart-defines
           echo '${{ secrets.FIREBASE_DART_DEFINES_JSON }}' > .dart-defines/firebase.json
-
-      - name: Restore Android signing configuration
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_FILE_PATH: ${{ secrets.KEYSTORE_FILE_PATH }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        run: |
-          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
-            echo "Missing Android signing secrets. Configure KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS."
-            exit 1
-          fi
-
-          KEYSTORE_REL_PATH="${KEYSTORE_FILE_PATH:-upload-keystore.jks}"
-          mkdir -p "android/app/$(dirname "$KEYSTORE_REL_PATH")"
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "android/app/$KEYSTORE_REL_PATH"
-          chmod 600 "android/app/$KEYSTORE_REL_PATH"
-
-          cat > android/key.properties <<EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=$KEYSTORE_REL_PATH
-          EOF
-
-          chmod 600 android/key.properties
 
       - name: Resolve flavor configuration
         run: |
@@ -235,98 +198,11 @@ jobs:
           path: build/app/outputs/flutter-apk/${{ matrix.apk_name }}
           if-no-files-found: error
 
-  build-aab:
-    name: Build pro AAB
-    needs: quality-gates
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - name: Set up Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.41.5'
-          cache: true
-
-      - name: Install FVM
-        run: dart pub global activate fvm
-
-      - name: Add pub cache to PATH
-        run: echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
-
-      - name: Install FVM-pinned SDK
-        run: fvm install
-
-      - name: Install dependencies
-        run: fvm flutter pub get
-
-      - name: Write Firebase dart-defines
-        run: |
-          mkdir -p .dart-defines
-          echo '${{ secrets.FIREBASE_DART_DEFINES_JSON }}' > .dart-defines/firebase.json
-
-      - name: Restore Android signing configuration
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_FILE_PATH: ${{ secrets.KEYSTORE_FILE_PATH }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        run: |
-          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
-            echo "Missing Android signing secrets. Configure KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS."
-            exit 1
-          fi
-
-          KEYSTORE_REL_PATH="${KEYSTORE_FILE_PATH:-upload-keystore.jks}"
-          mkdir -p "android/app/$(dirname "$KEYSTORE_REL_PATH")"
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "android/app/$KEYSTORE_REL_PATH"
-          chmod 600 "android/app/$KEYSTORE_REL_PATH"
-
-          cat > android/key.properties <<EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=$KEYSTORE_REL_PATH
-          EOF
-
-          chmod 600 android/key.properties
-
-      - name: Resolve flavor configuration
-        run: |
-          echo "API_BASE_URL=${{ secrets.API_BASE_URL_PRO }}" >> "$GITHUB_ENV"
-
-      - name: Build pro AAB
-        run: |
-          fvm flutter build appbundle \
-            --flavor pro \
-            -t lib/main_pro.dart \
-            --dart-define="API_BASE_URL=$API_BASE_URL" \
-            --dart-define-from-file=.dart-defines/firebase.json
-
-      - name: Upload pro AAB
-        uses: actions/upload-artifact@v7
-        with:
-          name: aab-pro
-          path: build/app/outputs/bundle/proRelease/app-pro-release.aab
-          if-no-files-found: error
-
   create-release:
     name: Create GitHub Release
     needs:
       - quality-gates
       - build-apk
-      - build-aab
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -342,30 +218,22 @@ jobs:
           pattern: apk-*
           path: release-assets
 
-      - name: Download AAB artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: aab-pro
-          path: release-assets
-
       - name: Create or update GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
+          GH_REPO: mfranchescagonzalezcejas/inkscroller_flutter
         run: |
           TAG="${{ needs.quality-gates.outputs.tag }}"
 
           DEV_APK="release-assets/apk-dev/app-dev-release.apk"
           STAGING_APK="release-assets/apk-staging/app-staging-release.apk"
           PRO_APK="release-assets/apk-pro/app-pro-release.apk"
-          PRO_AAB="release-assets/app-pro-release.aab"
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" \
               "$DEV_APK" \
               "$STAGING_APK" \
               "$PRO_APK" \
-              "$PRO_AAB" \
               --clobber
           else
             gh release create "$TAG" \
@@ -373,8 +241,7 @@ jobs:
               --notes-file release-metadata/release_notes_dev.txt \
               "$DEV_APK" \
               "$STAGING_APK" \
-              "$PRO_APK" \
-              "$PRO_AAB"
+              "$PRO_APK"
           fi
 
   distribute:
@@ -382,6 +249,7 @@ jobs:
     needs:
       - quality-gates
       - build-apk
+      - create-release
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:

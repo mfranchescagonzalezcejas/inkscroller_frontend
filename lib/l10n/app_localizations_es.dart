@@ -107,56 +107,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron eliminar los datos guardados';
 
   @override
-  String get settingsCleanupFailedMessage => 'Error durante la limpieza';
-
-  @override
-  String get settingsAccountDeletedSuccess => 'Cuenta eliminada correctamente';
-
-  @override
-  String get settingsAccountDeletedWithWarnings =>
-      'Cuenta eliminada con advertencias';
-
-  @override
-  String get settingsAccountSectionTitle => 'CUENTA';
-
-  @override
-  String get settingsAccountEmailLabel => 'Email';
-
-  @override
-  String get settingsAccountDeleteButton => 'Eliminar cuenta';
-
-  @override
-  String get settingsDeleteDialogTitle => 'Eliminar cuenta';
-
-  @override
-  String get settingsDeleteDialogRecoveryMessage =>
-      'La eliminación está incompleta. Es necesario finalizar la limpieza de datos.';
-
-  @override
-  String get settingsDeleteDialogWarning =>
-      'Esta acción es permanente e irreversible. Se eliminarán todos tus datos, incluyendo tu perfil, preferencias y progreso de lectura.';
-
-  @override
-  String get settingsDeleteDialogConfirmHint =>
-      'Escribí DELETE para confirmar:';
-
-  @override
-  String get settingsDeleteDialogPasswordHint =>
-      'Ingresá tu contraseña para reintentar:';
-
-  @override
-  String get settingsDeleteDialogPasswordFieldHint => 'Contraseña';
-
-  @override
-  String get settingsDeleteDialogDeleteButton => 'Eliminar';
-
-  @override
-  String get settingsDeleteDialogFinishButton => 'Finalizar';
-
-  @override
-  String get settingsDeleteDialogCancelButton => 'Cancelar';
-
-  @override
   String get loadingChapter => 'Cargando capítulo';
 
   @override
@@ -453,53 +403,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authCreateAccountButton => 'Crear cuenta';
 
   @override
-  String get authCompleteProfileTitle => 'Completá tu perfil';
-
-  @override
-  String get authCompleteProfileSubtitle =>
-      'Tu cuenta fue creada. Agregá los datos obligatorios del perfil para continuar.';
-
-  @override
-  String get authCompleteProfileButton => 'Completar perfil';
-
-  @override
   String get authHaveAccount => '¿Ya tenés cuenta? Iniciá sesión';
-
-  @override
-  String get authUsernameLabel => 'Nombre de usuario';
-
-  @override
-  String get authUsernameRequired => 'Elegí un nombre de usuario.';
-
-  @override
-  String get authUsernameInvalid =>
-      'Usá 3–30 letras minúsculas, números, guiones bajos o guiones.';
-
-  @override
-  String get authConfirmPasswordLabel => 'Confirmar contraseña';
-
-  @override
-  String get authConfirmPasswordRequired => 'Confirmá tu contraseña.';
-
-  @override
-  String get authConfirmPasswordMismatch => 'Las contraseñas no coinciden.';
-
-  @override
-  String get authBirthDateLabel => 'Fecha de nacimiento';
-
-  @override
-  String get authBirthDateRequired => 'Seleccioná tu fecha de nacimiento.';
-
-  @override
-  String get authBirthDateInvalid => 'Tenés que tener al menos 13 años.';
-
-  @override
-  String get authTermsAcknowledgement =>
-      'Acepto los Términos y la Política de Privacidad.';
-
-  @override
-  String get authTermsRequired =>
-      'Tenés que aceptar los Términos y la Política de Privacidad.';
 
   @override
   String get readerSettingsDirection => 'Dirección de lectura';

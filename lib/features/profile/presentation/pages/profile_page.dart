@@ -105,7 +105,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         authState: authState,
         enableDrawer: false,
         rightWidget: GestureDetector(
-          key: const Key('settingsButton'),
           onTap: () => context.push(AppRoutes.settings),
           child: const Icon(
             Icons.settings_outlined,
@@ -619,7 +618,6 @@ class _SignOutSection extends ConsumerWidget {
                   )
                 : Text(
                     context.l10n.profileSignOutAction,
-                    key: const Key('signOutButton'),
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 15,

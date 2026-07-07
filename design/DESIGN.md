@@ -378,7 +378,7 @@ Use the Manga Detail tune/settings action for controls that affect this title on
 
 ## 12. Phase 6 Editable Design Inventory
 
-The active Pencil source of truth is `design/designApp.pen`. The deprecated `design/pencil/inkscroller.pen` and extensionless `design/designApp` file must not be used.
+The active Pencil source of truth is `design/designApp`. The deprecated `design/pencil/inkscroller.pen` must not be used.
 
 | Area | Pencil coverage | Notes |
 |---|---|---|
@@ -386,7 +386,7 @@ The active Pencil source of truth is `design/designApp.pen`. The deprecated `des
 | Reading flow | Manga Detail, Reader, Reader Components, Manga settings, language empty states, community comments | Reader main screen is stable; fallback coverage lives in runtime boards. |
 | Auth/settings/docs | Login, Register, auth provider strategy, auth runtime states, Settings, About, Route Error, Dark/Light Design System Summaries | Android/Firebase first; Google + email/password + guest. Apple is deferred. |
 | Runtime states | Loading, Empty, Error, Offline/Fallback | Offline/Fallback covers cached reader, no cache, external chapters, stale catalogue, partial detail/chapter failure. |
-| Component library | Phase 6 component grid | Reflects current reusable contracts: navigation, actions, cards, reader controls, runtime states, and Material 3 icon direction. See `design/COMPONENT_LIBRARY.md`. |
+| Component library | Phase 6 component grid | Reflects current patterns: Primary CTAs, preference cards, settings/cache cards, reader/runtime states. |
 
 ---
 

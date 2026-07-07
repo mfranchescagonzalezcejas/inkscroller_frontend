@@ -126,26 +126,26 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       'invalid-credential' ||
       'invalid-email' =>
         const ServerException(
-          message: 'Credenciales inválidas.',
+          message: 'Credenciales inv�lidas.',
           code: 401,
         ),
       'email-already-in-use' => const ServerException(
-          message: 'El email ya está registrado.',
+          message: 'El email ya est� registrado.',
           code: 409,
         ),
       'weak-password' => const ServerException(
-          message: 'La contraseña es demasiado débil.',
+          message: 'La contrase�a es demasiado d�bil.',
           code: 400,
         ),
       'too-many-requests' => const ServerException(
-          message: 'Demasiados intentos. Intentá más tarde.',
+          message: 'Demasiados intentos. Intent� m�s tarde.',
           code: 429,
         ),
       'network-request-failed' => const NetworkException(
-          message: 'Sin conexión. Verificá tu red.',
+          message: 'Sin conexi�n. Verific� tu red.',
         ),
       _ => ServerException(
-          message: e.message ?? 'Error de autenticación.',
+          message: e.message ?? 'Error de autenticaci�n.',
           code: 500,
         ),
     };
