@@ -103,6 +103,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // ── Email ─────────────────────────────────────────────────────
                 AuthField(
+                  key: const Key('emailField'),
                   controller: _emailController,
                   label: context.l10n.authEmailLabel,
                   icon: Icons.email_outlined,
@@ -122,6 +123,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // ── Password ──────────────────────────────────────────────────
                 AuthField(
+                  key: const Key('passwordField'),
                   controller: _passwordController,
                   label: context.l10n.authPasswordLabel,
                   icon: Icons.lock_outline,
@@ -155,6 +157,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // ── Primary CTA ───────────────────────────────────────────────
                 AuthGradientButton(
+                  key: const Key('signInButton'),
                   onPressed: authState.isLoading ? null : _submit,
                   isLoading: authState.isLoading,
                   label: context.l10n.authSignInButton,
@@ -164,6 +167,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // ── Secondary actions ─────────────────────────────────────────
                 TextButton(
+                  key: const Key('registerLink'),
                   onPressed: () => context.go(AppRoutes.register),
                   child: Text(
                     context.l10n.authNoAccount,

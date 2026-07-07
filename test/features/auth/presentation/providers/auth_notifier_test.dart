@@ -9,6 +9,9 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:inkscroller_flutter/features/profile/domain/entities/user_profile.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:mocktail/mocktail.dart';
 
 // ---------------------------------------------------------------------------
@@ -22,6 +25,10 @@ class _MockSignUp extends Mock implements SignUp {}
 class _MockSignOut extends Mock implements SignOut {}
 
 class _MockGetAuthState extends Mock implements GetAuthState {}
+
+class _MockGetUserProfile extends Mock implements GetUserProfile {}
+
+class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -37,12 +44,16 @@ AuthNotifier _makeNotifier({
   required SignUp signUp,
   required SignOut signOut,
   required GetAuthState getAuthState,
+  required GetUserProfile getUserProfile,
+  required UpdateUserProfile updateUserProfile,
 }) {
   return AuthNotifier(
     signIn: signIn,
     signUp: signUp,
     signOut: signOut,
     getAuthState: getAuthState,
+    getUserProfile: getUserProfile,
+    updateUserProfile: updateUserProfile,
   );
 }
 
@@ -51,15 +62,31 @@ void main() {
   late _MockSignUp mockSignUp;
   late _MockSignOut mockSignOut;
   late _MockGetAuthState mockGetAuthState;
+  late _MockGetUserProfile mockGetUserProfile;
+  late _MockUpdateUserProfile mockUpdateUserProfile;
 
   setUp(() {
     mockSignIn = _MockSignIn();
     mockSignUp = _MockSignUp();
     mockSignOut = _MockSignOut();
     mockGetAuthState = _MockGetAuthState();
+    mockGetUserProfile = _MockGetUserProfile();
+    mockUpdateUserProfile = _MockUpdateUserProfile();
 
     // Default: auth state stream never emits — keeps notifier initial state clean.
     when(() => mockGetAuthState()).thenAnswer((_) => const Stream.empty());
+    // Default: profile check returns a complete profile (no pending completion).
+    when(() => mockGetUserProfile()).thenAnswer(
+      (_) async => Right<Failure, UserProfile>(
+        UserProfile(
+          firebaseUid: 'uid-123',
+          email: 'alice@example.com',
+          username: 'alice',
+          birthDate: DateTime(2000, 1, 1),
+          createdAt: DateTime(2024),
+        ),
+      ),
+    );
   });
 
   // ── signIn ────────────────────────────────────────────────────────────────
@@ -78,6 +105,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       expect(notifier.state.isLoading, isFalse);
@@ -103,6 +132,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       await notifier.signIn(email: 'alice@example.com', password: 's3cr3t');
@@ -128,6 +159,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       await notifier.signIn(email: 'alice@example.com', password: 'wrong');
@@ -153,6 +186,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       await notifier.signIn(email: 'alice@example.com', password: 'pw');
@@ -178,6 +213,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       // Emit a user so the notifier knows someone is signed in.
@@ -207,6 +244,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       await notifier.signOut();
@@ -228,6 +267,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       expect(notifier.state.user, isNull);
@@ -251,6 +292,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       streamController.add(_kUser);
@@ -287,6 +330,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       await notifier.signIn(email: 'alice@example.com', password: 'pw');
@@ -313,6 +358,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       // Simulate a previously authenticated user.
@@ -346,6 +393,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
       );
 
       streamController.addError(Exception('session expired'));

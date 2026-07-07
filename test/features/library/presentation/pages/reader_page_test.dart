@@ -18,6 +18,8 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
+import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/chapter.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
@@ -50,6 +52,10 @@ class _MockSignOut extends Mock implements SignOut {}
 
 class _MockGetAuthState extends Mock implements GetAuthState {}
 
+class _MockGetUserProfile extends Mock implements GetUserProfile {}
+
+class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
 // ---------------------------------------------------------------------------
 // Stub factories — avoid GetIt in tests
 // ---------------------------------------------------------------------------
@@ -64,6 +70,8 @@ AuthNotifier _makeStubAuthNotifier() {
     signUp: _MockSignUp(),
     signOut: _MockSignOut(),
     getAuthState: getAuthState,
+    getUserProfile: _MockGetUserProfile(),
+    updateUserProfile: _MockUpdateUserProfile(),
   );
 }
 

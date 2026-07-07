@@ -399,7 +399,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authCreateAccountButton => 'Create account';
 
   @override
+  String get authCompleteProfileTitle => 'Complete your profile';
+
+  @override
+  String get authCompleteProfileSubtitle =>
+      'Your account was created. Add the required profile details to continue.';
+
+  @override
+  String get authCompleteProfileButton => 'Complete profile';
+
+  @override
   String get authHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get authUsernameLabel => 'Username';
+
+  @override
+  String get authUsernameRequired => 'Choose a username.';
+
+  @override
+  String get authUsernameInvalid =>
+      'Use 3–30 lowercase letters, numbers, underscores, or hyphens.';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get authConfirmPasswordRequired => 'Confirm your password.';
+
+  @override
+  String get authConfirmPasswordMismatch => 'Passwords do not match.';
+
+  @override
+  String get authBirthDateLabel => 'Birth date';
+
+  @override
+  String get authBirthDateRequired => 'Select your birth date.';
+
+  @override
+  String get authBirthDateInvalid => 'You must be at least 13 years old.';
+
+  @override
+  String get authTermsAcknowledgement =>
+      'I agree to the Terms and Privacy Policy.';
+
+  @override
+  String get authTermsRequired =>
+      'You must agree to the Terms and Privacy Policy.';
 
   @override
   String get readerSettingsDirection => 'Reading direction';
