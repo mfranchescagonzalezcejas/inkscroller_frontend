@@ -106,6 +106,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCacheClearFailedMessage => 'Could not clear cached data';
 
   @override
+  String get settingsCleanupFailedMessage => 'Error during cleanup';
+
+  @override
+  String get settingsAccountDeletedSuccess => 'Account deleted successfully';
+
+  @override
+  String get settingsAccountDeletedWithWarnings =>
+      'Account deleted with warnings';
+
+  @override
+  String get settingsAccountSectionTitle => 'ACCOUNT';
+
+  @override
+  String get settingsAccountEmailLabel => 'Email';
+
+  @override
+  String get settingsAccountDeleteButton => 'Delete account';
+
+  @override
+  String get settingsDeleteDialogTitle => 'Delete account';
+
+  @override
+  String get settingsDeleteDialogRecoveryMessage =>
+      'The deletion is incomplete. You need to finish the data cleanup.';
+
+  @override
+  String get settingsDeleteDialogWarning =>
+      'This action is permanent and irreversible. All your data will be deleted, including your profile, preferences, and reading progress.';
+
+  @override
+  String get settingsDeleteDialogConfirmHint => 'Type DELETE to confirm:';
+
+  @override
+  String get settingsDeleteDialogPasswordHint =>
+      'Enter your password to retry:';
+
+  @override
+  String get settingsDeleteDialogPasswordFieldHint => 'Password';
+
+  @override
+  String get settingsDeleteDialogDeleteButton => 'Delete';
+
+  @override
+  String get settingsDeleteDialogCancelButton => 'Cancel';
+
+  @override
   String get loadingChapter => 'Loading chapter';
 
   @override

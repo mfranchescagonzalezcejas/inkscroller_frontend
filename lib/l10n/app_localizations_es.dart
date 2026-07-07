@@ -107,6 +107,53 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron eliminar los datos guardados';
 
   @override
+  String get settingsCleanupFailedMessage => 'Error durante la limpieza';
+
+  @override
+  String get settingsAccountDeletedSuccess => 'Cuenta eliminada correctamente';
+
+  @override
+  String get settingsAccountDeletedWithWarnings =>
+      'Cuenta eliminada con advertencias';
+
+  @override
+  String get settingsAccountSectionTitle => 'CUENTA';
+
+  @override
+  String get settingsAccountEmailLabel => 'Email';
+
+  @override
+  String get settingsAccountDeleteButton => 'Eliminar cuenta';
+
+  @override
+  String get settingsDeleteDialogTitle => 'Eliminar cuenta';
+
+  @override
+  String get settingsDeleteDialogRecoveryMessage =>
+      'La eliminación está incompleta. Es necesario finalizar la limpieza de datos.';
+
+  @override
+  String get settingsDeleteDialogWarning =>
+      'Esta acción es permanente e irreversible. Se eliminarán todos tus datos, incluyendo tu perfil, preferencias y progreso de lectura.';
+
+  @override
+  String get settingsDeleteDialogConfirmHint =>
+      'Escribí DELETE para confirmar:';
+
+  @override
+  String get settingsDeleteDialogPasswordHint =>
+      'Ingresá tu contraseña para reintentar:';
+
+  @override
+  String get settingsDeleteDialogPasswordFieldHint => 'Contraseña';
+
+  @override
+  String get settingsDeleteDialogDeleteButton => 'Eliminar';
+
+  @override
+  String get settingsDeleteDialogCancelButton => 'Cancelar';
+
+  @override
   String get loadingChapter => 'Cargando capítulo';
 
   @override

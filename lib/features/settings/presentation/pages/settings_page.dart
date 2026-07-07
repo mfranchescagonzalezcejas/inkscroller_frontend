@@ -65,21 +65,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         if (next.deleteWarning != null) {
           AppFeedback.showWarning(
             context,
-            title: 'Cuenta eliminada con advertencias',
+            title: context.l10n.settingsAccountDeletedWithWarnings,
             body: next.deleteWarning,
           );
         } else {
           AppFeedback.showSuccess(
             context,
-            title: 'Cuenta eliminada correctamente',
+            title: context.l10n.settingsAccountDeletedSuccess,
           );
         }
         context.go(AppRoutes.login);
       }
       if (next.deleteError != null && mounted) {
+        // Map provider error keys to localized strings.
+        final message = switch (next.deleteError!) {
+          'settingsCleanupFailedMessage' => context.l10n.settingsCleanupFailedMessage,
+          final other => other,
+        };
         AppFeedback.showError(
           context,
-          title: next.deleteError!,
+          title: message,
         );
         ref.read(settingsProvider.notifier).resetState();
       }
