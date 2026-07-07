@@ -384,7 +384,7 @@ jobs:
           persist-credentials: false
 
       - name: Fetch develop branch
-        run: git fetch origin develop:develop --depth=50
+        run: git fetch origin develop:develop 2>/dev/null || echo "develop branch not found, sync will be skipped"
 
       - name: Create sync PR
         env:
