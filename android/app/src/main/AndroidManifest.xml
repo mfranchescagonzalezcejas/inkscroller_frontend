@@ -3,6 +3,10 @@
     <!-- 🔥 OBLIGATORIO PARA INTERNET -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- 📢 Sin anuncios — declaración requerida para Android 13+ -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"
+        android:required="false" />
+
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
