@@ -20,7 +20,6 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
 
     final result = await getPreferences();
 
-    if (!mounted) return;
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,
@@ -45,7 +44,6 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
       defaultLanguage: defaultLanguage,
     );
 
-    if (!mounted) return;
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,

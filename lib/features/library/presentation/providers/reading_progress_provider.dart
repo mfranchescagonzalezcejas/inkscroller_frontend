@@ -22,9 +22,7 @@ class ReadingProgressNotifier
   final ReadingProgressRepository _repository;
 
   Future<void> _load() async {
-    final loaded = await _repository.getAll();
-    if (!mounted) return;
-    state = loaded;
+    state = await _repository.getAll();
   }
 
   MangaReadingProgress progressFor(String mangaId) {

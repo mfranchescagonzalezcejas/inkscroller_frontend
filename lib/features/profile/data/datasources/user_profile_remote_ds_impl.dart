@@ -30,32 +30,6 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
     }
   }
 
-  @override
-  Future<UserProfileModel> updateProfile({
-    required String username,
-    required DateTime birthDate,
-  }) async {
-    try {
-      final Response<Map<String, dynamic>> response = await dio
-          .patch<Map<String, dynamic>>(
-            ApiEndpoints.usersMe,
-            data: <String, String>{
-              'username': username,
-              'birth_date': _formatDate(birthDate),
-            },
-          );
-
-      final data = response.data;
-      if (data == null) {
-        throw const ServerException(message: 'Profile response was empty.');
-      }
-
-      return UserProfileModel.fromJson(data);
-    } on DioException catch (error) {
-      throw _mapDioException(error);
-    }
-  }
-
   AppException _mapDioException(DioException error) {
     if (error.type == DioExceptionType.connectionError ||
         error.type == DioExceptionType.connectionTimeout ||
@@ -69,32 +43,12 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
     final statusCode = error.response?.statusCode;
     final responseData = error.response?.data;
     final responseMessage = responseData is Map<String, dynamic>
-        ? _extractResponseMessage(responseData['detail'])
+        ? responseData['detail'] as String?
         : null;
 
     return ServerException(
       code: statusCode,
       message: responseMessage ?? error.message ?? 'Profile request failed.',
     );
-  }
-
-  String? _extractResponseMessage(Object? detail) {
-    if (detail is String && detail.isNotEmpty) {
-      return detail;
-    }
-
-    if (detail is List || detail is Map<String, dynamic>) {
-      return 'Profile request validation failed.';
-    }
-
-    return null;
-  }
-
-  String _formatDate(DateTime value) {
-    final year = value.year.toString().padLeft(4, '0');
-    final month = value.month.toString().padLeft(2, '0');
-    final day = value.day.toString().padLeft(2, '0');
-
-    return '$year-$month-$day';
   }
 }

@@ -49,9 +49,9 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     this._repository, {
     VoidCallback? onSyncStart,
     VoidCallback? onSyncEnd,
-  }) : _onSyncStart = onSyncStart,
-       _onSyncEnd = onSyncEnd,
-       super(const <String, UserLibraryEntry>{}) {
+  })  : _onSyncStart = onSyncStart,
+        _onSyncEnd = onSyncEnd,
+        super(const <String, UserLibraryEntry>{}) {
     _load();
   }
 
@@ -61,9 +61,9 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   String? _activeUserId;
 
   Future<void> _load() async {
-    final loaded = await _repository.getAll();
+    final entries = await _repository.getAll(userId: _activeUserId);
     if (!mounted) return;
-    state = loaded;
+    state = entries;
   }
 
   Future<void> onAuthStateChanged(String? userId) async {
@@ -74,17 +74,12 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     _activeUserId = userId;
 
     if (userId == null) {
-      final loaded = await _repository.getAll();
-      if (!mounted || _activeUserId != null) return;
-      state = loaded;
+      state = await _repository.getAll();
       return;
     }
 
     // Hydrate with local-first: load local data immediately, then sync in background.
-    final loaded = await _repository.getAll(userId: userId);
-    // Guard: skip if disposed or a newer user signed in during load.
-    if (!mounted || _activeUserId != userId) return;
-    state = loaded;
+    state = await _repository.getAll(userId: userId);
 
     // Background async hydration (fire and forget, updates state when done).
     // ignore: unawaited_futures
@@ -92,17 +87,13 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   }
 
   Future<void> _hydrateAsync(String userId) async {
-    if (!mounted) return;
     _onSyncStart?.call();
     try {
-      final hydrated = await _repository.hydrate(userId);
-      // Guard: skip if disposed or a newer user signed in during hydration.
-      if (!mounted || _activeUserId != userId) return;
-      state = hydrated;
+      state = await _repository.hydrate(userId);
     } on Object {
       // Best-effort background sync; keep local data on failure.
     } finally {
-      if (mounted) _onSyncEnd?.call();
+      _onSyncEnd?.call();
     }
   }
 

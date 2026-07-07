@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'flavors/flavor_config.dart';
 
-/// Selects Firebase options from flavor-specific dart-defines.
 class FirebaseOptionsSelector {
   static FirebaseOptions get current {
     if (kIsWeb) {
@@ -29,41 +28,27 @@ class FirebaseOptionsSelector {
         return const FirebaseOptions(
           apiKey: String.fromEnvironment('FIREBASE_ANDROID_DEV_API_KEY'),
           appId: String.fromEnvironment('FIREBASE_ANDROID_DEV_APP_ID'),
-          messagingSenderId: String.fromEnvironment(
-            'FIREBASE_ANDROID_DEV_MESSAGING_SENDER_ID',
-          ),
+          messagingSenderId: String.fromEnvironment('FIREBASE_ANDROID_DEV_MESSAGING_SENDER_ID'),
           projectId: String.fromEnvironment('FIREBASE_ANDROID_DEV_PROJECT_ID'),
-          storageBucket: String.fromEnvironment(
-            'FIREBASE_ANDROID_DEV_STORAGE_BUCKET',
-          ),
+          storageBucket: String.fromEnvironment('FIREBASE_ANDROID_DEV_STORAGE_BUCKET'),
         );
 
       case Flavor.staging:
         return const FirebaseOptions(
           apiKey: String.fromEnvironment('FIREBASE_ANDROID_STAGING_API_KEY'),
           appId: String.fromEnvironment('FIREBASE_ANDROID_STAGING_APP_ID'),
-          messagingSenderId: String.fromEnvironment(
-            'FIREBASE_ANDROID_STAGING_MESSAGING_SENDER_ID',
-          ),
-          projectId: String.fromEnvironment(
-            'FIREBASE_ANDROID_STAGING_PROJECT_ID',
-          ),
-          storageBucket: String.fromEnvironment(
-            'FIREBASE_ANDROID_STAGING_STORAGE_BUCKET',
-          ),
+          messagingSenderId: String.fromEnvironment('FIREBASE_ANDROID_STAGING_MESSAGING_SENDER_ID'),
+          projectId: String.fromEnvironment('FIREBASE_ANDROID_STAGING_PROJECT_ID'),
+          storageBucket: String.fromEnvironment('FIREBASE_ANDROID_STAGING_STORAGE_BUCKET'),
         );
 
       case Flavor.pro:
         return const FirebaseOptions(
           apiKey: String.fromEnvironment('FIREBASE_ANDROID_PRO_API_KEY'),
           appId: String.fromEnvironment('FIREBASE_ANDROID_PRO_APP_ID'),
-          messagingSenderId: String.fromEnvironment(
-            'FIREBASE_ANDROID_PRO_MESSAGING_SENDER_ID',
-          ),
+          messagingSenderId: String.fromEnvironment('FIREBASE_ANDROID_PRO_MESSAGING_SENDER_ID'),
           projectId: String.fromEnvironment('FIREBASE_ANDROID_PRO_PROJECT_ID'),
-          storageBucket: String.fromEnvironment(
-            'FIREBASE_ANDROID_PRO_STORAGE_BUCKET',
-          ),
+          storageBucket: String.fromEnvironment('FIREBASE_ANDROID_PRO_STORAGE_BUCKET'),
         );
     }
   }
@@ -75,13 +60,9 @@ class FirebaseOptionsSelector {
         return const FirebaseOptions(
           apiKey: String.fromEnvironment('FIREBASE_IOS_DEV_API_KEY'),
           appId: String.fromEnvironment('FIREBASE_IOS_DEV_APP_ID'),
-          messagingSenderId: String.fromEnvironment(
-            'FIREBASE_IOS_DEV_MESSAGING_SENDER_ID',
-          ),
+          messagingSenderId: String.fromEnvironment('FIREBASE_IOS_DEV_MESSAGING_SENDER_ID'),
           projectId: String.fromEnvironment('FIREBASE_IOS_DEV_PROJECT_ID'),
-          storageBucket: String.fromEnvironment(
-            'FIREBASE_IOS_DEV_STORAGE_BUCKET',
-          ),
+          storageBucket: String.fromEnvironment('FIREBASE_IOS_DEV_STORAGE_BUCKET'),
           iosBundleId: String.fromEnvironment('FIREBASE_IOS_DEV_BUNDLE_ID'),
         );
 
@@ -89,13 +70,9 @@ class FirebaseOptionsSelector {
         return const FirebaseOptions(
           apiKey: String.fromEnvironment('FIREBASE_IOS_STAGING_API_KEY'),
           appId: String.fromEnvironment('FIREBASE_IOS_STAGING_APP_ID'),
-          messagingSenderId: String.fromEnvironment(
-            'FIREBASE_IOS_STAGING_MESSAGING_SENDER_ID',
-          ),
+          messagingSenderId: String.fromEnvironment('FIREBASE_IOS_STAGING_MESSAGING_SENDER_ID'),
           projectId: String.fromEnvironment('FIREBASE_IOS_STAGING_PROJECT_ID'),
-          storageBucket: String.fromEnvironment(
-            'FIREBASE_IOS_STAGING_STORAGE_BUCKET',
-          ),
+          storageBucket: String.fromEnvironment('FIREBASE_IOS_STAGING_STORAGE_BUCKET'),
           iosBundleId: String.fromEnvironment('FIREBASE_IOS_STAGING_BUNDLE_ID'),
         );
 
@@ -103,13 +80,9 @@ class FirebaseOptionsSelector {
         return const FirebaseOptions(
           apiKey: String.fromEnvironment('FIREBASE_IOS_PRO_API_KEY'),
           appId: String.fromEnvironment('FIREBASE_IOS_PRO_APP_ID'),
-          messagingSenderId: String.fromEnvironment(
-            'FIREBASE_IOS_PRO_MESSAGING_SENDER_ID',
-          ),
+          messagingSenderId: String.fromEnvironment('FIREBASE_IOS_PRO_MESSAGING_SENDER_ID'),
           projectId: String.fromEnvironment('FIREBASE_IOS_PRO_PROJECT_ID'),
-          storageBucket: String.fromEnvironment(
-            'FIREBASE_IOS_PRO_STORAGE_BUCKET',
-          ),
+          storageBucket: String.fromEnvironment('FIREBASE_IOS_PRO_STORAGE_BUCKET'),
           iosBundleId: String.fromEnvironment('FIREBASE_IOS_PRO_BUNDLE_ID'),
         );
     }

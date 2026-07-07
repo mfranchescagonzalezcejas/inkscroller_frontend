@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,15 +52,8 @@ import '../../features/profile/data/datasources/user_profile_remote_ds_impl.dart
 import '../../features/profile/data/repositories/user_profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/user_profile_repository.dart';
 import '../../features/profile/domain/usecases/get_user_profile.dart';
-import '../../features/profile/domain/usecases/update_user_profile.dart';
-import '../../features/settings/data/datasources/settings_remote_ds.dart';
-import '../../features/settings/data/datasources/settings_remote_ds_impl.dart';
 import '../../features/settings/data/repositories/settings_cache_repository_impl.dart';
-import '../../features/settings/data/repositories/settings_repository_impl.dart';
-import '../../features/settings/data/repositories/account_cleanup_repository_impl.dart';
-import '../../features/settings/domain/repositories/account_cleanup_repository.dart';
 import '../../features/settings/domain/repositories/settings_cache_repository.dart';
-import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/usecases/clear_settings_cache.dart';
 import '../../features/settings/domain/usecases/get_settings_cache_size.dart';
 import '../network/dio_client.dart';
@@ -68,45 +61,35 @@ import '../network/dio_client.dart';
 /// Global get_it service locator instance used across the app.
 final sl = GetIt.instance;
 
-/// Registers [factory] as a [LazySingleton] only if [T] is not already
-/// registered in [sl]. Skips silently when the type is present.
-void _registerIfAbsent<T extends Object>(T Function() factory) {
-  if (!sl.isRegistered<T>()) {
-    sl.registerLazySingleton<T>(factory);
-  }
-}
-
 /// Registers all infrastructure dependencies as lazy singletons.
 ///
 /// Called once during app bootstrap in [mainCommon] before `runApp`.
 /// Wires [DioClient], auth, data sources, repositories, and use cases.
-/// Safe to call multiple times — each registration is individually guarded.
 Future<void> initDI() async {
-  // ── SharedPrefs ─────────────────────────────────────────────────────────
-  if (!sl.isRegistered<SharedPreferences>()) {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
-  }
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
 
-  // ── Auth ────────────────────────────────────────────────────────────────
-  _registerIfAbsent<FirebaseAuth>(() => FirebaseAuth.instance);
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
 
-  _registerIfAbsent<FirebaseAuthDataSource>(
+  sl.registerLazySingleton<FirebaseAuthDataSource>(
     () => FirebaseAuthDataSourceImpl(sl<FirebaseAuth>()),
   );
 
-  _registerIfAbsent<AuthRepository>(
+  sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(sl<FirebaseAuthDataSource>()),
   );
 
-  _registerIfAbsent<SignIn>(() => SignIn(sl<AuthRepository>()));
-  _registerIfAbsent<SignUp>(() => SignUp(sl<AuthRepository>()));
-  _registerIfAbsent<SignOut>(() => SignOut(sl<AuthRepository>()));
-  _registerIfAbsent<GetAuthState>(() => GetAuthState(sl<AuthRepository>()));
-  _registerIfAbsent<GetIdToken>(() => GetIdToken(sl<AuthRepository>()));
+  sl.registerLazySingleton<SignIn>(() => SignIn(sl<AuthRepository>()));
+  sl.registerLazySingleton<SignUp>(() => SignUp(sl<AuthRepository>()));
+  sl.registerLazySingleton<SignOut>(() => SignOut(sl<AuthRepository>()));
+  sl.registerLazySingleton<GetAuthState>(
+    () => GetAuthState(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<GetIdToken>(() => GetIdToken(sl<AuthRepository>()));
 
   // Core
-  _registerIfAbsent<DioClient>(
+  sl.registerLazySingleton<DioClient>(
     () => DioClient(
       tokenProvider: () async {
         final tokenResult = await sl<GetIdToken>()();
@@ -117,17 +100,17 @@ Future<void> initDI() async {
   );
 
   // Library - local datasource
-  _registerIfAbsent<LibraryLocalDataSource>(
+  sl.registerLazySingleton<LibraryLocalDataSource>(
     () => LibraryLocalDataSourceImpl(sl<SharedPreferences>()),
   );
 
   // Library - datasource
-  _registerIfAbsent<LibraryRemoteDataSource>(
+  sl.registerLazySingleton<LibraryRemoteDataSource>(
     () => LibraryRemoteDataSourceImpl(sl<DioClient>().dio),
   );
 
   // Library - repository
-  _registerIfAbsent<LibraryRepository>(
+  sl.registerLazySingleton<LibraryRepository>(
     () => LibraryRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
@@ -144,59 +127,63 @@ Future<void> initDI() async {
   );
 
   // Library - use cases
-  _registerIfAbsent<GetMangaList>(() => GetMangaList(sl()));
-  _registerIfAbsent<GetMangaDetail>(() => GetMangaDetail(sl()));
-  _registerIfAbsent<GetMangaChapters>(() => GetMangaChapters(sl()));
-  _registerIfAbsent<GetChapterPages>(
+  sl.registerLazySingleton<GetMangaList>(() => GetMangaList(sl()));
+
+  sl.registerLazySingleton<GetMangaDetail>(() => GetMangaDetail(sl()));
+  sl.registerLazySingleton<GetMangaChapters>(() => GetMangaChapters(sl()));
+
+  sl.registerLazySingleton<GetChapterPages>(
     () => GetChapterPages(sl<LibraryRepository>()),
   );
-  _registerIfAbsent<ResolveReaderMode>(() => const ResolveReaderMode());
-  _registerIfAbsent<SearchManga>(
+
+  sl.registerLazySingleton<ResolveReaderMode>(() => const ResolveReaderMode());
+
+  sl.registerLazySingleton<SearchManga>(
     () => SearchManga(sl<LibraryRepository>()),
   );
 
   // Library - per-title override repository
-  _registerIfAbsent<PerTitleOverrideRepository>(
+  sl.registerLazySingleton<PerTitleOverrideRepository>(
     () => PerTitleOverrideRepositoryImpl(sl<SharedPreferences>()),
   );
 
-  _registerIfAbsent<ReadingProgressRepository>(
+  sl.registerLazySingleton<ReadingProgressRepository>(
     () => ReadingProgressRepositoryImpl(sl<SharedPreferences>()),
   );
 
-  _registerIfAbsent<UserLibraryRemoteDataSource>(
+  sl.registerLazySingleton<UserLibraryRemoteDataSource>(
     () => UserLibraryRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
-  _registerIfAbsent<UserLibraryRepository>(
+  sl.registerLazySingleton<UserLibraryRepository>(
     () => UserLibraryRepositoryImpl(
       sl<SharedPreferences>(),
       sl<UserLibraryRemoteDataSource>(),
     ),
   );
 
-  _registerIfAbsent<SavePerTitleOverride>(
+  sl.registerLazySingleton<SavePerTitleOverride>(
     () => SavePerTitleOverride(sl<PerTitleOverrideRepository>()),
   );
-  _registerIfAbsent<GetPerTitleOverride>(
+  sl.registerLazySingleton<GetPerTitleOverride>(
     () => GetPerTitleOverride(sl<PerTitleOverrideRepository>()),
   );
-  _registerIfAbsent<RemovePerTitleOverride>(
+  sl.registerLazySingleton<RemovePerTitleOverride>(
     () => RemovePerTitleOverride(sl<PerTitleOverrideRepository>()),
   );
 
   // Preferences - local datasource
-  _registerIfAbsent<PreferencesLocalDataSource>(
+  sl.registerLazySingleton<PreferencesLocalDataSource>(
     () => PreferencesLocalDataSourceImpl(sl<SharedPreferences>()),
   );
 
   // Preferences - remote datasource
-  _registerIfAbsent<PreferencesRemoteDataSource>(
+  sl.registerLazySingleton<PreferencesRemoteDataSource>(
     () => PreferencesRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
   // Preferences - repository
-  _registerIfAbsent<PreferencesRepository>(
+  sl.registerLazySingleton<PreferencesRepository>(
     () => PreferencesRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
@@ -204,78 +191,53 @@ Future<void> initDI() async {
   );
 
   // Preferences - use cases
-  _registerIfAbsent<GetPreferences>(
+  sl.registerLazySingleton<GetPreferences>(
     () => GetPreferences(sl<PreferencesRepository>()),
   );
-  _registerIfAbsent<UpdatePreferences>(
+  sl.registerLazySingleton<UpdatePreferences>(
     () => UpdatePreferences(sl<PreferencesRepository>()),
   );
 
   // Profile - remote datasource
-  _registerIfAbsent<UserProfileRemoteDataSource>(
+  sl.registerLazySingleton<UserProfileRemoteDataSource>(
     () => UserProfileRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
 
   // Profile - repository
-  _registerIfAbsent<UserProfileRepository>(
+  sl.registerLazySingleton<UserProfileRepository>(
     () => UserProfileRepositoryImpl(remoteDataSource: sl()),
   );
 
   // Profile - use cases
-  _registerIfAbsent<GetUserProfile>(
+  sl.registerLazySingleton<GetUserProfile>(
     () => GetUserProfile(sl<UserProfileRepository>()),
-  );
-  _registerIfAbsent<UpdateUserProfile>(
-    () => UpdateUserProfile(sl<UserProfileRepository>()),
   );
 
   // Home - datasource
-  _registerIfAbsent<HomeRemoteDataSource>(
+  sl.registerLazySingleton<HomeRemoteDataSource>(
     () => HomeRemoteDataSourceImpl(sl<DioClient>().dio),
   );
 
   // Home - repository
-  _registerIfAbsent<HomeRepository>(
+  sl.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(remote: sl<HomeRemoteDataSource>()),
   );
 
   // Home - use cases
-  _registerIfAbsent<GetLatestHomeChapters>(
+  sl.registerLazySingleton<GetLatestHomeChapters>(
     () => GetLatestHomeChapters(sl<HomeRepository>()),
   );
 
   // Settings - cache repository
-  _registerIfAbsent<SettingsCacheRepository>(
+  sl.registerLazySingleton<SettingsCacheRepository>(
     () => SettingsCacheRepositoryImpl(sharedPreferences: sl<SharedPreferences>()),
   );
 
   // Settings - cache use cases
-  _registerIfAbsent<ClearSettingsCache>(
+  sl.registerLazySingleton<ClearSettingsCache>(
     () => ClearSettingsCache(sl<SettingsCacheRepository>()),
   );
-  _registerIfAbsent<GetSettingsCacheSize>(
+  sl.registerLazySingleton<GetSettingsCacheSize>(
     () => GetSettingsCacheSize(sl<SettingsCacheRepository>()),
-  );
-
-  // Settings - account deletion
-  initSettingsDI();
-}
-
-/// Registers account-level settings dependencies (remote data source +
-/// repository). Idempotent — safe to call multiple times.
-void initSettingsDI() {
-  _registerIfAbsent<SettingsRemoteDataSource>(
-    () => SettingsRemoteDataSourceImpl(dioClient: sl<DioClient>()),
-  );
-
-  _registerIfAbsent<SettingsRepository>(
-    () => SettingsRepositoryImpl(remoteDataSource: sl<SettingsRemoteDataSource>()),
-  );
-
-  _registerIfAbsent<AccountCleanupRepository>(
-    () => AccountCleanupRepositoryImpl(
-      firebaseAuth: sl<FirebaseAuth>(),
-      prefs: sl<SharedPreferences>(),
-    ),
   );
 }

@@ -7,9 +7,4 @@ import '../entities/user_profile.dart';
 // ignore: one_member_abstracts
 abstract class UserProfileRepository {
   Future<Either<Failure, UserProfile>> getProfile();
-
-  Future<Either<Failure, UserProfile>> updateProfile({
-    required String username,
-    required DateTime birthDate,
-  });
 }

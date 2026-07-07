@@ -11,11 +11,7 @@ import '../../domain/usecases/save_per_title_override.dart';
 ///
 /// Keyed by manga ID so each manga has its own independent state.
 final perTitleOverrideProvider =
-    StateNotifierProvider.family<
-      PerTitleOverrideNotifier,
-      PerTitleOverride?,
-      String
-    >(
+    StateNotifierProvider.family<PerTitleOverrideNotifier, PerTitleOverride?, String>(
       (ref, mangaId) => PerTitleOverrideNotifier(
         mangaId: mangaId,
         getOverride: sl(),
@@ -41,9 +37,7 @@ class PerTitleOverrideNotifier extends StateNotifier<PerTitleOverride?> {
   }
 
   Future<void> _load() async {
-    final override = await getOverride(mangaId);
-    if (!mounted) return;
-    state = override;
+    state = await getOverride(mangaId);
   }
 
   Future<void> setMode(ReaderMode mode) async {
