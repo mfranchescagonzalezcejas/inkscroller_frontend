@@ -77,7 +77,7 @@ rg 'https?://api\.(mangadex|jikan)\.org' lib/ --glob "*.dart"
 
 ### Pattern 11: Full HTTP URL inventory (4 URLs total)
 
-```
+```text
 lib/core/config/app_environment.dart:
   - 'http://127.0.0.1:8000'        ← localhost dev
   - 'http://10.0.2.2:8000'         ← Android emulator loopback
@@ -129,7 +129,7 @@ Where `$token` is obtained at runtime via `FirebaseAuth.instance.currentUser?.ge
 ## `.env.example` Audit
 
 **File**: `.env.example`  
-**Result**: Contains only placeholder values (`https://your-railway-url.up.railway.app`).
+**Result**: Contains only placeholder values (`https://your-cloud-run-url.run.app`).
 No real API keys, tokens, or credentials present. ✅
 
 ---

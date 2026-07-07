@@ -118,7 +118,7 @@ Ejecutar esta checklist antes de cambiar el repo a público:
 
 - [ ] `android/app/src/*/google-services.json` **NO está commiteado** en ningún branch
 - [ ] `ios/config/*/GoogleService-Info.plist` **NO está commiteado** en ningún branch
-- [ ] `android/*.jks` / `android/*.keystore` **NO está commiteado**
+- [ ] `android/*.jks` / `android/*.keystore` / `android/app/*.jks` / `android/app/*.keystore` **NO está commiteado**
 - [ ] `android/key.properties` **NO está commiteado**
 - [ ] `.dart-defines/` **NO está commiteado** (cubierto por `.gitignore`)
 - [ ] `.dart-defines/firebase.example.json` se mantiene como template seguro (sin valores reales)
