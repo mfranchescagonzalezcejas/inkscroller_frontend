@@ -73,7 +73,7 @@ Ninguna URL apunta a `api.mangadex.org`, `api.jikan.moe`, ni ningún dominio de 
 
 ## Búsqueda 4 — Instancias de Dio
 
-```
+```shell
 rg "Dio\s*\(" lib/ --glob "*.dart" -n
 ```
 

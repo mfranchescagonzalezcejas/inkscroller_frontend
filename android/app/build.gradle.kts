@@ -17,6 +17,8 @@ if (googleServicesFiles.any { file(it).isFile }) {
 }
 
 android {
+    // ponytail: namespace is the Flutter default "com.example" prefix.
+    // Replace with a real reverse-domain before Play Store release.
     namespace = "com.example.inkscroller"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -43,8 +45,8 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // ponytail: Debug keystore for now. Add a real keystore + signingConfig
+            // before Play Store distribution. Don't commit the keystore file.
             signingConfig = signingConfigs.getByName("debug")
         }
     }

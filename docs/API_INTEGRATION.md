@@ -128,13 +128,13 @@ class ApiConfig {
 | `staging` | `main_staging.dart` | `--dart-define=API_BASE_URL=...` | Falls back to local LAN URL if omitted |
 | `pro` | `main_pro.dart` | `--dart-define=API_BASE_URL=...` | Must be set to public API for release |
 
-> **Note:** If `API_BASE_URL` is omitted, the app uses `http://192.168.1.38:8000` as a developer-friendly default.
+> **Note:** If `API_BASE_URL` is omitted, the app uses `http://127.0.0.1:8000` as a developer-friendly default.
 
 **File:** `lib/core/config/app_environment.dart`
 
 ```dart
 abstract final class AppEnvironment {
-  static const String localBaseUrl = 'http://192.168.1.38:8000';
+  static const String localBaseUrl = 'http://127.0.0.1:8000';
 
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',

@@ -221,9 +221,9 @@ jobs:
       - name: Create or update GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: mfranchescagonzalezcejas/inkscroller_flutter
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.quality-gates.outputs.tag }}
         run: |
-          TAG="${{ needs.quality-gates.outputs.tag }}"
 
           DEV_APK="release-assets/apk-dev/app-dev-release.apk"
           STAGING_APK="release-assets/apk-staging/app-staging-release.apk"

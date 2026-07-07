@@ -126,9 +126,8 @@ Firma: ___________
 ### Evidencias — P0-F1
 
 - **Qué**: El flavor `pro` debe estar configurado con el `API_BASE_URL` apuntando a Railway, no a `localhost` ni a una IP LAN.
-- **Verificación**: QA smoke — run config `Flutter Pro Physical.run.xml` revisado con URL de backend desplegado. Revalidar contra Railway antes de release público.
-- **Fecha de cierre**: 2026-04-07
-- **Referencia cruzada**: Control Tower V1.0 (Obsidian) → P0-F1 marcado ✅ 2026-04-07
+- **Verificación**: QA smoke — run config `Flutter Pro Physical.run.xml` revisado con URL de backend desplegado.
+- **Estado**: Pendiente de revalidación contra Railway antes de release público. Última verificación: 2026-04-07.
 
 ### Evidencias — P0-F2
 
