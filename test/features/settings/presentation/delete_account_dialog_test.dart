@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,7 +60,7 @@ void main() {
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: DeleteAccountDialog()),
+        home: const Scaffold(body: DeleteAccountDialog()),
       ),
     );
   }
