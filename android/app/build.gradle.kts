@@ -17,9 +17,7 @@ if (googleServicesFiles.any { file(it).isFile }) {
 }
 
 android {
-    // ponytail: namespace is the Flutter default "com.example" prefix.
-    // Replace with a real reverse-domain before Play Store release.
-    namespace = "com.example.inkscroller"
+    namespace = "dev.devdigi.inkscroller"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -33,8 +31,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.inkscroller"
+        applicationId = "dev.devdigi.inkscroller"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -43,11 +40,32 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePropsFile = rootProject.file("key.properties")
+            if (keystorePropsFile.isFile) {
+                val lines = keystorePropsFile.readLines()
+                val props = mutableMapOf<String, String>()
+                for (line in lines) {
+                    val trimmed = line.trim()
+                    if (trimmed.startsWith("#") || trimmed.isEmpty()) continue
+                    val eq = trimmed.indexOf('=')
+                    if (eq > 0) {
+                        props[trimmed.substring(0, eq).trim()] =
+                            trimmed.substring(eq + 1).trim()
+                    }
+                }
+                storeFile = rootProject.file(props["storeFile"] ?: "")
+                storePassword = props["storePassword"] ?: ""
+                keyAlias = props["keyAlias"] ?: ""
+                keyPassword = props["keyPassword"] ?: ""
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // ponytail: Debug keystore for now. Add a real keystore + signingConfig
-            // before Play Store distribution. Don't commit the keystore file.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
