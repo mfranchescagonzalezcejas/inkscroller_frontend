@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/design_tokens.dart'
     show AppColors;
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/delete_account_dialog.dart';
@@ -26,7 +27,7 @@ class AccountSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _SectionLabel(text: 'CUENTA'.toUpperCase()),
+        _SectionLabel(text: context.l10n.settingsAccountSectionTitle.toUpperCase()),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -38,13 +39,13 @@ class AccountSection extends ConsumerWidget {
             children: <Widget>[
               _InfoRow(
                 icon: Icons.email_outlined,
-                label: 'Email',
+                label: context.l10n.settingsAccountEmailLabel,
                 value: email,
               ),
               const Divider(height: 1, color: AppColors.outlineVariant),
               _DangerButton(
                 key: const Key('deleteAccountButton'),
-                label: 'Eliminar cuenta',
+                label: context.l10n.settingsAccountDeleteButton,
                 onTap: () => _showDeleteAccountDialog(context),
               ),
             ],
