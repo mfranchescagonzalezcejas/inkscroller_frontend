@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -373,3 +374,32 @@ jobs:
             --app "$FIREBASE_APP_ID" \
             --testers "$FIREBASE_TESTERS" \
             --release-notes "$(cat release-metadata/${{ matrix.release_notes }})"
+
+  sync-develop:
+    name: Sync main → develop
+    needs:
+      - create-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create sync PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BEHIND=$(git rev-list --count develop..main 2>/dev/null || echo "0")
+          if [ "$BEHIND" -gt 0 ]; then
+            echo "main is $BEHIND commits ahead of develop. Creating sync PR..."
+            gh pr create \
+              --base develop \
+              --head main \
+              --title "chore: sync main → develop after ${{ github.ref_name }}" \
+              --body "Auto-generated sync PR after release \`${{ github.ref_name }}\`." \
+              --label "type:chore" 2>/dev/null || echo "PR already exists or creation skipped."
+          else
+            echo "develop is up to date with main. No sync needed."
+          fi
