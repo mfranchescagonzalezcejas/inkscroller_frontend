@@ -383,6 +383,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Fetch develop branch
+        run: git fetch origin develop:develop --depth=50
+
       - name: Create sync PR
         env:
           GH_TOKEN: ${{ github.token }}
