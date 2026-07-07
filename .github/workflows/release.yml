@@ -359,13 +359,12 @@ jobs:
 
       - name: Distribute ${{ matrix.flavor }}
         env:
-          FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
           GOOGLE_APPLICATION_CREDENTIALS: firebase-key.json
         run: |
           firebase appdistribution:distribute \
             "dist/${{ matrix.apk_name }}" \
             --app "$FIREBASE_APP_ID" \
-            --testers "$FIREBASE_TESTERS" \
+            --groups "testers" \
             --release-notes "$(cat release-metadata/${{ matrix.release_notes }})"
 
   sync-develop:
