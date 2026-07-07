@@ -258,20 +258,12 @@ Future<void> initDI() async {
   );
 
   // Settings - account deletion
-  initSettingsDI();
-}
-
-/// Registers account-level settings dependencies (remote data source +
-/// repository). Idempotent — safe to call multiple times.
-void initSettingsDI() {
   _registerIfAbsent<SettingsRemoteDataSource>(
     () => SettingsRemoteDataSourceImpl(dioClient: sl<DioClient>()),
   );
-
   _registerIfAbsent<SettingsRepository>(
     () => SettingsRepositoryImpl(remoteDataSource: sl<SettingsRemoteDataSource>()),
   );
-
   _registerIfAbsent<AccountCleanupRepository>(
     () => AccountCleanupRepositoryImpl(
       firebaseAuth: sl<FirebaseAuth>(),
