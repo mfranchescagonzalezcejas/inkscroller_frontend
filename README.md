@@ -14,6 +14,18 @@ This repository is prepared for **public portfolio visibility** and remains unde
 - The project is evolving and does **not** claim production service guarantees.
 - This README intentionally avoids private operational details and secret values.
 
+> 📘 **TFM submission** — See [TFM Deliverables](#tfm-deliverables) for submission materials.
+
+## TFM Quick Links
+
+| Resource | URL |
+|---|---|
+| Repository | [github.com/mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
+| Deployment | [InkScroller App](https://inkscroller.dev) |
+| Slides | <!-- TFM: add URL --> |
+| Demo video | <!-- TFM: add URL --> |
+| Test credentials | <!-- TFM: add user/password if login remains enabled --> |
+
 ## Tech Stack
 
 - **Flutter / Dart**
@@ -90,6 +102,48 @@ fvm flutter test
 
 Depending on target flavor and integration paths, some runs may require local Firebase configuration artifacts.
 
+## Project Structure
+
+```
+lib/
+├── core/                   # Shared infrastructure
+│   ├── di/                 # get_it dependency injection
+│   ├── network/            # Dio client, interceptors
+│   ├── router/             # GoRouter navigation
+│   ├── theme/              # M3 theme (light/dark)
+│   ├── design/             # Colors, typography, spacing tokens
+│   ├── error/              # Exceptions and failure types
+│   ├── constants/          # API endpoints and app constants
+│   ├── widgets/            # Shared UI components
+│   └── l10n/               # Localization delegates
+├── features/               # Business domains (Screaming Architecture)
+│   ├── auth/               # Login, register, session
+│   ├── home/               # Latest chapters, genre tabs
+│   ├── library/            # Manga catalog, search, reader
+│   ├── explore/            # Browse and discover
+│   ├── profile/            # User profile
+│   ├── settings/           # Account, cache, delete
+│   ├── preferences/        # Reading preferences
+│   ├── navigation/         # App scaffold and tab bar
+│   └── about/              # App info
+├── flavors/                # Build flavor config (dev/staging/pro)
+├── l10n/                   # ARB localization files (en, es)
+└── main_*.dart             # Flavor entry points
+```
+
+Inside each feature: `presentation → domain ← data` (Clean Architecture).
+
+## Main Features
+
+- **Manga reader** — scroll and paged modes, reading progress tracking, per-title overrides
+- **Manga catalog** — browse by genre, search, paginated lists with caching
+- **User library** — follow/unfollow manga, track reading status
+- **User profile** — avatar, username, birth date
+- **Authentication** — email/password, Firebase Auth, age-aware registration
+- **Localization** — English and Spanish
+- **3 build flavors** — dev (development), staging (testing), pro (production)
+- **CI/CD** — GitHub Actions, automated release workflow, Firebase Distribution
+
 ## Security & Public Readiness
 
 Before changing repository visibility or preparing external distribution docs:
@@ -102,6 +156,18 @@ Before changing repository visibility or preparing external distribution docs:
 InkScroller consumes content through its backend integration and includes attribution/compliance context in:
 
 - [`docs/legal/api-compliance.md`](docs/legal/api-compliance.md)
+
+## TFM Deliverables
+
+| Item | URL / Location |
+|---|---|
+| Source repository | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
+| Deployment | [InkScroller App](https://inkscroller.dev) |
+| Slides | <!-- TFM: link to slides --> |
+| Demo video | <!-- TFM: link to video --> |
+| Test user | <!-- TFM: email / password --> |
+
+For TFM evaluators: the app requires a running backend. All API requests go to the InkScroller backend which proxies MangaDex content. See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details.
 
 ## License
 
