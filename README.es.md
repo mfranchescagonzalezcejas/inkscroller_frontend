@@ -199,9 +199,9 @@ Dirección de capas: `Presentation → Domain ← Data` — el dominio no depend
 | ⚙️ **Repo backend**  | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend)   |
 | 📦 **Releases app**  | [GitHub Releases](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases) · publicación en Google Play en proceso |
 | 🔌 **APIs backend**  | `dev` `https://api.dev.inkscroller.devdigi.dev` · `staging` `https://api.stg.inkscroller.devdigi.dev` · `pro` `https://api.inkscroller.devdigi.dev` |
-| 📽️ **Diapositivas**  | <!-- TFM: añadir URL -->                                                                                          |
-| 🎬 **Vídeo demo**    | <!-- TFM: añadir URL -->                                                                                          |
-| 👤 **Usuario prueba** | <!-- TFM: añadir email/contraseña -->                                                                             |
+| 📽️ **Diapositivas**  | En proceso — todavía no publicadas                                                                                |
+| 🎬 **Vídeo demo**    | En proceso — todavía no publicado                                                                                 |
+| 👤 **Usuario prueba** | No requerido — la app permite crear una cuenta desde el registro con email/contraseña                             |
 
 </div>
 

@@ -199,9 +199,9 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 | ⚙️ **Backend repo**  | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend)   |
 | 📦 **App releases**  | [GitHub Releases](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases) · Google Play publication in progress |
 | 🔌 **Backend APIs**  | `dev` `https://api.dev.inkscroller.devdigi.dev` · `staging` `https://api.stg.inkscroller.devdigi.dev` · `pro` `https://api.inkscroller.devdigi.dev` |
-| 📽️ **Slides**        | <!-- TFM: add URL -->                                                                                             |
-| 🎬 **Demo video**    | <!-- TFM: add URL -->                                                                                             |
-| 👤 **Test user**     | <!-- TFM: add email/password -->                                                                                  |
+| 📽️ **Slides**        | Work in progress — not published yet                                                                              |
+| 🎬 **Demo video**    | Work in progress — not published yet                                                                              |
+| 👤 **Test user**     | Not required — users can create an account from the app with email/password registration                          |
 
 </div>
 
