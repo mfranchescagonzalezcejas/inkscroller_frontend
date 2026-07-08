@@ -117,66 +117,8 @@ class _ReaderPageImage extends StatefulWidget {
 }
 
 class _ReaderPageImageState extends State<_ReaderPageImage> {
-  ImageStream? _imageStream;
-  late final ImageStreamListener _imageListener;
-  bool _isLoaded = false;
-  bool _hasError = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _imageListener = ImageStreamListener(_onImageLoaded, onError: _onImageError);
-    _loadImage();
-  }
-
-  @override
-  void didUpdateWidget(_ReaderPageImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.url != widget.url) {
-      _imageStream?.removeListener(_imageListener);
-      _loadImage();
-    }
-  }
-
-  void _loadImage() {
-    setState(() {
-      _isLoaded = false;
-      _hasError = false;
-    });
-
-    final image = NetworkImage(widget.url);
-    _imageStream = image.resolve(ImageConfiguration.empty);
-    _imageStream!.addListener(_imageListener);
-  }
-
-  void _onImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
-    if (mounted) {
-      setState(() => _isLoaded = true);
-    }
-  }
-
-  void _onImageError(Object exception, StackTrace? stackTrace) {
-    if (mounted) {
-      setState(() => _hasError = true);
-    }
-  }
-
-  @override
-  void dispose() {
-    _imageStream?.removeListener(_imageListener);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_hasError) {
-      return _ErrorPlaceholder(pageNumber: widget.pageNumber);
-    }
-
-    if (!_isLoaded) {
-      return _LoadingPlaceholder(pageNumber: widget.pageNumber);
-    }
-
     return InteractiveViewer(
       minScale: 1,
       maxScale: 4,
@@ -185,6 +127,10 @@ class _ReaderPageImageState extends State<_ReaderPageImage> {
           widget.url,
           fit: BoxFit.contain,
           gaplessPlayback: true,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _LoadingPlaceholder(pageNumber: widget.pageNumber);
+          },
           errorBuilder: (context, error, stackTrace) {
             return _ErrorPlaceholder(pageNumber: widget.pageNumber);
           },
