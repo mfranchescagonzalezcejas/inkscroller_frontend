@@ -44,12 +44,14 @@ class _ReaderPageImage extends StatefulWidget {
 
 class _ReaderPageImageState extends State<_ReaderPageImage> {
   ImageStream? _imageStream;
+  late final ImageStreamListener _imageListener;
   bool _isLoaded = false;
   bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
+    _imageListener = ImageStreamListener(_onImageLoaded, onError: _onImageError);
     _loadImage();
   }
 
@@ -57,7 +59,7 @@ class _ReaderPageImageState extends State<_ReaderPageImage> {
   void didUpdateWidget(_ReaderPageImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.url != widget.url) {
-      _imageStream?.removeListener(ImageStreamListener(_onImageLoaded));
+      _imageStream?.removeListener(_imageListener);
       _loadImage();
     }
   }
@@ -70,9 +72,7 @@ class _ReaderPageImageState extends State<_ReaderPageImage> {
 
     final image = NetworkImage(widget.url);
     _imageStream = image.resolve(ImageConfiguration.empty);
-    _imageStream!.addListener(
-      ImageStreamListener(_onImageLoaded, onError: _onImageError),
-    );
+    _imageStream!.addListener(_imageListener);
   }
 
   void _onImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
@@ -83,7 +83,7 @@ class _ReaderPageImageState extends State<_ReaderPageImage> {
     }
   }
 
-  void _onImageError(dynamic exception, StackTrace? stackTrace) {
+  void _onImageError(Object exception, StackTrace? stackTrace) {
     if (mounted) {
       setState(() => _hasError = true);
     }
@@ -91,7 +91,7 @@ class _ReaderPageImageState extends State<_ReaderPageImage> {
 
   @override
   void dispose() {
-    _imageStream?.removeListener(ImageStreamListener(_onImageLoaded));
+    _imageStream?.removeListener(_imageListener);
     super.dispose();
   }
 
