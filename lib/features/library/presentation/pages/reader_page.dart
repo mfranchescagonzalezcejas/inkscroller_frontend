@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart';
+import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../domain/entities/chapter.dart';
@@ -222,12 +223,21 @@ class _ExternalChapterScreen extends StatelessWidget {
                   onPressed: () async {
                     try {
                       final uri = Uri.parse(externalUrl!);
-                      if (uri.scheme != 'http' && uri.scheme != 'https') return;
+                      if (uri.scheme != 'http' && uri.scheme != 'https') {
+                        AppFeedback.showWarning(
+                          context,
+                          title: context.l10n.externalChapterTitle,
+                        );
+                        return;
+                      }
                       if (await canLaunchUrl(uri)) {
                         await launchUrl(uri, mode: LaunchMode.externalApplication);
                       }
                     } on FormatException {
-                      return;
+                      AppFeedback.showWarning(
+                        context,
+                        title: context.l10n.externalChapterTitle,
+                      );
                     }
                   },
                 ),

@@ -357,12 +357,21 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
     try {
       final uri = Uri.parse(externalUrl);
-      if (uri.scheme != 'http' && uri.scheme != 'https') return;
+      if (uri.scheme != 'http' && uri.scheme != 'https') {
+        AppFeedback.showWarning(
+          context,
+          title: context.l10n.externalChapterTitle,
+        );
+        return;
+      }
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } on FormatException {
-      return;
+      AppFeedback.showWarning(
+        context,
+        title: context.l10n.externalChapterTitle,
+      );
     }
   }
 }
