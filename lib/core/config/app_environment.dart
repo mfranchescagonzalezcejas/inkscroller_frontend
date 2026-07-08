@@ -17,15 +17,15 @@ abstract final class AppEnvironment {
   /// Android emulator loopback alias for the host machine.
   static const String androidEmulatorBaseUrl = 'http://10.0.2.2:8000';
 
-  /// Dev backend URL deployed on Railway (Firebase project: inkscroller-aed59).
+  /// Backend API URLs by environment (deployed on devdigi.dev).
   ///
-  /// Used exclusively by the `dev` flavor run configurations. For staging and pro,
-  /// the API_BASE_URL is always provided via `--dart-define` in the run configs:
-  ///   - staging: inkscrollerbackend-stg.up.railway.app
-  ///   - pro:     inkscrollerbackend-pro.up.railway.app
+  /// These are the production endpoints. For local development, use `--dart-define`
+  /// or the default localhost fallback.
   ///
-  /// Dev Railway URL: 2026-04-21
-  static const String cloudRunBaseUrl = 'https://inkscrollerbackend-dev.up.railway.app';
+  ///   dev:     https://api.dev.inkscroller.devdigi.dev
+  ///   staging: https://api.stg.inkscroller.devdigi.dev
+  ///   pro:     https://api.inkscroller.devdigi.dev
+  static const String cloudRunBaseUrl = 'https://api.dev.inkscroller.devdigi.dev';
 
   /// Backend base URL for the current app run.
   ///
