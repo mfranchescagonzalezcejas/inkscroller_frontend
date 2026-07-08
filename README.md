@@ -221,12 +221,39 @@ See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details
 
 <br/>
 
+<!-- ─── ATTRIBUTION ───────────────────────────────────────────────────── -->
+
+<div align="center">
+  <sub><b>· &nbsp; A T T R I B U T I O N &nbsp; ·</b></sub>
+</div>
+
+<br/>
+
+InkScroller is a **reading interface** — it does not host, store, or distribute any copyrighted content.  
+All manga data and images are sourced through:
+
+- **MangaDex** — primary catalogue, chapters, and page images via MangaDex@Home. InkScroller is not affiliated with MangaDex. Content belongs to its respective authors and scanlation groups.
+- **Jikan / MyAnimeList** — metadata enrichment (score, rank, genres). InkScroller is not affiliated with MyAnimeList or Jikan.
+
+External chapters link to official platforms (Manga Plus, Viz Media, Mangatoon, etc.).  
+The app implements age-gated content access as required by platform policies.
+
+See [`docs/legal/api-compliance.md`](docs/legal/api-compliance.md) for full compliance details.
+
+<br/>
+
+<div align="center">
+  <img width="55%" src="https://capsule-render.vercel.app/api?type=rect&color=0:0f172a,50:0d9488,100:0f172a&height=3&section=header" alt=""/>
+</div>
+
+<br/>
+
 <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
 
 <div align="center">
 
 **InkScroller** — built with Flutter + FastAPI  
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) · [`docs/public-readiness.md`](docs/public-readiness.md) · [`LICENSE`](LICENSE)
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) · [`docs/legal/api-compliance.md`](docs/legal/api-compliance.md) · [`LICENSE`](LICENSE)
 
 <br/>
 
