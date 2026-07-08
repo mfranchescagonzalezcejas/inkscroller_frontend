@@ -68,6 +68,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
       return MangaModel.fromJson(data);
     } on DioException catch (error) {
       throw _mapDioException(error);
+    } on AppException {
+      rethrow;
     } on Exception catch (error) {
       throw UnexpectedException(message: error.toString());
     }
@@ -94,6 +96,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           .toList();
     } on DioException catch (error) {
       throw _mapDioException(error);
+    } on AppException {
+      rethrow;
     } on Exception catch (error) {
       throw UnexpectedException(message: error.toString());
     }
