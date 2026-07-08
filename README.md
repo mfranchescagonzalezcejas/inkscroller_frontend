@@ -28,6 +28,9 @@
 **InkScroller** is a full-stack manga reading app built with Flutter and FastAPI.  
 It features a smooth reader, personalized library, age-aware content filtering, and CI/CD automation.
 
+Content sourced through **MangaDex** — chapters hosted on the backend are rendered in-app;  
+external-only chapters redirect to the original MangaDex page seamlessly.
+
 🎓 &nbsp;**TFM submission** — See [deliverables](#tfm-deliverables) below.
 
 <br/>
@@ -52,7 +55,7 @@ It features a smooth reader, personalized library, age-aware content filtering, 
 |---|---|
 | Flutter 3.41 / Dart 3.9 | FastAPI (Python) |
 | Riverpod (state management) | Firebase Auth integration |
-| get_it (dependency injection) | MangaDex API proxy |
+| get_it (dependency injection) | MangaDex API proxy (manga, chapters, covers) |
 | Dio (networking) | Age-based content gating |
 | GoRouter (navigation) | REST API |
 | Firebase Core + Auth + Analytics | PostgreSQL |
@@ -78,7 +81,8 @@ It features a smooth reader, personalized library, age-aware content filtering, 
 
 <div align="center">
 
-📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides  
+📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides.  
+&nbsp;&nbsp;&nbsp;&nbsp;Internal reader for hosted pages; external chapters redirect to MangaDex  
 🔍 **Catalog** — browse by genre, search with pagination, smart caching  
 ❤️ **User library** — follow/unfollow, track reading status  
 👤 **Profile** — avatar, username, birth date, preferences  
@@ -196,7 +200,8 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 </div>
 
 The app consists of a **Flutter frontend** + **FastAPI backend**.  
-The backend proxies MangaDex content and manages users, auth, and reading progress.  
+The backend proxies **MangaDex** content (manga, chapters, covers) and manages users, auth, and reading progress.  
+Chapters hosted on the backend are rendered in-app with scroll/paged modes; external-only chapters show a warning and redirect to the original MangaDex page.  
 See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details.
 
 <br/>
