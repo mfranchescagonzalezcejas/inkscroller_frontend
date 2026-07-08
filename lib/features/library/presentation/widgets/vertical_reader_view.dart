@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 const int _preloadAheadCount = 8;
 
 /// Extra scroll-buffer pixels to trigger off-screen page preloading.
-const double _cacheExtent = 800.0;
+const double _cacheExtent = 800;
 
 /// Vertical-scroll chapter reader that stacks page images top-to-bottom.
 ///
