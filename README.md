@@ -32,8 +32,9 @@ It features a smooth reader, personalized library, age-aware content filtering, 
 
 The backend proxies **MangaDex** content (catalogue, chapters, pages via MangaDex@Home), enriches metadata through **Jikan/MyAnimeList**, and manages user profiles, reading preferences, and personal libraries with PostgreSQL persistence.
 
-Chapters hosted on MangaDex servers are proxied and rendered in-app;  
-external-only chapters (hosted on platforms like Mangatoon) display the official link to read on the original site.
+MangaDex aggregates chapters from scanlation groups and official sources.  
+Chapters hosted on MangaDex's own infrastructure are proxied through the backend and rendered in-app;  
+external-only chapters (linked to official platforms such as **Manga Plus**, **Viz Media**, **Mangatoon**, etc.) show a warning and open the original link on the official site.
 
 🎓 &nbsp;**TFM submission** — See [deliverables](#tfm-deliverables) below.
 
@@ -86,7 +87,7 @@ external-only chapters (hosted on platforms like Mangatoon) display the official
 
 <br/>
 
-- 📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides. Internal reader for MangaDex-hosted chapters; external chapters open on the official source (Mangatoon, etc.)
+- 📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides. Internal reader for MangaDex-hosted chapters; external chapters open on the official source (Manga Plus, Viz Media, Mangatoon, etc.)
 - 🔍 **Catalog** — browse by genre, search with pagination, smart caching
 - ❤️ **User library** — follow/unfollow manga, track reading status
 - 👤 **Profile** — avatar, username, birth date, reading preferences
@@ -209,7 +210,7 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 
 The app consists of a **Flutter frontend** + **FastAPI backend** (Python 3.12, deployed on Railway).  
 The backend proxies **MangaDex** content (catalogue, chapters, pages via MangaDex@Home), enriches metadata through **Jikan/MyAnimeList**, and manages **user profiles**, reading **preferences**, and **personal libraries** with PostgreSQL.  
-Chapters hosted on MangaDex servers are rendered in-app with scroll/paged modes; external-only chapters (platforms like Mangatoon) show a warning and open the official link on the original site.  
+Chapters hosted on MangaDex servers are rendered in-app with scroll/paged modes; external-only chapters (official platforms like Manga Plus, Viz Media, Mangatoon) show a warning and open the original link on the official site.  
 See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details.
 
 <br/>
