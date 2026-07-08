@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Paged chapter reader with page-by-page navigation and zoom support.
@@ -32,6 +34,15 @@ class _PagedReaderViewState extends State<PagedReaderView> {
     super.dispose();
   }
 
+  /// Fires background decode for the next 3 pages so swiping feels instant.
+  void _preloadNext(BuildContext context, int currentIndex) {
+    for (int i = currentIndex + 1;
+        i <= currentIndex + 3 && i < widget.pages.length;
+        i++) {
+      unawaited(precacheImage(NetworkImage(widget.pages[i]), context));
+    }
+  }
+
   void _toggleControls() {
     setState(() => _showControls = !_showControls);
   }
@@ -42,11 +53,12 @@ class _PagedReaderViewState extends State<PagedReaderView> {
       children: [
         GestureDetector(
           onTap: _toggleControls,
-          child: PageView.builder(
+          child:           PageView.builder(
             controller: _pageController,
             itemCount: widget.pages.length,
             onPageChanged: (index) {
               setState(() => _currentPage = index);
+              _preloadNext(context, index);
             },
             itemBuilder: (context, index) {
               return _ReaderPageImage(

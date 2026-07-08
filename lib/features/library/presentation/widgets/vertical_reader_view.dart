@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Vertical-scroll chapter reader that stacks page images top-to-bottom.
@@ -16,6 +18,7 @@ class VerticalReaderView extends StatelessWidget {
     return ListView.builder(
       itemCount: pages.length,
       itemBuilder: (context, index) {
+        _preloadNext(context, index);
         return _ReaderPageImage(
           url: pages[index],
           pageNumber: index + 1,
@@ -23,6 +26,15 @@ class VerticalReaderView extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Fires background decode for the next 3 pages so scrolling feels instant.
+  void _preloadNext(BuildContext context, int currentIndex) {
+    for (int i = currentIndex + 1;
+        i <= currentIndex + 3 && i < pages.length;
+        i++) {
+      unawaited(precacheImage(NetworkImage(pages[i]), context));
+    }
   }
 }
 
