@@ -27,6 +27,7 @@ migrate_working_dir/
 **/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins-dependencies
+.metadata
 .pub-cache/
 .pub/
 /build/
@@ -60,6 +61,7 @@ app.*.map.json
 .codegraph/
 .cursor/
 .vercel/
+.gga
 
 # Editor backup files
 *~
