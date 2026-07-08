@@ -164,7 +164,7 @@ See [RELEASING.md](RELEASING.md) for the complete checklist.
 Quick summary:
 
 - [ ] `pubspec.yaml` version bumped (semver + build number)
-- [ ] All changes merged to `master`
+- [ ] All changes merged to `main`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured
 - [ ] Run `./scripts/release.sh X.Y.Z` (or `.ps1` on Windows)
