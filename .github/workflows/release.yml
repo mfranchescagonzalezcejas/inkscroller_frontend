@@ -96,13 +96,13 @@ jobs:
           else
             {
               echo "### 🚀 Features"
-              echo "$COMMITS" | grep '^feat' | sed 's/^/- /'
+              echo "$COMMITS" | grep '^feat' | sed 's/^/- /' || true
               echo ""
               echo "### 🐛 Bug Fixes"
-              echo "$COMMITS" | grep '^fix' | sed 's/^/- /'
+              echo "$COMMITS" | grep '^fix' | sed 's/^/- /' || true
               echo ""
               echo "### 🔧 Refactors & Improvements"
-              echo "$COMMITS" | grep -E '^(perf|refactor|test)' | sed 's/^/- /'
+              echo "$COMMITS" | grep -E '^(perf|refactor|test)' | sed 's/^/- /' || true
             } > release-metadata/release_notes_dev.txt
           fi
 
