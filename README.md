@@ -85,8 +85,6 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 
 <br/>
 
-<br/>
-
 - 📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides. Internal reader for MangaDex-hosted chapters; external chapters open on the official source (Manga Plus, Viz Media, Mangatoon, etc.)
 - 🔍 **Catalog** — browse by genre, search with pagination, smart caching
 - ❤️ **User library** — follow/unfollow manga, track reading status
@@ -190,8 +188,6 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 <div align="center">
   <sub><b>· &nbsp; T F M &nbsp; D E L I V E R A B L E S &nbsp; ·</b></sub>
 </div>
-
-<br/>
 
 <br/>
 
