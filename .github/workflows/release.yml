@@ -87,8 +87,9 @@ jobs:
 
           mkdir -p release-metadata
 
-          COMMITS=$(git log $RANGE --pretty=format:"%s" \
-            | grep -E '^(feat|fix|perf|refactor|test)')
+          ALL_COMMITS=$(git log "$RANGE" --pretty=format:"%s")
+          COMMITS=$(printf '%s\n' "$ALL_COMMITS" \
+            | grep -E '^(feat|fix|perf|refactor|test)' || true)
 
           if [ -z "$COMMITS" ]; then
             echo "- Internal improvements and QA fixes" > release-metadata/release_notes_dev.txt
@@ -109,12 +110,15 @@ jobs:
           cp release-metadata/release_notes_dev.txt release-metadata/release_notes_pro.txt
 
           DEFAULT_MESSAGE="- Internal improvements and QA fixes included in this release"
-          [ ! -s release-metadata/release_notes_dev.txt ] \
-            && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_dev.txt
-          [ ! -s release-metadata/release_notes_staging.txt ] \
-            && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_staging.txt
-          [ ! -s release-metadata/release_notes_pro.txt ] || true \
-            && echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_pro.txt
+          if [ ! -s release-metadata/release_notes_dev.txt ]; then
+            echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_dev.txt
+          fi
+          if [ ! -s release-metadata/release_notes_staging.txt ]; then
+            echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_staging.txt
+          fi
+          if [ ! -s release-metadata/release_notes_pro.txt ]; then
+            echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_pro.txt
+          fi
 
       - name: Upload release metadata
         uses: actions/upload-artifact@v6
