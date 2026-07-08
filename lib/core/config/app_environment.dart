@@ -17,15 +17,15 @@ abstract final class AppEnvironment {
   /// Android emulator loopback alias for the host machine.
   static const String androidEmulatorBaseUrl = 'http://10.0.2.2:8000';
 
-  /// Backend API URLs by environment (deployed on devdigi.dev).
+  /// Remote backend API endpoints (deployed on devdigi.dev).
   ///
-  /// These are the production endpoints. For local development, use `--dart-define`
+  /// These are the deployed endpoints. For local development, use `--dart-define`
   /// or the default localhost fallback.
   ///
   ///   dev:     https://api.dev.inkscroller.devdigi.dev
   ///   staging: https://api.stg.inkscroller.devdigi.dev
   ///   pro:     https://api.inkscroller.devdigi.dev
-  static const String cloudRunBaseUrl = 'https://api.dev.inkscroller.devdigi.dev';
+  static const String devBackendApiBaseUrl = 'https://api.dev.inkscroller.devdigi.dev';
 
   /// Backend base URL for the current app run.
   ///
