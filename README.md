@@ -25,10 +25,14 @@
   <sub><b>· &nbsp; A B O U T &nbsp; ·</b></sub>
 </div>
 
-**InkScroller** is a full-stack manga reading app built with Flutter and FastAPI.  
+<br/>
+
+**InkScroller** is a full-stack manga reading app built with **Flutter** (frontend) and **FastAPI** (backend).  
 It features a smooth reader, personalized library, age-aware content filtering, and CI/CD automation.
 
-Content sourced through **MangaDex** — chapters hosted on MangaDex servers are proxied through the backend and rendered in-app;  
+The backend proxies **MangaDex** content (catalogue, chapters, pages via MangaDex@Home), enriches metadata through **Jikan/MyAnimeList**, and manages user profiles, reading preferences, and personal libraries with PostgreSQL persistence.
+
+Chapters hosted on MangaDex servers are proxied and rendered in-app;  
 external-only chapters (hosted on platforms like Mangatoon) display the official link to read on the original site.
 
 🎓 &nbsp;**TFM submission** — See [deliverables](#tfm-deliverables) below.
@@ -53,13 +57,14 @@ external-only chapters (hosted on platforms like Mangatoon) display the official
 
 | Frontend | Backend |
 |---|---|
-| Flutter 3.41 / Dart 3.9 | FastAPI (Python) |
-| Riverpod (state management) | Firebase Auth integration |
-| get_it (dependency injection) | MangaDex API proxy (manga, chapters, covers) |
-| Dio (networking) | Age-based content gating |
-| GoRouter (navigation) | REST API |
-| Firebase Core + Auth + Analytics | PostgreSQL |
-| Clean + Screaming Architecture | Deployed on devdigi.dev |
+| Flutter 3.41 / Dart 3.9 | FastAPI 0.128 / Python 3.12 |
+| Riverpod (state management) | httpx (async HTTP client) |
+| get_it (dependency injection) | Firebase Admin SDK (auth) |
+| Dio (networking) | MangaDex API client (catalogue, chapters, pages) |
+| GoRouter (navigation) | Jikan API client (MAL metadata enrichment) |
+| Firebase Core + Auth + Analytics | PostgreSQL (Railway) / SQLite (local) |
+| Clean + Screaming Architecture | In-memory TTL cache |
+| 3 flavors (dev, staging, pro) | Deployed on Railway |
 
 </div>
 
@@ -76,6 +81,8 @@ external-only chapters (hosted on platforms like Mangatoon) display the official
 <div align="center">
   <sub><b>· &nbsp; F E A T U R E S &nbsp; ·</b></sub>
 </div>
+
+<br/>
 
 <br/>
 
@@ -101,6 +108,8 @@ external-only chapters (hosted on platforms like Mangatoon) display the official
 <div align="center">
   <sub><b>· &nbsp; S E T U P &nbsp; ·</b></sub>
 </div>
+
+<br/>
 
 ### Prerequisites
 
@@ -146,6 +155,8 @@ fvm flutter test    # 197 tests — all green ✅
   <sub><b>· &nbsp; A R C H I T E C T U R E &nbsp; ·</b></sub>
 </div>
 
+<br/>
+
 **Screaming Architecture** at the top level, **Clean Architecture** per feature:
 
 ```
@@ -181,22 +192,24 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 
 <br/>
 
+<br/>
+
 <div align="center">
 
-| Item | URL |
-|---|---|
+| Item                 | URL                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | 🗂️ **Frontend repo** | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
-| ⚙️ **Backend repo** | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend) |
-| 🌐 **Deployment** | [InkScroller App](https://inkscroller.dev) |
-| 📽️ **Slides** | <!-- TFM: add URL --> |
-| 🎬 **Demo video** | <!-- TFM: add URL --> |
-| 👤 **Test user** | <!-- TFM: add email/password --> |
+| ⚙️ **Backend repo**  | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend)   |
+| 🌐 **Deployment**    | [InkScroller App](https://inkscroller.dev)                                                                        |
+| 📽️ **Slides**        | <!-- TFM: add URL -->                                                                                             |
+| 🎬 **Demo video**    | <!-- TFM: add URL -->                                                                                             |
+| 👤 **Test user**     | <!-- TFM: add email/password -->                                                                                  |
 
 </div>
 
-The app consists of a **Flutter frontend** + **FastAPI backend**.  
-The backend proxies **MangaDex** content (manga, chapters, covers) and manages users, auth, and reading progress.  
-Chapters hosted on MangaDex servers are proxied through the backend and rendered in-app with scroll/paged modes; external-only chapters (hosted on platforms like Mangatoon) show a warning and open the official link on the original site.  
+The app consists of a **Flutter frontend** + **FastAPI backend** (Python 3.12, deployed on Railway).  
+The backend proxies **MangaDex** content (catalogue, chapters, pages via MangaDex@Home), enriches metadata through **Jikan/MyAnimeList**, and manages **user profiles**, reading **preferences**, and **personal libraries** with PostgreSQL.  
+Chapters hosted on MangaDex servers are rendered in-app with scroll/paged modes; external-only chapters (platforms like Mangatoon) show a warning and open the official link on the original site.  
 See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details.
 
 <br/>
