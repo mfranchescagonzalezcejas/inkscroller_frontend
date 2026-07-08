@@ -368,6 +368,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } on FormatException {
+      if (!context.mounted) return;
       AppFeedback.showWarning(
         context,
         title: context.l10n.externalChapterTitle,
