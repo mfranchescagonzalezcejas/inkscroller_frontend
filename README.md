@@ -28,8 +28,8 @@
 **InkScroller** is a full-stack manga reading app built with Flutter and FastAPI.  
 It features a smooth reader, personalized library, age-aware content filtering, and CI/CD automation.
 
-Content sourced through **MangaDex** — chapters hosted on the backend are rendered in-app;  
-external-only chapters redirect to the original MangaDex page seamlessly.
+Content sourced through **MangaDex** — chapters hosted on MangaDex servers are proxied through the backend and rendered in-app;  
+external-only chapters (hosted on platforms like Mangatoon) display the official link to read on the original site.
 
 🎓 &nbsp;**TFM submission** — See [deliverables](#tfm-deliverables) below.
 
@@ -79,7 +79,7 @@ external-only chapters redirect to the original MangaDex page seamlessly.
 
 <br/>
 
-- 📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides. Internal reader for hosted pages; external chapters redirect to MangaDex
+- 📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides. Internal reader for MangaDex-hosted chapters; external chapters open on the official source (Mangatoon, etc.)
 - 🔍 **Catalog** — browse by genre, search with pagination, smart caching
 - ❤️ **User library** — follow/unfollow manga, track reading status
 - 👤 **Profile** — avatar, username, birth date, reading preferences
@@ -196,7 +196,7 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 
 The app consists of a **Flutter frontend** + **FastAPI backend**.  
 The backend proxies **MangaDex** content (manga, chapters, covers) and manages users, auth, and reading progress.  
-Chapters hosted on the backend are rendered in-app with scroll/paged modes; external-only chapters show a warning and redirect to the original MangaDex page.  
+Chapters hosted on MangaDex servers are proxied through the backend and rendered in-app with scroll/paged modes; external-only chapters (hosted on platforms like Mangatoon) show a warning and open the official link on the original site.  
 See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details.
 
 <br/>
