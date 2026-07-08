@@ -197,12 +197,15 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | 🗂️ **Frontend repo** | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
 | ⚙️ **Backend repo**  | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend)   |
-| 🌐 **Deployment**    | [InkScroller App](https://inkscroller.dev)                                                                        |
+| 📦 **App releases**  | [GitHub Releases](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases) · Google Play publication in progress |
+| 🔌 **Backend APIs**  | `dev` `https://api.dev.inkscroller.devdigi.dev` · `staging` `https://api.stg.inkscroller.devdigi.dev` · `pro` `https://api.inkscroller.devdigi.dev` |
 | 📽️ **Slides**        | <!-- TFM: add URL -->                                                                                             |
 | 🎬 **Demo video**    | <!-- TFM: add URL -->                                                                                             |
 | 👤 **Test user**     | <!-- TFM: add email/password -->                                                                                  |
 
 </div>
+
+InkScroller is a **mobile Flutter app**, so there is no public web deployment. GitHub Releases is the current public release channel while Google Play publication is in progress.
 
 The app consists of a **Flutter frontend** + **FastAPI backend** (Python 3.12, deployed on Railway).  
 The backend proxies **MangaDex** content (catalogue, chapters, pages via MangaDex@Home), enriches metadata through **Jikan/MyAnimeList**, and manages **user profiles**, reading **preferences**, and **personal libraries** with PostgreSQL.  
