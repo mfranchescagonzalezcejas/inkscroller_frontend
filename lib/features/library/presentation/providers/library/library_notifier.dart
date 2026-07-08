@@ -79,7 +79,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
           hasMore: false,
           failure: failure,
         );
-        // ponytail: don't cache failures — refresh must retry
+        // Skip caching failures so refresh() triggers a real network retry.
       },
       (mangas) {
         _offset += mangas.length;
