@@ -73,14 +73,13 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     result.fold(
       (failure) {
-        final failedState = state.copyWith(
+        state = state.copyWith(
           isLoading: false,
           mangas: const [],
           hasMore: false,
           failure: failure,
         );
-        state = failedState;
-        _tabCache[key] = failedState;
+        // ponytail: don't cache failures — refresh must retry
       },
       (mangas) {
         _offset += mangas.length;
