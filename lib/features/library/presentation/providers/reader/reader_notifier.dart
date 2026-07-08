@@ -87,7 +87,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       clearFailure: true,
     );
 
-    final firstPages = pages.take(3).toList();
+    final firstPages = pages.take(5).toList();
     // Gracefully handle precache failures — images still load on demand.
     try {
       await _precacheImages(firstPages);
@@ -101,10 +101,10 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       loadedPages: firstPages.length,
     );
 
-    // Pre-warm the remaining pages in the background.
-    if (pages.length > 3) {
-      unawaited(_precacheAllConcurrent(pages.sublist(3)));
-    }
+        // Pre-warm the remaining pages in the background.
+        if (pages.length > 5) {
+          unawaited(_precacheAllConcurrent(pages.sublist(5)));
+        }
   }
 
   /// Downloads and caches [urls] using a worker-pool with [concurrency] slots.

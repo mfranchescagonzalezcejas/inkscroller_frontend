@@ -34,10 +34,10 @@ class _PagedReaderViewState extends State<PagedReaderView> {
     super.dispose();
   }
 
-  /// Fires background decode for the next 3 pages so swiping feels instant.
+  /// Fires background decode for the next 8 pages so swiping feels instant.
   void _preloadNext(BuildContext context, int currentIndex) {
     for (int i = currentIndex + 1;
-        i <= currentIndex + 3 && i < widget.pages.length;
+        i <= currentIndex + 8 && i < widget.pages.length;
         i++) {
       unawaited(precacheImage(NetworkImage(widget.pages[i]), context));
     }

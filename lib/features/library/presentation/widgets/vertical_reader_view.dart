@@ -17,6 +17,7 @@ class VerticalReaderView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: pages.length,
+      cacheExtent: 800,
       itemBuilder: (context, index) {
         _preloadNext(context, index);
         return _ReaderPageImage(
@@ -28,10 +29,10 @@ class VerticalReaderView extends StatelessWidget {
     );
   }
 
-  /// Fires background decode for the next 3 pages so scrolling feels instant.
+  /// Fires background decode for the next 8 pages so scrolling feels instant.
   void _preloadNext(BuildContext context, int currentIndex) {
     for (int i = currentIndex + 1;
-        i <= currentIndex + 3 && i < pages.length;
+        i <= currentIndex + 8 && i < pages.length;
         i++) {
       unawaited(precacheImage(NetworkImage(pages[i]), context));
     }
