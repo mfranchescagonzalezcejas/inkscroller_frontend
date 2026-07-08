@@ -398,7 +398,7 @@ jobs:
               --head main \
               --title "chore: sync main → develop after ${REF_NAME}" \
               --body "Auto-generated sync PR after release \`${REF_NAME}\`." \
-              --label "type:chore" 2>/dev/null || echo "PR already exists or creation skipped."
+              --label "type:chore" || echo "⚠️ PR creation skipped (may already exist or branch protection)"
           else
             echo "develop is up to date with main. No sync needed."
           fi
