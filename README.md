@@ -1,6 +1,6 @@
 # InkScroller Flutter
 
-Flutter frontend for **InkScroller**, a manga reading experience focused on discoverability, personalized reading preferences, and an adaptive reader workflow.
+Flutter frontend (with FastAPI backend) for **InkScroller**, a manga reading experience focused on discoverability, personalized reading preferences, and an adaptive reader workflow.
 
 This repository is prepared for **public portfolio visibility** and remains under active development.
 
@@ -20,7 +20,8 @@ This repository is prepared for **public portfolio visibility** and remains unde
 
 | Resource | URL |
 |---|---|
-| Repository | [github.com/mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
+| Frontend repository | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
+| Backend repository | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend) |
 | Deployment | [InkScroller App](https://inkscroller.dev) |
 | Slides | <!-- TFM: add URL --> |
 | Demo video | <!-- TFM: add URL --> |
@@ -161,13 +162,14 @@ InkScroller consumes content through its backend integration and includes attrib
 
 | Item | URL / Location |
 |---|---|
-| Source repository | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
+| Frontend repository | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
+| Backend repository | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend) |
 | Deployment | [InkScroller App](https://inkscroller.dev) |
 | Slides | <!-- TFM: link to slides --> |
 | Demo video | <!-- TFM: link to video --> |
 | Test user | <!-- TFM: email / password --> |
 
-For TFM evaluators: the app requires a running backend. All API requests go to the InkScroller backend which proxies MangaDex content. See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details.
+For TFM evaluators: the app consists of a **Flutter frontend** and a **FastAPI backend**. The backend proxies MangaDex content and provides user management, auth, and reading progress APIs. See [`docs/API_INTEGRATION.md`](docs/API_INTEGRATION.md) for integration details.
 
 ## License
 
