@@ -2,6 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+/// How many off-screen pages to build and pre-load in the vertical reader.
+const int _preloadAheadCount = 8;
+
+/// Extra scroll-buffer pixels to trigger off-screen page preloading.
+const double _cacheExtent = 800.0;
+
 /// Vertical-scroll chapter reader that stacks page images top-to-bottom.
 ///
 /// Each page shows a loading placeholder while the image downloads,
@@ -17,7 +23,7 @@ class VerticalReaderView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: pages.length,
-      cacheExtent: 800,
+      cacheExtent: _cacheExtent,
       itemBuilder: (context, index) {
         _preloadNext(context, index);
         return _ReaderPageImage(
@@ -29,10 +35,10 @@ class VerticalReaderView extends StatelessWidget {
     );
   }
 
-  /// Fires background decode for the next 8 pages so scrolling feels instant.
+  /// Fires background decode for the next `_preloadAheadCount` pages.
   void _preloadNext(BuildContext context, int currentIndex) {
     for (int i = currentIndex + 1;
-        i <= currentIndex + 8 && i < pages.length;
+        i <= currentIndex + _preloadAheadCount && i < pages.length;
         i++) {
       unawaited(precacheImage(NetworkImage(pages[i]), context));
     }
@@ -40,7 +46,7 @@ class VerticalReaderView extends StatelessWidget {
 }
 
 /// Single page image widget with loading and error states.
-class _ReaderPageImage extends StatefulWidget {
+class _ReaderPageImage extends StatelessWidget {
   final String url;
   final int pageNumber;
   final BoxFit fit;
@@ -52,22 +58,17 @@ class _ReaderPageImage extends StatefulWidget {
   });
 
   @override
-  State<_ReaderPageImage> createState() => _ReaderPageImageState();
-}
-
-class _ReaderPageImageState extends State<_ReaderPageImage> {
-  @override
   Widget build(BuildContext context) {
     return Image.network(
-      widget.url,
-      fit: widget.fit,
+      url,
+      fit: fit,
       gaplessPlayback: true,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return _LoadingPlaceholder(pageNumber: widget.pageNumber);
+        return _LoadingPlaceholder(pageNumber: pageNumber);
       },
       errorBuilder: (context, error, stackTrace) {
-        return _ErrorPlaceholder(pageNumber: widget.pageNumber);
+        return _ErrorPlaceholder(pageNumber: pageNumber);
       },
     );
   }

@@ -11,6 +11,9 @@ import '../../../domain/usecases/resolve_reader_mode.dart';
 import '../../../domain/usecases/get_chapter_pages.dart';
 import 'reader_state.dart';
 
+/// How many pages to pre-cache before showing the reader.
+const int _initialPrecacheCount = 5;
+
 /// Loads chapter page URLs and pre-caches images concurrently in the background.
 ///
 /// Fetches page data via [GetChapterPages], then immediately shows the reader
@@ -87,24 +90,24 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       clearFailure: true,
     );
 
-    final firstPages = pages.take(5).toList();
-    // Gracefully handle precache failures — images still load on demand.
+    final firstPages = pages.take(_initialPrecacheCount).toList();
     try {
       await _precacheImages(firstPages);
     } on Object catch (_) {
       // Precache is a perf optimisation, not a requirement.
     }
+    if (_isDisposed) return;
 
-    // Now show the reader — first 3 pages are cache-ready.
+    // Show the reader with the first 5 pages already cached.
     state = state.copyWith(
       isLoading: false,
       loadedPages: firstPages.length,
     );
 
-        // Pre-warm the remaining pages in the background.
-        if (pages.length > 5) {
-          unawaited(_precacheAllConcurrent(pages.sublist(5)));
-        }
+    // Pre-warm the remaining pages in the background.
+    if (pages.length > _initialPrecacheCount) {
+      unawaited(_precacheAllConcurrent(pages.sublist(_initialPrecacheCount)));
+    }
   }
 
   /// Downloads and caches [urls] using a worker-pool with [concurrency] slots.

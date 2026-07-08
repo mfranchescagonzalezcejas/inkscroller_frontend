@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+/// How many pages ahead to pre-load when swiping in the paged reader.
+const int _preloadAheadCount = 8;
+
 /// Paged chapter reader with page-by-page navigation and zoom support.
 ///
 /// Shows one page at a time in a [PageView] with natural swipe gestures.
@@ -34,10 +37,10 @@ class _PagedReaderViewState extends State<PagedReaderView> {
     super.dispose();
   }
 
-  /// Fires background decode for the next 8 pages so swiping feels instant.
+  /// Fires background decode for the next `_preloadAheadCount` pages.
   void _preloadNext(BuildContext context, int currentIndex) {
     for (int i = currentIndex + 1;
-        i <= currentIndex + 8 && i < widget.pages.length;
+        i <= currentIndex + _preloadAheadCount && i < widget.pages.length;
         i++) {
       unawaited(precacheImage(NetworkImage(widget.pages[i]), context));
     }
@@ -118,17 +121,12 @@ class _TopBar extends StatelessWidget {
 }
 
 /// Single page image widget with loading and error states.
-class _ReaderPageImage extends StatefulWidget {
+class _ReaderPageImage extends StatelessWidget {
   final String url;
   final int pageNumber;
 
   const _ReaderPageImage({required this.url, required this.pageNumber});
 
-  @override
-  State<_ReaderPageImage> createState() => _ReaderPageImageState();
-}
-
-class _ReaderPageImageState extends State<_ReaderPageImage> {
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
@@ -136,15 +134,15 @@ class _ReaderPageImageState extends State<_ReaderPageImage> {
       maxScale: 4,
       child: Center(
         child: Image.network(
-          widget.url,
+          url,
           fit: BoxFit.contain,
           gaplessPlayback: true,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
-            return _LoadingPlaceholder(pageNumber: widget.pageNumber);
+            return _LoadingPlaceholder(pageNumber: pageNumber);
           },
           errorBuilder: (context, error, stackTrace) {
-            return _ErrorPlaceholder(pageNumber: widget.pageNumber);
+            return _ErrorPlaceholder(pageNumber: pageNumber);
           },
         ),
       ),
