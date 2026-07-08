@@ -79,19 +79,14 @@ external-only chapters redirect to the original MangaDex page seamlessly.
 
 <br/>
 
-<div align="center">
-
-📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides.  
-&nbsp;&nbsp;&nbsp;&nbsp;Internal reader for hosted pages; external chapters redirect to MangaDex  
-🔍 **Catalog** — browse by genre, search with pagination, smart caching  
-❤️ **User library** — follow/unfollow, track reading status  
-👤 **Profile** — avatar, username, birth date, preferences  
-🔐 **Auth** — email/password, Firebase Auth, age-aware registration  
-🌐 **Localization** — English & Spanish  
-📦 **3 flavors** — dev, staging, pro  
-⚙️ **CI/CD** — GitHub Actions, automated releases, Firebase Distribution  
-
-</div>
+- 📖 **Manga reader** — scroll & paged modes, reading progress, per-title overrides. Internal reader for hosted pages; external chapters redirect to MangaDex
+- 🔍 **Catalog** — browse by genre, search with pagination, smart caching
+- ❤️ **User library** — follow/unfollow manga, track reading status
+- 👤 **Profile** — avatar, username, birth date, reading preferences
+- 🔐 **Auth** — email/password, Firebase Auth, age-aware registration
+- 🌐 **Localization** — English & Spanish
+- 📦 **3 build flavors** — dev, staging, pro
+- ⚙️ **CI/CD** — GitHub Actions, automated release workflow, Firebase Distribution
 
 <br/>
 
