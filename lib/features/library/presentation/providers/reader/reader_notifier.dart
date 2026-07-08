@@ -51,42 +51,60 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     final result = await getChapterPages(chapterId);
     if (_isDisposed) return;
 
+    var pages = <String>[];
+    var hasFailed = false;
     result.fold(
       (failure) {
+        hasFailed = true;
         if (_isDisposed) return;
         state = state.copyWith(isLoading: false, failure: failure);
       },
-      (pages) {
-        if (pages.isEmpty) {
-          state = state.copyWith(
-            isLoading: false,
-            failure: const UnexpectedFailure(message: 'Capítulo sin páginas'),
-          );
-          return;
-        }
-
-        final readerMode = resolveReaderMode(
-          globalReaderMode: globalReaderMode,
-          titleOverride: titleOverride,
-          contentMetadata: ReaderContentMetadata(pageCount: pages.length),
-        );
-
-        // Expose URLs immediately so the reader renders on the next frame.
-        // Each page widget has its own loading placeholder — no need to wait.
-        state = state.copyWith(
-          pages: pages,
-          isLoading: false,
-          readerMode: readerMode,
-          totalPages: pages.length,
-          loadedPages: 0,
-          clearFailure: true,
-        );
-
-        // Pre-warm the image cache concurrently in the background.
-        // 4 parallel slots: fast enough without hammering the CDN.
-        unawaited(_precacheAllConcurrent(pages));
-      },
+      (p) => pages = p,
     );
+    if (hasFailed || _isDisposed) return;
+    if (pages.isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        failure: const UnexpectedFailure(message: 'Capítulo sin páginas'),
+      );
+      return;
+    }
+
+    final readerMode = resolveReaderMode(
+      globalReaderMode: globalReaderMode,
+      titleOverride: titleOverride,
+      contentMetadata: ReaderContentMetadata(pageCount: pages.length),
+    );
+
+    // Precache the first 3 pages while the loading screen is still visible.
+    // This way the reader opens with images already in cache — no spinners.
+    state = state.copyWith(
+      pages: pages,
+      isLoading: true,
+      readerMode: readerMode,
+      totalPages: pages.length,
+      loadedPages: 0,
+      clearFailure: true,
+    );
+
+    final firstPages = pages.take(3).toList();
+    // Gracefully handle precache failures — images still load on demand.
+    try {
+      await _precacheImages(firstPages);
+    } on Object catch (_) {
+      // Precache is a perf optimisation, not a requirement.
+    }
+
+    // Now show the reader — first 3 pages are cache-ready.
+    state = state.copyWith(
+      isLoading: false,
+      loadedPages: firstPages.length,
+    );
+
+    // Pre-warm the remaining pages in the background.
+    if (pages.length > 3) {
+      unawaited(_precacheAllConcurrent(pages.sublist(3)));
+    }
   }
 
   /// Downloads and caches [urls] using a worker-pool with [concurrency] slots.
@@ -121,6 +139,12 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     await Future.wait(
       List.generate(math.min(concurrency, urls.length), (_) => worker()),
     );
+  }
+
+  /// Pre-caches [urls] in parallel. Used for the initial batch so the reader
+  /// opens with the first pages already in the image cache.
+  Future<void> _precacheImages(List<String> urls) async {
+    await Future.wait(urls.map(_precacheNetworkImage));
   }
 
   Future<void> _precacheNetworkImage(String url) async {
