@@ -46,6 +46,8 @@ It features a smooth reader, personalized library, age-aware content filtering, 
 
 <br/>
 
+<div align="center">
+
 | Frontend | Backend |
 |---|---|
 | Flutter 3.41 / Dart 3.9 | FastAPI (Python) |
@@ -55,6 +57,8 @@ It features a smooth reader, personalized library, age-aware content filtering, 
 | GoRouter (navigation) | REST API |
 | Firebase Core + Auth + Analytics | PostgreSQL |
 | Clean + Screaming Architecture | Deployed on devdigi.dev |
+
+</div>
 
 <br/>
 
@@ -178,6 +182,8 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 
 <br/>
 
+<div align="center">
+
 | Item | URL |
 |---|---|
 | 🗂️ **Frontend repo** | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
@@ -186,6 +192,8 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 | 📽️ **Slides** | <!-- TFM: add URL --> |
 | 🎬 **Demo video** | <!-- TFM: add URL --> |
 | 👤 **Test user** | <!-- TFM: add email/password --> |
+
+</div>
 
 The app consists of a **Flutter frontend** + **FastAPI backend**.  
 The backend proxies MangaDex content and manages users, auth, and reading progress.  
