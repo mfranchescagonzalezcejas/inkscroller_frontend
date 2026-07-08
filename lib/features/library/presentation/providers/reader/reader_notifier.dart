@@ -141,10 +141,12 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     );
   }
 
-  /// Pre-caches [urls] in parallel. Used for the initial batch so the reader
-  /// opens with the first pages already in the image cache.
+  /// Pre-caches [urls] one by one and updates the loading bar after each.
   Future<void> _precacheImages(List<String> urls) async {
-    await Future.wait(urls.map(_precacheNetworkImage));
+    for (var i = 0; i < urls.length; i++) {
+      await _precacheNetworkImage(urls[i]);
+      state = state.copyWith(loadedPages: i + 1);
+    }
   }
 
   Future<void> _precacheNetworkImage(String url) async {
