@@ -92,7 +92,10 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
 
     final firstPages = pages.take(_initialPrecacheCount).toList();
     try {
-      await _precacheImages(firstPages);
+      await _precacheImages(firstPages).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () {},
+      );
     } on Object catch (_) {
       // Precache is a perf optimisation, not a requirement.
     }
