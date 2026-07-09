@@ -67,6 +67,42 @@ void main() {
     expect(notifier.state.failure, isA<NetworkFailure>());
   });
 
+  test('refresh() retries network call after cached failure', () async {
+    when(
+      () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
+    ).thenAnswer(
+      (_) async => const Left<Failure, List<Manga>>(
+        NetworkFailure(message: 'offline'),
+      ),
+    );
+    when(() => searchManga(any())).thenAnswer(
+      (_) async => const Right<Failure, List<Manga>>(<Manga>[]),
+    );
+
+    final notifier = LibraryNotifier(getMangaList, searchManga);
+    await Future<void>.delayed(Duration.zero);
+
+    // Initial load failed.
+    expect(notifier.state.failure, isA<NetworkFailure>());
+
+    // Override mock: second call succeeds.
+    when(
+      () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
+    ).thenAnswer(
+      (_) async => Right<Failure, List<Manga>>(mangas),
+    );
+
+    await notifier.refresh();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(notifier.state.failure, isNull);
+    expect(notifier.state.mangas, hasLength(2));
+    expect(notifier.state.mangas.first.title, 'Berserk');
+    verify(
+      () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
+    ).called(2);
+  });
+
   test('loadMore appends and deduplicates mangas', () async {
     final initialPage = <Manga>[
       ...mangas,
