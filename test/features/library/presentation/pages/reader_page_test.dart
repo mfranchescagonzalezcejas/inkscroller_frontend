@@ -229,6 +229,7 @@ void main() {
           external: true,
           externalUrl: 'https://example.com/chapter/blocked',
         );
+        fakeUrlLauncher.canLaunchResult = false;
 
         await pumpReaderPage(
           tester,
