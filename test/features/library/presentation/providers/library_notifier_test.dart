@@ -103,6 +103,42 @@ void main() {
     ).called(2);
   });
 
+  test('refresh() fetches again after successful cached state', () async {
+    when(
+      () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
+    ).thenAnswer(
+      (_) async => Right<Failure, List<Manga>>(mangas),
+    );
+    when(() => searchManga(any())).thenAnswer(
+      (_) async => const Right<Failure, List<Manga>>(<Manga>[]),
+    );
+
+    final notifier = LibraryNotifier(getMangaList, searchManga);
+    await Future<void>.delayed(Duration.zero);
+
+    // Initial load succeeded and cached.
+    expect(notifier.state.mangas, hasLength(2));
+
+    // Second load returns different data.
+    final updatedMangas = <Manga>[
+      Manga(id: '3', title: 'Pluto'),
+    ];
+    when(
+      () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
+    ).thenAnswer(
+      (_) async => Right<Failure, List<Manga>>(updatedMangas),
+    );
+
+    await notifier.refresh();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(notifier.state.mangas, hasLength(1));
+    expect(notifier.state.mangas.first.title, 'Pluto');
+    verify(
+      () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
+    ).called(2);
+  });
+
   test('loadMore appends and deduplicates mangas', () async {
     final initialPage = <Manga>[
       ...mangas,

@@ -147,7 +147,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   /// Reloads the current mode from the first page.
+  ///
+  /// Clears the tab cache so pull-to-refresh always fetches fresh data.
   Future<void> refresh() {
+    final key = _cacheKey(_mode, _genre);
+    _tabCache.remove(key);
     return loadInitial(mode: _mode, genre: _genre);
   }
 
