@@ -35,6 +35,8 @@ import 'package:inkscroller_flutter/features/preferences/presentation/providers/
 import 'package:inkscroller_flutter/features/preferences/presentation/providers/preferences_provider.dart';
 import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 class _MockGetChapterPages extends Mock implements GetChapterPages {}
 
@@ -55,6 +57,23 @@ class _MockGetAuthState extends Mock implements GetAuthState {}
 class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
+class _FakeUrlLauncher extends UrlLauncherPlatform {
+  bool canLaunchResult = false;
+  final launchedUrls = <String>[];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> canLaunch(String url) async => canLaunchResult;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launchedUrls.add(url);
+    return true;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Stub factories — avoid GetIt in tests
@@ -134,6 +153,8 @@ Future<void> pumpReaderPage(
 void main() {
   late GetChapterPages getChapterPages;
   late ResolveReaderMode resolveReaderMode;
+  late UrlLauncherPlatform previousUrlLauncher;
+  late _FakeUrlLauncher fakeUrlLauncher;
 
   setUpAll(() {
     registerFallbackValue(
@@ -144,6 +165,13 @@ void main() {
   setUp(() {
     getChapterPages = _MockGetChapterPages();
     resolveReaderMode = _MockResolveReaderMode();
+    previousUrlLauncher = UrlLauncherPlatform.instance;
+    fakeUrlLauncher = _FakeUrlLauncher();
+    UrlLauncherPlatform.instance = fakeUrlLauncher;
+  });
+
+  tearDown(() {
+    UrlLauncherPlatform.instance = previousUrlLauncher;
   });
 
   // ── P0-F2: External chapter guard ───────────────────────────────────────
@@ -188,6 +216,35 @@ void main() {
         // Loading indicator must NOT be visible.
         expect(find.byType(LinearProgressIndicator), findsNothing);
 
+        verifyNever(() => getChapterPages(any()));
+      },
+    );
+
+    testWidgets(
+      'shows warning feedback when externalUrl cannot be launched',
+      (tester) async {
+        final externalChapter = Chapter(
+          id: 'ch-ext-unlaunchable',
+          readable: false,
+          external: true,
+          externalUrl: 'https://example.com/chapter/blocked',
+        );
+        fakeUrlLauncher.canLaunchResult = false;
+
+        await pumpReaderPage(
+          tester,
+          getChapterPages: getChapterPages,
+          resolveReaderMode: resolveReaderMode,
+          chapterId: 'ch-ext-unlaunchable',
+          chapter: externalChapter,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Open on original site'));
+        await tester.pump();
+
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(fakeUrlLauncher.launchedUrls, isEmpty);
         verifyNever(() => getChapterPages(any()));
       },
     );

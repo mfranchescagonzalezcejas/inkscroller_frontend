@@ -355,9 +355,31 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
       return;
     }
 
-    final uri = Uri.parse(externalUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      final uri = Uri.parse(externalUrl);
+      if (uri.scheme != 'http' && uri.scheme != 'https') {
+        AppFeedback.showWarning(
+          context,
+          title: context.l10n.externalChapterTitle,
+        );
+        return;
+      }
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+
+      if (!context.mounted) return;
+      AppFeedback.showWarning(
+        context,
+        title: context.l10n.externalChapterTitle,
+      );
+    } on FormatException {
+      if (!context.mounted) return;
+      AppFeedback.showWarning(
+        context,
+        title: context.l10n.externalChapterTitle,
+      );
     }
   }
 }

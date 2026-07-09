@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart';
+import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../domain/entities/chapter.dart';
@@ -220,9 +221,31 @@ class _ExternalChapterScreen extends StatelessWidget {
                   icon: const Icon(Icons.open_in_browser),
                   label: Text(context.l10n.externalChapterOpenAction),
                   onPressed: () async {
-                    final uri = Uri.parse(externalUrl!);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    try {
+                      final uri = Uri.parse(externalUrl!);
+                      if (uri.scheme != 'http' && uri.scheme != 'https') {
+                        AppFeedback.showWarning(
+                          context,
+                          title: context.l10n.externalChapterTitle,
+                        );
+                        return;
+                      }
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        return;
+                      }
+
+                      if (!context.mounted) return;
+                      AppFeedback.showWarning(
+                        context,
+                        title: context.l10n.externalChapterTitle,
+                      );
+                    } on FormatException {
+                      if (!context.mounted) return;
+                      AppFeedback.showWarning(
+                        context,
+                        title: context.l10n.externalChapterTitle,
+                      );
                     }
                   },
                 ),
