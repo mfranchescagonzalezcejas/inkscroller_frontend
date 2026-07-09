@@ -14,7 +14,7 @@
 <br/>
 
 [![Build](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/actions)
-[![Tests](https://img.shields.io/badge/tests-197%20passed-0d9488?logo=github)](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/mfranchescagonzalezcejas/inkscroller_frontend/ci.yml?label=tests&logo=github)](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/actions)
 [![Backend](https://img.shields.io/badge/backend-Inkscroller-1e40af?logo=fastapi)](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend)
 
 </div>
@@ -137,7 +137,7 @@ fvm flutter run --flavor pro -t lib/main_pro.dart
 
 ```bash
 fvm flutter analyze
-fvm flutter test    # 197 tests — all green ✅
+fvm flutter test    # all green ✅
 ```
 
 <br/>
