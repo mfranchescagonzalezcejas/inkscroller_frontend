@@ -195,15 +195,20 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 
 <div align="center">
 
-| Item                 | URL                                                                                                               |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 🗂️ **Frontend repo** | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
-| ⚙️ **Backend repo**  | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend)   |
-| 📦 **App releases**  | [GitHub Releases](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases) · Google Play publication in progress |
-| 🔌 **Backend APIs**  | `dev` `https://api.dev.inkscroller.devdigi.dev` · `staging` `https://api.stg.inkscroller.devdigi.dev` · `pro` `https://api.inkscroller.devdigi.dev` |
-| 📽️ **Slides**        | Work in progress — not published yet                                                                              |
-| 🎬 **Demo video**    | Work in progress — not published yet                                                                              |
-| 👤 **Test user**     | Not required — users can create an account from the app with email/password registration                          |
+<table>
+<thead>
+<tr><th>Item</th><th>URL</th></tr>
+</thead>
+<tbody>
+<tr><td>🗂️ <b>Frontend repo</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend">mfranchescagonzalezcejas/inkscroller_frontend</a></td></tr>
+<tr><td>⚙️ <b>Backend repo</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/Inkscroller_backend">mfranchescagonzalezcejas/Inkscroller_backend</a></td></tr>
+<tr><td>📦 <b>App releases</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases">GitHub Releases</a> · Google Play publication in progress</td></tr>
+<tr><td>🔌 <b>Backend APIs</b></td><td><code>dev</code> <code>https://api.dev.inkscroller.devdigi.dev</code> · <code>staging</code> <code>https://api.stg.inkscroller.devdigi.dev</code> · <code>pro</code> <code>https://api.inkscroller.devdigi.dev</code></td></tr>
+<tr><td>📽️ <b>Slides</b></td><td>Work in progress — not published yet</td></tr>
+<tr><td>🎬 <b>Demo video</b></td><td>Work in progress — not published yet</td></tr>
+<tr><td>👤 <b>Test user</b></td><td>Not required — users can create an account from the app with email/password registration</td></tr>
+</tbody>
+</table>
 
 </div>
 

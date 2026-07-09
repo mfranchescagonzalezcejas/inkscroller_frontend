@@ -195,15 +195,20 @@ Dirección de capas: `Presentation → Domain ← Data` — el dominio no depend
 
 <div align="center">
 
-| Ítem                 | URL                                                                                                               |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 🗂️ **Repo frontend** | [mfranchescagonzalezcejas/inkscroller_frontend](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend) |
-| ⚙️ **Repo backend**  | [mfranchescagonzalezcejas/Inkscroller_backend](https://github.com/mfranchescagonzalezcejas/Inkscroller_backend)   |
-| 📦 **Releases app**  | [GitHub Releases](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases) · publicación en Google Play en proceso |
-| 🔌 **APIs backend**  | `dev` `https://api.dev.inkscroller.devdigi.dev` · `staging` `https://api.stg.inkscroller.devdigi.dev` · `pro` `https://api.inkscroller.devdigi.dev` |
-| 📽️ **Diapositivas**  | En proceso — todavía no publicadas                                                                                |
-| 🎬 **Vídeo demo**    | En proceso — todavía no publicado                                                                                 |
-| 👤 **Usuario prueba** | No requerido — la app permite crear una cuenta desde el registro con email/contraseña                             |
+<table>
+<thead>
+<tr><th>Ítem</th><th>URL</th></tr>
+</thead>
+<tbody>
+<tr><td>🗂️ <b>Repo frontend</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend">mfranchescagonzalezcejas/inkscroller_frontend</a></td></tr>
+<tr><td>⚙️ <b>Repo backend</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/Inkscroller_backend">mfranchescagonzalezcejas/Inkscroller_backend</a></td></tr>
+<tr><td>📦 <b>Releases app</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases">GitHub Releases</a> · publicación en Google Play en proceso</td></tr>
+<tr><td>🔌 <b>APIs backend</b></td><td><code>dev</code> <code>https://api.dev.inkscroller.devdigi.dev</code> · <code>staging</code> <code>https://api.stg.inkscroller.devdigi.dev</code> · <code>pro</code> <code>https://api.inkscroller.devdigi.dev</code></td></tr>
+<tr><td>📽️ <b>Diapositivas</b></td><td>En proceso — todavía no publicadas</td></tr>
+<tr><td>🎬 <b>Vídeo demo</b></td><td>En proceso — todavía no publicado</td></tr>
+<tr><td>👤 <b>Usuario prueba</b></td><td>No requerido — la app permite crear una cuenta desde el registro con email/contraseña</td></tr>
+</tbody>
+</table>
 
 </div>
 
