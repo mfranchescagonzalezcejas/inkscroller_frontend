@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/error/failures.dart';
 import '../../../domain/entities/reader_mode.dart';
 import '../../../domain/entities/reading_preferences.dart';
@@ -30,6 +31,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   }) : super(const ReaderState());
 
   bool _isDisposed = false;
+  bool _precacheAbandoned = false;
 
   @override
   void dispose() {
@@ -92,9 +94,10 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
 
     final firstPages = pages.take(_initialPrecacheCount).toList();
     try {
+      _precacheAbandoned = false;
       await _precacheImages(firstPages).timeout(
-        const Duration(seconds: 8),
-        onTimeout: () {},
+        const Duration(seconds: AppConstants.readerPrecacheTimeoutSeconds),
+        onTimeout: () => _precacheAbandoned = true,
       );
     } on Object catch (_) {
       // Precache is a perf optimisation, not a requirement.
@@ -150,9 +153,9 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   /// Pre-caches [urls] one by one and updates the loading bar after each.
   Future<void> _precacheImages(List<String> urls) async {
     for (var i = 0; i < urls.length; i++) {
-      if (_isDisposed) return;
+      if (_isDisposed || _precacheAbandoned) return;
       await _precacheNetworkImage(urls[i]);
-      if (_isDisposed) return;
+      if (_isDisposed || _precacheAbandoned) return;
       state = state.copyWith(loadedPages: i + 1);
     }
   }

@@ -22,6 +22,7 @@ class AppConstants {
   static const double defaultZoom = 1;
   static const double minZoom = 0.8;
   static const double maxZoom = 3;
+  static const int readerPrecacheTimeoutSeconds = 8;
 
   // Cache
   static const int imageCacheDays = 7;
