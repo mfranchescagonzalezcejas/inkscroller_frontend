@@ -16,8 +16,8 @@ Editable source: [`release-flow.drawio`](diagrams/release-flow.drawio)
 
 ```
 1. Bump version in pubspec.yaml
-2. Commit, PR → develop → master (normal flow)
-3. Run the release script from master
+2. Commit, PR → develop → main (normal flow)
+3. Run the release script from main
 4. CI does the rest automatically
 ```
 
@@ -31,9 +31,9 @@ version: 1.2.3+45   # semver+build-number
 - The **semver** (`1.2.3`) must match the tag you will create.
 - The **build number** (`+45`) must be incremented on every release.
 
-### Step 2 — Merge to master
+### Step 2 — Merge to main
 
-All changes must be on `master` before tagging. The release scripts enforce this.
+All changes must be on `main` before tagging. The release scripts enforce this.
 
 ### Step 3 — Run the release script
 
@@ -51,11 +51,11 @@ The script runs 6 pre-flight checks before creating the tag:
 
 | Check | What it validates |
 |-------|------------------|
-| Branch | Must be on `master` |
+| Branch | Must be on `main` |
 | Clean tree | No uncommitted changes |
 | Semver format | Argument must be `X.Y.Z` |
 | pubspec match | Arg must match `pubspec.yaml` semver |
-| Sync | Local `master` == `origin/master` |
+| Sync | Local `main` == `origin/main` |
 | No duplicate tag | `vX.Y.Z` must not already exist |
 
 If any check fails, the script exits with a clear error — no tag is created.
@@ -72,7 +72,7 @@ Once the tag `vX.Y.Z` is pushed, `.github/workflows/release.yml` triggers and:
 
 Track progress at:
 ```
-https://github.com/mfranchescagonzalezcejas/inkscroller_flutter/actions
+https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/actions
 ```
 
 ---
@@ -114,7 +114,7 @@ Go to **Settings → Secrets and variables → Actions** and verify these are se
 If a release has a critical bug:
 
 1. **Do not delete the tag** — it stays for history.
-2. Fix the bug on a branch, merge to `master`.
+2. Fix the bug on a branch, merge to `main`.
 3. Bump `pubspec.yaml` to the next patch version (e.g. `1.2.4`).
 4. Run the release script again with the new version.
 
@@ -126,7 +126,7 @@ the new build as an update.
 ## Checklist
 
 - [ ] `pubspec.yaml` version bumped (semver + build number)
-- [ ] All changes merged to `master`
+- [ ] All changes merged to `main`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured (see table above)
 - [ ] Run `./scripts/release.sh X.Y.Z` (or `.ps1` on Windows)
