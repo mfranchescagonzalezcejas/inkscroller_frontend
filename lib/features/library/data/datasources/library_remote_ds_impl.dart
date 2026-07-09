@@ -61,9 +61,15 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
         '${ApiEndpoints.manga}/$mangaId',
       );
 
-      return MangaModel.fromJson(response.data!);
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException(message: 'Empty response from server');
+      }
+      return MangaModel.fromJson(data);
     } on DioException catch (error) {
       throw _mapDioException(error);
+    } on AppException {
+      rethrow;
     } on Exception catch (error) {
       throw UnexpectedException(message: error.toString());
     }
@@ -80,12 +86,18 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
         '${ApiEndpoints.chaptersByManga}/$mangaId',
       );
 
-      return response.data!
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException(message: 'Empty response from server');
+      }
+      return data
           .whereType<Map<String, dynamic>>()
           .map(ChapterModel.fromJson)
           .toList();
     } on DioException catch (error) {
       throw _mapDioException(error);
+    } on AppException {
+      rethrow;
     } on Exception catch (error) {
       throw UnexpectedException(message: error.toString());
     }
@@ -104,7 +116,10 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
         '${ApiEndpoints.chapterPages}/$chapterId/pages',
       );
 
-      final data = response.data!;
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException(message: 'Empty response from server');
+      }
 
       if (data['external'] == true) {
         throw const ServerException(message: 'Chapter is external only');

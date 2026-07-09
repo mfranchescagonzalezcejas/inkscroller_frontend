@@ -19,6 +19,8 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
       await dio.delete<void>(ApiEndpoints.usersMe);
     } on DioException catch (error) {
       throw _mapDioException(error);
+    } on Exception catch (error) {
+      throw UnexpectedException(message: error.toString());
     }
   }
 
