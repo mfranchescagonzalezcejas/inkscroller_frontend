@@ -240,7 +240,7 @@ class _ExternalChapterScreen extends StatelessWidget {
                         context,
                         title: context.l10n.externalChapterTitle,
                       );
-                    } on FormatException {
+                    } on Exception {
                       if (!context.mounted) return;
                       AppFeedback.showWarning(
                         context,
