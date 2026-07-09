@@ -12,12 +12,14 @@
 #   6. Tag must not already exist locally or on origin
 #
 # After checks pass:
-#   7. Computes next build number from current pubspec.yaml (N+1, or 1 if none)
+#   7. Computes next build number from current pubspec.yaml
+#      (reuses the existing build when retrying the same X.Y.Z, otherwise N+1)
 #   8. Bumps pubspec.yaml to X.Y.Z+<next-build>
 #   9. Commits, pushes main, creates and pushes vX.Y.Z tag -> triggers CI
 #
 # Build-number semantics:
-#   The script increments the source build number in pubspec.yaml.
+#   The script increments the source build number in pubspec.yaml,
+#   except when retrying an already-bumped same-semver release.
 #   CI may additionally pass --build-name and --build-number to Flutter
 #   for artifact metadata. See docs/RELEASING.md for the full explanation.
 
@@ -113,9 +115,12 @@ if ($LASTEXITCODE -eq 0) {
 }
 Ok "Local tag $tag does not exist yet"
 
-$remoteTag = git ls-remote --exit-code --tags origin "refs/tags/$tag" 2>$null
-if ($LASTEXITCODE -eq 0) {
+git ls-remote --exit-code --tags origin "refs/tags/$tag" 2>$null | Out-Null
+$rc = $LASTEXITCODE
+if ($rc -eq 0) {
     Fail "Tag $tag already exists on origin. Did you forget to bump the version?"
+} elseif ($rc -ne 2) {
+    Fail "Could not check remote tag (ls-remote exited $rc). Network or auth error?"
 }
 Ok "Remote tag $tag does not exist yet"
 
@@ -141,7 +146,7 @@ if ($currentVersionLine -eq $newVersionLine) {
 # ── Commit, push, tag ────────────────────────────────────────────────────────
 
 # Only commit if there are staged changes (i.e. pubspec was actually bumped)
-$staged = git diff --cached --quiet
+git diff --cached --quiet | Out-Null
 if ($LASTEXITCODE -eq 0) {
     Info "No changes to commit - pubspec was already at target version"
 } else {
@@ -154,6 +159,10 @@ Info "Creating tag $tag..."
 git tag $tag
 Info "Pushing main and $tag atomically..."
 git push --atomic origin main $tag
+if ($LASTEXITCODE -ne 0) {
+    git tag -d $tag 2>$null | Out-Null
+    Fail "Atomic push failed; removed local tag $tag so the release can be retried"
+}
 
 Write-Host ""
 Write-Host "Released $tag - CI workflow triggered." -ForegroundColor Green

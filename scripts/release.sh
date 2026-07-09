@@ -13,12 +13,14 @@
 #   6. Tag must not already exist locally or on origin
 #
 # After checks pass:
-#   7. Computes next build number from current pubspec.yaml (N+1, or 1 if none)
+#   7. Computes next build number from current pubspec.yaml
+#      (reuses the existing build when retrying the same X.Y.Z, otherwise N+1)
 #   8. Bumps pubspec.yaml to X.Y.Z+<next-build>
 #   9. Commits, pushes main, creates and pushes vX.Y.Z tag → triggers CI
 #
 # Build-number semantics:
-#   The script increments the source build number in pubspec.yaml.
+#   The script increments the source build number in pubspec.yaml,
+#   except when retrying an already-bumped same-semver release.
 #   CI may additionally pass --build-name and --build-number to Flutter
 #   for artifact metadata. See docs/RELEASING.md for the full explanation.
 
@@ -120,8 +122,12 @@ if git rev-parse "$TAG" >/dev/null 2>&1; then
 fi
 ok "Local tag $TAG does not exist yet"
 
-if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-    fail "Tag $TAG already exists on origin. Did you forget to bump the version?"
+git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1
+RC=$?
+if [ "$RC" -eq 0 ]; then
+  fail "Tag $TAG already exists on origin. Did you forget to bump the version?"
+elif [ "$RC" -ne 2 ]; then
+  fail "Could not check remote tag (ls-remote exited $RC). Network or auth error?"
 fi
 ok "Remote tag $TAG does not exist yet"
 
@@ -157,7 +163,10 @@ fi
 info "Creating tag $TAG..."
 git tag "$TAG"
 info "Pushing main and $TAG atomically..."
-git push --atomic origin main "$TAG"
+if ! git push --atomic origin main "$TAG"; then
+  git tag -d "$TAG" >/dev/null 2>&1 || true
+  fail "Atomic push failed; removed local tag $TAG so the release can be retried"
+fi
 
 echo ""
 echo -e "${GREEN}Released $TAG${NC} — CI workflow triggered."
