@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/error/failures.dart';
 import '../../../domain/entities/reader_mode.dart';
 import '../../../domain/entities/reading_preferences.dart';
@@ -23,13 +24,23 @@ const int _initialPrecacheCount = 5;
 class ReaderNotifier extends StateNotifier<ReaderState> {
   final GetChapterPages getChapterPages;
   final ResolveReaderMode resolveReaderMode;
+  final Future<void> Function(String url) _precacheNetworkImage;
+  final Duration _initialPrecacheTimeout;
 
   ReaderNotifier({
     required this.getChapterPages,
     required this.resolveReaderMode,
-  }) : super(const ReaderState());
+    Future<void> Function(String url)? precacheNetworkImage,
+    Duration initialPrecacheTimeout = const Duration(
+      seconds: AppConstants.readerPrecacheTimeoutSeconds,
+    ),
+  }) : _precacheNetworkImage =
+           precacheNetworkImage ?? _defaultPrecacheNetworkImage,
+       _initialPrecacheTimeout = initialPrecacheTimeout,
+       super(const ReaderState());
 
   bool _isDisposed = false;
+  bool _precacheAbandoned = false;
 
   @override
   void dispose() {
@@ -56,14 +67,11 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
 
     var pages = <String>[];
     var hasFailed = false;
-    result.fold(
-      (failure) {
-        hasFailed = true;
-        if (_isDisposed) return;
-        state = state.copyWith(isLoading: false, failure: failure);
-      },
-      (p) => pages = p,
-    );
+    result.fold((failure) {
+      hasFailed = true;
+      if (_isDisposed) return;
+      state = state.copyWith(isLoading: false, failure: failure);
+    }, (p) => pages = p);
     if (hasFailed || _isDisposed) return;
     if (pages.isEmpty) {
       state = state.copyWith(
@@ -92,17 +100,18 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
 
     final firstPages = pages.take(_initialPrecacheCount).toList();
     try {
-      await _precacheImages(firstPages);
+      _precacheAbandoned = false;
+      await _precacheImages(firstPages).timeout(
+        _initialPrecacheTimeout,
+        onTimeout: () => _precacheAbandoned = true,
+      );
     } on Object catch (_) {
       // Precache is a perf optimisation, not a requirement.
     }
     if (_isDisposed) return;
 
     // Show the reader with the first 5 pages already cached.
-    state = state.copyWith(
-      isLoading: false,
-      loadedPages: firstPages.length,
-    );
+    state = state.copyWith(isLoading: false, loadedPages: firstPages.length);
 
     // Pre-warm the remaining pages in the background.
     if (pages.length > _initialPrecacheCount) {
@@ -147,14 +156,14 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   /// Pre-caches [urls] one by one and updates the loading bar after each.
   Future<void> _precacheImages(List<String> urls) async {
     for (var i = 0; i < urls.length; i++) {
-      if (_isDisposed) return;
+      if (_isDisposed || _precacheAbandoned) return;
       await _precacheNetworkImage(urls[i]);
-      if (_isDisposed) return;
+      if (_isDisposed || _precacheAbandoned) return;
       state = state.copyWith(loadedPages: i + 1);
     }
   }
 
-  Future<void> _precacheNetworkImage(String url) async {
+  static Future<void> _defaultPrecacheNetworkImage(String url) async {
     final provider = NetworkImage(url);
     final stream = provider.resolve(ImageConfiguration.empty);
 
