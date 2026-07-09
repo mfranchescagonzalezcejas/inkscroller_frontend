@@ -232,7 +232,14 @@ class _ExternalChapterScreen extends StatelessWidget {
                       }
                       if (await canLaunchUrl(uri)) {
                         await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        return;
                       }
+
+                      if (!context.mounted) return;
+                      AppFeedback.showWarning(
+                        context,
+                        title: context.l10n.externalChapterTitle,
+                      );
                     } on FormatException {
                       if (!context.mounted) return;
                       AppFeedback.showWarning(
