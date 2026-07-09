@@ -39,7 +39,8 @@ class UserProfileNotifier extends StateNotifier<UserProfileState> {
       NetworkFailure(message: final message) ||
       CacheFailure(message: final message) ||
       UnexpectedFailure(message: final message) ||
-      ExternalChapterFailure(message: final message) => message,
+      ExternalChapterFailure(message: final message) ||
+      EmptyChapterFailure(message: final message) => message,
     };
   }
 }

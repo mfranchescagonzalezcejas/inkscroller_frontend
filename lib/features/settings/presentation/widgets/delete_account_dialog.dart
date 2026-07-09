@@ -2,7 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/design_tokens.dart' show AppColors;
+import '../../../../core/l10n/l10n.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
+
+/// Resolves a stable cleanup error key to its localized message.
+///
+/// Returns the corresponding l10n string for known keys, or a generic
+/// localized error for keys that cannot be recognized.
+String resolveCleanupErrorText(String? errorKey, AppLocalizations l10n) {
+  return switch (errorKey) {
+    'requires-recent-login' => l10n.cleanupRequiresRecentLogin,
+    'firebase-delete-failed' => l10n.cleanupFirebaseDeleteFailed,
+    'wrong-password' => l10n.cleanupReauthWrongPassword,
+    'user-mismatch' => l10n.cleanupReauthUserMismatch,
+    'invalid-credential' => l10n.cleanupReauthInvalidCredential,
+    'too-many-requests' => l10n.cleanupReauthTooManyRequests,
+    'auth-error' => l10n.cleanupReauthAuthError,
+    cleanupUnexpectedErrorKey => l10n.cleanupUnexpectedError,
+    cleanupWarningKey => l10n.cleanupPrefsClearWarning,
+    _ => l10n.cleanupUnexpectedError, // ponytail: catch-all for unknown codes
+  };
+}
 
 /// AlertDialog for permanent account deletion with typed confirmation.
 ///
@@ -34,23 +55,29 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final state = ref.watch(settingsProvider);
     final bool isPending = state.cleanupRecoveryPending;
     final bool needsPassword = state.requiresRecentLogin;
     final bool busy = _isDeleting || isPending;
 
     final bool canConfirm = isPending
-        ? !_isDeleting && (!needsPassword || _passwordController.text.isNotEmpty)
+        ? !_isDeleting &&
+              (!needsPassword || _passwordController.text.isNotEmpty)
         : _canDelete && !_isDeleting;
+
+    final String? recoveryErrorText = isPending && state.deleteError != null
+        ? resolveCleanupErrorText(state.deleteError, l10n)
+        : null;
 
     return PopScope(
       canPop: !busy,
       child: AlertDialog(
         backgroundColor: AppColors.stage,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Eliminar cuenta',
-          style: TextStyle(
+        title: Text(
+          l10n.deleteAccountTitle,
+          style: const TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -63,9 +90,8 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           children: <Widget>[
             if (isPending) ...[
               Text(
-                state.deleteError ??
-                    'La eliminación está incompleta. '
-                        'Es necesario finalizar la limpieza de datos.',
+                recoveryErrorText ??
+                    l10n.deleteAccountIncompleteRecoveryMessage,
                 key: const Key('deleteRecoveryMessage'),
                 style: const TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
@@ -74,20 +100,18 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 ),
               ),
             ] else ...[
-              const Text(
-                'Esta acción es permanente e irreversible. Se eliminarán todos '
-                'tus datos, incluyendo tu perfil, preferencias y progreso '
-                'de lectura.',
-                style: TextStyle(
+              Text(
+                l10n.deleteAccountWarningBody,
+                style: const TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Escribí DELETE para confirmar:',
-                style: TextStyle(
+              Text(
+                l10n.deleteAccountPrompt,
+                style: const TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -132,9 +156,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
             ],
             if (needsPassword) ...[
               const SizedBox(height: 16),
-              const Text(
-                'Ingresá tu contraseña para reintentar:',
-                style: TextStyle(
+              Text(
+                l10n.deleteAccountPasswordLabel,
+                style: const TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -153,7 +177,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                   color: AppColors.onSurface,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Contraseña',
+                  hintText: l10n.deleteAccountPasswordHint,
                   hintStyle: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
@@ -184,9 +208,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           TextButton(
             key: const Key('deleteCancelButton'),
             onPressed: busy ? null : () => Navigator.of(context).pop(false),
-            child: const Text(
-              'Cancelar',
-              style: TextStyle(
+            child: Text(
+              l10n.deleteAccountCancelAction,
+              style: const TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 color: AppColors.onSurfaceVariant,
               ),
@@ -223,7 +247,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                     ),
                   )
                 : Text(
-                    isPending ? 'Finalizar' : 'Eliminar',
+                    isPending
+                        ? l10n.deleteAccountFinalizeAction
+                        : l10n.deleteAccountDeleteAction,
                     style: const TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       color: AppColors.voidLowest,

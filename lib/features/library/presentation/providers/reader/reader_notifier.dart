@@ -76,7 +76,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     if (pages.isEmpty) {
       state = state.copyWith(
         isLoading: false,
-        failure: const UnexpectedFailure(message: 'Capítulo sin páginas'),
+        failure: const EmptyChapterFailure(),
       );
       return;
     }

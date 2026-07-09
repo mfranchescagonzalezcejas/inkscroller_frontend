@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
@@ -70,7 +71,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
           ? ref.read(perTitleOverrideProvider(widget.mangaId!))
           : null;
 
-      ref.read(readerProvider(widget.chapterId).notifier).loadChapter(
+      ref
+          .read(readerProvider(widget.chapterId).notifier)
+          .loadChapter(
             chapterId: widget.chapterId,
             globalReaderMode: globalReaderMode,
             titleOverride: titleOverride,
@@ -96,9 +99,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     // redirect/warning screen. This prevents any in-app rendering of content
     // that is hosted exclusively on third-party sites.
     if (widget.chapter?.external ?? false) {
-      return _ExternalChapterScreen(
-        externalUrl: widget.chapter?.externalUrl,
-      );
+      return _ExternalChapterScreen(externalUrl: widget.chapter?.externalUrl);
     }
 
     final state = ref.watch(readerProvider(widget.chapterId));
@@ -132,12 +133,16 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     }
 
     if (state.failure != null) {
-      return Scaffold(body: Center(child: Text(state.failure!.message)));
+      final message = state.failure is EmptyChapterFailure
+          ? context.l10n.readerNoPages
+          : context.l10n.readerErrorGeneric;
+      return Scaffold(body: Center(child: Text(message)));
     }
 
     final uiState = ref.watch(readerUiProvider(widget.chapterId));
-    final background =
-        uiState.amoledBlack ? Colors.black : AppColors.voidLowest;
+    final background = uiState.amoledBlack
+        ? Colors.black
+        : AppColors.voidLowest;
 
     return Scaffold(
       backgroundColor: background,
@@ -169,8 +174,9 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
             Positioned.fill(
               child: IgnorePointer(
                 child: ColoredBox(
-                  color: Colors.black
-                      .withValues(alpha: 1.0 - uiState.brightness),
+                  color: Colors.black.withValues(
+                    alpha: 1.0 - uiState.brightness,
+                  ),
                 ),
               ),
             ),
@@ -231,7 +237,10 @@ class _ExternalChapterScreen extends StatelessWidget {
                         return;
                       }
                       if (await canLaunchUrl(uri)) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
                         return;
                       }
 

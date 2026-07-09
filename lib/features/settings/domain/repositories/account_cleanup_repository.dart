@@ -39,6 +39,7 @@ class AccountCleanupException implements Exception {
   const AccountCleanupException({
     required this.message,
     required this.requiresRecentLogin,
+    this.code,
   });
 
   /// User-facing error message.
@@ -46,6 +47,9 @@ class AccountCleanupException implements Exception {
 
   /// Whether the user must re-login before retrying.
   final bool requiresRecentLogin;
+
+  /// Stable machine-readable label so presentation can map to l10n.
+  final String? code;
 
   @override
   String toString() => 'AccountCleanupException: $message';

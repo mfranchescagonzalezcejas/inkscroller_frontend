@@ -53,8 +53,7 @@ void main() {
     await notifier.loadChapter(chapterId: 'chapter-1');
 
     expect(notifier.state.isLoading, isFalse);
-    expect(notifier.state.failure, isA<UnexpectedFailure>());
-    expect(notifier.state.failure?.message, 'Capítulo sin páginas');
+    expect(notifier.state.failure, isA<EmptyChapterFailure>());
   });
 
   test('loadChapter abandons initial precache writes after timeout', () async {

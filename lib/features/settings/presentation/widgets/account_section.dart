@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/design/design_tokens.dart'
-    show AppColors;
+import '../../../../core/design/design_tokens.dart' show AppColors;
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/delete_account_dialog.dart';
@@ -15,6 +15,7 @@ class AccountSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final authState = ref.watch(authProvider);
     final user = authState.user;
 
@@ -26,7 +27,7 @@ class AccountSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _SectionLabel(text: 'CUENTA'.toUpperCase()),
+        _SectionLabel(text: l10n.accountSectionLabel.toUpperCase()),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -44,7 +45,7 @@ class AccountSection extends ConsumerWidget {
               const Divider(height: 1, color: AppColors.outlineVariant),
               _DangerButton(
                 key: const Key('deleteAccountButton'),
-                label: 'Eliminar cuenta',
+                label: l10n.deleteAccountTitle,
                 onTap: () => _showDeleteAccountDialog(context),
               ),
             ],
@@ -169,11 +170,7 @@ class _DangerButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Icon(
-              Icons.delete_outline,
-              size: 18,
-              color: AppColors.danger,
-            ),
+            const Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
             const SizedBox(width: 8),
             Text(
               label,

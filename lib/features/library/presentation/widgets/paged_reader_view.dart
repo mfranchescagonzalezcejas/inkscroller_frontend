@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
+
 /// How many pages ahead to pre-load when swiping in the paged reader.
 const int _preloadAheadCount = 8;
 
@@ -39,9 +41,11 @@ class _PagedReaderViewState extends State<PagedReaderView> {
 
   /// Fires background decode for the next `_preloadAheadCount` pages.
   void _preloadNext(BuildContext context, int currentIndex) {
-    for (int i = currentIndex + 1;
-        i <= currentIndex + _preloadAheadCount && i < widget.pages.length;
-        i++) {
+    for (
+      int i = currentIndex + 1;
+      i <= currentIndex + _preloadAheadCount && i < widget.pages.length;
+      i++
+    ) {
       unawaited(precacheImage(NetworkImage(widget.pages[i]), context));
     }
   }
@@ -56,7 +60,7 @@ class _PagedReaderViewState extends State<PagedReaderView> {
       children: [
         GestureDetector(
           onTap: _toggleControls,
-          child:           PageView.builder(
+          child: PageView.builder(
             controller: _pageController,
             itemCount: widget.pages.length,
             onPageChanged: (index) {
@@ -169,7 +173,7 @@ class _LoadingPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Cargando página $pageNumber...',
+            context.l10n.readerPageLoadingVerbose(pageNumber),
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -200,7 +204,7 @@ class _ErrorPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'No se pudo cargar la página $pageNumber',
+            context.l10n.readerPageLoadError(pageNumber),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

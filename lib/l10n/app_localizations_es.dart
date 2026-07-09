@@ -481,4 +481,102 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get readerDirectionVertical => 'Vertical';
+
+  @override
+  String get deleteAccountTitle => 'Eliminar cuenta';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'Esta acción es permanente e irreversible. Se eliminarán todos tus datos, incluyendo tu perfil, preferencias y progreso de lectura.';
+
+  @override
+  String get deleteAccountPrompt => 'Escribí DELETE para confirmar:';
+
+  @override
+  String get deleteAccountPasswordLabel =>
+      'Ingresá tu contraseña para reintentar:';
+
+  @override
+  String get deleteAccountPasswordHint => 'Contraseña';
+
+  @override
+  String get deleteAccountCancelAction => 'Cancelar';
+
+  @override
+  String get deleteAccountFinalizeAction => 'Finalizar';
+
+  @override
+  String get deleteAccountDeleteAction => 'Eliminar';
+
+  @override
+  String get deleteAccountIncompleteRecoveryMessage =>
+      'La eliminación está incompleta. Es necesario finalizar la limpieza de datos.';
+
+  @override
+  String get accountSectionLabel => 'CUENTA';
+
+  @override
+  String get settingsAccountDeletedWithWarnings =>
+      'Cuenta eliminada con advertencias';
+
+  @override
+  String get settingsAccountDeletedSuccessfully =>
+      'Cuenta eliminada correctamente';
+
+  @override
+  String get cleanupUnexpectedError => 'Error durante la limpieza';
+
+  @override
+  String readerPageLoading(int pageNumber) {
+    return 'Página $pageNumber';
+  }
+
+  @override
+  String readerPageLoadingVerbose(int pageNumber) {
+    return 'Cargando página $pageNumber…';
+  }
+
+  @override
+  String readerPageLoadError(int pageNumber) {
+    return 'No se pudo cargar la página $pageNumber';
+  }
+
+  @override
+  String get readerNoPages => 'Capítulo sin páginas';
+
+  @override
+  String get readerErrorGeneric => 'Algo salió mal al cargar el capítulo.';
+
+  @override
+  String get cleanupRequiresRecentLogin =>
+      'Volvé a iniciar sesión para completar la eliminación.';
+
+  @override
+  String get cleanupFirebaseDeleteFailed =>
+      'No pudimos eliminar tu cuenta de Firebase. Intentá de nuevo.';
+
+  @override
+  String get cleanupReauthWrongPassword => 'Contraseña incorrecta.';
+
+  @override
+  String get cleanupReauthUserMismatch =>
+      'El usuario no coincide con la sesión actual.';
+
+  @override
+  String get cleanupReauthInvalidCredential => 'Credencial inválida.';
+
+  @override
+  String get cleanupReauthTooManyRequests =>
+      'Demasiados intentos. Esperá un momento y volvé a intentar.';
+
+  @override
+  String get cleanupReauthAuthError => 'Error de autenticación.';
+
+  @override
+  String get cleanupPrefsClearWarning =>
+      'No se pudieron eliminar algunos datos locales.';
+
+  @override
+  String get deleteAccountGenericError =>
+      'No se pudo eliminar la cuenta. Intentá de nuevo.';
 }

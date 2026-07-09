@@ -73,6 +73,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
       CacheFailure(message: final message) => message,
       UnexpectedFailure(message: final message) => message,
       ExternalChapterFailure(message: final message) => message,
+      EmptyChapterFailure(message: final message) => message,
     };
   }
 }

@@ -225,5 +225,53 @@
   "readerSettingsConfirm": "Confirm settings",
   "readerDirectionLtr": "LTR",
   "readerDirectionRtl": "RTL",
-  "readerDirectionVertical": "Vertical"
+  "readerDirectionVertical": "Vertical",
+  "deleteAccountTitle": "Delete Account",
+  "deleteAccountWarningBody": "This action is permanent and irreversible. All your data, including your profile, preferences, and reading progress, will be deleted.",
+  "deleteAccountPrompt": "Type DELETE to confirm:",
+  "deleteAccountPasswordLabel": "Enter your password to retry:",
+  "deleteAccountPasswordHint": "Password",
+  "deleteAccountCancelAction": "Cancel",
+  "deleteAccountFinalizeAction": "Finalize",
+  "deleteAccountDeleteAction": "Delete",
+  "deleteAccountIncompleteRecoveryMessage": "The deletion is incomplete. Cleanup must be finalized.",
+  "accountSectionLabel": "ACCOUNT",
+  "settingsAccountDeletedWithWarnings": "Account deleted with warnings",
+  "settingsAccountDeletedSuccessfully": "Account deleted successfully",
+  "cleanupUnexpectedError": "Error during cleanup",
+  "readerPageLoading": "Page {pageNumber}",
+  "@readerPageLoading": {
+    "placeholders": {
+      "pageNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "readerPageLoadingVerbose": "Loading page {pageNumber}…",
+  "@readerPageLoadingVerbose": {
+    "placeholders": {
+      "pageNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "readerPageLoadError": "Could not load page {pageNumber}",
+  "@readerPageLoadError": {
+    "placeholders": {
+      "pageNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "readerNoPages": "Chapter has no pages",
+  "readerErrorGeneric": "Something went wrong loading the chapter.",
+  "cleanupRequiresRecentLogin": "You need to sign in again to complete the deletion.",
+  "cleanupFirebaseDeleteFailed": "We couldn't delete your Firebase account. Try again.",
+  "cleanupReauthWrongPassword": "Incorrect password.",
+  "cleanupReauthUserMismatch": "The user doesn't match the current session.",
+  "cleanupReauthInvalidCredential": "Invalid credential.",
+  "cleanupReauthTooManyRequests": "Too many attempts. Wait a moment and try again.",
+  "cleanupReauthAuthError": "Authentication error.",
+  "cleanupPrefsClearWarning": "Some local data could not be cleared.",
+  "deleteAccountGenericError": "Could not delete account. Please try again."
 }

@@ -43,6 +43,7 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
             throw const AccountCleanupException(
               message: 'Volvé a iniciar sesión para completar la eliminación.',
               requiresRecentLogin: true,
+              code: 'requires-recent-login',
             );
           }
           // Wrap other reauth errors (wrong password, user mismatch, etc.)
@@ -50,6 +51,7 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
           throw AccountCleanupException(
             message: _describeReauthError(e),
             requiresRecentLogin: false,
+            code: _reauthErrorCode(e),
           );
         }
       }
@@ -75,6 +77,7 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
           throw const AccountCleanupException(
             message: 'Volvé a iniciar sesión para completar la eliminación.',
             requiresRecentLogin: true,
+            code: 'requires-recent-login',
           );
         } else {
           shouldSignOut = false;
@@ -82,6 +85,7 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
             message:
                 'No pudimos eliminar tu cuenta de Firebase. Intentá de nuevo.',
             requiresRecentLogin: false,
+            code: 'firebase-delete-failed',
           );
         }
       }
@@ -150,5 +154,16 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
       default:
         return e.message ?? 'Error de autenticación.';
     }
+  }
+
+  /// Returns a stable machine-readable key for a Firebase reauth error.
+  String _reauthErrorCode(FirebaseAuthException e) {
+    return switch (e.code) {
+      'wrong-password' => 'wrong-password',
+      'user-mismatch' => 'user-mismatch',
+      'invalid-credential' => 'invalid-credential',
+      'too-many-requests' => 'too-many-requests',
+      _ => 'auth-error',
+    };
   }
 }

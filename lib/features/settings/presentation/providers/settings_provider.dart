@@ -11,6 +11,12 @@ import '../../../profile/presentation/providers/user_profile_provider.dart';
 import '../../domain/repositories/account_cleanup_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 
+/// Stable key for the unexpected cleanup error so presentation can translate.
+const String cleanupUnexpectedErrorKey = 'cleanup.unexpected_error';
+
+/// Stable key for non-critical cleanup warnings so presentation can translate.
+const String cleanupWarningKey = 'cleanup.prefs_clear_failed';
+
 /// State for account-level settings operations.
 class SettingsState {
   /// True while the account deletion request is in-flight.
@@ -149,7 +155,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       state = state.copyWith(
         isDeletingAccount: false,
         cleanupRecoveryPending: true,
-        deleteError: e.message,
+        deleteError: e.code ?? cleanupUnexpectedErrorKey,
         requiresRecentLogin: e.requiresRecentLogin,
       );
       return;
@@ -157,7 +163,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       state = state.copyWith(
         isDeletingAccount: false,
         cleanupRecoveryPending: true,
-        deleteError: 'Error durante la limpieza',
+        deleteError: cleanupUnexpectedErrorKey,
       );
       return;
     }
@@ -178,7 +184,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       accountDeleted: true,
       cleanupRecoveryPending: false,
       requiresRecentLogin: false,
-      deleteWarning: warning,
+      deleteWarning: warning != null ? cleanupWarningKey : null,
     );
   }
 
