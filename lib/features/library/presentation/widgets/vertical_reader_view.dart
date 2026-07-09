@@ -13,21 +13,28 @@ const double _cacheExtent = 800;
 /// Each page shows a loading placeholder while the image downloads,
 /// handles individual image errors gracefully, and uses gapless playback
 /// to avoid flickering when scrolling back.
-class VerticalReaderView extends StatelessWidget {
+class VerticalReaderView extends StatefulWidget {
   /// Ordered chapter page image URLs.
   final List<String> pages;
 
   const VerticalReaderView({super.key, required this.pages});
 
   @override
+  State<VerticalReaderView> createState() => _VerticalReaderViewState();
+}
+
+class _VerticalReaderViewState extends State<VerticalReaderView> {
+  final _precachedPages = <int>{};
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: pages.length,
+      itemCount: widget.pages.length,
       cacheExtent: _cacheExtent,
       itemBuilder: (context, index) {
         _preloadNext(context, index);
         return _ReaderPageImage(
-          url: pages[index],
+          url: widget.pages[index],
           pageNumber: index + 1,
           fit: BoxFit.fitWidth,
         );
@@ -38,9 +45,11 @@ class VerticalReaderView extends StatelessWidget {
   /// Fires background decode for the next `_preloadAheadCount` pages.
   void _preloadNext(BuildContext context, int currentIndex) {
     for (int i = currentIndex + 1;
-        i <= currentIndex + _preloadAheadCount && i < pages.length;
+        i <= currentIndex + _preloadAheadCount && i < widget.pages.length;
         i++) {
-      unawaited(precacheImage(NetworkImage(pages[i]), context));
+      if (_precachedPages.add(i)) {
+        unawaited(precacheImage(NetworkImage(widget.pages[i]), context));
+      }
     }
   }
 }

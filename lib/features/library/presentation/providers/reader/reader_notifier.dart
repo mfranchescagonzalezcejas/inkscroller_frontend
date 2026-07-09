@@ -79,7 +79,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       contentMetadata: ReaderContentMetadata(pageCount: pages.length),
     );
 
-    // Precache the first 3 pages while the loading screen is still visible.
+    // Precache initial pages while the loading screen is still visible.
     // This way the reader opens with images already in cache — no spinners.
     state = state.copyWith(
       pages: pages,
@@ -147,7 +147,9 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   /// Pre-caches [urls] one by one and updates the loading bar after each.
   Future<void> _precacheImages(List<String> urls) async {
     for (var i = 0; i < urls.length; i++) {
+      if (_isDisposed) return;
       await _precacheNetworkImage(urls[i]);
+      if (_isDisposed) return;
       state = state.copyWith(loadedPages: i + 1);
     }
   }
