@@ -18,6 +18,7 @@ import '../../domain/entities/manga.dart';
 import '../../domain/entities/manga_reading_progress.dart';
 import '../../domain/entities/reader_mode.dart';
 import '../providers/chapters/manga_chapter_provider.dart';
+import '../providers/chapters/manga_chapter_state.dart';
 import '../providers/per_title_override_provider.dart';
 import '../providers/reading_progress_provider.dart';
 import '../providers/user_library_provider.dart';
@@ -38,6 +39,7 @@ class MangaDetailPage extends ConsumerStatefulWidget {
 
 class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
   bool _preferencesRequested = false;
+  late final ProviderSubscription _mangaChaptersSub;
 
   @override
   void initState() {
@@ -51,13 +53,29 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
       }
     });
     // Sync reading progress when chapters change — lives here, not in build().
-    ref.listen(mangaChaptersProvider, (prev, next) {
-      if (next.chapters.isNotEmpty) {
+    _mangaChaptersSub = ref.listenManual<MangaChaptersState>(
+      mangaChaptersProvider,
+      (prev, next) {
+        if (next.chapters.isEmpty) return;
+        // Dedup: skip if the set of chapters hasn't actually changed.
+        final prevIds =
+            prev?.chapters.map((c) => c.id).toSet() ?? <String>{};
+        final nextIds = next.chapters.map((c) => c.id).toSet();
+        if (prevIds.length == nextIds.length &&
+            prevIds.containsAll(nextIds)) {
+          return;
+        }
         ref
             .read(readingProgressProvider.notifier)
             .syncChapters(widget.manga.id, next.chapters);
-      }
-    });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _mangaChaptersSub.close();
+    super.dispose();
   }
 
   @override
