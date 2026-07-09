@@ -18,6 +18,7 @@ import '../../domain/entities/manga.dart';
 import '../../domain/entities/manga_reading_progress.dart';
 import '../../domain/entities/reader_mode.dart';
 import '../providers/chapters/manga_chapter_provider.dart';
+import '../providers/chapters/manga_chapter_state.dart';
 import '../providers/per_title_override_provider.dart';
 import '../providers/reading_progress_provider.dart';
 import '../providers/user_library_provider.dart';
@@ -26,7 +27,7 @@ import '../widgets/manga_detail_shimmer.dart';
 
 /// Manga detail page matching inkscroller.pen design (node paPg4).
 ///
-/// Structure: TopBar (overlay) · Cover · Tags · Title+Meta · CTA · Actions · Chapters
+/// Structure: TopBar (overlay) · Cover · Tags · Title+Meta · CTA · Chapters
 class MangaDetailPage extends ConsumerStatefulWidget {
   final Manga manga;
 
@@ -38,7 +39,7 @@ class MangaDetailPage extends ConsumerStatefulWidget {
 
 class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
   bool _preferencesRequested = false;
-  String? _lastSyncedChapterSignature;
+  late final ProviderSubscription _mangaChaptersSub;
 
   @override
   void initState() {
@@ -51,6 +52,30 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
         ref.read(preferencesProvider.notifier).loadPreferences();
       }
     });
+    // Sync reading progress when chapters change — lives here, not in build().
+    _mangaChaptersSub = ref.listenManual<MangaChaptersState>(
+      mangaChaptersProvider,
+      (prev, next) {
+        if (next.chapters.isEmpty) return;
+        // Dedup: skip if the set of chapters hasn't actually changed.
+        final prevIds =
+            prev?.chapters.map((c) => c.id).toSet() ?? <String>{};
+        final nextIds = next.chapters.map((c) => c.id).toSet();
+        if (prevIds.length == nextIds.length &&
+            prevIds.containsAll(nextIds)) {
+          return;
+        }
+        ref
+            .read(readingProgressProvider.notifier)
+            .syncChapters(widget.manga.id, next.chapters);
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _mangaChaptersSub.close();
+    super.dispose();
   }
 
   @override
@@ -66,19 +91,6 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
         .maybeWhen(data: (isOnline) => !isOnline, orElse: () => false);
-
-    final String chapterSignature = state.chapters
-        .map((chapter) => chapter.id)
-        .join('|');
-    if (state.chapters.isNotEmpty &&
-        _lastSyncedChapterSignature != chapterSignature) {
-      _lastSyncedChapterSignature = chapterSignature;
-      Future.microtask(
-        () => ref
-            .read(readingProgressProvider.notifier)
-            .syncChapters(widget.manga.id, state.chapters),
-      );
-    }
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
@@ -117,9 +129,6 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     },
                   ),
                 ),
-
-                // ── Actions row ───────────────────────────────────
-                const SliverToBoxAdapter(child: _ActionsRow()),
 
                 // ── Per-title reader mode override ────────────────
                 const SliverToBoxAdapter(
@@ -677,44 +686,6 @@ class _CtaButton extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ── Actions Row ──────────────────────────────────────────────────────────────
-
-class _ActionsRow extends StatelessWidget {
-  const _ActionsRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          _ActionBtn(icon: Icons.favorite_border, onTap: () {}),
-          const SizedBox(width: 32),
-          _ActionBtn(icon: Icons.download_outlined, onTap: () {}),
-          const SizedBox(width: 32),
-          _ActionBtn(icon: Icons.share_outlined, onTap: () {}),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _ActionBtn({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Icon(icon, color: AppColors.onSurfaceVariant, size: 28),
     );
   }
 }
