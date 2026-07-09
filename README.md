@@ -158,7 +158,7 @@ fvm flutter test    # all green ✅
 
 **Screaming Architecture** at the top level, **Clean Architecture** per feature:
 
-```
+```text
 lib/
 ├── core/              # DI, networking, router, theme, design tokens, widgets
 ├── features/          # Business domains
