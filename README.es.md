@@ -183,6 +183,8 @@ Dirección de capas: `Presentation → Domain ← Data` — el dominio no depend
 
 <br/>
 
+<a name="entregables-tfm"></a>
+
 <!-- ─── TFM ───────────────────────────────────────────────────────────── -->
 
 <div align="center">

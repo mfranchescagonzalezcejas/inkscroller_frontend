@@ -183,6 +183,8 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 
 <br/>
 
+<a name="tfm-deliverables"></a>
+
 <!-- ─── TFM ───────────────────────────────────────────────────────────── -->
 
 <div align="center">
