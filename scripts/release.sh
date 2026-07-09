@@ -122,8 +122,8 @@ if git rev-parse "$TAG" >/dev/null 2>&1; then
 fi
 ok "Local tag $TAG does not exist yet"
 
-git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1
-RC=$?
+RC=0
+git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1 || RC=$?
 if [ "$RC" -eq 0 ]; then
   fail "Tag $TAG already exists on origin. Did you forget to bump the version?"
 elif [ "$RC" -ne 2 ]; then
@@ -165,7 +165,8 @@ git tag "$TAG"
 info "Pushing main and $TAG atomically..."
 if ! git push --atomic origin main "$TAG"; then
   git tag -d "$TAG" >/dev/null 2>&1 || true
-  fail "Atomic push failed; removed local tag $TAG so the release can be retried"
+  git reset --hard origin/main >/dev/null 2>&1 || true
+  fail "Atomic push failed; reverted tag and local commits. The release can now be retried."
 fi
 
 echo ""

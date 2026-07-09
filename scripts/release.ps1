@@ -161,7 +161,8 @@ Info "Pushing main and $tag atomically..."
 git push --atomic origin main $tag
 if ($LASTEXITCODE -ne 0) {
     git tag -d $tag 2>$null | Out-Null
-    Fail "Atomic push failed; removed local tag $tag so the release can be retried"
+    git reset --hard origin/main 2>$null | Out-Null
+    Fail "Atomic push failed; reverted tag and local commits. The release can now be retried."
 }
 
 Write-Host ""
