@@ -11,6 +11,9 @@ import '../../../domain/usecases/resolve_reader_mode.dart';
 import '../../../domain/usecases/get_chapter_pages.dart';
 import 'reader_state.dart';
 
+/// How many pages to pre-cache before showing the reader.
+const int _initialPrecacheCount = 5;
+
 /// Loads chapter page URLs and pre-caches images concurrently in the background.
 ///
 /// Fetches page data via [GetChapterPages], then immediately shows the reader
@@ -51,42 +54,60 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     final result = await getChapterPages(chapterId);
     if (_isDisposed) return;
 
+    var pages = <String>[];
+    var hasFailed = false;
     result.fold(
       (failure) {
+        hasFailed = true;
         if (_isDisposed) return;
         state = state.copyWith(isLoading: false, failure: failure);
       },
-      (pages) {
-        if (pages.isEmpty) {
-          state = state.copyWith(
-            isLoading: false,
-            failure: const UnexpectedFailure(message: 'Capítulo sin páginas'),
-          );
-          return;
-        }
-
-        final readerMode = resolveReaderMode(
-          globalReaderMode: globalReaderMode,
-          titleOverride: titleOverride,
-          contentMetadata: ReaderContentMetadata(pageCount: pages.length),
-        );
-
-        // Expose URLs immediately so the reader renders on the next frame.
-        // Each page widget has its own loading placeholder — no need to wait.
-        state = state.copyWith(
-          pages: pages,
-          isLoading: false,
-          readerMode: readerMode,
-          totalPages: pages.length,
-          loadedPages: 0,
-          clearFailure: true,
-        );
-
-        // Pre-warm the image cache concurrently in the background.
-        // 4 parallel slots: fast enough without hammering the CDN.
-        unawaited(_precacheAllConcurrent(pages));
-      },
+      (p) => pages = p,
     );
+    if (hasFailed || _isDisposed) return;
+    if (pages.isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        failure: const UnexpectedFailure(message: 'Capítulo sin páginas'),
+      );
+      return;
+    }
+
+    final readerMode = resolveReaderMode(
+      globalReaderMode: globalReaderMode,
+      titleOverride: titleOverride,
+      contentMetadata: ReaderContentMetadata(pageCount: pages.length),
+    );
+
+    // Precache initial pages while the loading screen is still visible.
+    // This way the reader opens with images already in cache — no spinners.
+    state = state.copyWith(
+      pages: pages,
+      isLoading: true,
+      readerMode: readerMode,
+      totalPages: pages.length,
+      loadedPages: 0,
+      clearFailure: true,
+    );
+
+    final firstPages = pages.take(_initialPrecacheCount).toList();
+    try {
+      await _precacheImages(firstPages);
+    } on Object catch (_) {
+      // Precache is a perf optimisation, not a requirement.
+    }
+    if (_isDisposed) return;
+
+    // Show the reader with the first 5 pages already cached.
+    state = state.copyWith(
+      isLoading: false,
+      loadedPages: firstPages.length,
+    );
+
+    // Pre-warm the remaining pages in the background.
+    if (pages.length > _initialPrecacheCount) {
+      unawaited(_precacheAllConcurrent(pages.sublist(_initialPrecacheCount)));
+    }
   }
 
   /// Downloads and caches [urls] using a worker-pool with [concurrency] slots.
@@ -121,6 +142,16 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     await Future.wait(
       List.generate(math.min(concurrency, urls.length), (_) => worker()),
     );
+  }
+
+  /// Pre-caches [urls] one by one and updates the loading bar after each.
+  Future<void> _precacheImages(List<String> urls) async {
+    for (var i = 0; i < urls.length; i++) {
+      if (_isDisposed) return;
+      await _precacheNetworkImage(urls[i]);
+      if (_isDisposed) return;
+      state = state.copyWith(loadedPages: i + 1);
+    }
   }
 
   Future<void> _precacheNetworkImage(String url) async {

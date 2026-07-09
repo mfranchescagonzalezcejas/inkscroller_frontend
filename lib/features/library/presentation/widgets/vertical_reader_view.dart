@@ -1,33 +1,61 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+/// How many off-screen pages to build and pre-load in the vertical reader.
+const int _preloadAheadCount = 8;
+
+/// Extra scroll-buffer pixels to trigger off-screen page preloading.
+const double _cacheExtent = 800;
 
 /// Vertical-scroll chapter reader that stacks page images top-to-bottom.
 ///
 /// Each page shows a loading placeholder while the image downloads,
 /// handles individual image errors gracefully, and uses gapless playback
 /// to avoid flickering when scrolling back.
-class VerticalReaderView extends StatelessWidget {
+class VerticalReaderView extends StatefulWidget {
   /// Ordered chapter page image URLs.
   final List<String> pages;
 
   const VerticalReaderView({super.key, required this.pages});
 
   @override
+  State<VerticalReaderView> createState() => _VerticalReaderViewState();
+}
+
+class _VerticalReaderViewState extends State<VerticalReaderView> {
+  final _precachedPages = <int>{};
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: pages.length,
+      itemCount: widget.pages.length,
+      cacheExtent: _cacheExtent,
       itemBuilder: (context, index) {
+        _preloadNext(context, index);
         return _ReaderPageImage(
-          url: pages[index],
+          url: widget.pages[index],
           pageNumber: index + 1,
           fit: BoxFit.fitWidth,
         );
       },
     );
   }
+
+  /// Fires background decode for the next `_preloadAheadCount` pages.
+  void _preloadNext(BuildContext context, int currentIndex) {
+    for (int i = currentIndex + 1;
+        i <= currentIndex + _preloadAheadCount && i < widget.pages.length;
+        i++) {
+      if (_precachedPages.add(i)) {
+        unawaited(precacheImage(NetworkImage(widget.pages[i]), context));
+      }
+    }
+  }
 }
 
 /// Single page image widget with loading and error states.
-class _ReaderPageImage extends StatefulWidget {
+class _ReaderPageImage extends StatelessWidget {
   final String url;
   final int pageNumber;
   final BoxFit fit;
@@ -39,78 +67,17 @@ class _ReaderPageImage extends StatefulWidget {
   });
 
   @override
-  State<_ReaderPageImage> createState() => _ReaderPageImageState();
-}
-
-class _ReaderPageImageState extends State<_ReaderPageImage> {
-  ImageStream? _imageStream;
-  bool _isLoaded = false;
-  bool _hasError = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadImage();
-  }
-
-  @override
-  void didUpdateWidget(_ReaderPageImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.url != widget.url) {
-      _imageStream?.removeListener(ImageStreamListener(_onImageLoaded));
-      _loadImage();
-    }
-  }
-
-  void _loadImage() {
-    setState(() {
-      _isLoaded = false;
-      _hasError = false;
-    });
-
-    final image = NetworkImage(widget.url);
-    _imageStream = image.resolve(ImageConfiguration.empty);
-    _imageStream!.addListener(
-      ImageStreamListener(_onImageLoaded, onError: _onImageError),
-    );
-  }
-
-  void _onImageLoaded(ImageInfo imageInfo, bool synchronousCall) {
-    if (mounted) {
-      setState(() {
-        _isLoaded = true;
-      });
-    }
-  }
-
-  void _onImageError(dynamic exception, StackTrace? stackTrace) {
-    if (mounted) {
-      setState(() => _hasError = true);
-    }
-  }
-
-  @override
-  void dispose() {
-    _imageStream?.removeListener(ImageStreamListener(_onImageLoaded));
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_hasError) {
-      return _ErrorPlaceholder(pageNumber: widget.pageNumber);
-    }
-
-    if (!_isLoaded) {
-      return _LoadingPlaceholder(pageNumber: widget.pageNumber);
-    }
-
     return Image.network(
-      widget.url,
-      fit: widget.fit,
+      url,
+      fit: fit,
       gaplessPlayback: true,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return _LoadingPlaceholder(pageNumber: pageNumber);
+      },
       errorBuilder: (context, error, stackTrace) {
-        return _ErrorPlaceholder(pageNumber: widget.pageNumber);
+        return _ErrorPlaceholder(pageNumber: pageNumber);
       },
     );
   }
