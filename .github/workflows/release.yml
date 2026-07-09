@@ -94,14 +94,25 @@ jobs:
             echo "- Internal improvements and QA fixes" > release-metadata/release_notes_dev.txt
           else
             {
-              echo "### 🚀 Features"
-              echo "$COMMITS" | grep '^feat' | sed 's/^/- /' || true
-              echo ""
-              echo "### 🐛 Bug Fixes"
-              echo "$COMMITS" | grep '^fix' | sed 's/^/- /' || true
-              echo ""
-              echo "### 🔧 Refactors & Improvements"
-              echo "$COMMITS" | grep -E '^(perf|refactor|test)' | sed 's/^/- /' || true
+              FEATS=$(echo "$COMMITS" | grep '^feat' | sed 's/^/- /' || true)
+              FIXES=$(echo "$COMMITS" | grep '^fix' | sed 's/^/- /' || true)
+              OTHERS=$(echo "$COMMITS" | grep -E '^(perf|refactor|test)' | sed 's/^/- /' || true)
+
+              if [ -n "$FEATS" ]; then
+                echo "### 🚀 Features"
+                echo "$FEATS"
+                echo ""
+              fi
+              if [ -n "$FIXES" ]; then
+                echo "### 🐛 Bug Fixes"
+                echo "$FIXES"
+                echo ""
+              fi
+              if [ -n "$OTHERS" ]; then
+                echo "### 🔧 Refactors & Improvements"
+                echo "$OTHERS"
+                echo ""
+              fi
             } > release-metadata/release_notes_dev.txt
           fi
 
