@@ -21,7 +21,7 @@ String resolveCleanupErrorText(String? errorKey, AppLocalizations l10n) {
     'auth-error' => l10n.cleanupReauthAuthError,
     cleanupUnexpectedErrorKey => l10n.cleanupUnexpectedError,
     cleanupWarningKey => l10n.cleanupPrefsClearWarning,
-    _ => l10n.cleanupUnexpectedError, // ponytail: catch-all for unknown codes
+    _ => l10n.cleanupUnexpectedError, // fallback: catch-all for unknown codes
   };
 }
 

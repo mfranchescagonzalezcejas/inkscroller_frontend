@@ -12,10 +12,10 @@ import '../../domain/repositories/account_cleanup_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 
 /// Stable key for the unexpected cleanup error so presentation can translate.
-const String cleanupUnexpectedErrorKey = 'cleanup.unexpected_error';
+const String cleanupUnexpectedErrorKey = 'cleanup-unexpected-error';
 
 /// Stable key for non-critical cleanup warnings so presentation can translate.
-const String cleanupWarningKey = 'cleanup.prefs_clear_failed';
+const String cleanupWarningKey = 'cleanup-prefs-clear-warning';
 
 /// State for account-level settings operations.
 class SettingsState {

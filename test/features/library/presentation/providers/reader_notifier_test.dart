@@ -45,7 +45,7 @@ void main() {
     expect(notifier.state.pages, isEmpty);
   });
 
-  test('loadChapter stores UnexpectedFailure when pages are empty', () async {
+  test('loadChapter stores EmptyChapterFailure when pages are empty', () async {
     when(
       () => getChapterPages('chapter-1'),
     ).thenAnswer((_) async => const Right<Failure, List<String>>(<String>[]));

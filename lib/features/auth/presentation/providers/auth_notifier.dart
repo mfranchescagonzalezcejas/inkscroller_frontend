@@ -91,7 +91,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(
           clearUser: true,
           isLoading: false,
-          error: 'La sesión no pudo verificarse. Iniciá sesión nuevamente.',
+          error: 'La sesión no pudo verificarse. Inicia sesión nuevamente.',
         );
       },
     );
