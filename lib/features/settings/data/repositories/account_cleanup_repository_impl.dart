@@ -6,9 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/repositories/account_cleanup_repository.dart';
 
-/// Warning key returned when a no-email user's Firebase session expired.
-const String cleanupSessionExpiredKey = 'cleanup-session-expired';
-
 /// Handles local cleanup after backend account deletion.
 ///
 /// Removes the Firebase user (critical — failure is rethrown to prevent the
@@ -86,9 +83,15 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
         } else if (e.code == 'requires-recent-login') {
           if (user.email == null) {
             // User has no email (phone/anonymous auth) — re-auth via
-            // email+password is impossible. Proceed with sign-out and
-            // local cleanup instead of trapping the user in a retry loop.
-            warning = cleanupSessionExpiredKey;
+            // email+password is impossible. Throw a terminal error so
+            // the provider does NOT mark accountDeleted: true, avoiding
+            // an inconsistent state where the Firebase Auth user still
+            // exists. The sign-out and prefs clear below still run.
+            throw const AccountCleanupException(
+              message: 'no-email-session-expired',
+              requiresRecentLogin: false,
+              code: 'no-email-session-expired',
+            );
           } else {
             throw const AccountCleanupException(
               message: 'requires-recent-login',

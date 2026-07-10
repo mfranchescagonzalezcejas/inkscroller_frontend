@@ -17,6 +17,9 @@ const String cleanupUnexpectedErrorKey = 'cleanup-unexpected-error';
 /// Stable key for non-critical cleanup warnings so presentation can translate.
 const String cleanupWarningKey = 'cleanup-prefs-clear-warning';
 
+/// Key returned when a no-email user's Firebase session expired during cleanup.
+const String cleanupSessionExpiredKey = 'cleanup-session-expired';
+
 /// State for account-level settings operations.
 class SettingsState {
   /// True while the account deletion request is in-flight.
@@ -152,12 +155,25 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     try {
       warning = await _cleanup.cleanUpAfterDeletion(password: password);
     } on AccountCleanupException catch (e) {
-      state = state.copyWith(
-        isDeletingAccount: false,
-        cleanupRecoveryPending: true,
-        deleteError: e.code ?? cleanupUnexpectedErrorKey,
-        requiresRecentLogin: e.requiresRecentLogin,
-      );
+      if (e.code == 'no-email-session-expired') {
+        // Phone/anonymous user with a stale session — local cleanup
+        // (signOut + prefs clear) happened in the repo but the Firebase
+        // Auth user could not be deleted. Terminal: do NOT mark
+        // accountDeleted, do NOT keep recoveryPending.
+        state = state.copyWith(
+          isDeletingAccount: false,
+          cleanupRecoveryPending: false,
+          requiresRecentLogin: false,
+          deleteError: cleanupSessionExpiredKey,
+        );
+      } else {
+        state = state.copyWith(
+          isDeletingAccount: false,
+          cleanupRecoveryPending: true,
+          deleteError: e.code ?? cleanupUnexpectedErrorKey,
+          requiresRecentLogin: e.requiresRecentLogin,
+        );
+      }
       return;
     } on Exception catch (_) {
       state = state.copyWith(
