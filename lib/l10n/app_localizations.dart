@@ -967,6 +967,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vertical'**
   String get readerDirectionVertical;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is permanent and irreversible. All your data, including your profile, preferences, and reading progress, will be deleted.'**
+  String get deleteAccountWarningBody;
+
+  /// No description provided for @deleteAccountPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE to confirm:'**
+  String get deleteAccountPrompt;
+
+  /// No description provided for @deleteAccountPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password to retry:'**
+  String get deleteAccountPasswordLabel;
+
+  /// No description provided for @deleteAccountPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get deleteAccountPasswordHint;
+
+  /// No description provided for @deleteAccountCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get deleteAccountCancelAction;
+
+  /// No description provided for @deleteAccountFinalizeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize'**
+  String get deleteAccountFinalizeAction;
+
+  /// No description provided for @deleteAccountDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAccountDeleteAction;
+
+  /// No description provided for @deleteAccountIncompleteRecoveryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The deletion is incomplete. Cleanup must be finalized.'**
+  String get deleteAccountIncompleteRecoveryMessage;
+
+  /// No description provided for @accountSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ACCOUNT'**
+  String get accountSectionLabel;
+
+  /// No description provided for @settingsAccountDeletedWithWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted with warnings'**
+  String get settingsAccountDeletedWithWarnings;
+
+  /// No description provided for @settingsAccountDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted successfully'**
+  String get settingsAccountDeletedSuccessfully;
+
+  /// No description provided for @cleanupUnexpectedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error during cleanup'**
+  String get cleanupUnexpectedError;
+
+  /// No description provided for @readerPageLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {pageNumber}'**
+  String readerPageLoading(int pageNumber);
+
+  /// No description provided for @readerPageLoadingVerbose.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading page {pageNumber}…'**
+  String readerPageLoadingVerbose(int pageNumber);
+
+  /// No description provided for @readerPageLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load page {pageNumber}'**
+  String readerPageLoadError(int pageNumber);
+
+  /// No description provided for @readerNoPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter has no pages'**
+  String get readerNoPages;
+
+  /// No description provided for @readerErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong loading the chapter.'**
+  String get readerErrorGeneric;
+
+  /// No description provided for @cleanupRequiresRecentLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'You need to sign in again to complete the deletion.'**
+  String get cleanupRequiresRecentLogin;
+
+  /// No description provided for @cleanupFirebaseDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t delete your Firebase account. Try again.'**
+  String get cleanupFirebaseDeleteFailed;
+
+  /// No description provided for @cleanupReauthWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password.'**
+  String get cleanupReauthWrongPassword;
+
+  /// No description provided for @cleanupReauthUserMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The user doesn\'t match the current session.'**
+  String get cleanupReauthUserMismatch;
+
+  /// No description provided for @cleanupReauthInvalidCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid credential.'**
+  String get cleanupReauthInvalidCredential;
+
+  /// No description provided for @cleanupReauthTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Wait a moment and try again.'**
+  String get cleanupReauthTooManyRequests;
+
+  /// No description provided for @cleanupReauthAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication error.'**
+  String get cleanupReauthAuthError;
+
+  /// No description provided for @cleanupPrefsClearWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Some local data could not be cleared.'**
+  String get cleanupPrefsClearWarning;
+
+  /// No description provided for @deleteAccountGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete account. Please try again.'**
+  String get deleteAccountGenericError;
+
+  /// No description provided for @authSessionVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Session could not be verified. Sign in again.'**
+  String get authSessionVerificationFailed;
 }
 
 class _AppLocalizationsDelegate

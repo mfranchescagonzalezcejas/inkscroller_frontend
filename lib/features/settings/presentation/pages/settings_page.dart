@@ -15,6 +15,7 @@ import '../../../../flavors/flavor_config.dart';
 import '../providers/settings_cache_controller.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/account_section.dart';
+import '../widgets/delete_account_dialog.dart' show resolveCleanupErrorText;
 
 /// Settings page — cache maintenance, app environment info, and account actions.
 ///
@@ -65,22 +66,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         if (next.deleteWarning != null) {
           AppFeedback.showWarning(
             context,
-            title: 'Cuenta eliminada con advertencias',
-            body: next.deleteWarning,
+            title: context.l10n.settingsAccountDeletedWithWarnings,
+            body: resolveCleanupErrorText(next.deleteWarning, context.l10n),
           );
         } else {
           AppFeedback.showSuccess(
             context,
-            title: 'Cuenta eliminada correctamente',
+            title: context.l10n.settingsAccountDeletedSuccessfully,
           );
         }
         context.go(AppRoutes.login);
       }
       if (next.deleteError != null && mounted) {
-        AppFeedback.showError(
-          context,
-          title: next.deleteError!,
-        );
+        final errorTitle = next.cleanupRecoveryPending
+            ? resolveCleanupErrorText(next.deleteError, context.l10n)
+            : context.l10n.deleteAccountGenericError;
+        AppFeedback.showError(context, title: errorTitle);
         ref.read(settingsProvider.notifier).resetState();
       }
     });

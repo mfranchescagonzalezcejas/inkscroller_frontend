@@ -7,6 +7,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
+import '../auth_error_text.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_form_widgets.dart';
 
@@ -37,7 +38,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    await ref.read(authProvider.notifier).signIn(
+    await ref
+        .read(authProvider.notifier)
+        .signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -49,7 +52,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listen(authProvider, (previous, next) {
       if (next.error != null && next.error != previous?.error) {
-        AppFeedback.showError(context, title: next.error!);
+        final title = authErrorText(context, next.error);
+        AppFeedback.showError(context, title: title);
         ref.read(authProvider.notifier).clearError();
       }
     });

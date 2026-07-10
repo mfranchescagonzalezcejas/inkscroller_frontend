@@ -103,7 +103,7 @@
   "libraryTabReading": "Leyendo",
   "libraryTabCompleted": "Completo",
   "libraryTabOnHold": "Pausado",
-  "libraryEmpty": "Tu biblioteca está vacía. Añadí mangas desde Inicio o el detalle.",
+  "libraryEmpty": "Tu biblioteca está vacía. Añade mangas desde Inicio o el detalle.",
   "libraryEmptyTab": "Todavía no hay mangas en esta pestaña.",
   "libraryStatusReading": "Marcar como Leyendo",
   "libraryStatusCompleted": "Marcar como Completo",
@@ -137,7 +137,7 @@
       "chapterLabel": {}
     }
   },
-  "readingProgressDialogExternalMessage": "Este capítulo se abre afuera de InkScroller. ¿Querés marcar {count} capítulos hasta {chapterLabel} antes de salir?",
+  "readingProgressDialogExternalMessage": "Este capítulo se abre fuera de InkScroller. ¿Quieres marcar {count} capítulos hasta {chapterLabel} antes de salir?",
   "@readingProgressDialogExternalMessage": {
     "placeholders": {
       "count": {
@@ -175,10 +175,10 @@
   "profileAppInfoTitle": "Información de la app",
   "profileAppInfoSubtitle": "Versión, licencias, créditos",
   "profileGuestTitle": "Estás usando la app como invitada.",
-  "profileGuestSubtitle": "Iniciá sesión o creá una cuenta para ver tu perfil y gestionar tus preferencias.",
+  "profileGuestSubtitle": "Inicia sesión o crea una cuenta para ver tu perfil y gestionar tus preferencias.",
   "profileGuestCta": "Iniciar sesión o crear cuenta",
   "profileSignOutAction": "Cerrar sesión",
-  "profileSignOutSnackBar": "Sesión cerrada. Seguís en modo invitada.",
+  "profileSignOutSnackBar": "Sesión cerrada. Sigues en modo invitada.",
   "profileServerConnectionError": "No se pudo conectar con el servidor.",
   "profileVersionLabel": "Versión {version} (Build {buildNumber})",
   "@profileVersionLabel": {
@@ -187,43 +187,92 @@
       "buildNumber": {}
     }
   },
-  "authSignInTitle": "Iniciá sesión",
+  "authSignInTitle": "Inicia sesión",
   "authSignInSubtitle": "Tu colección de manga te espera",
   "authEmailLabel": "Email",
   "authPasswordLabel": "Contraseña",
   "authSignInButton": "Iniciar sesión",
-  "authNoAccount": "¿No tenés cuenta? Crear una",
+  "authNoAccount": "¿No tienes cuenta? Crear una",
   "authContinueAsGuest": "Continuar como invitada",
-  "authEmailRequired": "Ingresá tu email.",
-  "authEmailInvalid": "Ingresá un email válido.",
-  "authPasswordRequired": "Ingresá tu contraseña.",
+  "authEmailRequired": "Ingresa tu email.",
+  "authEmailInvalid": "Ingresa un email válido.",
+  "authPasswordRequired": "Ingresa tu contraseña.",
   "authPasswordTooShort": "La contraseña debe tener al menos 6 caracteres.",
   "authCreateAccountTitle": "Crear cuenta",
-  "authCreateAccountSubtitle": "Unite a la colección",
+  "authCreateAccountSubtitle": "Únete a la colección",
   "authCreateAccountButton": "Crear cuenta",
-  "authCompleteProfileTitle": "Completá tu perfil",
-  "authCompleteProfileSubtitle": "Tu cuenta fue creada. Agregá los datos obligatorios para continuar.",
+  "authCompleteProfileTitle": "Completa tu perfil",
+  "authCompleteProfileSubtitle": "Tu cuenta fue creada. Agrega los datos obligatorios para continuar.",
   "authCompleteProfileButton": "Completar perfil",
-  "authHaveAccount": "¿Ya tenés cuenta? Iniciá sesión",
+  "authHaveAccount": "¿Ya tienes cuenta? Inicia sesión",
   "authUsernameLabel": "Usuario",
-  "authUsernameRequired": "Elegí un nombre de usuario.",
-  "authUsernameInvalid": "Usá 3–30 letras minúsculas, números, guiones bajos o guiones.",
+  "authUsernameRequired": "Elige un nombre de usuario.",
+  "authUsernameInvalid": "Usa 3–30 letras minúsculas, números, guiones bajos o guiones.",
   "authConfirmPasswordLabel": "Confirmar contraseña",
-  "authConfirmPasswordRequired": "Confirmá tu contraseña.",
+  "authConfirmPasswordRequired": "Confirma tu contraseña.",
   "authConfirmPasswordMismatch": "Las contraseñas no coinciden.",
   "authBirthDateLabel": "Fecha de nacimiento",
-  "authBirthDateRequired": "Elegí tu fecha de nacimiento.",
-  "authBirthDateInvalid": "Tenés que tener al menos 13 años.",
+  "authBirthDateRequired": "Elige tu fecha de nacimiento.",
+  "authBirthDateInvalid": "Debes tener al menos 13 años.",
   "authTermsAcknowledgement": "Acepto los Términos y la Política de Privacidad.",
-  "authTermsRequired": "Tenés que aceptar los Términos y la Política de Privacidad.",
+  "authTermsRequired": "Debes aceptar los Términos y la Política de Privacidad.",
   "readerSettingsDirection": "Dirección de lectura",
   "readerSettingsBrightness": "Brillo",
   "readerSettingsAmoled": "Negro AMOLED",
-  "readerSettingsAmoledSubtitle": "Ahorrá batería en pantallas OLED",
+  "readerSettingsAmoledSubtitle": "Ahorra batería en pantallas OLED",
   "readerSettingsImmersive": "Modo inmersivo",
   "readerSettingsImmersiveSubtitle": "Ocultar barras de navegación del sistema",
   "readerSettingsConfirm": "Confirmar ajustes",
   "readerDirectionLtr": "LTR",
   "readerDirectionRtl": "RTL",
-  "readerDirectionVertical": "Vertical"
+  "readerDirectionVertical": "Vertical",
+  "deleteAccountTitle": "Eliminar cuenta",
+  "deleteAccountWarningBody": "Esta acción es permanente e irreversible. Se eliminarán todos tus datos, incluyendo tu perfil, preferencias y progreso de lectura.",
+  "deleteAccountPrompt": "Escribe DELETE para confirmar:",
+  "deleteAccountPasswordLabel": "Ingresa tu contraseña para reintentar:",
+  "deleteAccountPasswordHint": "Contraseña",
+  "deleteAccountCancelAction": "Cancelar",
+  "deleteAccountFinalizeAction": "Finalizar",
+  "deleteAccountDeleteAction": "Eliminar",
+  "deleteAccountIncompleteRecoveryMessage": "La eliminación está incompleta. Es necesario finalizar la limpieza de datos.",
+  "accountSectionLabel": "CUENTA",
+  "settingsAccountDeletedWithWarnings": "Cuenta eliminada con advertencias",
+  "settingsAccountDeletedSuccessfully": "Cuenta eliminada correctamente",
+  "cleanupUnexpectedError": "Error durante la limpieza",
+  "readerPageLoading": "Página {pageNumber}",
+  "@readerPageLoading": {
+    "placeholders": {
+      "pageNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "readerPageLoadingVerbose": "Cargando página {pageNumber}…",
+  "@readerPageLoadingVerbose": {
+    "placeholders": {
+      "pageNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "readerPageLoadError": "No se pudo cargar la página {pageNumber}",
+  "@readerPageLoadError": {
+    "placeholders": {
+      "pageNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "readerNoPages": "Capítulo sin páginas",
+  "readerErrorGeneric": "Algo salió mal al cargar el capítulo.",
+  "cleanupRequiresRecentLogin": "Vuelve a iniciar sesión para completar la eliminación.",
+  "cleanupFirebaseDeleteFailed": "No se pudo eliminar tu cuenta de Firebase. Intenta de nuevo.",
+  "cleanupReauthWrongPassword": "Contraseña incorrecta.",
+  "cleanupReauthUserMismatch": "El usuario no coincide con la sesión actual.",
+  "cleanupReauthInvalidCredential": "Credencial inválida.",
+  "cleanupReauthTooManyRequests": "Demasiados intentos. Espera un momento e intenta de nuevo.",
+  "cleanupReauthAuthError": "Error de autenticación.",
+  "cleanupPrefsClearWarning": "No se pudieron eliminar algunos datos locales.",
+  "deleteAccountGenericError": "No se pudo eliminar la cuenta. Intenta de nuevo.",
+  "authSessionVerificationFailed": "No se pudo verificar la sesión. Inicia sesión nuevamente."
 }

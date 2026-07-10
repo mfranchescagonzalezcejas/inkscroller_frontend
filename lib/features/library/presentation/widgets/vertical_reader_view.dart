@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n.dart';
+
 /// How many off-screen pages to build and pre-load in the vertical reader.
 const int _preloadAheadCount = 8;
 
@@ -44,9 +46,11 @@ class _VerticalReaderViewState extends State<VerticalReaderView> {
 
   /// Fires background decode for the next `_preloadAheadCount` pages.
   void _preloadNext(BuildContext context, int currentIndex) {
-    for (int i = currentIndex + 1;
-        i <= currentIndex + _preloadAheadCount && i < widget.pages.length;
-        i++) {
+    for (
+      int i = currentIndex + 1;
+      i <= currentIndex + _preloadAheadCount && i < widget.pages.length;
+      i++
+    ) {
       if (_precachedPages.add(i)) {
         unawaited(precacheImage(NetworkImage(widget.pages[i]), context));
       }
@@ -103,7 +107,7 @@ class _LoadingPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Página $pageNumber',
+            context.l10n.readerPageLoading(pageNumber),
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -135,7 +139,7 @@ class _ErrorPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'No se pudo cargar la página $pageNumber',
+            context.l10n.readerPageLoadError(pageNumber),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

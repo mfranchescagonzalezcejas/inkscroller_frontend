@@ -476,4 +476,105 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readerDirectionVertical => 'Vertical';
+
+  @override
+  String get deleteAccountTitle => 'Delete Account';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'This action is permanent and irreversible. All your data, including your profile, preferences, and reading progress, will be deleted.';
+
+  @override
+  String get deleteAccountPrompt => 'Type DELETE to confirm:';
+
+  @override
+  String get deleteAccountPasswordLabel => 'Enter your password to retry:';
+
+  @override
+  String get deleteAccountPasswordHint => 'Password';
+
+  @override
+  String get deleteAccountCancelAction => 'Cancel';
+
+  @override
+  String get deleteAccountFinalizeAction => 'Finalize';
+
+  @override
+  String get deleteAccountDeleteAction => 'Delete';
+
+  @override
+  String get deleteAccountIncompleteRecoveryMessage =>
+      'The deletion is incomplete. Cleanup must be finalized.';
+
+  @override
+  String get accountSectionLabel => 'ACCOUNT';
+
+  @override
+  String get settingsAccountDeletedWithWarnings =>
+      'Account deleted with warnings';
+
+  @override
+  String get settingsAccountDeletedSuccessfully =>
+      'Account deleted successfully';
+
+  @override
+  String get cleanupUnexpectedError => 'Error during cleanup';
+
+  @override
+  String readerPageLoading(int pageNumber) {
+    return 'Page $pageNumber';
+  }
+
+  @override
+  String readerPageLoadingVerbose(int pageNumber) {
+    return 'Loading page $pageNumber…';
+  }
+
+  @override
+  String readerPageLoadError(int pageNumber) {
+    return 'Could not load page $pageNumber';
+  }
+
+  @override
+  String get readerNoPages => 'Chapter has no pages';
+
+  @override
+  String get readerErrorGeneric => 'Something went wrong loading the chapter.';
+
+  @override
+  String get cleanupRequiresRecentLogin =>
+      'You need to sign in again to complete the deletion.';
+
+  @override
+  String get cleanupFirebaseDeleteFailed =>
+      'We couldn\'t delete your Firebase account. Try again.';
+
+  @override
+  String get cleanupReauthWrongPassword => 'Incorrect password.';
+
+  @override
+  String get cleanupReauthUserMismatch =>
+      'The user doesn\'t match the current session.';
+
+  @override
+  String get cleanupReauthInvalidCredential => 'Invalid credential.';
+
+  @override
+  String get cleanupReauthTooManyRequests =>
+      'Too many attempts. Wait a moment and try again.';
+
+  @override
+  String get cleanupReauthAuthError => 'Authentication error.';
+
+  @override
+  String get cleanupPrefsClearWarning =>
+      'Some local data could not be cleared.';
+
+  @override
+  String get deleteAccountGenericError =>
+      'Could not delete account. Please try again.';
+
+  @override
+  String get authSessionVerificationFailed =>
+      'Session could not be verified. Sign in again.';
 }

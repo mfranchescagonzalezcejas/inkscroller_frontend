@@ -41,15 +41,18 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
         } on FirebaseAuthException catch (e) {
           if (e.code == 'requires-recent-login') {
             throw const AccountCleanupException(
-              message: 'Volvé a iniciar sesión para completar la eliminación.',
+              message: 'Vuelve a iniciar sesión para completar la eliminación.',
               requiresRecentLogin: true,
+              code: 'requires-recent-login',
             );
           }
           // Wrap other reauth errors (wrong password, user mismatch, etc.)
           // so the caller can display the Firebase error message.
+          final (:message, :code) = _reauthError(e);
           throw AccountCleanupException(
-            message: _describeReauthError(e),
+            message: message,
             requiresRecentLogin: false,
+            code: code,
           );
         }
       }
@@ -73,15 +76,17 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
           // Already deleted — treat as success.
         } else if (e.code == 'requires-recent-login') {
           throw const AccountCleanupException(
-            message: 'Volvé a iniciar sesión para completar la eliminación.',
+            message: 'Vuelve a iniciar sesión para completar la eliminación.',
             requiresRecentLogin: true,
+            code: 'requires-recent-login',
           );
         } else {
           shouldSignOut = false;
           throw const AccountCleanupException(
             message:
-                'No pudimos eliminar tu cuenta de Firebase. Intentá de nuevo.',
+                'No se pudo eliminar tu cuenta de Firebase. Intenta de nuevo.',
             requiresRecentLogin: false,
+            code: 'firebase-delete-failed',
           );
         }
       }
@@ -136,19 +141,29 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
   @override
   String? get currentCleanupUserId => _firebaseAuth.currentUser?.uid;
 
-  /// Returns a user-facing message for a Firebase reauth error code.
-  String _describeReauthError(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'wrong-password':
-        return 'Contraseña incorrecta.';
-      case 'user-mismatch':
-        return 'El usuario no coincide con la sesión actual.';
-      case 'invalid-credential':
-        return 'Credencial inválida.';
-      case 'too-many-requests':
-        return 'Demasiados intentos. Esperá un momento y volvé a intentar.';
-      default:
-        return e.message ?? 'Error de autenticación.';
-    }
+  /// Returns a (message, code) pair for a Firebase reauth error.
+  ({String message, String code}) _reauthError(FirebaseAuthException e) {
+    return switch (e.code) {
+      'wrong-password' => (
+        message: 'Contraseña incorrecta.',
+        code: 'wrong-password',
+      ),
+      'user-mismatch' => (
+        message: 'El usuario no coincide con la sesión actual.',
+        code: 'user-mismatch',
+      ),
+      'invalid-credential' => (
+        message: 'Credencial inválida.',
+        code: 'invalid-credential',
+      ),
+      'too-many-requests' => (
+        message: 'Demasiados intentos. Espera un momento e intenta de nuevo.',
+        code: 'too-many-requests',
+      ),
+      _ => (
+        message: e.message ?? 'Error de autenticación.',
+        code: 'auth-error',
+      ),
+    };
   }
 }

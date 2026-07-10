@@ -20,6 +20,12 @@ const String _completeProfileMetadataFailureReason =
 const String _profileCompletionCheckFailureReason =
     'profile_completion_check_failed';
 
+/// Stable internal key stored in [AuthState.error] when the auth stream
+/// reports a session verification failure. Widget layers resolve this to a
+/// localized message via [context.l10n.authSessionVerificationFailed].
+const String authSessionVerificationErrorKey =
+    'auth_session_verification_failed';
+
 /// Reports profile metadata failures to observability without coupling the
 /// notifier to a concrete analytics SDK.
 typedef ProfileMetadataFailureReporter =
@@ -91,7 +97,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(
           clearUser: true,
           isLoading: false,
-          error: 'La sesión no pudo verificarse. Iniciá sesión nuevamente.',
+          error: authSessionVerificationErrorKey,
         );
       },
     );

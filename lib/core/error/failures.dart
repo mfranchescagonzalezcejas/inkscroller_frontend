@@ -26,16 +26,21 @@ final class UnexpectedFailure extends Failure {
   const UnexpectedFailure({required super.message, super.code});
 }
 
+/// Failure emitted when a chapter has zero pages.
+///
+/// The [message] is a human-readable fallback; the presentation layer
+/// should map this type to a localized string.
+final class EmptyChapterFailure extends Failure {
+  const EmptyChapterFailure() : super(message: 'Chapter has no pages');
+}
+
 /// Failure emitted when a chapter is marked as external-only and cannot be
 /// rendered inside the in-app reader.
 ///
 /// [externalUrl] carries the URL where the chapter can be opened, if known.
 /// Used by [ReaderPage] to show a redirect/warning screen instead of the reader.
 final class ExternalChapterFailure extends Failure {
-  const ExternalChapterFailure({
-    required super.message,
-    this.externalUrl,
-  });
+  const ExternalChapterFailure({required super.message, this.externalUrl});
 
   /// The URL to which the user should be directed, or `null` if unknown.
   final String? externalUrl;

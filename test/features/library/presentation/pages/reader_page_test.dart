@@ -117,6 +117,7 @@ Future<void> pumpReaderPage(
   required ResolveReaderMode resolveReaderMode,
   String chapterId = 'ch-001',
   Chapter? chapter,
+  Locale locale = const Locale('en'),
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -134,13 +135,10 @@ Future<void> pumpReaderPage(
         ),
       ],
       child: MaterialApp(
-        locale: const Locale('en'),
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: ReaderPage(
-          chapterId: chapterId,
-          chapter: chapter,
-        ),
+        home: ReaderPage(chapterId: chapterId, chapter: chapter),
       ),
     ),
   );
@@ -157,9 +155,7 @@ void main() {
   late _FakeUrlLauncher fakeUrlLauncher;
 
   setUpAll(() {
-    registerFallbackValue(
-      const ReaderContentMetadata(pageCount: 0),
-    );
+    registerFallbackValue(const ReaderContentMetadata(pageCount: 0));
   });
 
   setUp(() {
@@ -220,34 +216,33 @@ void main() {
       },
     );
 
-    testWidgets(
-      'shows warning feedback when externalUrl cannot be launched',
-      (tester) async {
-        final externalChapter = Chapter(
-          id: 'ch-ext-unlaunchable',
-          readable: false,
-          external: true,
-          externalUrl: 'https://example.com/chapter/blocked',
-        );
-        fakeUrlLauncher.canLaunchResult = false;
+    testWidgets('shows warning feedback when externalUrl cannot be launched', (
+      tester,
+    ) async {
+      final externalChapter = Chapter(
+        id: 'ch-ext-unlaunchable',
+        readable: false,
+        external: true,
+        externalUrl: 'https://example.com/chapter/blocked',
+      );
+      fakeUrlLauncher.canLaunchResult = false;
 
-        await pumpReaderPage(
-          tester,
-          getChapterPages: getChapterPages,
-          resolveReaderMode: resolveReaderMode,
-          chapterId: 'ch-ext-unlaunchable',
-          chapter: externalChapter,
-        );
-        await tester.pumpAndSettle();
+      await pumpReaderPage(
+        tester,
+        getChapterPages: getChapterPages,
+        resolveReaderMode: resolveReaderMode,
+        chapterId: 'ch-ext-unlaunchable',
+        chapter: externalChapter,
+      );
+      await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Open on original site'));
-        await tester.pump();
+      await tester.tap(find.text('Open on original site'));
+      await tester.pump();
 
-        expect(find.byType(SnackBar), findsOneWidget);
-        expect(fakeUrlLauncher.launchedUrls, isEmpty);
-        verifyNever(() => getChapterPages(any()));
-      },
-    );
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(fakeUrlLauncher.launchedUrls, isEmpty);
+      verifyNever(() => getChapterPages(any()));
+    });
 
     testWidgets(
       'shows external-chapter warning screen when chapter.external == true '
@@ -345,9 +340,53 @@ void main() {
 
         // External chapter warning must NOT be shown.
         expect(find.text('External chapter'), findsNothing);
-        // Normal error/reader path is shown instead.
-        expect(find.text('offline'), findsOneWidget);
+        // Normal error path is shown — generic localized error, not raw message.
+        expect(
+          find.text('Something went wrong loading the chapter.'),
+          findsOneWidget,
+        );
       },
     );
   });
+
+  // ── Empty-chapter guard ────────────────────────────────────────────────
+
+  testWidgets('shows localized readerNoPages when chapter has zero pages', (
+    tester,
+  ) async {
+    when(
+      () => getChapterPages('ch-empty'),
+    ).thenAnswer((_) async => const Right<Failure, List<String>>(<String>[]));
+
+    await pumpReaderPage(
+      tester,
+      getChapterPages: getChapterPages,
+      resolveReaderMode: resolveReaderMode,
+      chapterId: 'ch-empty',
+    );
+    await tester.pumpAndSettle();
+
+    // EmptyChapterFailure → localized "Chapter has no pages" (en locale).
+    expect(find.text('Chapter has no pages'), findsOneWidget);
+  });
+
+  testWidgets(
+    'shows localized readerNoPages in Spanish when chapter has zero pages',
+    (tester) async {
+      when(
+        () => getChapterPages('ch-empty-es'),
+      ).thenAnswer((_) async => const Right<Failure, List<String>>(<String>[]));
+
+      await pumpReaderPage(
+        tester,
+        getChapterPages: getChapterPages,
+        resolveReaderMode: resolveReaderMode,
+        chapterId: 'ch-empty-es',
+        locale: const Locale('es'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Capítulo sin páginas'), findsOneWidget);
+    },
+  );
 }
