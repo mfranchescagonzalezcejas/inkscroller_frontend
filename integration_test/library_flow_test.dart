@@ -146,7 +146,7 @@ void _registerGetItMocks() {
         UserReadingPreferences(
           defaultReaderMode: ReaderMode.paged,
           defaultLanguage: 'es',
-          updatedAt: DateTime(2026),
+          updatedAt: _fixtureDate,
         ),
       ),
     );
@@ -158,7 +158,7 @@ void _registerGetItMocks() {
         UserReadingPreferences(
           defaultReaderMode: ReaderMode.paged,
           defaultLanguage: 'es',
-          updatedAt: DateTime(2026),
+          updatedAt: _fixtureDate,
         ),
       ),
     );
@@ -170,6 +170,27 @@ void _registerGetItMocks() {
       () => UpdatePreferences(prefsRepo),
     );
   }
+}
+
+/// Shared fixture date used across test data factories.
+final _fixtureDate = DateTime(2026);
+
+/// Repeatedly pumps [tester] until [finder] matches at least one widget,
+/// timing out after [timeout] if the condition is never met.
+Future<void> _pumpUntilFound(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 10),
+}) async {
+  const pumpInterval = Duration(milliseconds: 50);
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    // Let real-time async operations (mock futures) resolve.
+    await tester.runAsync(() => Future<void>.delayed(pumpInterval));
+    await tester.pump();
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  await tester.pump();
 }
 
 void main() {
@@ -239,19 +260,20 @@ void main() {
                 manga: berserk,
                 isInLibrary: true,
                 status: UserLibraryStatus.reading,
-                updatedAt: DateTime(2026),
+                updatedAt: _fixtureDate,
               ),
               'monster': UserLibraryEntry(
                 manga: monster,
                 isInLibrary: true,
                 status: UserLibraryStatus.reading,
-                updatedAt: DateTime(2026),
+                updatedAt: _fixtureDate,
               ),
             }),
           ),
         ],
         child: MaterialApp.router(
           routerConfig: router,
+          locale: const Locale('es'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
         ),
@@ -266,7 +288,7 @@ void main() {
         manga: Manga(id: 'fallback', title: 'fallback'),
         isInLibrary: true,
         status: UserLibraryStatus.reading,
-        updatedAt: DateTime(2026),
+        updatedAt: _fixtureDate,
       ),
     );
     registerFallbackValue(const PerTitleOverride(
@@ -320,19 +342,12 @@ void main() {
     expect(find.text('Berserk'), findsNothing);
 
     await tester.tap(find.text('Monster'));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
-    for (var i = 0; i < 10; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-    }
+    await _pumpUntilFound(tester, find.text('Capítulos'));
 
     expect(find.text('Monster'), findsWidgets);
     expect(find.text('Capítulos'), findsOneWidget);
 
-    // Let chapter data load and UI settle.
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
-    for (var i = 0; i < 10; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-    }
+    await _pumpUntilFound(tester, find.text('Capítulo 1'));
 
     expect(find.text('Capítulo 1'), findsOneWidget);
     expect(find.text('Chapter One'), findsOneWidget);
