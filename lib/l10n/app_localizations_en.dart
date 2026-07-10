@@ -623,4 +623,57 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get libraryErrorExternalChapter =>
       'This chapter is only available on the original site.';
+
+  @override
+  String get aboutTitle => 'About';
+
+  @override
+  String aboutVersion(String version, String build) {
+    return 'Version $version (Build $build)';
+  }
+
+  @override
+  String get aboutAppDescription => 'Personal manga reader — open source';
+
+  @override
+  String get aboutDisclaimerTitle => 'DISCLAIMER';
+
+  @override
+  String get aboutDisclaimerMangadexTitle => 'Not affiliated with MangaDex';
+
+  @override
+  String aboutDisclaimerMangadexBody(String appName) {
+    return '$appName is not affiliated, associated, authorized, or endorsed by MangaDex. The name \"MangaDex\" and its logo are trademarks of their respective owners. Use of the public MangaDex API is subject to its Terms of Use.';
+  }
+
+  @override
+  String get aboutDisclaimerMalTitle => 'Not affiliated with MyAnimeList';
+
+  @override
+  String aboutDisclaimerMalBody(String appName) {
+    return '$appName is not affiliated, associated, authorized, or endorsed by MyAnimeList (MAL). The name \"MyAnimeList\" and its logo are trademarks of their respective owners. Additional metadata is sourced through the public Jikan API, an unofficial MAL API, used for informational purposes only.';
+  }
+
+  @override
+  String get aboutDisclaimerCopyrightTitle => 'Content copyright';
+
+  @override
+  String aboutDisclaimerCopyrightBody(String appName) {
+    return 'All manga content (images, chapters, covers) belongs to their respective authors and publishers. $appName does not store or redistribute copyrighted content. This app only consumes data from third-party public APIs.';
+  }
+
+  @override
+  String get aboutCreditsTitle => 'CREDITS AND APIs';
+
+  @override
+  String get aboutCreditMangadexDescription => 'Catalog, chapters, and covers';
+
+  @override
+  String get aboutCreditJikanDescription => 'Additional metadata (MAL)';
+
+  @override
+  String get aboutCreditCloudRunDescription => 'Backend infrastructure';
+
+  @override
+  String get aboutCreditFirebaseDescription => 'User authentication';
 }

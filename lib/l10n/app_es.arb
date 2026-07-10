@@ -287,5 +287,41 @@
   "libraryErrorInvalidCertificate": "Certificado inválido.",
   "libraryErrorNetworkUnknown": "Ocurrió un error de red inesperado.",
   "libraryErrorEmptyResponse": "El servidor devolvió una respuesta vacía.",
-  "libraryErrorExternalChapter": "Este capítulo solo está disponible en el sitio original."
+  "libraryErrorExternalChapter": "Este capítulo solo está disponible en el sitio original.",
+  "aboutTitle": "Sobre la app",
+  "aboutVersion": "Versión {version} (Build {build})",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": { "type": "String" },
+      "build": { "type": "String" }
+    }
+  },
+  "aboutAppDescription": "Manga reader personal — open source",
+  "aboutDisclaimerTitle": "AVISO LEGAL",
+  "aboutDisclaimerMangadexTitle": "Sin afiliación a MangaDex",
+  "aboutDisclaimerMangadexBody": "{appName} no está afiliado, asociado, autorizado ni respaldado por MangaDex. El nombre \"MangaDex\" y su logotipo son marcas de sus respectivos propietarios. El uso de la API pública de MangaDex se realiza bajo sus Términos de Uso.",
+  "@aboutDisclaimerMangadexBody": {
+    "placeholders": {
+      "appName": { "type": "String" }
+    }
+  },
+  "aboutDisclaimerMalTitle": "Sin afiliación a MyAnimeList",
+  "aboutDisclaimerMalBody": "{appName} no está afiliado, asociado, autorizado ni respaldado por MyAnimeList (MAL). El nombre \"MyAnimeList\" y su logotipo son marcas de sus respectivos propietarios. Los metadatos adicionales se obtienen a través de la API pública de Jikan, una API no oficial de MAL, y se usan únicamente con fines informativos.",
+  "@aboutDisclaimerMalBody": {
+    "placeholders": {
+      "appName": { "type": "String" }
+    }
+  },
+  "aboutDisclaimerCopyrightTitle": "Derechos de autor del contenido",
+  "aboutDisclaimerCopyrightBody": "Todo el contenido de manga (imágenes, capítulos, portadas) pertenece a sus respectivos autores y editores. {appName} no almacena ni redistribuye contenido con derechos de autor. Esta app solo consume datos de APIs públicas de terceros.",
+  "@aboutDisclaimerCopyrightBody": {
+    "placeholders": {
+      "appName": { "type": "String" }
+    }
+  },
+  "aboutCreditsTitle": "CRÉDITOS Y APIs",
+  "aboutCreditMangadexDescription": "Catálogo, capítulos y portadas",
+  "aboutCreditJikanDescription": "Metadatos adicionales (MAL)",
+  "aboutCreditCloudRunDescription": "Infraestructura de backend",
+  "aboutCreditFirebaseDescription": "Autenticación de usuarios"
 }

@@ -1,26 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/design/design_tokens.dart' show AppColors;
+import '../../../../core/l10n/l10n.dart';
 
 /// About screen — app version, legal disclaimer, and API credits.
 ///
-/// Accessible from Profile → "Información de la app".
+/// Accessible from Profile → "App information".
 /// Contains the legal disclaimer required by MangaDex and MAL/Jikan API ToS.
-class AboutPage extends StatelessWidget {
+class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
 
   @override
+  State<AboutPage> createState() => _AboutPageState();
+}
+
+class _AboutPageState extends State<AboutPage> {
+  PackageInfo? _packageInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+    setState(() => _packageInfo = info);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: AppColors.stage,
       appBar: AppBar(
         backgroundColor: AppColors.stage,
         foregroundColor: AppColors.onSurface,
         elevation: 0,
-        title: const Text(
-          'Sobre la app',
-          style: TextStyle(
+        title: Text(
+          l10n.aboutTitle,
+          style: const TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -30,12 +52,12 @@ class AboutPage extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-        children: const <Widget>[
-          _AppIdentitySection(),
-          SizedBox(height: 24),
-          _DisclaimerSection(),
-          SizedBox(height: 24),
-          _CreditsSection(),
+        children: <Widget>[
+          _AppIdentitySection(packageInfo: _packageInfo),
+          const SizedBox(height: 24),
+          const _DisclaimerSection(),
+          const SizedBox(height: 24),
+          const _CreditsSection(),
         ],
       ),
     );
@@ -45,19 +67,29 @@ class AboutPage extends StatelessWidget {
 // ── App identity ──────────────────────────────────────────────────────────────
 
 class _AppIdentitySection extends StatelessWidget {
-  const _AppIdentitySection();
+  final PackageInfo? packageInfo;
+
+  const _AppIdentitySection({this.packageInfo});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final version = packageInfo != null
+        ? l10n.aboutVersion(
+            packageInfo!.version,
+            packageInfo!.buildNumber,
+          )
+        : '';
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(24),
-      child: const Column(
+      child: Column(
         children: <Widget>[
-          Text(
+          const Text(
             AppConstants.appName,
             style: TextStyle(
               fontFamily: 'Plus Jakarta Sans',
@@ -66,19 +98,19 @@ class _AppIdentitySection extends StatelessWidget {
               color: AppColors.onSurface,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Versión 0.4.2 (Build 20)',
-            style: TextStyle(
+            version,
+            style: const TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 13,
               color: AppColors.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            'Manga reader personal — open source',
-            style: TextStyle(
+            l10n.aboutAppDescription,
+            style: const TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 12,
               color: AppColors.outline,
@@ -97,10 +129,11 @@ class _DisclaimerSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const _SectionTitle(text: 'AVISO LEGAL'),
+        _SectionTitle(text: l10n.aboutDisclaimerTitle),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -108,36 +141,25 @@ class _DisclaimerSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.all(16),
-          child: const Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _DisclaimerItem(
                 icon: Icons.no_photography_outlined,
-                title: 'Sin afiliación a MangaDex',
-                body:
-                    '${AppConstants.appName} no está afiliado, asociado, autorizado ni respaldado por MangaDex. '
-                    'El nombre "MangaDex" y su logotipo son marcas de sus respectivos propietarios. '
-                    'El uso de la API pública de MangaDex se realiza bajo sus Términos de Uso.',
+                title: l10n.aboutDisclaimerMangadexTitle,
+                body: l10n.aboutDisclaimerMangadexBody(AppConstants.appName),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _DisclaimerItem(
                 icon: Icons.no_photography_outlined,
-                title: 'Sin afiliación a MyAnimeList',
-                body:
-                    '${AppConstants.appName} no está afiliado, asociado, autorizado ni respaldado por MyAnimeList (MAL). '
-                    'El nombre "MyAnimeList" y su logotipo son marcas de sus respectivos propietarios. '
-                    'Los metadatos adicionales se obtienen a través de la API pública de Jikan, '
-                    'una API no oficial de MAL, y se usan únicamente con fines informativos.',
+                title: l10n.aboutDisclaimerMalTitle,
+                body: l10n.aboutDisclaimerMalBody(AppConstants.appName),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _DisclaimerItem(
                 icon: Icons.copyright_outlined,
-                title: 'Derechos de autor del contenido',
-                body:
-                    'Todo el contenido de manga (imágenes, capítulos, portadas) '
-                    'pertenece a sus respectivos autores y editores. '
-                    '${AppConstants.appName} no almacena ni redistribuye contenido con derechos de autor. '
-                    'Esta app solo consume datos de APIs públicas de terceros.',
+                title: l10n.aboutDisclaimerCopyrightTitle,
+                body: l10n.aboutDisclaimerCopyrightBody(AppConstants.appName),
               ),
             ],
           ),
@@ -154,10 +176,11 @@ class _CreditsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const _SectionTitle(text: 'CRÉDITOS Y APIs'),
+        _SectionTitle(text: l10n.aboutCreditsTitle),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -165,33 +188,33 @@ class _CreditsSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: const Column(
+          child: Column(
             children: <Widget>[
               _CreditRow(
                 icon: Icons.library_books_outlined,
                 name: 'MangaDex API',
-                description: 'Catálogo, capítulos y portadas',
+                description: l10n.aboutCreditMangadexDescription,
                 url: 'api.mangadex.org',
               ),
-              Divider(color: AppColors.outlineVariant, height: 1),
+              const Divider(color: AppColors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.api_outlined,
                 name: 'Jikan API',
-                description: 'Metadatos adicionales (MAL)',
+                description: l10n.aboutCreditJikanDescription,
                 url: 'api.jikan.moe',
               ),
-              Divider(color: AppColors.outlineVariant, height: 1),
+              const Divider(color: AppColors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.cloud_outlined,
                 name: 'Google Cloud Run',
-                description: 'Infraestructura de backend',
+                description: l10n.aboutCreditCloudRunDescription,
                 url: 'cloud.google.com',
               ),
-              Divider(color: AppColors.outlineVariant, height: 1),
+              const Divider(color: AppColors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.lock_outlined,
                 name: 'Firebase Auth',
-                description: 'Autenticación de usuarios',
+                description: l10n.aboutCreditFirebaseDescription,
                 url: 'firebase.google.com',
               ),
             ],

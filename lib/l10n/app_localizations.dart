@@ -1213,6 +1213,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This chapter is only available on the original site.'**
   String get libraryErrorExternalChapter;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} (Build {build})'**
+  String aboutVersion(String version, String build);
+
+  /// No description provided for @aboutAppDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal manga reader — open source'**
+  String get aboutAppDescription;
+
+  /// No description provided for @aboutDisclaimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'DISCLAIMER'**
+  String get aboutDisclaimerTitle;
+
+  /// No description provided for @aboutDisclaimerMangadexTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not affiliated with MangaDex'**
+  String get aboutDisclaimerMangadexTitle;
+
+  /// No description provided for @aboutDisclaimerMangadexBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} is not affiliated, associated, authorized, or endorsed by MangaDex. The name \"MangaDex\" and its logo are trademarks of their respective owners. Use of the public MangaDex API is subject to its Terms of Use.'**
+  String aboutDisclaimerMangadexBody(String appName);
+
+  /// No description provided for @aboutDisclaimerMalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not affiliated with MyAnimeList'**
+  String get aboutDisclaimerMalTitle;
+
+  /// No description provided for @aboutDisclaimerMalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} is not affiliated, associated, authorized, or endorsed by MyAnimeList (MAL). The name \"MyAnimeList\" and its logo are trademarks of their respective owners. Additional metadata is sourced through the public Jikan API, an unofficial MAL API, used for informational purposes only.'**
+  String aboutDisclaimerMalBody(String appName);
+
+  /// No description provided for @aboutDisclaimerCopyrightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content copyright'**
+  String get aboutDisclaimerCopyrightTitle;
+
+  /// No description provided for @aboutDisclaimerCopyrightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All manga content (images, chapters, covers) belongs to their respective authors and publishers. {appName} does not store or redistribute copyrighted content. This app only consumes data from third-party public APIs.'**
+  String aboutDisclaimerCopyrightBody(String appName);
+
+  /// No description provided for @aboutCreditsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CREDITS AND APIs'**
+  String get aboutCreditsTitle;
+
+  /// No description provided for @aboutCreditMangadexDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog, chapters, and covers'**
+  String get aboutCreditMangadexDescription;
+
+  /// No description provided for @aboutCreditJikanDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional metadata (MAL)'**
+  String get aboutCreditJikanDescription;
+
+  /// No description provided for @aboutCreditCloudRunDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend infrastructure'**
+  String get aboutCreditCloudRunDescription;
+
+  /// No description provided for @aboutCreditFirebaseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'User authentication'**
+  String get aboutCreditFirebaseDescription;
 }
 
 class _AppLocalizationsDelegate

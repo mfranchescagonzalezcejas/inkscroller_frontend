@@ -629,4 +629,57 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get libraryErrorExternalChapter =>
       'Este capítulo solo está disponible en el sitio original.';
+
+  @override
+  String get aboutTitle => 'Sobre la app';
+
+  @override
+  String aboutVersion(String version, String build) {
+    return 'Versión $version (Build $build)';
+  }
+
+  @override
+  String get aboutAppDescription => 'Manga reader personal — open source';
+
+  @override
+  String get aboutDisclaimerTitle => 'AVISO LEGAL';
+
+  @override
+  String get aboutDisclaimerMangadexTitle => 'Sin afiliación a MangaDex';
+
+  @override
+  String aboutDisclaimerMangadexBody(String appName) {
+    return '$appName no está afiliado, asociado, autorizado ni respaldado por MangaDex. El nombre \"MangaDex\" y su logotipo son marcas de sus respectivos propietarios. El uso de la API pública de MangaDex se realiza bajo sus Términos de Uso.';
+  }
+
+  @override
+  String get aboutDisclaimerMalTitle => 'Sin afiliación a MyAnimeList';
+
+  @override
+  String aboutDisclaimerMalBody(String appName) {
+    return '$appName no está afiliado, asociado, autorizado ni respaldado por MyAnimeList (MAL). El nombre \"MyAnimeList\" y su logotipo son marcas de sus respectivos propietarios. Los metadatos adicionales se obtienen a través de la API pública de Jikan, una API no oficial de MAL, y se usan únicamente con fines informativos.';
+  }
+
+  @override
+  String get aboutDisclaimerCopyrightTitle => 'Derechos de autor del contenido';
+
+  @override
+  String aboutDisclaimerCopyrightBody(String appName) {
+    return 'Todo el contenido de manga (imágenes, capítulos, portadas) pertenece a sus respectivos autores y editores. $appName no almacena ni redistribuye contenido con derechos de autor. Esta app solo consume datos de APIs públicas de terceros.';
+  }
+
+  @override
+  String get aboutCreditsTitle => 'CRÉDITOS Y APIs';
+
+  @override
+  String get aboutCreditMangadexDescription => 'Catálogo, capítulos y portadas';
+
+  @override
+  String get aboutCreditJikanDescription => 'Metadatos adicionales (MAL)';
+
+  @override
+  String get aboutCreditCloudRunDescription => 'Infraestructura de backend';
+
+  @override
+  String get aboutCreditFirebaseDescription => 'Autenticación de usuarios';
 }
