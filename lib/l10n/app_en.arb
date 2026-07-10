@@ -287,5 +287,41 @@
   "libraryErrorInvalidCertificate": "Invalid certificate.",
   "libraryErrorNetworkUnknown": "An unexpected network error occurred.",
   "libraryErrorEmptyResponse": "The server returned an empty response.",
-  "libraryErrorExternalChapter": "This chapter is only available on the original site."
+  "libraryErrorExternalChapter": "This chapter is only available on the original site.",
+  "aboutTitle": "About",
+  "aboutVersion": "Version {version} (Build {build})",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": { "type": "String" },
+      "build": { "type": "String" }
+    }
+  },
+  "aboutAppDescription": "Personal manga reader — open source",
+  "aboutDisclaimerTitle": "DISCLAIMER",
+  "aboutDisclaimerMangadexTitle": "Not affiliated with MangaDex",
+  "aboutDisclaimerMangadexBody": "{appName} is not affiliated, associated, authorized, or endorsed by MangaDex. The name \"MangaDex\" and its logo are trademarks of their respective owners. Use of the public MangaDex API is subject to its Terms of Use.",
+  "@aboutDisclaimerMangadexBody": {
+    "placeholders": {
+      "appName": { "type": "String" }
+    }
+  },
+  "aboutDisclaimerMalTitle": "Not affiliated with MyAnimeList",
+  "aboutDisclaimerMalBody": "{appName} is not affiliated, associated, authorized, or endorsed by MyAnimeList (MAL). The name \"MyAnimeList\" and its logo are trademarks of their respective owners. Additional metadata is sourced through the public Jikan API, an unofficial MAL API, used for informational purposes only.",
+  "@aboutDisclaimerMalBody": {
+    "placeholders": {
+      "appName": { "type": "String" }
+    }
+  },
+  "aboutDisclaimerCopyrightTitle": "Content copyright",
+  "aboutDisclaimerCopyrightBody": "All manga content (images, chapters, covers) belongs to their respective authors and publishers. {appName} does not store or redistribute copyrighted content. This app only consumes data from third-party public APIs.",
+  "@aboutDisclaimerCopyrightBody": {
+    "placeholders": {
+      "appName": { "type": "String" }
+    }
+  },
+  "aboutCreditsTitle": "CREDITS AND APIs",
+  "aboutCreditMangadexDescription": "Catalog, chapters, and covers",
+  "aboutCreditJikanDescription": "Additional metadata (MAL)",
+  "aboutCreditCloudRunDescription": "Backend infrastructure",
+  "aboutCreditFirebaseDescription": "User authentication"
 }
