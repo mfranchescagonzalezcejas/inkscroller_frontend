@@ -155,25 +155,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     try {
       warning = await _cleanup.cleanUpAfterDeletion(password: password);
     } on AccountCleanupException catch (e) {
-      if (e.code == 'no-email-session-expired') {
-        // Phone/anonymous user with a stale session — local cleanup
-        // (signOut + prefs clear) happened in the repo but the Firebase
-        // Auth user could not be deleted. Terminal: do NOT mark
-        // accountDeleted, do NOT keep recoveryPending.
-        state = state.copyWith(
-          isDeletingAccount: false,
-          cleanupRecoveryPending: false,
-          requiresRecentLogin: false,
-          deleteError: cleanupSessionExpiredKey,
-        );
-      } else {
-        state = state.copyWith(
-          isDeletingAccount: false,
-          cleanupRecoveryPending: true,
-          deleteError: e.code ?? cleanupUnexpectedErrorKey,
-          requiresRecentLogin: e.requiresRecentLogin,
-        );
-      }
+      state = state.copyWith(
+        isDeletingAccount: false,
+        cleanupRecoveryPending: true,
+        deleteError: e.code ?? cleanupUnexpectedErrorKey,
+        requiresRecentLogin: e.requiresRecentLogin,
+      );
       return;
     } on Exception catch (_) {
       state = state.copyWith(
