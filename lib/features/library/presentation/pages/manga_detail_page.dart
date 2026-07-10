@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
+import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/core/widgets/offline_banner.dart';
 import 'package:inkscroller_flutter/features/library/presentation/widgets/cover_image.dart';
@@ -10,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart'
     show AppColors, AppSpacing, AppTypography;
+import '../../../../core/error/failures.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../domain/chapter_progress_utils.dart';
@@ -24,6 +26,30 @@ import '../providers/reading_progress_provider.dart';
 import '../providers/user_library_provider.dart';
 import '../widgets/chapter_tile.dart';
 import '../widgets/manga_detail_shimmer.dart';
+
+/// Resolves a library [Failure] to a localized error message.
+///
+/// Maps stable failure codes to the corresponding [AppLocalizations] string.
+/// Falls back to [AppLocalizations.libraryErrorNetworkUnknown] for unknown
+/// or unexpected failure types.
+String _libraryErrorText(Failure? failure, AppLocalizations l10n) {
+  if (failure == null) return '';
+  final message = failure.message;
+  return switch (message) {
+    'network/no-connection' => l10n.libraryErrorNetworkNoConnection,
+    'server/bad-response' => l10n.libraryErrorServerBadResponse,
+    'client/cancelled' => l10n.libraryErrorRequestCancelled,
+    'server/invalid-certificate' => l10n.libraryErrorInvalidCertificate,
+    'network/unknown' => l10n.libraryErrorNetworkUnknown,
+    'server/empty-response' => l10n.libraryErrorEmptyResponse,
+    'chapter/external-only' => l10n.libraryErrorExternalChapter,
+    _ => failure is NetworkFailure
+        ? l10n.libraryErrorNetworkNoConnection
+        : failure is ServerFailure
+        ? l10n.libraryErrorServerBadResponse
+        : l10n.libraryErrorNetworkUnknown,
+  };
+}
 
 /// Manga detail page matching inkscroller.pen design (node paPg4).
 ///
@@ -174,7 +200,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              state.failure!.message,
+                              _libraryErrorText(state.failure, context.l10n),
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 color: AppColors.onSurfaceVariant,

@@ -603,4 +603,30 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authUnknownError => 'Error de autenticación. Intenta de nuevo.';
+
+  @override
+  String get libraryErrorNetworkNoConnection =>
+      'No se pudo conectar con el servidor.';
+
+  @override
+  String get libraryErrorServerBadResponse =>
+      'El servidor respondió con un error.';
+
+  @override
+  String get libraryErrorRequestCancelled => 'La solicitud fue cancelada.';
+
+  @override
+  String get libraryErrorInvalidCertificate => 'Certificado inválido.';
+
+  @override
+  String get libraryErrorNetworkUnknown =>
+      'Ocurrió un error de red inesperado.';
+
+  @override
+  String get libraryErrorEmptyResponse =>
+      'El servidor devolvió una respuesta vacía.';
+
+  @override
+  String get libraryErrorExternalChapter =>
+      'Este capítulo solo está disponible en el sitio original.';
 }

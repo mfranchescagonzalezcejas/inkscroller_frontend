@@ -280,5 +280,12 @@
   "authWeakPassword": "La contraseña es muy débil. Usa al menos 6 caracteres.",
   "authTooManyRequests": "Demasiados intentos. Espera e intenta de nuevo.",
   "authNetworkError": "Sin conexión a internet. Verifica tu red.",
-  "authUnknownError": "Error de autenticación. Intenta de nuevo."
+  "authUnknownError": "Error de autenticación. Intenta de nuevo.",
+  "libraryErrorNetworkNoConnection": "No se pudo conectar con el servidor.",
+  "libraryErrorServerBadResponse": "El servidor respondió con un error.",
+  "libraryErrorRequestCancelled": "La solicitud fue cancelada.",
+  "libraryErrorInvalidCertificate": "Certificado inválido.",
+  "libraryErrorNetworkUnknown": "Ocurrió un error de red inesperado.",
+  "libraryErrorEmptyResponse": "El servidor devolvió una respuesta vacía.",
+  "libraryErrorExternalChapter": "Este capítulo solo está disponible en el sitio original."
 }

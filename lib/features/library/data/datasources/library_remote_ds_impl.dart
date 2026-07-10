@@ -63,7 +63,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
 
       final data = response.data;
       if (data == null) {
-        throw const ServerException(message: 'Empty response from server');
+        throw const ServerException(message: 'server/empty-response');
       }
       return MangaModel.fromJson(data);
     } on DioException catch (error) {
@@ -88,7 +88,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
 
       final data = response.data;
       if (data == null) {
-        throw const ServerException(message: 'Empty response from server');
+        throw const ServerException(message: 'server/empty-response');
       }
       return data
           .whereType<Map<String, dynamic>>()
@@ -118,11 +118,11 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
 
       final data = response.data;
       if (data == null) {
-        throw const ServerException(message: 'Empty response from server');
+        throw const ServerException(message: 'server/empty-response');
       }
 
       if (data['external'] == true) {
-        throw const ServerException(message: 'Chapter is external only');
+        throw const ServerException(message: 'chapter/external-only');
       }
 
       return List<String>.from(data['pages'] as List<dynamic>? ?? <dynamic>[]);
@@ -178,26 +178,18 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
       DioExceptionType.receiveTimeout ||
-      DioExceptionType.connectionError => NetworkException(
-        message: 'No se pudo conectar con el servidor',
-        code: statusCode,
-      ),
+      DioExceptionType.connectionError =>
+        const NetworkException(message: 'network/no-connection'),
       DioExceptionType.badResponse => ServerException(
-        message: 'El servidor respondió con un error',
+        message: 'server/bad-response',
         code: statusCode,
       ),
-      DioExceptionType.cancel => UnexpectedException(
-        message: 'La solicitud fue cancelada',
-        code: statusCode,
-      ),
-      DioExceptionType.badCertificate => UnexpectedException(
-        message: 'Certificado inválido',
-        code: statusCode,
-      ),
-      DioExceptionType.unknown => NetworkException(
-        message: error.message ?? 'Ocurrió un error de red inesperado',
-        code: statusCode,
-      ),
+      DioExceptionType.cancel =>
+        const UnexpectedException(message: 'client/cancelled'),
+      DioExceptionType.badCertificate =>
+        const UnexpectedException(message: 'server/invalid-certificate'),
+      DioExceptionType.unknown =>
+        const NetworkException(message: 'network/unknown'),
     };
   }
 

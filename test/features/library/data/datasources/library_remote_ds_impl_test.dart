@@ -39,7 +39,7 @@ void main() {
             isA<ServerException>().having(
               (e) => e.message,
               'message',
-              'Empty response from server',
+              'server/empty-response',
             ),
           ),
         );
@@ -71,7 +71,7 @@ void main() {
             isA<ServerException>().having(
               (e) => e.message,
               'message',
-              'Empty response from server',
+              'server/empty-response',
             ),
           ),
         );
@@ -103,7 +103,7 @@ void main() {
             isA<ServerException>().having(
               (e) => e.message,
               'message',
-              'Empty response from server',
+              'server/empty-response',
             ),
           ),
         );
@@ -132,7 +132,7 @@ void main() {
             isA<ServerException>().having(
               (e) => e.message,
               'message',
-              'Chapter is external only',
+              'chapter/external-only',
             ),
           ),
         );
