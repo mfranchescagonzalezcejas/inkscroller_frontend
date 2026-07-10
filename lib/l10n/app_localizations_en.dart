@@ -571,6 +571,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some local data could not be cleared.';
 
   @override
+  String get cleanupSessionExpired =>
+      'Your session expired. Please sign in again and retry.';
+
+  @override
   String get deleteAccountGenericError =>
       'Could not delete account. Please try again.';
 
