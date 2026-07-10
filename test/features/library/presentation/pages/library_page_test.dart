@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:inkscroller_flutter/l10n/app_localizations.dart';
+import '../../../../support/l10n_test_helpers.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
@@ -140,12 +140,7 @@ void main() {
             (ref) => _makeStubUserLibraryNotifier(libraryEntries),
           ),
         ],
-        child: const MaterialApp(
-          locale: Locale('es'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: LibraryPage(),
-        ),
+        child: wrapWithL10n(const LibraryPage(), locale: const Locale('es')),
       ),
     );
   }

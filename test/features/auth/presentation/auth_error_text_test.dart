@@ -2,18 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/auth_error_text.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
-import 'package:inkscroller_flutter/l10n/app_localizations.dart';
+
+import '../../../support/l10n_test_helpers.dart';
 
 void main() {
-  Widget wrapWithL10n(Widget child, {required Locale locale}) {
-    return MaterialApp(
-      locale: locale,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Builder(builder: (context) => child),
-    );
-  }
-
   group('authErrorText', () {
     testWidgets('resolves session verification key to EN message', (
       tester,
