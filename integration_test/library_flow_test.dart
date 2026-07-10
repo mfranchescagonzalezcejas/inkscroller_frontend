@@ -320,7 +320,7 @@ void main() {
     expect(find.text('Berserk'), findsNothing);
 
     await tester.tap(find.text('Monster'));
-    await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 500)));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
@@ -329,7 +329,7 @@ void main() {
     expect(find.text('Capítulos'), findsOneWidget);
 
     // Let chapter data load and UI settle.
-    await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 500)));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
