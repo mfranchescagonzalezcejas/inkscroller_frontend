@@ -146,10 +146,9 @@ jobs:
             test/features/settings/presentation/delete_account_dialog_test.dart
 
   ui-tests:
-    name: UI tests (pages + widgets) — informational
+    name: UI tests (pages + widgets)
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
