@@ -577,4 +577,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authSessionVerificationFailed =>
       'Session could not be verified. Sign in again.';
+
+  @override
+  String get authInvalidCredentials => 'Invalid email or password.';
+
+  @override
+  String get authEmailAlreadyInUse => 'This email is already registered.';
+
+  @override
+  String get authWeakPassword =>
+      'Password is too weak — use at least 6 characters.';
+
+  @override
+  String get authTooManyRequests =>
+      'Too many attempts. Please wait and try again.';
+
+  @override
+  String get authNetworkError => 'No internet connection. Check your network.';
+
+  @override
+  String get authUnknownError => 'Authentication failed. Please try again.';
 }

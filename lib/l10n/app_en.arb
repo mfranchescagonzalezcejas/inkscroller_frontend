@@ -274,5 +274,11 @@
   "cleanupReauthAuthError": "Authentication error.",
   "cleanupPrefsClearWarning": "Some local data could not be cleared.",
   "deleteAccountGenericError": "Could not delete account. Please try again.",
-  "authSessionVerificationFailed": "Session could not be verified. Sign in again."
+  "authSessionVerificationFailed": "Session could not be verified. Sign in again.",
+  "authInvalidCredentials": "Invalid email or password.",
+  "authEmailAlreadyInUse": "This email is already registered.",
+  "authWeakPassword": "Password is too weak — use at least 6 characters.",
+  "authTooManyRequests": "Too many attempts. Please wait and try again.",
+  "authNetworkError": "No internet connection. Check your network.",
+  "authUnknownError": "Authentication failed. Please try again."
 }
