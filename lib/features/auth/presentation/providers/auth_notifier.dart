@@ -26,6 +26,30 @@ const String _profileCompletionCheckFailureReason =
 const String authSessionVerificationErrorKey =
     'auth_session_verification_failed';
 
+// ---------------------------------------------------------------------------
+// Firebase auth error codes (stable — matched by authErrorText to localized
+// messages in app_*.arb). These replace raw/hardcoded user-facing text from
+// the data layer.
+// ---------------------------------------------------------------------------
+
+/// Credentials are invalid, not found, or malformed.
+const String authInvalidCredentialsKey = 'auth/invalid-credentials';
+
+/// The email is already associated with an existing account.
+const String authEmailAlreadyInUseKey = 'auth/email-already-in-use';
+
+/// The chosen password does not meet minimum strength requirements.
+const String authWeakPasswordKey = 'auth/weak-password';
+
+/// Too many login attempts — rate-limited by the backend.
+const String authTooManyRequestsKey = 'auth/too-many-requests';
+
+/// A network or connectivity failure prevented the auth request.
+const String authNetworkErrorKey = 'auth/network-error';
+
+/// An unexpected / uncategorised auth failure.
+const String authUnknownErrorKey = 'auth/unknown-error';
+
 /// Reports profile metadata failures to observability without coupling the
 /// notifier to a concrete analytics SDK.
 typedef ProfileMetadataFailureReporter =

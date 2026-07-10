@@ -583,4 +583,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get authSessionVerificationFailed =>
       'No se pudo verificar la sesión. Inicia sesión nuevamente.';
+
+  @override
+  String get authInvalidCredentials => 'Email o contraseña inválidos.';
+
+  @override
+  String get authEmailAlreadyInUse => 'Este email ya está registrado.';
+
+  @override
+  String get authWeakPassword =>
+      'La contraseña es muy débil. Usa al menos 6 caracteres.';
+
+  @override
+  String get authTooManyRequests =>
+      'Demasiados intentos. Espera e intenta de nuevo.';
+
+  @override
+  String get authNetworkError => 'Sin conexión a internet. Verifica tu red.';
+
+  @override
+  String get authUnknownError => 'Error de autenticación. Intenta de nuevo.';
 }

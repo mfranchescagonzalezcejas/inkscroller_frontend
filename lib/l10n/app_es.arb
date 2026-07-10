@@ -274,5 +274,11 @@
   "cleanupReauthAuthError": "Error de autenticación.",
   "cleanupPrefsClearWarning": "No se pudieron eliminar algunos datos locales.",
   "deleteAccountGenericError": "No se pudo eliminar la cuenta. Intenta de nuevo.",
-  "authSessionVerificationFailed": "No se pudo verificar la sesión. Inicia sesión nuevamente."
+  "authSessionVerificationFailed": "No se pudo verificar la sesión. Inicia sesión nuevamente.",
+  "authInvalidCredentials": "Email o contraseña inválidos.",
+  "authEmailAlreadyInUse": "Este email ya está registrado.",
+  "authWeakPassword": "La contraseña es muy débil. Usa al menos 6 caracteres.",
+  "authTooManyRequests": "Demasiados intentos. Espera e intenta de nuevo.",
+  "authNetworkError": "Sin conexión a internet. Verifica tu red.",
+  "authUnknownError": "Error de autenticación. Intenta de nuevo."
 }

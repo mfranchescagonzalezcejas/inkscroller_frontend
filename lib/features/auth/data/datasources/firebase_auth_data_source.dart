@@ -120,32 +120,34 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   }
 
   AppException _mapFirebaseException(FirebaseAuthException e) {
+    // ponytail: stable codes instead of raw user-facing messages — the
+    // presentation layer resolves these via authErrorText(context, code).
     return switch (e.code) {
       'user-not-found' ||
       'wrong-password' ||
       'invalid-credential' ||
       'invalid-email' =>
         const ServerException(
-          message: 'Credenciales inv�lidas.',
+          message: 'auth/invalid-credentials',
           code: 401,
         ),
       'email-already-in-use' => const ServerException(
-          message: 'El email ya est� registrado.',
+          message: 'auth/email-already-in-use',
           code: 409,
         ),
       'weak-password' => const ServerException(
-          message: 'La contrase�a es demasiado d�bil.',
+          message: 'auth/weak-password',
           code: 400,
         ),
       'too-many-requests' => const ServerException(
-          message: 'Demasiados intentos. Intent� m�s tarde.',
+          message: 'auth/too-many-requests',
           code: 429,
         ),
       'network-request-failed' => const NetworkException(
-          message: 'Sin conexi�n. Verific� tu red.',
+          message: 'auth/network-error',
         ),
-      _ => ServerException(
-          message: e.message ?? 'Error de autenticaci�n.',
+      _ => const ServerException(
+          message: 'auth/unknown-error',
           code: 500,
         ),
     };

@@ -1135,6 +1135,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Session could not be verified. Sign in again.'**
   String get authSessionVerificationFailed;
+
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authEmailAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered.'**
+  String get authEmailAlreadyInUse;
+
+  /// No description provided for @authWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is too weak — use at least 6 characters.'**
+  String get authWeakPassword;
+
+  /// No description provided for @authTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait and try again.'**
+  String get authTooManyRequests;
+
+  /// No description provided for @authNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Check your network.'**
+  String get authNetworkError;
+
+  /// No description provided for @authUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed. Please try again.'**
+  String get authUnknownError;
 }
 
 class _AppLocalizationsDelegate
