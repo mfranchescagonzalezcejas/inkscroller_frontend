@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
 import 'package:inkscroller_flutter/features/about/presentation/pages/about_page.dart';
-import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 
 import '../../../../support/l10n_test_helpers.dart';
 
@@ -43,7 +42,7 @@ Future<void> pumpAboutPage(
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
     const MethodChannel('dev.fluttercommunity.plus/package_info'),
-    (MethodCall methodCall) async {
+    (methodCall) async {
       if (methodCall.method == 'getAll') {
         return mockPackageInfo ?? _mockPackageInfoData();
       }
