@@ -9,6 +9,7 @@
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
@@ -60,13 +61,17 @@ class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
 class _FakeUrlLauncher extends UrlLauncherPlatform {
   bool canLaunchResult = false;
+  bool canLaunchThrows = false;
   final launchedUrls = <String>[];
 
   @override
   LinkDelegate? get linkDelegate => null;
 
   @override
-  Future<bool> canLaunch(String url) async => canLaunchResult;
+  Future<bool> canLaunch(String url) async {
+    if (canLaunchThrows) throw PlatformException(code: 'NO_ACTIVITY');
+    return canLaunchResult;
+  }
 
   @override
   Future<bool> launchUrl(String url, LaunchOptions options) async {
@@ -243,6 +248,36 @@ void main() {
       expect(fakeUrlLauncher.launchedUrls, isEmpty);
       verifyNever(() => getChapterPages(any()));
     });
+
+    testWidgets(
+      'shows warning and logs when canLaunchUrl throws an exception',
+      (tester) async {
+        final externalChapter = Chapter(
+          id: 'ch-ext-throw',
+          readable: false,
+          external: true,
+          externalUrl: 'https://example.com/chapter/throw',
+        );
+        fakeUrlLauncher.canLaunchThrows = true;
+
+        await pumpReaderPage(
+          tester,
+          getChapterPages: getChapterPages,
+          resolveReaderMode: resolveReaderMode,
+          chapterId: 'ch-ext-throw',
+          chapter: externalChapter,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Open on original site'));
+        await tester.pump();
+
+        // Warning snackbar is shown despite the exception.
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(fakeUrlLauncher.launchedUrls, isEmpty);
+        verifyNever(() => getChapterPages(any()));
+      },
+    );
 
     testWidgets(
       'shows external-chapter warning screen when chapter.external == true '

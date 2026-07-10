@@ -249,7 +249,10 @@ class _ExternalChapterScreen extends StatelessWidget {
                         context,
                         title: context.l10n.externalChapterTitle,
                       );
-                    } on Exception {
+                    } on Exception catch (e, st) {
+                      debugPrint(
+                        '[ExternalLink] Failed to launch URL: $e\n$st',
+                      );
                       if (!context.mounted) return;
                       AppFeedback.showWarning(
                         context,
