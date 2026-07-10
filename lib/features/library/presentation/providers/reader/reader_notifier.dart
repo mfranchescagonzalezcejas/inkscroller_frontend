@@ -40,6 +40,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
        super(const ReaderState());
 
   bool _isDisposed = false;
+  int _loadGeneration = 0;
 
   @override
   void dispose() {
@@ -98,8 +99,12 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     );
 
     final firstPages = pages.take(_initialPrecacheCount).toList();
+    _loadGeneration++;
     try {
-      await _precacheAllConcurrent(firstPages).timeout(
+      await _precacheAllConcurrent(
+        firstPages,
+        generation: _loadGeneration,
+      ).timeout(
         _initialPrecacheTimeout,
         onTimeout: () {},
       );
@@ -108,12 +113,19 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     }
     if (_isDisposed) return;
 
+    // Bump generation so any residual first-batch workers from a timed-out
+    // precache don't overwrite loadedPages with stale values.
+    _loadGeneration++;
+
     // Show the reader with the first 5 pages already cached.
     state = state.copyWith(isLoading: false, loadedPages: firstPages.length);
 
     // Pre-warm the remaining pages in the background.
     if (pages.length > _initialPrecacheCount) {
-      unawaited(_precacheAllConcurrent(pages.sublist(_initialPrecacheCount)));
+      unawaited(_precacheAllConcurrent(
+        pages.sublist(_initialPrecacheCount),
+        generation: _loadGeneration,
+      ));
     }
   }
 
@@ -125,6 +137,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   Future<void> _precacheAllConcurrent(
     List<String> urls, {
     int concurrency = 4,
+    int generation = 0,
   }) async {
     var index = 0;
     var loaded = 0;
@@ -142,7 +155,11 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
 
         if (_isDisposed) return;
         loaded++;
-        state = state.copyWith(loadedPages: loaded);
+        // Only update state if this load generation is still active,
+        // so timed-out workers cannot write stale progress values.
+        if (generation == _loadGeneration) {
+          state = state.copyWith(loadedPages: loaded);
+        }
       }
     }
 

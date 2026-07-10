@@ -19,6 +19,7 @@ String resolveCleanupErrorText(String? errorKey, AppLocalizations l10n) {
     'invalid-credential' => l10n.cleanupReauthInvalidCredential,
     'too-many-requests' => l10n.cleanupReauthTooManyRequests,
     'auth-error' => l10n.cleanupReauthAuthError,
+    'email-not-available' => l10n.cleanupEmailNotAvailable,
     cleanupUnexpectedErrorKey => l10n.cleanupUnexpectedError,
     cleanupWarningKey => l10n.cleanupPrefsClearWarning,
     _ => l10n.cleanupUnexpectedError, // fallback: catch-all for unknown codes

@@ -571,6 +571,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some local data could not be cleared.';
 
   @override
+  String get cleanupEmailNotAvailable =>
+      'This account does not have an email address. Try signing in with a different method.';
+
+  @override
   String get deleteAccountGenericError =>
       'Could not delete account. Please try again.';
 
