@@ -40,7 +40,6 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
        super(const ReaderState());
 
   bool _isDisposed = false;
-  bool _precacheAbandoned = false;
 
   @override
   void dispose() {
@@ -100,10 +99,9 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
 
     final firstPages = pages.take(_initialPrecacheCount).toList();
     try {
-      _precacheAbandoned = false;
-      await _precacheImages(firstPages).timeout(
+      await _precacheAllConcurrent(firstPages).timeout(
         _initialPrecacheTimeout,
-        onTimeout: () => _precacheAbandoned = true,
+        onTimeout: () {},
       );
     } on Object catch (_) {
       // Precache is a perf optimisation, not a requirement.
@@ -151,16 +149,6 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     await Future.wait(
       List.generate(math.min(concurrency, urls.length), (_) => worker()),
     );
-  }
-
-  /// Pre-caches [urls] one by one and updates the loading bar after each.
-  Future<void> _precacheImages(List<String> urls) async {
-    for (var i = 0; i < urls.length; i++) {
-      if (_isDisposed || _precacheAbandoned) return;
-      await _precacheNetworkImage(urls[i]);
-      if (_isDisposed || _precacheAbandoned) return;
-      state = state.copyWith(loadedPages: i + 1);
-    }
   }
 
   static Future<void> _defaultPrecacheNetworkImage(String url) async {
