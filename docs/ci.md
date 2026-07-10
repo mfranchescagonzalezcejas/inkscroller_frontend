@@ -78,7 +78,7 @@ Before distributing any build, the release workflow runs:
 
 1. `fvm flutter analyze`
 2. `fvm flutter test`
-3. Tag validation — the pushed tag must use `vX.Y.Z` semver format
+3. Version validation — `pubspec.yaml` semver must match the pushed tag
 
 If any step fails, no APKs are distributed.
 
@@ -94,9 +94,8 @@ version: 1.2.3+45   # semver+build-number
 ```
 
 - The **semver** (`1.2.3`) must match the tag (`v1.2.3`)
-- The **build number** (`+45`) is auto-incremented by `scripts/release.sh` on every release
-- CI may additionally pass `--build-name` and `--build-number` to Flutter as artifact metadata; the source of truth for the version lives in `pubspec.yaml`
-- See [RELEASING.md#build-number-semantics-source-vs-ci](RELEASING.md#build-number-semantics-source-vs-ci) for the full explanation
+- The **build number** (`+45`) must be incremented on every release
+- The release scripts enforce the pubspec ↔ tag match before creating the tag
 
 ---
 
@@ -152,7 +151,7 @@ fvm flutter run --flavor pro     -t lib/main_pro.dart
 
 - Firebase keys are injected at build time via `--dart-define-from-file` using a single `FIREBASE_DART_DEFINES_JSON` CI secret — no hardcoded keys in source
 - Release is tag-driven, not triggered by manually publishing a GitHub Release
-- Cross-platform release scripts enforce 6 pre-flight checks, then auto-bump pubspec.yaml before tagging
+- Cross-platform release scripts enforce 6 pre-flight checks before tagging
 - Flutter version is pinned in CI via FVM for reproducibility
 - Release notes rely on commit conventions instead of manual input
 
@@ -164,6 +163,7 @@ See [RELEASING.md](RELEASING.md) for the complete checklist.
 
 Quick summary:
 
+- [ ] `pubspec.yaml` version bumped (semver + build number)
 - [ ] All changes merged to `main`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured

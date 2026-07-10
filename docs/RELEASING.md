@@ -15,17 +15,27 @@ Editable source: [`release-flow.drawio`](diagrams/release-flow.drawio)
 ## Release flow
 
 ```
-1. All changes merged to main (normal flow)
-2. Run the release script from main (it bumps pubspec.yaml, commits, pushes, tags)
-3. CI does the rest automatically
+1. Bump version in pubspec.yaml
+2. Commit, PR → develop → main (normal flow)
+3. Run the release script from main
+4. CI does the rest automatically
 ```
 
-### Step 1 — Merge to main
+### Step 1 — Bump pubspec.yaml
+
+```yaml
+# pubspec.yaml
+version: 1.2.3+45   # semver+build-number
+```
+
+- The **semver** (`1.2.3`) must match the tag you will create.
+- The **build number** (`+45`) must be incremented on every release.
+
+### Step 2 — Merge to main
 
 All changes must be on `main` before tagging. The release scripts enforce this.
-You do **not** need to bump `pubspec.yaml` manually — the script handles it.
 
-### Step 2 — Run the release script
+### Step 3 — Run the release script
 
 **macOS / Linux:**
 ```bash
@@ -37,36 +47,25 @@ You do **not** need to bump `pubspec.yaml` manually — the script handles it.
 .\scripts\release.ps1 -Version 1.2.3
 ```
 
-The script runs 6 pre-flight checks, then bumps `pubspec.yaml` and tags:
+The script runs 6 pre-flight checks before creating the tag:
 
 | Check | What it validates |
 |-------|------------------|
 | Branch | Must be on `main` |
 | Clean tree | No uncommitted changes |
 | Semver format | Argument must be `X.Y.Z` |
-| pubspec parseable | `pubspec.yaml` must exist with a valid version line |
+| pubspec match | Arg must match `pubspec.yaml` semver |
 | Sync | Local `main` == `origin/main` |
-| No duplicate tag | `vX.Y.Z` must not already exist locally or on `origin` |
+| No duplicate tag | `vX.Y.Z` must not already exist |
 
-If any check fails, the script exits with a clear error — no bump, no commit, no tag.
+If any check fails, the script exits with a clear error — no tag is created.
 
-When checks pass, the script:
-1. Computes the next build number (`N+1` from current, or `1` if none)
-2. Writes `version: X.Y.Z+<next-build>` into `pubspec.yaml`
-3. Commits the bump as `chore(release): bump version to X.Y.Z+<next-build>`
-4. Creates the local `vX.Y.Z` tag on the bump commit
-5. Pushes `main` and `vX.Y.Z` atomically, so remote `main` is not advanced without the tag
-
-If the script already bumped `pubspec.yaml` for the requested semver but failed
-before pushing the tag, rerun the same command. The script reuses the existing
-build number instead of incrementing it again, then creates the missing tag.
-
-### Step 3 — CI runs automatically
+### Step 4 — CI runs automatically
 
 Once the tag `vX.Y.Z` is pushed, `.github/workflows/release.yml` triggers and:
 
 1. Runs `fvm flutter analyze` + `fvm flutter test`
-2. Validates tag format (`vX.Y.Z`)
+2. Validates tag matches `pubspec.yaml`
 3. Builds DEV / STAGING / PRO APKs
 4. Creates the GitHub Release and attaches all APKs
 5. Distributes APKs via Firebase App Distribution
@@ -110,30 +109,14 @@ Go to **Settings → Secrets and variables → Actions** and verify these are se
 
 ---
 
-## Build-number semantics (source vs CI)
-
-There are **two separate** build numbers in play:
-
-| Layer | Where | Managed by | Purpose |
-|-------|-------|-----------|---------|
-| **Source** | `pubspec.yaml` `version: X.Y.Z+N` | Release script | Canonical source version stored in the tagged commit |
-| **Artifact** | `--build-name` / `--build-number` passed to `fvm flutter build` | CI workflow | Version metadata stamped into the generated APK/AAB; does **not** change `pubspec.yaml` |
-
-The release script persists the **source version** before the tag is created.
-CI then passes `--build-name="${GITHUB_REF_NAME#v}"` and
-`--build-number="$BUILD_NUMBER"` to Flutter when building artifacts. Those
-build arguments override artifact metadata at build time, but they do not modify
-`pubspec.yaml`.
-
----
-
 ## Rollback
 
 If a release has a critical bug:
 
 1. **Do not delete the tag** — it stays for history.
 2. Fix the bug on a branch, merge to `main`.
-3. Run the release script again with the next patch version (e.g. `1.2.4`).
+3. Bump `pubspec.yaml` to the next patch version (e.g. `1.2.4`).
+4. Run the release script again with the new version.
 
 There is no automated rollback — Firebase App Distribution testers will receive
 the new build as an update.
@@ -142,6 +125,7 @@ the new build as an update.
 
 ## Checklist
 
+- [ ] `pubspec.yaml` version bumped (semver + build number)
 - [ ] All changes merged to `main`
 - [ ] `FIREBASE_DART_DEFINES_JSON` secret is up to date
 - [ ] All other secrets configured (see table above)

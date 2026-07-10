@@ -4,25 +4,15 @@
 # Usage: ./scripts/release.sh <version>
 #   version  Semver without the 'v' prefix (e.g. 1.2.3)
 #
-# Pre-flight checks (all must pass before bumping):
+# Pre-flight checks (all must pass before tagging):
 #   1. Must run from the main branch
 #   2. Working tree must be clean
 #   3. Version argument must be a valid semver (X.Y.Z)
-#   4. pubspec.yaml must exist with a parseable version line
+#   4. Version must match pubspec.yaml
 #   5. Local main must be in sync with origin/main
-#   6. Tag must not already exist locally or on origin
+#   6. Tag must not already exist
 #
-# After checks pass:
-#   7. Computes next build number from current pubspec.yaml
-#      (reuses the existing build when retrying the same X.Y.Z, otherwise N+1)
-#   8. Bumps pubspec.yaml to X.Y.Z+<next-build>
-#   9. Commits, pushes main, creates and pushes vX.Y.Z tag → triggers CI
-#
-# Build-number semantics:
-#   The script increments the source build number in pubspec.yaml,
-#   except when retrying an already-bumped same-semver release.
-#   CI may additionally pass --build-name and --build-number to Flutter
-#   for artifact metadata. See docs/RELEASING.md for the full explanation.
+# On success: creates and pushes vX.Y.Z tag → triggers release.yml in CI
 
 set -euo pipefail
 
@@ -62,44 +52,15 @@ if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
 fi
 ok "Version format valid: $VERSION"
 
-# ── 4. Parse pubspec.yaml, compute next build number ─────────────────────────
+# ── 4. Version matches pubspec.yaml ──────────────────────────────────────────
 
-if [ ! -f pubspec.yaml ]; then
-  fail "pubspec.yaml not found. Are you in the project root?"
+PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+PUBSPEC_SEMVER="${PUBSPEC_VERSION%%+*}"
+
+if [ "$PUBSPEC_SEMVER" != "$VERSION" ]; then
+  fail "pubspec.yaml version ($PUBSPEC_VERSION) does not match $VERSION. Bump pubspec.yaml first."
 fi
-
-CURRENT_VERSION_LINE=$(grep -m1 '^version:' pubspec.yaml || true)
-if [ -z "$CURRENT_VERSION_LINE" ]; then
-  fail "Could not find version in pubspec.yaml"
-fi
-# shellcheck disable=SC2001
-CURRENT_VERSION=$(echo "$CURRENT_VERSION_LINE" | sed 's/version: *//')
-
-if [ -z "$CURRENT_VERSION" ]; then
-  fail "Could not parse version from pubspec.yaml"
-fi
-
-# Extract current semver and build number, if any (X.Y.Z+N)
-CURRENT_SEMVER="${CURRENT_VERSION%%+*}"
-if echo "$CURRENT_VERSION" | grep -q '+'; then
-  # shellcheck disable=SC2001
-  CURRENT_BUILD=$(echo "$CURRENT_VERSION" | sed 's/.*+//')
-  if ! echo "$CURRENT_BUILD" | grep -qE '^[0-9]+$'; then
-    fail "pubspec.yaml build number is not numeric: +${CURRENT_BUILD}"
-  fi
-else
-  CURRENT_BUILD=0
-fi
-
-if [ "$CURRENT_SEMVER" = "$VERSION" ] && [ "$CURRENT_BUILD" -gt 0 ]; then
-  NEXT_BUILD=$CURRENT_BUILD
-  info "pubspec.yaml already uses release semver ${VERSION}; reusing build ${NEXT_BUILD}"
-else
-  NEXT_BUILD=$((CURRENT_BUILD + 1))
-fi
-
-NEW_VERSION="${VERSION}+${NEXT_BUILD}"
-ok "pubspec.yaml — current: ${CURRENT_VERSION}, next: ${NEW_VERSION}"
+ok "pubspec.yaml version matches: $PUBSPEC_VERSION"
 
 # ── 5. Local/origin sync ─────────────────────────────────────────────────────
 
@@ -120,54 +81,13 @@ TAG="v$VERSION"
 if git rev-parse "$TAG" >/dev/null 2>&1; then
   fail "Tag $TAG already exists. Did you forget to bump the version?"
 fi
-ok "Local tag $TAG does not exist yet"
+ok "Tag $TAG does not exist yet"
 
-RC=0
-git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1 || RC=$?
-if [ "$RC" -eq 0 ]; then
-  fail "Tag $TAG already exists on origin. Did you forget to bump the version?"
-elif [ "$RC" -ne 2 ]; then
-  fail "Could not check remote tag (ls-remote exited $RC). Network or auth error?"
-fi
-ok "Remote tag $TAG does not exist yet"
+# ── Tag and push ─────────────────────────────────────────────────────────────
 
-# ── Bump pubspec.yaml ────────────────────────────────────────────────────────
-
-NEW_VERSION_LINE="version: ${NEW_VERSION}"
-
-if [ "$CURRENT_VERSION_LINE" = "$NEW_VERSION_LINE" ]; then
-  info "pubspec.yaml already at ${NEW_VERSION}, skipping bump"
-else
-  info "Bumping pubspec.yaml to ${NEW_VERSION}"
-
-  # portable temp-file replacement (no sed -i, works on macOS and Linux)
-  TMPFILE=$(mktemp)
-  # shellcheck disable=SC2064
-  sed "s/^version: .*/version: ${NEW_VERSION}/" pubspec.yaml > "$TMPFILE"
-  mv "$TMPFILE" pubspec.yaml
-
-  git add pubspec.yaml
-fi
-
-# ── Commit, push, tag ────────────────────────────────────────────────────────
-
-# Only commit if there are staged changes (i.e. pubspec was actually bumped)
-if git diff --cached --quiet; then
-  info "No changes to commit — pubspec was already at target version"
-else
-  COMMIT_MSG="chore(release): bump version to ${NEW_VERSION}"
-  info "Committing: ${COMMIT_MSG}"
-  git commit -m "$COMMIT_MSG"
-fi
-
-info "Creating tag $TAG..."
+info "Creating and pushing tag $TAG..."
 git tag "$TAG"
-info "Pushing main and $TAG atomically..."
-if ! git push --atomic origin main "$TAG"; then
-  git tag -d "$TAG" >/dev/null 2>&1 || true
-  git reset --hard origin/main >/dev/null 2>&1 || true
-  fail "Atomic push failed; reverted tag and local commits. The release can now be retried."
-fi
+git push origin "$TAG"
 
 echo ""
 echo -e "${GREEN}Released $TAG${NC} — CI workflow triggered."
