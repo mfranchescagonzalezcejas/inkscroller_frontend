@@ -137,7 +137,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
   Future<void> _precacheAllConcurrent(
     List<String> urls, {
     int concurrency = 4,
-    int generation = 0,
+    required int generation,
   }) async {
     var index = 0;
     var loaded = 0;

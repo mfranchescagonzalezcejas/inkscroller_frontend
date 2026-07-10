@@ -20,6 +20,9 @@ const String cleanupWarningKey = 'cleanup-prefs-clear-warning';
 /// Key returned when a no-email user's Firebase session expired during cleanup.
 const String cleanupSessionExpiredKey = 'cleanup-session-expired';
 
+/// Stable key for local prefs failure during cleanup.
+const String prefsClearFailedKey = 'Prefs clear failed';
+
 /// State for account-level settings operations.
 class SettingsState {
   /// True while the account deletion request is in-flight.
@@ -188,7 +191,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       cleanupRecoveryPending: false,
       requiresRecentLogin: false,
       deleteWarning: warning != null
-          ? (warning == 'Prefs clear failed' ? cleanupWarningKey : warning)
+          ? (warning == prefsClearFailedKey ? cleanupWarningKey : warning)
           : null,
     );
   }

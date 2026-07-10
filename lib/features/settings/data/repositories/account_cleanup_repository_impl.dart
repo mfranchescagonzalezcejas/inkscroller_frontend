@@ -9,6 +9,9 @@ import '../../domain/repositories/account_cleanup_repository.dart';
 /// Warning key returned when a no-email user's Firebase session expired.
 const String cleanupSessionExpiredKey = 'cleanup-session-expired';
 
+/// Stable key for local prefs failure during cleanup.
+const String prefsClearFailedKey = 'Prefs clear failed';
+
 /// Handles local cleanup after backend account deletion.
 ///
 /// Removes the Firebase user (critical — failure is rethrown to prevent the
@@ -115,11 +118,11 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
 
     try {
       final cleared = await _prefs.clear();
-      if (!cleared) {
-        warning = 'Prefs clear failed';
+      if (!cleared && warning == null) {
+        warning = prefsClearFailedKey;
       }
     } on Exception catch (_) {
-      warning = 'Prefs clear failed';
+      warning ??= prefsClearFailedKey;
     }
 
     return warning;
