@@ -26,9 +26,14 @@ class _AboutPageState extends State<AboutPage> {
   }
 
   Future<void> _loadPackageInfo() async {
-    final info = await PackageInfo.fromPlatform();
-    if (!mounted) return;
-    setState(() => _packageInfo = info);
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (!mounted) return;
+      setState(() => _packageInfo = info);
+    } on Object catch (_) {
+      // ponytail: PackageInfo fails silently — version row stays empty.
+      // Add a retry or Sentry breadcrumb when error tracking is wired.
+    }
   }
 
   @override

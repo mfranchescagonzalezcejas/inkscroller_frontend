@@ -639,7 +639,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get aboutAppDescription => 'Manga reader personal — open source';
+  String get aboutAppDescription => 'Lector de manga personal — código abierto';
 
   @override
   String get aboutDisclaimerTitle => 'AVISO LEGAL';

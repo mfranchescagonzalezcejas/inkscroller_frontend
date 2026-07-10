@@ -296,7 +296,7 @@
       "build": { "type": "String" }
     }
   },
-  "aboutAppDescription": "Manga reader personal — open source",
+  "aboutAppDescription": "Lector de manga personal — código abierto",
   "aboutDisclaimerTitle": "AVISO LEGAL",
   "aboutDisclaimerMangadexTitle": "Sin afiliación a MangaDex",
   "aboutDisclaimerMangadexBody": "{appName} no está afiliado, asociado, autorizado ni respaldado por MangaDex. El nombre \"MangaDex\" y su logotipo son marcas de sus respectivos propietarios. El uso de la API pública de MangaDex se realiza bajo sus Términos de Uso.",

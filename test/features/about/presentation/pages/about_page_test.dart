@@ -92,7 +92,7 @@ void main() {
 
     testWidgets('renders app description in Spanish', (tester) async {
       await pumpAboutPage(tester, locale: const Locale('es'));
-      expectText(tester, 'Manga reader personal — open source');
+      expectText(tester, 'Lector de manga personal — código abierto');
     });
   });
 
