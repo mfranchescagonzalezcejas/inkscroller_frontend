@@ -71,6 +71,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Default to dev flavor so `flutter test integration_test/` resolves
+        // assembleDevDebug instead of failing on missing assembleDebug.
+        missingDimensionStrategy("app", "dev")
     }
 
     signingConfigs {
