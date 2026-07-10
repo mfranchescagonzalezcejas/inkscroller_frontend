@@ -1129,6 +1129,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete account. Please try again.'**
   String get deleteAccountGenericError;
+
+  /// No description provided for @authSessionVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Session could not be verified. Sign in again.'**
+  String get authSessionVerificationFailed;
 }
 
 class _AppLocalizationsDelegate

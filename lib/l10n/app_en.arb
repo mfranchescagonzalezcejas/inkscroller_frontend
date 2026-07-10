@@ -273,5 +273,6 @@
   "cleanupReauthTooManyRequests": "Too many attempts. Wait a moment and try again.",
   "cleanupReauthAuthError": "Authentication error.",
   "cleanupPrefsClearWarning": "Some local data could not be cleared.",
-  "deleteAccountGenericError": "Could not delete account. Please try again."
+  "deleteAccountGenericError": "Could not delete account. Please try again.",
+  "authSessionVerificationFailed": "Session could not be verified. Sign in again."
 }

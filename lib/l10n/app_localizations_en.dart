@@ -573,4 +573,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountGenericError =>
       'Could not delete account. Please try again.';
+
+  @override
+  String get authSessionVerificationFailed =>
+      'Session could not be verified. Sign in again.';
 }

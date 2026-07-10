@@ -177,7 +177,7 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
     expect(
       find.text(
-        'Tu biblioteca está vacía. Añadí mangas desde Inicio o el detalle.',
+        'Tu biblioteca está vacía. Añade mangas desde Inicio o el detalle.',
       ),
       findsOneWidget,
     );
@@ -202,7 +202,7 @@ void main() {
 
     expect(
       find.text(
-        'Tu biblioteca está vacía. Añadí mangas desde Inicio o el detalle.',
+        'Tu biblioteca está vacía. Añade mangas desde Inicio o el detalle.',
       ),
       findsOneWidget,
     );

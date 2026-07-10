@@ -110,7 +110,10 @@ void main() {
 
       expect(notifier.state.isLoading, isFalse);
 
-      final future = notifier.signIn(email: 'alice@example.com', password: 's3cr3t');
+      final future = notifier.signIn(
+        email: 'alice@example.com',
+        password: 's3cr3t',
+      );
       // isLoading should flip to true synchronously once the async fn yields.
       await future;
 
@@ -203,9 +206,9 @@ void main() {
       // Prime the notifier with an authenticated-looking state via the stream.
       final streamController = StreamController<AppUser?>.broadcast();
       when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);
-      when(() => mockSignOut()).thenAnswer(
-        (_) async => const Right<Failure, void>(null),
-      );
+      when(
+        () => mockSignOut(),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
 
       final notifier = _makeNotifier(
         signIn: mockSignIn,
@@ -319,9 +322,8 @@ void main() {
           password: any(named: 'password'),
         ),
       ).thenAnswer(
-        (_) async => const Left<Failure, AppUser>(
-          ServerFailure(message: 'Oops'),
-        ),
+        (_) async =>
+            const Left<Failure, AppUser>(ServerFailure(message: 'Oops')),
       );
 
       final notifier = _makeNotifier(
@@ -346,8 +348,7 @@ void main() {
   // ── P0-F7: auth stream error handling ────────────────────────────────────
 
   group('auth stream error handling (P0-F7)', () {
-    test(
-        'clears user and sets error when auth stream emits an error — '
+    test('clears user and sets error when auth stream emits an error — '
         'does not leave notifier in inconsistent state', () async {
       final streamController = StreamController<AppUser?>.broadcast();
       when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);
@@ -375,14 +376,14 @@ void main() {
       expect(notifier.state.isAuthenticated, isFalse);
       // isLoading must not be stuck at true.
       expect(notifier.state.isLoading, isFalse);
-      // An error message should be present to surface to the UI.
-      expect(notifier.state.error, isNotNull);
+      // The error must be the stable internal key so presentation layers can
+      // resolve it to a localized message via authErrorText().
+      expect(notifier.state.error, authSessionVerificationErrorKey);
 
       await streamController.close();
     });
 
-    test(
-        'public navigation is unaffected after auth stream error — '
+    test('public navigation is unaffected after auth stream error — '
         'user is null (guest mode), not locked', () async {
       final streamController = StreamController<AppUser?>.broadcast();
       when(() => mockGetAuthState()).thenAnswer((_) => streamController.stream);

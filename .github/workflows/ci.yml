@@ -93,6 +93,7 @@ jobs:
             test/features/settings/domain/ \
             test/features/library/data/ \
             test/features/preferences/data/ \
+            test/features/auth/presentation/auth_error_text_test.dart \
             test/features/auth/presentation/providers/ \
             test/features/home/presentation/providers/ \
             test/features/library/presentation/providers/ \
