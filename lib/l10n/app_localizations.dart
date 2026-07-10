@@ -1171,6 +1171,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Authentication failed. Please try again.'**
   String get authUnknownError;
+
+  /// No description provided for @libraryErrorNetworkNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the server.'**
+  String get libraryErrorNetworkNoConnection;
+
+  /// No description provided for @libraryErrorServerBadResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The server responded with an error.'**
+  String get libraryErrorServerBadResponse;
+
+  /// No description provided for @libraryErrorRequestCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was cancelled.'**
+  String get libraryErrorRequestCancelled;
+
+  /// No description provided for @libraryErrorInvalidCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid certificate.'**
+  String get libraryErrorInvalidCertificate;
+
+  /// No description provided for @libraryErrorNetworkUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected network error occurred.'**
+  String get libraryErrorNetworkUnknown;
+
+  /// No description provided for @libraryErrorEmptyResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The server returned an empty response.'**
+  String get libraryErrorEmptyResponse;
+
+  /// No description provided for @libraryErrorExternalChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter is only available on the original site.'**
+  String get libraryErrorExternalChapter;
 }
 
 class _AppLocalizationsDelegate

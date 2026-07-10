@@ -280,5 +280,12 @@
   "authWeakPassword": "Password is too weak — use at least 6 characters.",
   "authTooManyRequests": "Too many attempts. Please wait and try again.",
   "authNetworkError": "No internet connection. Check your network.",
-  "authUnknownError": "Authentication failed. Please try again."
+  "authUnknownError": "Authentication failed. Please try again.",
+  "libraryErrorNetworkNoConnection": "Could not connect to the server.",
+  "libraryErrorServerBadResponse": "The server responded with an error.",
+  "libraryErrorRequestCancelled": "The request was cancelled.",
+  "libraryErrorInvalidCertificate": "Invalid certificate.",
+  "libraryErrorNetworkUnknown": "An unexpected network error occurred.",
+  "libraryErrorEmptyResponse": "The server returned an empty response.",
+  "libraryErrorExternalChapter": "This chapter is only available on the original site."
 }
