@@ -273,6 +273,7 @@
   "cleanupReauthTooManyRequests": "Too many attempts. Wait a moment and try again.",
   "cleanupReauthAuthError": "Authentication error.",
   "cleanupPrefsClearWarning": "Some local data could not be cleared.",
+  "cleanupSessionExpired": "Your session expired. Please sign in again and retry.",
   "deleteAccountGenericError": "Could not delete account. Please try again.",
   "authSessionVerificationFailed": "Session could not be verified. Sign in again.",
   "authInvalidCredentials": "Invalid email or password.",

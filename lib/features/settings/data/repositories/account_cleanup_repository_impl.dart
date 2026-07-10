@@ -6,6 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/repositories/account_cleanup_repository.dart';
 
+/// Warning key returned when a no-email user's Firebase session expired.
+const String cleanupSessionExpiredKey = 'cleanup-session-expired';
+
 /// Handles local cleanup after backend account deletion.
 ///
 /// Removes the Firebase user (critical — failure is rethrown to prevent the
@@ -29,6 +32,7 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
 
   @override
   Future<String?> cleanUpAfterDeletion({String? password}) async {
+    String? warning;
     final user = _firebaseAuth.currentUser;
     if (user != null) {
       // Reauthenticate if password is provided — needed when Firebase
@@ -80,11 +84,18 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
         if (e.code == 'user-not-found') {
           // Already deleted — treat as success.
         } else if (e.code == 'requires-recent-login') {
-          throw const AccountCleanupException(
-            message: 'requires-recent-login',
-            requiresRecentLogin: true,
-            code: 'requires-recent-login',
-          );
+          if (user.email == null) {
+            // User has no email (phone/anonymous auth) — re-auth via
+            // email+password is impossible. Proceed with sign-out and
+            // local cleanup instead of trapping the user in a retry loop.
+            warning = cleanupSessionExpiredKey;
+          } else {
+            throw const AccountCleanupException(
+              message: 'requires-recent-login',
+              requiresRecentLogin: true,
+              code: 'requires-recent-login',
+            );
+          }
         } else {
           shouldSignOut = false;
           throw const AccountCleanupException(
@@ -99,7 +110,6 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
       await _firebaseAuth.signOut();
     }
 
-    String? warning;
     try {
       final cleared = await _prefs.clear();
       if (!cleared) {

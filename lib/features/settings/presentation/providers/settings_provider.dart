@@ -184,7 +184,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       accountDeleted: true,
       cleanupRecoveryPending: false,
       requiresRecentLogin: false,
-      deleteWarning: warning != null ? cleanupWarningKey : null,
+      deleteWarning: warning != null
+          ? (warning == 'Prefs clear failed' ? cleanupWarningKey : warning)
+          : null,
     );
   }
 

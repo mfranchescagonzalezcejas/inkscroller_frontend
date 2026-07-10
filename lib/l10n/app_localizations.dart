@@ -1124,6 +1124,12 @@ abstract class AppLocalizations {
   /// **'Some local data could not be cleared.'**
   String get cleanupPrefsClearWarning;
 
+  /// No description provided for @cleanupSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Please sign in again and retry.'**
+  String get cleanupSessionExpired;
+
   /// No description provided for @deleteAccountGenericError.
   ///
   /// In en, this message translates to:
