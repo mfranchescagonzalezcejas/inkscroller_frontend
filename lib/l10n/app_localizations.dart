@@ -1124,12 +1124,6 @@ abstract class AppLocalizations {
   /// **'Some local data could not be cleared.'**
   String get cleanupPrefsClearWarning;
 
-  /// No description provided for @cleanupEmailNotAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'This account does not have an email address. Try signing in with a different method.'**
-  String get cleanupEmailNotAvailable;
-
   /// No description provided for @deleteAccountGenericError.
   ///
   /// In en, this message translates to:

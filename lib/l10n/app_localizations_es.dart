@@ -577,10 +577,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron eliminar algunos datos locales.';
 
   @override
-  String get cleanupEmailNotAvailable =>
-      'Esta cuenta no tiene un email asociado. Intenta iniciar sesión con otro método.';
-
-  @override
   String get deleteAccountGenericError =>
       'No se pudo eliminar la cuenta. Intenta de nuevo.';
 

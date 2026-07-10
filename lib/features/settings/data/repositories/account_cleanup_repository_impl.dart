@@ -32,15 +32,10 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
     final user = _firebaseAuth.currentUser;
     if (user != null) {
       // Reauthenticate if password is provided — needed when Firebase
-      // requires a recent login for sensitive operations.
-      if (password != null) {
-        if (user.email == null) {
-          throw const AccountCleanupException(
-            message: 'email-not-available',
-            requiresRecentLogin: false,
-            code: 'email-not-available',
-          );
-        }
+      // requires a recent login for sensitive operations. If the user
+      // has no email (phone/anonymous auth), re-auth via email+password
+      // is impossible — skip it and rely on the native auth provider.
+      if (password != null && user.email != null) {
         try {
           await user.reauthenticateWithCredential(
             EmailAuthProvider.credential(
