@@ -49,7 +49,7 @@ case "$MODE" in
   dev-cloud)
     ENTRYPOINT="lib/main_dev.dart"
     FLAVOR="dev"
-    BASE_URL="https://inkscroller-backend-708894048002.us-central1.run.app"
+    BASE_URL="https://api.dev.inkscroller.devdigi.dev"
     ;;
   dev-lan)
     "$PROJECT_DIR/scripts/update_lan_dart_defines.sh"
