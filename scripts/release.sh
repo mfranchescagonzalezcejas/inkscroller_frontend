@@ -89,7 +89,8 @@ ok "Tag $TAG does not exist yet"
 # ── Tag and push ─────────────────────────────────────────────────────────────
 
 info "Creating and pushing tag $TAG..."
-git tag "$TAG"
+git tag "$TAG" || fail "Failed to create tag $TAG."
+
 # Re-check main hasn't moved since the sync check in step 5.
 if ! git fetch origin main --quiet; then
   git tag -d "$TAG" >/dev/null 2>&1
@@ -99,6 +100,8 @@ if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
   git tag -d "$TAG" >/dev/null 2>&1
   fail "Origin/main has moved since sync check. Tag deleted."
 fi
+
+# Final server-side validation also runs in release.yml (quality gates).
 git push origin "$TAG" || { git tag -d "$TAG" >/dev/null 2>&1; fail "Push of tag $TAG failed."; }
 
 echo ""
