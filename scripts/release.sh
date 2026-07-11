@@ -96,7 +96,8 @@ if ! git fetch origin main --quiet; then
   git tag -d "$TAG" >/dev/null 2>&1
   fail "Could not re-fetch origin/main. Tag deleted."
 fi
-if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+TAG_COMMIT=$(git rev-parse --verify "${TAG}^{commit}" 2>/dev/null) || { git tag -d "$TAG" >/dev/null 2>&1; fail "Failed to resolve tag $TAG."; }
+if [ "$TAG_COMMIT" != "$(git rev-parse origin/main)" ]; then
   git tag -d "$TAG" >/dev/null 2>&1
   fail "Origin/main has moved since sync check. Tag deleted."
 fi

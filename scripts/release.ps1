@@ -101,9 +101,13 @@ if ($LASTEXITCODE -ne 0) {
     git tag -d $tag 2>$null
     Fail "Could not re-fetch origin/main. Tag deleted."
 }
-$localCommit = git rev-parse HEAD
+$tagCommit = git rev-parse --verify "${tag}^{commit}" 2>$null
+if ($LASTEXITCODE -ne 0) {
+    git tag -d $tag 2>$null
+    Fail "Failed to resolve tag $tag."
+}
 $remoteCommit = git rev-parse origin/main
-if ($localCommit -ne $remoteCommit) {
+if ($tagCommit -ne $remoteCommit) {
     git tag -d $tag 2>$null
     Fail "Origin/main has moved since sync check. Tag deleted."
 }
