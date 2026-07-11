@@ -172,8 +172,14 @@ void _registerGetItMocks() {
   }
 }
 
+/// Shared fixture year for test data factories.
+const _fixtureYear = 2026;
+
 /// Shared fixture date used across test data factories.
-final _fixtureDate = DateTime(2026);
+final _fixtureDate = DateTime(_fixtureYear);
+
+/// How long to wait for the UI to settle after a navigation event.
+const _settleDuration = Duration(seconds: 1);
 
 /// Repeatedly pumps [tester] until [finder] matches at least one widget,
 /// timing out after [timeout] if the condition is never met.
@@ -347,7 +353,7 @@ void main() {
 
     // Let the UI render and settle.
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(_settleDuration);
     await tester.pump();
 
     expect(find.text('Berserk'), findsOneWidget);

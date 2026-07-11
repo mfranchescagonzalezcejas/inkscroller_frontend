@@ -77,9 +77,13 @@ Ok "Local main is in sync with origin"
 
 $tag = "v$Version"
 
+$remoteTag = git ls-remote --exit-code --refs origin "refs/tags/$tag" 2>$null
+if ($LASTEXITCODE -eq 0) {
+    Fail "Tag $tag already exists on origin. Did you forget to bump the version?"
+}
 $existingTag = git rev-parse $tag 2>$null
 if ($LASTEXITCODE -eq 0) {
-    Fail "Tag $tag already exists. Did you forget to bump the version?"
+    Fail "Tag $tag already exists locally. Did you forget to bump the version?"
 }
 Ok "Tag $tag does not exist yet"
 
