@@ -71,6 +71,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Flavor default is configured via `flutter: default-flavor: dev` in
+        // pubspec.yaml. No external dependencies require a dimension fallback.
     }
 
     signingConfigs {

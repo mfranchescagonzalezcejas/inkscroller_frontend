@@ -17,6 +17,14 @@ const String prefsClearFailedKey = 'Prefs clear failed';
 /// Removes the Firebase user (critical — failure is rethrown to prevent the
 /// provider from marking deletion as complete), clears local preferences,
 /// and signs out.
+///
+/// ## Edge case: no-email users with stale sessions
+///
+/// Phone/anonymous users without an email cannot re-authenticate via
+/// email+password when Firebase requires a recent login. In that terminal
+/// state, `user.delete()` always fails. The method falls back to sign-out +
+/// local cleanup and returns `cleanupSessionExpiredKey` — a documented
+/// exception to the throw-on-failure rule documented in the domain contract.
 class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
   final FirebaseAuth _firebaseAuth;
   final SharedPreferences _prefs;

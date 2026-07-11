@@ -64,10 +64,23 @@ jobs:
         run: |
           TAG_VERSION="${REF_NAME#v}"
           if ! echo "$TAG_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "[ERROR] Tag must follow semver format (e.g. v1.0.2)"
+            echo "[ERROR] Tag must follow numeric semver (e.g. v1.0.2)"
             exit 1
           fi
           echo "[OK] Tag v$TAG_VERSION is valid."
+
+      - name: Validate tag points to main HEAD
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          git fetch origin main --quiet
+          TAG_COMMIT=$(git rev-parse HEAD)
+          MAIN_COMMIT=$(git rev-parse origin/main)
+          if [ "$TAG_COMMIT" != "$MAIN_COMMIT" ]; then
+            echo "[ERROR] Tag $REF_NAME does not point to HEAD of main."
+            exit 1
+          fi
+          echo "[OK] Tag points to HEAD of main ($MAIN_COMMIT)."
 
       - name: Write Firebase dart-defines
         run: |
@@ -87,48 +100,32 @@ jobs:
 
           mkdir -p release-metadata
 
-          COMMITS=$(git log "$RANGE" --pretty=format:"%s" \
-            | grep -E '^(feat|fix|perf|refactor|test)' || true)
+          ALL_COMMITS=$(git log "$RANGE" --pretty=format:"%s")
+          FEATURES=$(printf '%s\n' "$ALL_COMMITS" | grep '^feat' || true)
+          FIXES=$(printf '%s\n' "$ALL_COMMITS" | grep '^fix' || true)
 
-          if [ -z "$COMMITS" ]; then
-            echo "- Internal improvements and QA fixes" > release-metadata/release_notes_dev.txt
-          else
-            {
-              FEATS=$(echo "$COMMITS" | grep '^feat' | sed 's/^/- /' || true)
-              FIXES=$(echo "$COMMITS" | grep '^fix' | sed 's/^/- /' || true)
-              OTHERS=$(echo "$COMMITS" | grep -E '^(perf|refactor|test)' | sed 's/^/- /' || true)
+          # DEV: feat + fix
+          {
+            [ -z "$FEATURES" ] || { echo "### 🚀 Features"; echo "$FEATURES" | sed 's/^/- /'; echo ""; }
+            [ -z "$FIXES" ] || { echo "### 🐛 Bug Fixes"; echo "$FIXES" | sed 's/^/- /'; }
+          } > release-metadata/release_notes_dev.txt
 
-              if [ -n "$FEATS" ]; then
-                echo "### 🚀 Features"
-                echo "$FEATS"
-                echo ""
-              fi
-              if [ -n "$FIXES" ]; then
-                echo "### 🐛 Bug Fixes"
-                echo "$FIXES"
-                echo ""
-              fi
-              if [ -n "$OTHERS" ]; then
-                echo "### 🔧 Refactors & Improvements"
-                echo "$OTHERS"
-                echo ""
-              fi
-            } > release-metadata/release_notes_dev.txt
-          fi
+          # STAGING/PRO: fix only
+          {
+            [ -z "$FIXES" ] || { echo "### 🐛 Bug Fixes"; echo "$FIXES" | sed 's/^/- /'; }
+          } > release-metadata/release_notes_staging.txt
 
-          cp release-metadata/release_notes_dev.txt release-metadata/release_notes_staging.txt
-          cp release-metadata/release_notes_dev.txt release-metadata/release_notes_pro.txt
+          cp release-metadata/release_notes_staging.txt release-metadata/release_notes_pro.txt
 
-          DEFAULT_MESSAGE="- Internal improvements and QA fixes included in this release"
-          [ -s release-metadata/release_notes_dev.txt ] \
-            || echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_dev.txt
-          [ -s release-metadata/release_notes_staging.txt ] \
-            || echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_staging.txt
-          [ -s release-metadata/release_notes_pro.txt ] \
-            || echo "$DEFAULT_MESSAGE" > release-metadata/release_notes_pro.txt
+          DEFAULT_MESSAGE="- No user-visible changes"
+          for f in dev staging pro; do
+            if [ ! -s "release-metadata/release_notes_${f}.txt" ]; then
+              echo "$DEFAULT_MESSAGE" > "release-metadata/release_notes_${f}.txt"
+            fi
+          done
 
       - name: Upload release metadata
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: release-metadata
           path: release-metadata/
@@ -227,7 +224,7 @@ jobs:
             --dart-define-from-file=.dart-defines/firebase.json
 
       - name: Upload ${{ matrix.flavor }} APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: apk-${{ matrix.flavor }}
           path: build/app/outputs/flutter-apk/${{ matrix.apk_name }}
@@ -246,7 +243,7 @@ jobs:
 
       - name: Upload ${{ matrix.flavor }} AAB
         if: matrix.flavor == 'pro'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: aab-${{ matrix.flavor }}
           path: build/app/outputs/bundle/${{ matrix.flavor }}Release/app-${{ matrix.flavor }}-release.aab
