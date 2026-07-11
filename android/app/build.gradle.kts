@@ -72,10 +72,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Fallback: when a dependency consumes the `app` dimension without
-        // an explicit flavor, default to `dev` so `flutter test
-        // integration_test/` resolves assembleDevDebug.
-        missingDimensionStrategy("app", "dev")
+        // Flavor default is configured via `flutter: default-flavor: dev` in
+        // pubspec.yaml. No external dependencies require a dimension fallback.
     }
 
     signingConfigs {

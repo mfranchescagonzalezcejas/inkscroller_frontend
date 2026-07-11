@@ -91,6 +91,28 @@ Ok "Tag $tag does not exist yet"
 
 Info "Creating and pushing tag $tag..."
 git tag $tag
+if ($LASTEXITCODE -ne 0) {
+    Fail "Failed to create tag $tag."
+}
+
+# Re-check main hasn't moved since the sync check in step 5.
+git fetch origin main --quiet 2>$null
+if ($LASTEXITCODE -ne 0) {
+    git tag -d $tag 2>$null
+    Fail "Could not re-fetch origin/main. Tag deleted."
+}
+$tagCommit = git rev-parse --verify "${tag}^{commit}" 2>$null
+if ($LASTEXITCODE -ne 0) {
+    git tag -d $tag 2>$null
+    Fail "Failed to resolve tag $tag."
+}
+$remoteCommit = git rev-parse origin/main
+if ($tagCommit -ne $remoteCommit) {
+    git tag -d $tag 2>$null
+    Fail "Origin/main has moved since sync check. Tag deleted."
+}
+
+# Final server-side validation also runs in release.yml (quality gates).
 git push origin $tag
 if ($LASTEXITCODE -ne 0) {
     git tag -d $tag 2>$null
