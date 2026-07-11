@@ -93,6 +93,10 @@ Info "Creating and pushing tag $tag..."
 git tag $tag
 # Re-check main hasn't moved since the sync check in step 5.
 git fetch origin main --quiet 2>$null
+if ($LASTEXITCODE -ne 0) {
+    git tag -d $tag 2>$null
+    Fail "Could not re-fetch origin/main. Tag deleted."
+}
 $localCommit = git rev-parse HEAD
 $remoteCommit = git rev-parse origin/main
 if ($localCommit -ne $remoteCommit) {

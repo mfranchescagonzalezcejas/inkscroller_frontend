@@ -72,9 +72,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Default flavor resolved via `flutter: default-flavor: dev` in
-        // pubspec.yaml. Kept as safety net for Gradle-only invocations.
-        missingDimensionStrategy("app", "dev")
+        // Flavor default is configured via `flutter: default-flavor: dev` in
+        // pubspec.yaml. No external dependencies require a dimension fallback.
     }
 
     signingConfigs {
