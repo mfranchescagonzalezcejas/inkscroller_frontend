@@ -11,7 +11,14 @@ class SearchManga {
   SearchManga(this.repository);
 
   /// Returns manga whose title or metadata match [query].
-  Future<Either<Failure, List<Manga>>> call(String query) {
-    return repository.searchManga(query);
+  ///
+  /// Accepts [limit] and [offset] for pagination. Returns a record of
+  /// matching entities and the total result count.
+  Future<Either<Failure, (List<Manga> items, int total)>> call(
+    String query, {
+    required int limit,
+    required int offset,
+  }) {
+    return repository.searchManga(query, limit: limit, offset: offset);
   }
 }

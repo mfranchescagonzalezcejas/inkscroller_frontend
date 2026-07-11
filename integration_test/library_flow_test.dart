@@ -311,8 +311,8 @@ void main() {
     when(() => getMangaList(limit: 20, offset: 0)).thenAnswer(
       (_) async => Right<Failure, List<Manga>>(<Manga>[berserk, monster]),
     );
-    when(() => searchManga('monster')).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(<Manga>[monster]),
+    when(() => searchManga('monster', limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
+      (_) async => Right<Failure, (List<Manga>, int)>(<Manga>[monster], 1),
     );
     when(() => getMangaChapters('monster')).thenAnswer(
       (_) async => Right<Failure, List<Chapter>>(<Chapter>[

@@ -138,32 +138,45 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   // ─────────────────────────────
   // BUSQUEDA DE MANGAS
   // ─────────────────────────────
-  /// Searches for manga via `/manga/search?q={query}`.
+  /// Searches for manga via `/manga/search?q={query}&limit={limit}&offset={offset}`.
   ///
-  /// Handles both a plain JSON array response and a wrapped `{"data": [...]}` response.
+  /// Returns a record of matching models and the total count from the backend.
   @override
-  Future<List<MangaModel>> searchManga(String query) async {
+  Future<(List<MangaModel> items, int total)> searchManga(
+    String query, {
+    required int limit,
+    required int offset,
+  }) async {
     try {
       final response = await dio.get<dynamic>(
         '${ApiEndpoints.manga}/search',
-        queryParameters: {'q': query},
+        queryParameters: {'q': query, 'limit': limit, 'offset': offset},
       );
 
       final body = response.data;
 
-      final List<dynamic> rawList;
-      if (body is List) {
-        rawList = body;
-      } else if (body is Map<String, dynamic>) {
-        rawList = (body['data'] as List<dynamic>?) ?? <dynamic>[];
-      } else {
-        rawList = <dynamic>[];
+      if (body is Map<String, dynamic>) {
+        final List<dynamic> rawList =
+            (body['data'] as List<dynamic>?) ?? <dynamic>[];
+        final int total = body['total'] as int? ?? rawList.length;
+        return (
+          rawList
+              .whereType<Map<String, dynamic>>()
+              .map(MangaModel.fromJson)
+              .toList(),
+          total,
+        );
       }
 
-      return rawList
-          .whereType<Map<String, dynamic>>()
-          .map(MangaModel.fromJson)
-          .toList();
+      // Legacy: plain JSON array response — no total available.
+      final List<dynamic> rawList = body is List ? body : <dynamic>[];
+      return (
+        rawList
+            .whereType<Map<String, dynamic>>()
+            .map(MangaModel.fromJson)
+            .toList(),
+        rawList.length,
+      );
     } on DioException catch (error) {
       throw _mapDioException(error);
     } on Exception catch (error) {

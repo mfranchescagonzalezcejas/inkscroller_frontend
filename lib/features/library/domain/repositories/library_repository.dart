@@ -31,8 +31,14 @@ abstract class LibraryRepository {
   /// Throws if the chapter is external-only (not hosted on the backend).
   Future<Either<Failure, List<String>>> getChapterPages(String chapterId);
 
-  /// Searches for manga titles matching [query] and returns the results.
-  Future<Either<Failure, List<Manga>>> searchManga(String query);
+  /// Searches for manga titles matching [query] with pagination support.
+  ///
+  /// Returns a record of matching entities and the total result count.
+  Future<Either<Failure, (List<Manga> items, int total)>> searchManga(
+    String query, {
+    required int limit,
+    required int offset,
+  });
 
   /// Clears all persisted library cache entries.
   ///

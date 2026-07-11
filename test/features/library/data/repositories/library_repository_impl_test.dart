@@ -164,15 +164,27 @@ void main() {
 
   test('searchManga maps datasource models into entities', () async {
     when(
-      () => remoteDataSource.searchManga('berserk'),
+      () => remoteDataSource.searchManga(
+        'berserk',
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+      ),
     ).thenAnswer(
-      (_) async => <MangaModel>[const MangaModel(id: '1', title: 'Berserk')],
+      (_) async => (
+        <MangaModel>[const MangaModel(id: '1', title: 'Berserk')],
+        1,
+      ),
     );
 
-    final result = await repository.searchManga('berserk');
+    final result = await repository.searchManga(
+      'berserk',
+      limit: 20,
+      offset: 0,
+    );
 
     expect(result, isA<Right<Failure, dynamic>>());
-    result.fold((_) => fail('expected right'), (mangas) {
+    result.fold((_) => fail('expected right'), (pair) {
+      final (mangas, _) = pair;
       expect(mangas.single.id, '1');
     });
   });

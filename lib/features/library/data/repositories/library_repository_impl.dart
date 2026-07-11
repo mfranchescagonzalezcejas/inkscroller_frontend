@@ -126,10 +126,18 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
-  Future<Either<Failure, List<Manga>>> searchManga(String query) async {
+  Future<Either<Failure, (List<Manga> items, int total)>> searchManga(
+    String query, {
+    required int limit,
+    required int offset,
+  }) async {
     try {
-      final models = await remoteDataSource.searchManga(query);
-      return Right(models.map((e) => e.toEntity()).toList());
+      final (items, total) = await remoteDataSource.searchManga(
+        query,
+        limit: limit,
+        offset: offset,
+      );
+      return Right((items.map((e) => e.toEntity()).toList(), total));
     } on AppException catch (error) {
       return Left(_mapExceptionToFailure(error));
     } on Exception catch (error) {

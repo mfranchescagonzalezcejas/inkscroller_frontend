@@ -34,6 +34,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   int _offset = 0;
   static const int _limit = AppConstants.mangaPageLimit;
 
+  int _searchOffset = 0;
+  int _searchTotal = 0;
+
   Timer? _searchDebounce;
   String _activeQuery = '';
 
@@ -97,9 +100,14 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   Future<void> loadMore() async {
-    if (_mode != LibraryMode.normal) return;
-    if (state.isSearching) return;
     if (state.isLoadingMore || !state.hasMore) return;
+
+    if (state.isSearching) {
+      await _loadMoreSearch();
+      return;
+    }
+
+    if (_mode != LibraryMode.normal) return;
 
     state = state.copyWith(isLoadingMore: true, clearFailure: true);
 
@@ -124,6 +132,38 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     );
   }
 
+  Future<void> _loadMoreSearch() async {
+    state = state.copyWith(isLoadingMore: true, clearFailure: true);
+
+    final result = await _searchManga(
+      _activeQuery,
+      limit: _limit,
+      offset: _searchOffset,
+    );
+
+    if (_activeQuery.isEmpty) return;
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(isLoadingMore: false, failure: failure);
+      },
+      (pair) {
+        final (newItems, total) = pair;
+        _searchOffset += newItems.length;
+        _searchTotal = total;
+
+        final combined = dedupeMangas([...state.mangas, ...newItems]);
+
+        state = state.copyWith(
+          mangas: combined,
+          isLoadingMore: false,
+          hasMore: _searchOffset < _searchTotal,
+          clearFailure: true,
+        );
+      },
+    );
+  }
+
   /// UI hook: actualiza el texto del buscador y lanza debounce
   void setQuery(String query) {
     final trimmed = query.trim();
@@ -142,6 +182,8 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   Future<void> clearSearch() async {
     _searchDebounce?.cancel();
     _activeQuery = '';
+    _searchOffset = 0;
+    _searchTotal = 0;
     state = state.copyWith(query: '', isSearching: false, clearFailure: true);
     await loadInitial(mode: _mode, genre: _genre);
   }
@@ -163,8 +205,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   Future<void> _performSearch(String query) async {
-    // Evita resultados fuera de orden
     _activeQuery = query;
+    _searchOffset = 0;
+    _searchTotal = 0;
 
     state = state.copyWith(
       isSearching: true,
@@ -173,19 +216,23 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       clearFailure: true,
     );
 
-    final result = await _searchManga(query);
+    final result = await _searchManga(query, limit: _limit, offset: 0);
 
-    // Si la query cambió mientras esperábamos, ignoramos este resultado.
     if (_activeQuery != query) return;
 
     result.fold(
       (failure) {
         state = state.copyWith(isSearching: false, failure: failure);
       },
-      (results) {
+      (pair) {
+        final (items, total) = pair;
+        _searchOffset = items.length;
+        _searchTotal = total;
+
         state = state.copyWith(
-          mangas: dedupeMangas(results),
+          mangas: dedupeMangas(items),
           isSearching: false,
+          hasMore: _searchOffset < _searchTotal,
           clearFailure: true,
         );
       },

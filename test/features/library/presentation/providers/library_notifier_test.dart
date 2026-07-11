@@ -34,8 +34,8 @@ void main() {
       ),
     );
 
-    when(() => searchManga(any())).thenAnswer(
-      (_) async => const Right<Failure, List<Manga>>(<Manga>[]),
+    when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
+      (_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)),
     );
 
     final notifier = LibraryNotifier(getMangaList, searchManga);
@@ -55,8 +55,8 @@ void main() {
         NetworkFailure(message: 'offline'),
       ),
     );
-    when(() => searchManga(any())).thenAnswer(
-      (_) async => const Right<Failure, List<Manga>>(<Manga>[]),
+    when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
+      (_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)),
     );
 
     final notifier = LibraryNotifier(getMangaList, searchManga);
@@ -75,8 +75,8 @@ void main() {
         NetworkFailure(message: 'offline'),
       ),
     );
-    when(() => searchManga(any())).thenAnswer(
-      (_) async => const Right<Failure, List<Manga>>(<Manga>[]),
+    when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
+      (_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)),
     );
 
     final notifier = LibraryNotifier(getMangaList, searchManga);
@@ -109,8 +109,8 @@ void main() {
     ).thenAnswer(
       (_) async => Right<Failure, List<Manga>>(mangas),
     );
-    when(() => searchManga(any())).thenAnswer(
-      (_) async => const Right<Failure, List<Manga>>(<Manga>[]),
+    when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
+      (_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)),
     );
 
     final notifier = LibraryNotifier(getMangaList, searchManga);
@@ -159,8 +159,8 @@ void main() {
         Manga(id: '3', title: 'Pluto'),
       ]),
     );
-    when(() => searchManga(any())).thenAnswer(
-      (_) async => const Right<Failure, List<Manga>>(<Manga>[]),
+    when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
+      (_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)),
     );
 
     final notifier = LibraryNotifier(getMangaList, searchManga);

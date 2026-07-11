@@ -29,6 +29,12 @@ abstract class LibraryRemoteDataSource {
   /// Throws if the chapter is marked as external-only on the backend.
   Future<List<String>> getChapterPages(String chapterId);
 
-  /// Searches the API for manga matching [query] and returns matching models.
-  Future<List<MangaModel>> searchManga(String query);
+  /// Searches for manga matching [query] with pagination support.
+  ///
+  /// Returns a record of matching models and the total result count.
+  Future<(List<MangaModel> items, int total)> searchManga(
+    String query, {
+    required int limit,
+    required int offset,
+  });
 }

@@ -18,15 +18,17 @@ void main() {
   });
 
   test('delegates query to repository', () async {
-    const expected = Right<Failure, List<Manga>>(<Manga>[]);
+    const expected = Right<Failure, (List<Manga>, int)>((<Manga>[], 0));
 
-    when(() => repository.searchManga('monster')).thenAnswer(
-      (_) async => expected,
-    );
+    when(
+      () => repository.searchManga('monster', limit: 20, offset: 0),
+    ).thenAnswer((_) async => expected);
 
-    final result = await useCase('monster');
+    final result = await useCase('monster', limit: 20, offset: 0);
 
     expect(result, expected);
-    verify(() => repository.searchManga('monster')).called(1);
+    verify(
+      () => repository.searchManga('monster', limit: 20, offset: 0),
+    ).called(1);
   });
 }
