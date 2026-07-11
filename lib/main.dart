@@ -3,4 +3,6 @@
 // and --target explicitly.
 import 'main_dev.dart' as app;
 
+/// Default entry point used when no [--target] is specified.
+/// Delegates to [main_dev.main] which initializes the dev flavor.
 Future<void> main() => app.main();
