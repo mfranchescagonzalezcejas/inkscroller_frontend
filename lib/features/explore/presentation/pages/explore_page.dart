@@ -33,7 +33,6 @@ class ExplorePage extends ConsumerStatefulWidget {
 class _ExplorePageState extends ConsumerState<ExplorePage> {
   late final ScrollController _scrollController;
   late final TextEditingController _searchController;
-  bool _canTriggerLoadMore = true;
   int _selectedGenreIndex = 0; // 0=All, 1=Popular, 2=Romance, 3=Action
 
   @override
@@ -58,11 +57,9 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         _scrollController.position.extentAfter <=
         AppConstants.mangaListPrefetchExtent;
 
-    if (thresholdReached && !state.isLoadingMore && _canTriggerLoadMore) {
-      _canTriggerLoadMore = false;
+    if (thresholdReached && !state.isLoadingMore) {
       ref.read(libraryProvider.notifier).loadMore();
     }
-    if (!thresholdReached) _canTriggerLoadMore = true;
   }
 
   @override
