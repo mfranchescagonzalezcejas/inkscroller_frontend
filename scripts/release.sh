@@ -87,7 +87,7 @@ ok "Tag $TAG does not exist yet"
 
 info "Creating and pushing tag $TAG..."
 git tag "$TAG"
-git push origin "$TAG"
+git push origin "$TAG" || { git tag -d "$TAG" >/dev/null 2>&1; fail "Push of tag $TAG failed."; }
 
 echo ""
 echo -e "${GREEN}Released $TAG${NC} — CI workflow triggered."

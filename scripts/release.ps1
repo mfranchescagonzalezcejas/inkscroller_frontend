@@ -88,6 +88,10 @@ Ok "Tag $tag does not exist yet"
 Info "Creating and pushing tag $tag..."
 git tag $tag
 git push origin $tag
+if ($LASTEXITCODE -ne 0) {
+    git tag -d $tag 2>$null
+    Fail "Push of tag $tag failed."
+}
 
 Write-Host ""
 Write-Host "Released $tag - CI workflow triggered." -ForegroundColor Green

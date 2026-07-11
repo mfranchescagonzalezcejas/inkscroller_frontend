@@ -321,6 +321,25 @@ void main() {
     );
   });
 
+  tearDown(() {
+    final git = GetIt.instance;
+    if (git.isRegistered<GetPerTitleOverride>()) {
+      git.unregister<GetPerTitleOverride>();
+    }
+    if (git.isRegistered<SavePerTitleOverride>()) {
+      git.unregister<SavePerTitleOverride>();
+    }
+    if (git.isRegistered<RemovePerTitleOverride>()) {
+      git.unregister<RemovePerTitleOverride>();
+    }
+    if (git.isRegistered<GetPreferences>()) {
+      git.unregister<GetPreferences>();
+    }
+    if (git.isRegistered<UpdatePreferences>()) {
+      git.unregister<UpdatePreferences>();
+    }
+  });
+
   testWidgets('user can search a manga and open its detail page', (
     tester,
   ) async {

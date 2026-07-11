@@ -72,8 +72,9 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Default to dev flavor so `flutter test integration_test/` resolves
-        // assembleDevDebug instead of failing on missing assembleDebug.
+        // Fallback: when a dependency consumes the `app` dimension without
+        // an explicit flavor, default to `dev` so `flutter test
+        // integration_test/` resolves assembleDevDebug.
         missingDimensionStrategy("app", "dev")
     }
 
