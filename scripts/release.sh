@@ -90,6 +90,12 @@ ok "Tag $TAG does not exist yet"
 
 info "Creating and pushing tag $TAG..."
 git tag "$TAG"
+# Re-check main hasn't moved since the sync check in step 5.
+git fetch origin main --quiet || true
+if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+  git tag -d "$TAG" >/dev/null 2>&1
+  fail "Origin/main has moved since sync check. Tag deleted."
+fi
 git push origin "$TAG" || { git tag -d "$TAG" >/dev/null 2>&1; fail "Push of tag $TAG failed."; }
 
 echo ""

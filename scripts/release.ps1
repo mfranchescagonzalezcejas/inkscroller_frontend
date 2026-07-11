@@ -91,6 +91,14 @@ Ok "Tag $tag does not exist yet"
 
 Info "Creating and pushing tag $tag..."
 git tag $tag
+# Re-check main hasn't moved since the sync check in step 5.
+git fetch origin main --quiet 2>$null
+$localCommit = git rev-parse HEAD
+$remoteCommit = git rev-parse origin/main
+if ($localCommit -ne $remoteCommit) {
+    git tag -d $tag 2>$null
+    Fail "Origin/main has moved since sync check. Tag deleted."
+}
 git push origin $tag
 if ($LASTEXITCODE -ne 0) {
     git tag -d $tag 2>$null

@@ -65,7 +65,7 @@ If any check fails, the script exits with a clear error — no tag is created.
 Once the tag `vX.Y.Z` is pushed, `.github/workflows/release.yml` triggers and:
 
 1. Runs `fvm flutter analyze` + `fvm flutter test`
-2. Validates tag matches `pubspec.yaml`
+2. Validates tag format matches semver (e.g. `v1.0.2`)
 3. Builds DEV / STAGING / PRO APKs
 4. Creates the GitHub Release and attaches all APKs
 5. Distributes APKs via Firebase App Distribution

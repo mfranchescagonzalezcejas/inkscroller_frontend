@@ -43,6 +43,7 @@ dev_dependencies:
   very_good_analysis: ^6.0.0
 
 flutter:
+  default-flavor: dev
   generate: true
   uses-material-design: true
   assets:
