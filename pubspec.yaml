@@ -2,7 +2,7 @@ name: inkscroller_flutter
 description: "InkScroller Flutter application"
 publish_to: 'none'
 
-version: 1.0.6+32
+version: 1.0.7+33
 
 environment:
   sdk: ">=3.9.0 <4.0.0"

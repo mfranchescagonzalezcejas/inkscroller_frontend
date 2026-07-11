@@ -78,7 +78,7 @@ Before distributing any build, the release workflow runs:
 
 1. `fvm flutter analyze`
 2. `fvm flutter test`
-3. Version validation — `pubspec.yaml` semver must match the pushed tag
+3. Tag format validation — pushed tag must follow semver format (e.g. `v1.0.2`)
 
 If any step fails, no APKs are distributed.
 
