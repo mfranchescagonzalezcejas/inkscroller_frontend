@@ -77,8 +77,11 @@ Ok "Local main is in sync with origin"
 
 $tag = "v$Version"
 
-$remoteTag = git ls-remote --exit-code --refs origin "refs/tags/$tag" 2>$null
-if ($LASTEXITCODE -eq 0) {
+$remoteTag = git ls-remote --refs origin "refs/tags/$tag" 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Fail "Could not reach origin to check tag: $remoteTag"
+}
+if ($remoteTag) {
     Fail "Tag $tag already exists on origin. Did you forget to bump the version?"
 }
 $existingTag = git rev-parse $tag 2>$null
@@ -117,6 +120,17 @@ git push origin $tag
 if ($LASTEXITCODE -ne 0) {
     git tag -d $tag 2>$null
     Fail "Push of tag $tag failed."
+}
+
+# Post-push: verify main hasn't moved since validation.
+git fetch origin main --quiet 2>$null
+$remoteMain = git rev-parse origin/main 2>$null
+if ($remoteMain -and $tagCommit -ne $remoteMain) {
+    Write-Host ""
+    Write-Host "Warning: main moved since tag was pushed." -ForegroundColor Yellow
+    Write-Host "CI may reject the release. If so, delete the tag:" -ForegroundColor Yellow
+    Write-Host "  git push --delete origin $tag && git tag -d $tag" -ForegroundColor Yellow
+    Write-Host "Then bump version and retry." -ForegroundColor Yellow
 }
 
 Write-Host ""

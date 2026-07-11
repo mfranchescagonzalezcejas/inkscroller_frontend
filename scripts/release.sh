@@ -78,7 +78,10 @@ ok "Local main is in sync with origin"
 
 TAG="v$VERSION"
 
-if git ls-remote --exit-code --refs origin "refs/tags/$TAG" >/dev/null 2>&1; then
+if ! output=$(git ls-remote --refs origin "refs/tags/$TAG" 2>&1); then
+  fail "Could not reach origin to check tag $TAG: $output"
+fi
+if [ -n "$output" ]; then
   fail "Tag $TAG already exists on origin. Did you forget to bump the version?"
 fi
 if git rev-parse "$TAG" >/dev/null 2>&1; then
@@ -104,6 +107,17 @@ fi
 
 # Final server-side validation also runs in release.yml (quality gates).
 git push origin "$TAG" || { git tag -d "$TAG" >/dev/null 2>&1; fail "Push of tag $TAG failed."; }
+
+# Post-push: verify main hasn't moved since validation.
+git fetch origin main --quiet 2>/dev/null || true
+REMOTE_MAIN=$(git rev-parse origin/main 2>/dev/null || echo "")
+if [ -n "$REMOTE_MAIN" ] && [ "$TAG_COMMIT" != "$REMOTE_MAIN" ]; then
+  echo ""
+  echo -e "${YELLOW}Warning: main moved since tag was pushed.${NC}"
+  echo -e "${YELLOW}CI may reject the release. If so, delete the tag:${NC}"
+  echo -e "${YELLOW}  git push --delete origin $TAG && git tag -d $TAG${NC}"
+  echo -e "${YELLOW}Then bump version and retry.${NC}"
+fi
 
 echo ""
 echo -e "${GREEN}Released $TAG${NC} — CI workflow triggered."

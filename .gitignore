@@ -109,3 +109,4 @@ skills-lock.json
 
 # Local secrets (Firebase service accounts)
 .secrets/
+sentry.properties
