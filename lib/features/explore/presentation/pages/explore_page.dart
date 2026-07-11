@@ -52,7 +52,6 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
   void _onScroll() {
     final state = ref.read(libraryProvider);
-    if (state.isSearching || state.query.trim().isNotEmpty) return;
     if (!_scrollController.hasClients) return;
 
     final thresholdReached =
@@ -321,9 +320,9 @@ class _ExploreGrid extends StatelessWidget {
           crossAxisCount = LibraryUiConstants.smallGridColumns;
         }
 
-        final showBottomLoader = state.isLoadingMore && !state.isSearching;
+        final showBottomLoader = state.isLoadingMore;
         final showEndReached =
-            !state.isSearching && !state.isLoadingMore && !state.hasMore;
+            !state.isLoadingMore && !state.hasMore;
 
         return MasonryGridView.builder(
           controller: controller,
