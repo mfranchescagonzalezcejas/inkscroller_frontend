@@ -27,6 +27,7 @@ migrate_working_dir/
 **/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins-dependencies
+.metadata
 .pub-cache/
 .pub/
 /build/
@@ -55,11 +56,13 @@ app.*.map.json
 .qa-evidence/
 .atl/
 .engram/
+openspec/
 
 # Local tooling artifacts — machine-specific, never commit
 .codegraph/
 .cursor/
 .vercel/
+.gga
 
 # Editor backup files
 *~

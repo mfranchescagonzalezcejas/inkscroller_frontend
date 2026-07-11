@@ -6,6 +6,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
+import '../auth_error_text.dart';
 import '../providers/auth_provider.dart';
 import '../validation/registration_validators.dart';
 import '../widgets/auth_form_widgets.dart';
@@ -154,7 +155,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     ref.listen(authProvider, (previous, next) {
       if (next.error != null && next.error != previous?.error) {
-        AppFeedback.showError(context, title: next.error!);
+        final title = authErrorText(context, next.error);
+        AppFeedback.showError(context, title: title);
       }
     });
 
@@ -189,11 +191,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   const SizedBox(height: 16),
 
-                // ── Header ────────────────────────────────────────────────────
-                Text(
-                  isProfileCompletion
-                      ? context.l10n.authCompleteProfileTitle
-                      : context.l10n.authCreateAccountTitle,
+                  // ── Header ────────────────────────────────────────────────────
+                  Text(
+                    isProfileCompletion
+                        ? context.l10n.authCompleteProfileTitle
+                        : context.l10n.authCreateAccountTitle,
                     style: const TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 28,
@@ -306,9 +308,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         onPressed: isActionLocked
                             ? null
                             : () => setState(
-                                  () => _obscureConfirmPassword =
-                                      !_obscureConfirmPassword,
-                                ),
+                                () => _obscureConfirmPassword =
+                                    !_obscureConfirmPassword,
+                              ),
                         icon: Icon(
                           _obscureConfirmPassword
                               ? Icons.visibility_outlined
@@ -387,7 +389,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   AuthGradientButton(
                     key: const Key('createAccountButton'),
                     onPressed: isActionLocked ? null : _submit,
-                    isLoading: authState.isLoading || authState.registrationInProgress,
+                    isLoading:
+                        authState.isLoading || authState.registrationInProgress,
                     label: isProfileCompletion
                         ? context.l10n.authCompleteProfileButton
                         : context.l10n.authCreateAccountButton,

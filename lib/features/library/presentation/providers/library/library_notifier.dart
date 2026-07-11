@@ -73,14 +73,13 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     result.fold(
       (failure) {
-        final failedState = state.copyWith(
+        state = state.copyWith(
           isLoading: false,
           mangas: const [],
           hasMore: false,
           failure: failure,
         );
-        state = failedState;
-        _tabCache[key] = failedState;
+        // Skip caching failures so refresh() triggers a real network retry.
       },
       (mangas) {
         _offset += mangas.length;
@@ -148,7 +147,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   /// Reloads the current mode from the first page.
+  ///
+  /// Clears the tab cache so pull-to-refresh always fetches fresh data.
   Future<void> refresh() {
+    final key = _cacheKey(_mode, _genre);
+    _tabCache.remove(key);
     return loadInitial(mode: _mode, genre: _genre);
   }
 

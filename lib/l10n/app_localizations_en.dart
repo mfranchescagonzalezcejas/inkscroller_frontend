@@ -476,4 +476,208 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readerDirectionVertical => 'Vertical';
+
+  @override
+  String get deleteAccountTitle => 'Delete Account';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'This action is permanent and irreversible. All your data, including your profile, preferences, and reading progress, will be deleted.';
+
+  @override
+  String get deleteAccountPrompt => 'Type DELETE to confirm:';
+
+  @override
+  String get deleteAccountPasswordLabel => 'Enter your password to retry:';
+
+  @override
+  String get deleteAccountPasswordHint => 'Password';
+
+  @override
+  String get deleteAccountCancelAction => 'Cancel';
+
+  @override
+  String get deleteAccountFinalizeAction => 'Finalize';
+
+  @override
+  String get deleteAccountDeleteAction => 'Delete';
+
+  @override
+  String get deleteAccountIncompleteRecoveryMessage =>
+      'The deletion is incomplete. Cleanup must be finalized.';
+
+  @override
+  String get accountSectionLabel => 'ACCOUNT';
+
+  @override
+  String get settingsAccountDeletedWithWarnings =>
+      'Account deleted with warnings';
+
+  @override
+  String get settingsAccountDeletedSuccessfully =>
+      'Account deleted successfully';
+
+  @override
+  String get cleanupUnexpectedError => 'Error during cleanup';
+
+  @override
+  String readerPageLoading(int pageNumber) {
+    return 'Page $pageNumber';
+  }
+
+  @override
+  String readerPageLoadingVerbose(int pageNumber) {
+    return 'Loading page $pageNumber…';
+  }
+
+  @override
+  String readerPageLoadError(int pageNumber) {
+    return 'Could not load page $pageNumber';
+  }
+
+  @override
+  String get readerNoPages => 'Chapter has no pages';
+
+  @override
+  String get readerErrorGeneric => 'Something went wrong loading the chapter.';
+
+  @override
+  String get cleanupRequiresRecentLogin =>
+      'You need to sign in again to complete the deletion.';
+
+  @override
+  String get cleanupFirebaseDeleteFailed =>
+      'We couldn\'t delete your Firebase account. Try again.';
+
+  @override
+  String get cleanupReauthWrongPassword => 'Incorrect password.';
+
+  @override
+  String get cleanupReauthUserMismatch =>
+      'The user doesn\'t match the current session.';
+
+  @override
+  String get cleanupReauthInvalidCredential => 'Invalid credential.';
+
+  @override
+  String get cleanupReauthTooManyRequests =>
+      'Too many attempts. Wait a moment and try again.';
+
+  @override
+  String get cleanupReauthAuthError => 'Authentication error.';
+
+  @override
+  String get cleanupPrefsClearWarning =>
+      'Some local data could not be cleared.';
+
+  @override
+  String get cleanupSessionExpired =>
+      'Your session expired. Please sign in again and retry.';
+
+  @override
+  String get deleteAccountGenericError =>
+      'Could not delete account. Please try again.';
+
+  @override
+  String get authSessionVerificationFailed =>
+      'Session could not be verified. Sign in again.';
+
+  @override
+  String get authInvalidCredentials => 'Invalid email or password.';
+
+  @override
+  String get authEmailAlreadyInUse => 'This email is already registered.';
+
+  @override
+  String get authWeakPassword =>
+      'Password is too weak — use at least 6 characters.';
+
+  @override
+  String get authTooManyRequests =>
+      'Too many attempts. Please wait and try again.';
+
+  @override
+  String get authNetworkError => 'No internet connection. Check your network.';
+
+  @override
+  String get authUnknownError => 'Authentication failed. Please try again.';
+
+  @override
+  String get libraryErrorNetworkNoConnection =>
+      'Could not connect to the server.';
+
+  @override
+  String get libraryErrorServerBadResponse =>
+      'The server responded with an error.';
+
+  @override
+  String get libraryErrorRequestCancelled => 'The request was cancelled.';
+
+  @override
+  String get libraryErrorInvalidCertificate => 'Invalid certificate.';
+
+  @override
+  String get libraryErrorNetworkUnknown =>
+      'An unexpected network error occurred.';
+
+  @override
+  String get libraryErrorEmptyResponse =>
+      'The server returned an empty response.';
+
+  @override
+  String get libraryErrorExternalChapter =>
+      'This chapter is only available on the original site.';
+
+  @override
+  String get aboutTitle => 'About';
+
+  @override
+  String aboutVersion(String version, String build) {
+    return 'Version $version (Build $build)';
+  }
+
+  @override
+  String get aboutAppDescription => 'Personal manga reader — open source';
+
+  @override
+  String get aboutDisclaimerTitle => 'DISCLAIMER';
+
+  @override
+  String get aboutDisclaimerMangadexTitle => 'Not affiliated with MangaDex';
+
+  @override
+  String aboutDisclaimerMangadexBody(String appName) {
+    return '$appName is not affiliated, associated, authorized, or endorsed by MangaDex. The name \"MangaDex\" and its logo are trademarks of their respective owners. Use of the public MangaDex API is subject to its Terms of Use.';
+  }
+
+  @override
+  String get aboutDisclaimerMalTitle => 'Not affiliated with MyAnimeList';
+
+  @override
+  String aboutDisclaimerMalBody(String appName) {
+    return '$appName is not affiliated, associated, authorized, or endorsed by MyAnimeList (MAL). The name \"MyAnimeList\" and its logo are trademarks of their respective owners. Additional metadata is sourced through the public Jikan API, an unofficial MAL API, used for informational purposes only.';
+  }
+
+  @override
+  String get aboutDisclaimerCopyrightTitle => 'Content copyright';
+
+  @override
+  String aboutDisclaimerCopyrightBody(String appName) {
+    return 'All manga content (images, chapters, covers) belongs to their respective authors and publishers. $appName does not store or redistribute copyrighted content. This app only consumes data from third-party public APIs.';
+  }
+
+  @override
+  String get aboutCreditsTitle => 'CREDITS AND APIs';
+
+  @override
+  String get aboutCreditMangadexDescription => 'Catalog, chapters, and covers';
+
+  @override
+  String get aboutCreditJikanDescription => 'Additional metadata (MAL)';
+
+  @override
+  String get aboutCreditCloudRunDescription => 'Backend infrastructure';
+
+  @override
+  String get aboutCreditFirebaseDescription => 'User authentication';
 }

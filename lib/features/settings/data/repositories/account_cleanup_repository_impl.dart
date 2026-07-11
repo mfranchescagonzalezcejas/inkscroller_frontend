@@ -1,13 +1,30 @@
+// ponytail: stable failure codes replace hardcoded user-facing messages — the
+// presentation layer resolves these codes via resolveCleanupErrorText().
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/repositories/account_cleanup_repository.dart';
+
+/// Warning key returned when a no-email user's Firebase session expired.
+const String cleanupSessionExpiredKey = 'cleanup-session-expired';
+
+/// Stable key for local prefs failure during cleanup.
+const String prefsClearFailedKey = 'Prefs clear failed';
 
 /// Handles local cleanup after backend account deletion.
 ///
 /// Removes the Firebase user (critical — failure is rethrown to prevent the
 /// provider from marking deletion as complete), clears local preferences,
 /// and signs out.
+///
+/// ## Edge case: no-email users with stale sessions
+///
+/// Phone/anonymous users without an email cannot re-authenticate via
+/// email+password when Firebase requires a recent login. In that terminal
+/// state, `user.delete()` always fails. The method falls back to sign-out +
+/// local cleanup and returns `cleanupSessionExpiredKey` — a documented
+/// exception to the throw-on-failure rule documented in the domain contract.
 class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
   final FirebaseAuth _firebaseAuth;
   final SharedPreferences _prefs;
@@ -26,11 +43,14 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
 
   @override
   Future<String?> cleanUpAfterDeletion({String? password}) async {
+    String? warning;
     final user = _firebaseAuth.currentUser;
     if (user != null) {
       // Reauthenticate if password is provided — needed when Firebase
-      // requires a recent login for sensitive operations.
-      if (password != null) {
+      // requires a recent login for sensitive operations. If the user
+      // has no email (phone/anonymous auth), re-auth via email+password
+      // is impossible — skip it and rely on the native auth provider.
+      if (password != null && user.email != null) {
         try {
           await user.reauthenticateWithCredential(
             EmailAuthProvider.credential(
@@ -41,15 +61,18 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
         } on FirebaseAuthException catch (e) {
           if (e.code == 'requires-recent-login') {
             throw const AccountCleanupException(
-              message: 'Volvé a iniciar sesión para completar la eliminación.',
+              message: 'requires-recent-login',
               requiresRecentLogin: true,
+              code: 'requires-recent-login',
             );
           }
           // Wrap other reauth errors (wrong password, user mismatch, etc.)
           // so the caller can display the Firebase error message.
+          final (:message, :code) = _reauthError(e);
           throw AccountCleanupException(
-            message: _describeReauthError(e),
+            message: code,
             requiresRecentLogin: false,
+            code: code,
           );
         }
       }
@@ -72,16 +95,27 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
         if (e.code == 'user-not-found') {
           // Already deleted — treat as success.
         } else if (e.code == 'requires-recent-login') {
-          throw const AccountCleanupException(
-            message: 'Volvé a iniciar sesión para completar la eliminación.',
-            requiresRecentLogin: true,
-          );
+          if (user.email == null) {
+            // User has no email (phone/anonymous auth) — re-auth via
+            // email+password is impossible. Do local cleanup and return
+            // a terminal warning so SettingsNotifier marks accountDeleted
+            // and navigates to login. The Firebase Auth user remains as
+            // an orphan, which is acceptable since the backend data and
+            // local session are already gone.
+            warning = cleanupSessionExpiredKey;
+          } else {
+            throw const AccountCleanupException(
+              message: 'requires-recent-login',
+              requiresRecentLogin: true,
+              code: 'requires-recent-login',
+            );
+          }
         } else {
           shouldSignOut = false;
           throw const AccountCleanupException(
-            message:
-                'No pudimos eliminar tu cuenta de Firebase. Intentá de nuevo.',
+            message: 'firebase-delete-failed',
             requiresRecentLogin: false,
+            code: 'firebase-delete-failed',
           );
         }
       }
@@ -90,14 +124,13 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
       await _firebaseAuth.signOut();
     }
 
-    String? warning;
     try {
       final cleared = await _prefs.clear();
-      if (!cleared) {
-        warning = 'Prefs clear failed';
+      if (!cleared && warning == null) {
+        warning = prefsClearFailedKey;
       }
     } on Exception catch (_) {
-      warning = 'Prefs clear failed';
+      warning ??= prefsClearFailedKey;
     }
 
     return warning;
@@ -136,19 +169,20 @@ class AccountCleanupRepositoryImpl implements AccountCleanupRepository {
   @override
   String? get currentCleanupUserId => _firebaseAuth.currentUser?.uid;
 
-  /// Returns a user-facing message for a Firebase reauth error code.
-  String _describeReauthError(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'wrong-password':
-        return 'Contraseña incorrecta.';
-      case 'user-mismatch':
-        return 'El usuario no coincide con la sesión actual.';
-      case 'invalid-credential':
-        return 'Credencial inválida.';
-      case 'too-many-requests':
-        return 'Demasiados intentos. Esperá un momento y volvé a intentar.';
-      default:
-        return e.message ?? 'Error de autenticación.';
-    }
+  /// Returns a (message, code) pair for a Firebase reauth error.
+  ({String message, String code}) _reauthError(FirebaseAuthException e) {
+    return switch (e.code) {
+      'wrong-password' => (message: 'wrong-password', code: 'wrong-password'),
+      'user-mismatch' => (message: 'user-mismatch', code: 'user-mismatch'),
+      'invalid-credential' => (
+        message: 'invalid-credential',
+        code: 'invalid-credential',
+      ),
+      'too-many-requests' => (
+        message: 'too-many-requests',
+        code: 'too-many-requests',
+      ),
+      _ => (message: 'auth-error', code: 'auth-error'),
+    };
   }
 }

@@ -22,7 +22,9 @@ class ReaderState {
     this.readerMode = ReaderMode.vertical,
   });
 
-  double get progress => totalPages == 0 ? 0 : loadedPages / totalPages;
+  /// Returns null (indeterminate) while fetching page URLs,
+  /// or determinate 0..1 during precache phase.
+  double? get progress => totalPages == 0 ? null : loadedPages / totalPages;
 
   ReaderState copyWith({
     bool? isLoading,

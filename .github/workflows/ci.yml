@@ -93,6 +93,7 @@ jobs:
             test/features/settings/domain/ \
             test/features/library/data/ \
             test/features/preferences/data/ \
+            test/features/auth/presentation/auth_error_text_test.dart \
             test/features/auth/presentation/providers/ \
             test/features/home/presentation/providers/ \
             test/features/library/presentation/providers/ \
@@ -104,6 +105,8 @@ jobs:
     name: UI smoke tests (routing + critical surfaces)
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -137,14 +140,15 @@ jobs:
           fvm flutter test \
             test/core/router/app_router_test.dart \
             test/core/router/app_routes_test.dart \
+            test/features/library/presentation/pages/reader_page_test.dart \
             test/features/library/presentation/widgets/library_widgets_test.dart \
-            test/features/home/presentation/pages/home_hero_overflow_test.dart
+            test/features/home/presentation/pages/home_hero_overflow_test.dart \
+            test/features/settings/presentation/delete_account_dialog_test.dart
 
   ui-tests:
-    name: UI tests (pages + widgets) — informational
+    name: UI tests (pages + widgets)
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

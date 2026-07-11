@@ -967,6 +967,348 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vertical'**
   String get readerDirectionVertical;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is permanent and irreversible. All your data, including your profile, preferences, and reading progress, will be deleted.'**
+  String get deleteAccountWarningBody;
+
+  /// No description provided for @deleteAccountPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE to confirm:'**
+  String get deleteAccountPrompt;
+
+  /// No description provided for @deleteAccountPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password to retry:'**
+  String get deleteAccountPasswordLabel;
+
+  /// No description provided for @deleteAccountPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get deleteAccountPasswordHint;
+
+  /// No description provided for @deleteAccountCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get deleteAccountCancelAction;
+
+  /// No description provided for @deleteAccountFinalizeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize'**
+  String get deleteAccountFinalizeAction;
+
+  /// No description provided for @deleteAccountDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAccountDeleteAction;
+
+  /// No description provided for @deleteAccountIncompleteRecoveryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The deletion is incomplete. Cleanup must be finalized.'**
+  String get deleteAccountIncompleteRecoveryMessage;
+
+  /// No description provided for @accountSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ACCOUNT'**
+  String get accountSectionLabel;
+
+  /// No description provided for @settingsAccountDeletedWithWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted with warnings'**
+  String get settingsAccountDeletedWithWarnings;
+
+  /// No description provided for @settingsAccountDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted successfully'**
+  String get settingsAccountDeletedSuccessfully;
+
+  /// No description provided for @cleanupUnexpectedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error during cleanup'**
+  String get cleanupUnexpectedError;
+
+  /// No description provided for @readerPageLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {pageNumber}'**
+  String readerPageLoading(int pageNumber);
+
+  /// No description provided for @readerPageLoadingVerbose.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading page {pageNumber}…'**
+  String readerPageLoadingVerbose(int pageNumber);
+
+  /// No description provided for @readerPageLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load page {pageNumber}'**
+  String readerPageLoadError(int pageNumber);
+
+  /// No description provided for @readerNoPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter has no pages'**
+  String get readerNoPages;
+
+  /// No description provided for @readerErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong loading the chapter.'**
+  String get readerErrorGeneric;
+
+  /// No description provided for @cleanupRequiresRecentLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'You need to sign in again to complete the deletion.'**
+  String get cleanupRequiresRecentLogin;
+
+  /// No description provided for @cleanupFirebaseDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t delete your Firebase account. Try again.'**
+  String get cleanupFirebaseDeleteFailed;
+
+  /// No description provided for @cleanupReauthWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password.'**
+  String get cleanupReauthWrongPassword;
+
+  /// No description provided for @cleanupReauthUserMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The user doesn\'t match the current session.'**
+  String get cleanupReauthUserMismatch;
+
+  /// No description provided for @cleanupReauthInvalidCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid credential.'**
+  String get cleanupReauthInvalidCredential;
+
+  /// No description provided for @cleanupReauthTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Wait a moment and try again.'**
+  String get cleanupReauthTooManyRequests;
+
+  /// No description provided for @cleanupReauthAuthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication error.'**
+  String get cleanupReauthAuthError;
+
+  /// No description provided for @cleanupPrefsClearWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Some local data could not be cleared.'**
+  String get cleanupPrefsClearWarning;
+
+  /// No description provided for @cleanupSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Please sign in again and retry.'**
+  String get cleanupSessionExpired;
+
+  /// No description provided for @deleteAccountGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete account. Please try again.'**
+  String get deleteAccountGenericError;
+
+  /// No description provided for @authSessionVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Session could not be verified. Sign in again.'**
+  String get authSessionVerificationFailed;
+
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authEmailAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered.'**
+  String get authEmailAlreadyInUse;
+
+  /// No description provided for @authWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is too weak — use at least 6 characters.'**
+  String get authWeakPassword;
+
+  /// No description provided for @authTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait and try again.'**
+  String get authTooManyRequests;
+
+  /// No description provided for @authNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Check your network.'**
+  String get authNetworkError;
+
+  /// No description provided for @authUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed. Please try again.'**
+  String get authUnknownError;
+
+  /// No description provided for @libraryErrorNetworkNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the server.'**
+  String get libraryErrorNetworkNoConnection;
+
+  /// No description provided for @libraryErrorServerBadResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The server responded with an error.'**
+  String get libraryErrorServerBadResponse;
+
+  /// No description provided for @libraryErrorRequestCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was cancelled.'**
+  String get libraryErrorRequestCancelled;
+
+  /// No description provided for @libraryErrorInvalidCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid certificate.'**
+  String get libraryErrorInvalidCertificate;
+
+  /// No description provided for @libraryErrorNetworkUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected network error occurred.'**
+  String get libraryErrorNetworkUnknown;
+
+  /// No description provided for @libraryErrorEmptyResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The server returned an empty response.'**
+  String get libraryErrorEmptyResponse;
+
+  /// No description provided for @libraryErrorExternalChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter is only available on the original site.'**
+  String get libraryErrorExternalChapter;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} (Build {build})'**
+  String aboutVersion(String version, String build);
+
+  /// No description provided for @aboutAppDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal manga reader — open source'**
+  String get aboutAppDescription;
+
+  /// No description provided for @aboutDisclaimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'DISCLAIMER'**
+  String get aboutDisclaimerTitle;
+
+  /// No description provided for @aboutDisclaimerMangadexTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not affiliated with MangaDex'**
+  String get aboutDisclaimerMangadexTitle;
+
+  /// No description provided for @aboutDisclaimerMangadexBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} is not affiliated, associated, authorized, or endorsed by MangaDex. The name \"MangaDex\" and its logo are trademarks of their respective owners. Use of the public MangaDex API is subject to its Terms of Use.'**
+  String aboutDisclaimerMangadexBody(String appName);
+
+  /// No description provided for @aboutDisclaimerMalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not affiliated with MyAnimeList'**
+  String get aboutDisclaimerMalTitle;
+
+  /// No description provided for @aboutDisclaimerMalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} is not affiliated, associated, authorized, or endorsed by MyAnimeList (MAL). The name \"MyAnimeList\" and its logo are trademarks of their respective owners. Additional metadata is sourced through the public Jikan API, an unofficial MAL API, used for informational purposes only.'**
+  String aboutDisclaimerMalBody(String appName);
+
+  /// No description provided for @aboutDisclaimerCopyrightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content copyright'**
+  String get aboutDisclaimerCopyrightTitle;
+
+  /// No description provided for @aboutDisclaimerCopyrightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All manga content (images, chapters, covers) belongs to their respective authors and publishers. {appName} does not store or redistribute copyrighted content. This app only consumes data from third-party public APIs.'**
+  String aboutDisclaimerCopyrightBody(String appName);
+
+  /// No description provided for @aboutCreditsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CREDITS AND APIs'**
+  String get aboutCreditsTitle;
+
+  /// No description provided for @aboutCreditMangadexDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog, chapters, and covers'**
+  String get aboutCreditMangadexDescription;
+
+  /// No description provided for @aboutCreditJikanDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional metadata (MAL)'**
+  String get aboutCreditJikanDescription;
+
+  /// No description provided for @aboutCreditCloudRunDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend infrastructure'**
+  String get aboutCreditCloudRunDescription;
+
+  /// No description provided for @aboutCreditFirebaseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'User authentication'**
+  String get aboutCreditFirebaseDescription;
 }
 
 class _AppLocalizationsDelegate
