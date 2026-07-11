@@ -86,18 +86,20 @@ void main() {
           offset: 0,
         ),
       ).thenAnswer(
-        (_) async => <MangaModel>[
+        (_) async => (<MangaModel>[
           const MangaModel(id: '1', title: 'Berserk'),
           const MangaModel(id: '2', title: 'Monster'),
-        ],
+        ], 2),
       );
 
       final result = await repository.getMangaList(limit: 20, offset: 0);
 
       expect(result.isRight(), isTrue);
-      result.fold((_) => fail('expected right'), (mangas) {
+      result.fold((_) => fail('expected right'), (pair) {
+        final (mangas, total) = pair;
         expect(mangas, hasLength(2));
         expect(mangas.first.title, 'Berserk');
+        expect(total, 2);
       });
     });
 
@@ -156,8 +158,10 @@ void main() {
       final result = await repository.getMangaList(limit: 20, offset: 0);
 
       expect(result.isRight(), isTrue);
-      result.fold((_) => fail('expected right'), (mangas) {
+      result.fold((_) => fail('expected right'), (pair) {
+        final (mangas, total) = pair;
         expect(mangas.single.id, 'cached');
+        expect(total, 1);
       });
     });
   });

@@ -11,7 +11,9 @@ abstract class LibraryRemoteDataSource {
   /// [limit] and [offset] control pagination; [order] provides sort parameters.
   /// [genre] filters by genre name (e.g. "romance", "action") — resolved to
   /// a MangaDex tag UUID on the backend.
-  Future<List<MangaModel>> getMangaList({
+  ///
+  /// Returns a record of matching models and the total result count from the API.
+  Future<(List<MangaModel> items, int total)> getMangaList({
     required int limit,
     required int offset,
     Map<String, String>? order,

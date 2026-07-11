@@ -18,8 +18,10 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   // LISTA DE MANGAS
   // ─────────────────────────────
   /// Fetches [limit] manga starting at [offset] from the `/manga` endpoint.
+  ///
+  /// Returns a record of matching models and the total count from the API.
   @override
-  Future<List<MangaModel>> getMangaList({
+  Future<(List<MangaModel> items, int total)> getMangaList({
     required int limit,
     required int offset,
     Map<String, String>? order,
@@ -36,13 +38,18 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
         },
       );
 
-      final List<dynamic> data = (response.data?['data'] as List<dynamic>?) ??
+      final body = response.data;
+      final List<dynamic> data = (body?['data'] as List<dynamic>?) ??
           <dynamic>[];
+      final int total = body?['total'] as int? ?? data.length;
 
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map(MangaModel.fromJson)
-          .toList();
+      return (
+        data
+            .whereType<Map<String, dynamic>>()
+            .map(MangaModel.fromJson)
+            .toList(),
+        total,
+      );
     } on DioException catch (error) {
       throw _mapDioException(error);
     } on Exception catch (error) {

@@ -309,10 +309,10 @@ void main() {
     getMangaChapters = _MockGetMangaChapters();
 
     when(() => getMangaList(limit: 20, offset: 0)).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(<Manga>[berserk, monster]),
+      (_) async => Right<Failure, (List<Manga>, int)>((<Manga>[berserk, monster], 2)),
     );
     when(() => searchManga('monster', limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
-      (_) async => Right<Failure, (List<Manga>, int)>(<Manga>[monster], 1),
+      (_) async => Right<Failure, (List<Manga>, int)>((<Manga>[monster], 1)),
     );
     when(() => getMangaChapters('monster')).thenAnswer(
       (_) async => Right<Failure, List<Chapter>>(<Chapter>[

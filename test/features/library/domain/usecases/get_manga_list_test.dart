@@ -18,7 +18,7 @@ void main() {
   });
 
   test('delegates parameters to repository', () async {
-    const expected = Right<Failure, List<Manga>>(<Manga>[]);
+    const expected = Right<Failure, (List<Manga>, int)>((<Manga>[], 0));
 
     when(
       () => repository.getMangaList(

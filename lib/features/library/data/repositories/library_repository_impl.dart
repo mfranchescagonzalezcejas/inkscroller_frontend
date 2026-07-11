@@ -33,14 +33,14 @@ class LibraryRepositoryImpl implements LibraryRepository {
   final Duration mangaChaptersCacheTtl;
 
   @override
-  Future<Either<Failure, List<Manga>>> getMangaList({
+  Future<Either<Failure, (List<Manga> items, int total)>> getMangaList({
     required int limit,
     required int offset,
     Map<String, String>? order,
     String? genre,
   }) async {
     try {
-      final models = await remoteDataSource.getMangaList(
+      final (models, total) = await remoteDataSource.getMangaList(
         limit: limit,
         offset: offset,
         order: order,
@@ -53,7 +53,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         mangas: models,
       );
 
-      return Right(models.map((e) => e.toEntity()).toList());
+      return Right((models.map((e) => e.toEntity()).toList(), total));
     } on AppException catch (error) {
       final cached = await _getCachedMangaList(
         limit: limit,
@@ -62,7 +62,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         maxAge: mangaListCacheTtl,
       );
       if (cached != null) {
-        return Right(cached.map((e) => e.toEntity()).toList());
+        return Right((cached.map((e) => e.toEntity()).toList(), cached.length));
       }
 
       return Left(_mapExceptionToFailure(error));

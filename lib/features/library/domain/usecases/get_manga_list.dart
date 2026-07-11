@@ -17,7 +17,9 @@ class GetMangaList {
   ///
   /// Returns up to [limit] manga starting at [offset].
   /// Pass [genre] to filter server-side (e.g. "romance", "action").
-  Future<Either<Failure, List<Manga>>> call({
+  ///
+  /// Returns a record of manga entities and the total result count.
+  Future<Either<Failure, (List<Manga> items, int total)>> call({
     required int limit,
     required int offset,
     Map<String, String>? order,

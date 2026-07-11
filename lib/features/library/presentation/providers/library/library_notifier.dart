@@ -32,6 +32,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   String? _genre;
 
   int _offset = 0;
+  int _total = 0;
   static const int _limit = AppConstants.mangaPageLimit;
 
   int _searchOffset = 0;
@@ -84,13 +85,15 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         );
         // Skip caching failures so refresh() triggers a real network retry.
       },
-      (mangas) {
+      (pair) {
+        final (mangas, total) = pair;
         _offset += mangas.length;
+        _total = total;
 
         final newState = state.copyWith(
           mangas: dedupeMangas(mangas),
           isLoading: false,
-          hasMore: _mode == LibraryMode.normal && mangas.length == _limit,
+          hasMore: _mode == LibraryMode.normal && _offset < _total,
           clearFailure: true,
         );
         state = newState;
@@ -117,15 +120,17 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       (failure) {
         state = state.copyWith(isLoadingMore: false, failure: failure);
       },
-      (newMangas) {
+      (pair) {
+        final (newMangas, total) = pair;
         _offset += newMangas.length;
+        _total = total;
 
         final combined = dedupeMangas([...state.mangas, ...newMangas]);
 
         state = state.copyWith(
           mangas: combined,
           isLoadingMore: false,
-          hasMore: newMangas.length == _limit,
+          hasMore: _offset < _total,
           clearFailure: true,
         );
       },
@@ -231,7 +236,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
         state = state.copyWith(
           mangas: dedupeMangas(items),
-          isSearching: false,
+          isSearching: true,
           hasMore: _searchOffset < _searchTotal,
           clearFailure: true,
         );

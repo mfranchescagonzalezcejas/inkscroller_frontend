@@ -153,14 +153,14 @@ void main() {
   testWidgets('shows empty local library state while initial load is pending', (
     tester,
   ) async {
-    final completer = Completer<Either<Failure, List<Manga>>>();
+    final completer = Completer<Either<Failure, (List<Manga>, int)>>();
 
     when(
       () => getMangaList(limit: 20, offset: 0),
     ).thenAnswer((_) => completer.future);
     when(
       () => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset')),
-    ).thenAnswer((_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
 
     await pumpLibraryPage(
       tester,
@@ -183,10 +183,10 @@ void main() {
   ) async {
     when(
       () => getMangaList(limit: 20, offset: 0),
-    ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
     when(
       () => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset')),
-    ).thenAnswer((_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
 
     await pumpLibraryPage(
       tester,
@@ -207,11 +207,11 @@ void main() {
     final manga1 = Manga(id: '1', title: 'Berserk');
     final manga2 = Manga(id: '2', title: 'Monster');
     when(() => getMangaList(limit: 20, offset: 0)).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(<Manga>[manga1, manga2]),
+      (_) async => Right<Failure, (List<Manga>, int)>((<Manga>[manga1, manga2], 2)),
     );
     when(
       () => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset')),
-    ).thenAnswer((_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
 
     await pumpLibraryPage(
       tester,
@@ -244,10 +244,10 @@ void main() {
       final manga = Manga(id: '1', title: 'Initial');
       when(
         () => getMangaList(limit: 20, offset: 0),
-      ).thenAnswer((_) async => Right<Failure, List<Manga>>(<Manga>[manga]));
+      ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[manga], 1)));
       when(
         () => searchManga('pluto', limit: any(named: 'limit'), offset: any(named: 'offset')),
-      ).thenAnswer((_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
+      ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
 
       await pumpLibraryPage(
         tester,
@@ -277,10 +277,10 @@ void main() {
     (tester) async {
       when(
         () => getMangaList(limit: 20, offset: 0),
-      ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+      ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
       when(
         () => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset')),
-      ).thenAnswer((_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
+      ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
 
       await pumpLibraryPage(
         tester,

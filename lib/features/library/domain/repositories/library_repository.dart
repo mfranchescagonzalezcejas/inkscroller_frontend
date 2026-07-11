@@ -13,7 +13,9 @@ abstract class LibraryRepository {
   /// Returns a paginated list of manga titles.
   ///
   /// [genre] filters by genre name (e.g. "romance", "action").
-  Future<Either<Failure, List<Manga>>> getMangaList({
+  ///
+  /// Returns a record of entities and the total result count from the API.
+  Future<Either<Failure, (List<Manga> items, int total)>> getMangaList({
     required int limit,
     required int offset,
     Map<String, String>? order,

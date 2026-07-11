@@ -25,12 +25,12 @@ void main() {
     searchManga = _MockSearchManga();
   });
 
-  test('loadInitial stores mangas and enables pagination when full page', () async {
+  test('loadInitial stores mangas and enables pagination when more items exist', () async {
     when(
       () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
     ).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(
-        List<Manga>.generate(20, (index) => Manga(id: '$index', title: 'Manga $index')),
+      (_) async => Right<Failure, (List<Manga>, int)>(
+        (List<Manga>.generate(20, (index) => Manga(id: '$index', title: 'Manga $index')), 40),
       ),
     );
 
@@ -51,7 +51,7 @@ void main() {
     when(
       () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
     ).thenAnswer(
-      (_) async => const Left<Failure, List<Manga>>(
+      (_) async => const Left<Failure, (List<Manga>, int)>(
         NetworkFailure(message: 'offline'),
       ),
     );
@@ -71,7 +71,7 @@ void main() {
     when(
       () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
     ).thenAnswer(
-      (_) async => const Left<Failure, List<Manga>>(
+      (_) async => const Left<Failure, (List<Manga>, int)>(
         NetworkFailure(message: 'offline'),
       ),
     );
@@ -89,7 +89,7 @@ void main() {
     when(
       () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
     ).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(mangas),
+      (_) async => Right<Failure, (List<Manga>, int)>((mangas, 2)),
     );
 
     await notifier.refresh();
@@ -107,7 +107,7 @@ void main() {
     when(
       () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
     ).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(mangas),
+      (_) async => Right<Failure, (List<Manga>, int)>((mangas, 2)),
     );
     when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
       (_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)),
@@ -126,7 +126,7 @@ void main() {
     when(
       () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')),
     ).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(updatedMangas),
+      (_) async => Right<Failure, (List<Manga>, int)>((updatedMangas, 1)),
     );
 
     await notifier.refresh();
@@ -150,14 +150,14 @@ void main() {
 
     when(
       () => getMangaList(limit: 20, offset: 0),
-    ).thenAnswer((_) async => Right<Failure, List<Manga>>(initialPage));
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((initialPage, 40)));
     when(
       () => getMangaList(limit: 20, offset: 20),
     ).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(<Manga>[
+      (_) async => Right<Failure, (List<Manga>, int)>((<Manga>[
         mangas.first,
         Manga(id: '3', title: 'Pluto'),
-      ]),
+      ], 40)),
     );
     when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'))).thenAnswer(
       (_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)),
