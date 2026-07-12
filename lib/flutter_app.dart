@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 
 import 'core/l10n/app_locale_provider.dart';
+import 'core/providers/session_startup_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'flavors/flavor_config.dart';
@@ -16,6 +17,11 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Activate session-startup provider at app root so profile and
+    // preferences load immediately when a session is restored (cold start)
+    // without waiting for the user to visit the Profile page.
+    ref.watch(sessionStartupProvider);
+
     final locale = ref.watch(appLocaleProvider);
 
     return MaterialApp.router(
