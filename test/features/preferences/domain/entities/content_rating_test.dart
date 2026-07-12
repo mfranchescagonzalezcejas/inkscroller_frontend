@@ -77,10 +77,10 @@ void main() {
       );
     });
 
-    test('16-17 with stored all falls back to safe', () {
+    test('16-17 with stored all falls back to suggestive (age default)', () {
       expect(
         ContentRating.effectiveForAge(16, isGuest: false, stored: ContentRating.all),
-        ContentRating.safe,
+        ContentRating.suggestive,
       );
     });
 

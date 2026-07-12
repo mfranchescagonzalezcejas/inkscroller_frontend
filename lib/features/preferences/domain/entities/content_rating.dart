@@ -20,6 +20,9 @@ enum ContentRating {
   }
 
   /// Effective rating given stored preference and age constraints.
+  ///
+  /// Defaults to [suggestive] for authenticated users 16+ (Safe + Suggestive),
+  /// and [safe] for guests, under-16, or users without a birth date.
   static ContentRating effectiveForAge(
     int? age, {
     required bool isGuest,
@@ -27,7 +30,7 @@ enum ContentRating {
   }) {
     final allowed = valuesForAge(age, isGuest: isGuest);
     if (stored != null && allowed.contains(stored)) return stored;
-    if (!isGuest && age != null && age >= 18) return ContentRating.suggestive;
+    if (!isGuest && age != null && age >= 16) return ContentRating.suggestive;
     return ContentRating.safe;
   }
 }
