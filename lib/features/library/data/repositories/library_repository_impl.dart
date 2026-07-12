@@ -38,6 +38,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     required int offset,
     Map<String, String>? order,
     String? genre,
+    String? contentRating,
   }) async {
     try {
       final models = await remoteDataSource.getMangaList(
@@ -45,6 +46,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         offset: offset,
         order: order,
         genre: genre,
+        contentRating: contentRating,
       );
       await _cacheMangaList(
         limit: limit,
@@ -126,9 +128,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
-  Future<Either<Failure, List<Manga>>> searchManga(String query) async {
+  Future<Either<Failure, List<Manga>>> searchManga(
+    String query, {
+    String? contentRating,
+  }) async {
     try {
-      final models = await remoteDataSource.searchManga(query);
+      final models = await remoteDataSource.searchManga(
+        query,
+        contentRating: contentRating,
+      );
       return Right(models.map((e) => e.toEntity()).toList());
     } on AppException catch (error) {
       return Left(_mapExceptionToFailure(error));

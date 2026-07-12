@@ -24,6 +24,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     required int offset,
     Map<String, String>? order,
     String? genre,
+    String? contentRating,
   }) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
@@ -32,6 +33,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           'limit': limit,
           'offset': offset,
           if (genre != null) 'genre': genre,
+          if (contentRating != null) 'content_rating': contentRating,
           ...?order?.map((key, value) => MapEntry('order[$key]', value)),
         },
       );
@@ -142,11 +144,14 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   ///
   /// Handles both a plain JSON array response and a wrapped `{"data": [...]}` response.
   @override
-  Future<List<MangaModel>> searchManga(String query) async {
+  Future<List<MangaModel>> searchManga(String query, {String? contentRating}) async {
     try {
       final response = await dio.get<dynamic>(
         '${ApiEndpoints.manga}/search',
-        queryParameters: {'q': query},
+        queryParameters: {
+          'q': query,
+          if (contentRating != null) 'content_rating': contentRating,
+        },
       );
 
       final body = response.data;

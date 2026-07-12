@@ -16,6 +16,7 @@ abstract class LibraryRemoteDataSource {
     required int offset,
     Map<String, String>? order,
     String? genre,
+    String? contentRating,
   });
 
   /// Fetches the full detail model for a single manga by [mangaId].
@@ -30,5 +31,5 @@ abstract class LibraryRemoteDataSource {
   Future<List<String>> getChapterPages(String chapterId);
 
   /// Searches the API for manga matching [query] and returns matching models.
-  Future<List<MangaModel>> searchManga(String query);
+  Future<List<MangaModel>> searchManga(String query, {String? contentRating});
 }
