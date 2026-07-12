@@ -173,4 +173,56 @@ void main() {
     expect(ids, containsAll(<String>['1', '2', '3']));
     expect(ids.last, '3');
   });
+
+  test('loadMore continues paginating after short page', () async {
+    when(
+      () => getMangaList(limit: 20, offset: 0),
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[
+      Manga(id: '1', title: 'Berserk'),
+    ], 40)));
+    when(
+      () => getMangaList(limit: 20, offset: 1),
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[
+      Manga(id: '2', title: 'Naruto'),
+    ], 40)));
+    when(
+      () => getMangaList(limit: 20, offset: 2),
+    ).thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[
+      Manga(id: '3', title: 'One Piece'),
+    ], 40)));
+    when(() => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset')))
+        .thenAnswer((_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
+
+    final notifier = LibraryNotifier(getMangaList, searchManga);
+    await Future<void>.delayed(Duration.zero);
+
+    await notifier.loadMore();
+    expect(notifier.state.mangas, hasLength(2));
+
+    await notifier.loadMore();
+    expect(notifier.state.mangas, hasLength(3));
+  });
+
+  test('search pagination appends results', () async {
+    when(() => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order')))
+        .thenAnswer((_) async => const Right<Failure, (List<Manga>, int)>((<Manga>[], 0)));
+    when(() => searchManga('naruto', limit: 50, offset: 0))
+        .thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[
+          Manga(id: '1', title: 'Naruto'),
+        ], 40)));
+    when(() => searchManga('naruto', limit: 50, offset: 1))
+        .thenAnswer((_) async => Right<Failure, (List<Manga>, int)>((<Manga>[
+          Manga(id: '2', title: 'Naruto Shippuden'),
+        ], 40)));
+
+    final notifier = LibraryNotifier(getMangaList, searchManga);
+    await Future<void>.delayed(Duration.zero);
+
+    await notifier.search('naruto');
+    await Future<void>.delayed(Duration.zero);
+    expect(notifier.state.mangas, hasLength(1));
+
+    await notifier.loadMore();
+    expect(notifier.state.mangas, hasLength(2));
+  });
 }

@@ -38,7 +38,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
   int _searchOffset = 0;
   int _searchTotal = 0;
-  static const int _searchLimit = 50;
+  static const int _searchLimit = AppConstants.searchPageLimit;
 
   Timer? _searchDebounce;
   String _activeQuery = '';
@@ -145,15 +145,19 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   Future<void> _loadMoreSearch() async {
+    final requestQuery = _activeQuery;
     state = state.copyWith(isLoadingMore: true, clearFailure: true);
 
     final result = await _searchManga(
-      _activeQuery,
+      requestQuery,
       limit: _searchLimit,
       offset: _searchOffset,
     );
 
-    if (_activeQuery.isEmpty) return;
+    if (_activeQuery.isEmpty || _activeQuery != requestQuery) {
+      state = state.copyWith(isLoadingMore: false);
+      return;
+    }
 
     result.fold(
       (failure) {
@@ -177,6 +181,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       },
     );
   }
+
+  /// Directly triggers a search for [query], bypassing debounce.
+  Future<void> search(String query) => _performSearch(query);
 
   /// UI hook: actualiza el texto del buscador y lanza debounce
   void setQuery(String query) {
@@ -246,7 +253,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       return;
     }
 
-    final result = await _searchManga(query, limit: _searchLimit, offset: 0);
+    final result = await _searchManga(query, limit: _searchLimit, offset: AppConstants.firstPageOffset);
 
     if (_activeQuery != query) return;
 

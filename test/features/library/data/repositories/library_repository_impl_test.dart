@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/exceptions.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
 import 'package:inkscroller_flutter/features/library/data/datasources/library_local_ds.dart';
 import 'package:inkscroller_flutter/features/library/data/datasources/library_remote_ds.dart';
 import 'package:inkscroller_flutter/features/library/data/models/chapter_model.dart';
@@ -170,8 +171,8 @@ void main() {
     when(
       () => remoteDataSource.searchManga(
         'berserk',
-        limit: any(named: 'limit'),
-        offset: any(named: 'offset'),
+        limit: 20,
+        offset: 0,
       ),
     ).thenAnswer(
       (_) async => (
@@ -186,10 +187,11 @@ void main() {
       offset: 0,
     );
 
-    expect(result, isA<Right<Failure, dynamic>>());
+    expect(result, isA<Right<Failure, (List<Manga>, int)>>());
     result.fold((_) => fail('expected right'), (pair) {
-      final (mangas, _) = pair;
+      final (mangas, total) = pair;
       expect(mangas.single.id, '1');
+      expect(total, 1);
     });
   });
 

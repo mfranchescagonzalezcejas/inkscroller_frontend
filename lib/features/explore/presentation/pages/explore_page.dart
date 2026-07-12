@@ -327,7 +327,7 @@ class _ExploreGrid extends StatelessWidget {
 
         final showBottomLoader = state.isLoadingMore;
         final showEndReached =
-            !state.isLoadingMore && !state.hasMore;
+            !state.isLoadingMore && !state.hasMore && !state.isSearching;
 
         return MasonryGridView.builder(
           controller: controller,

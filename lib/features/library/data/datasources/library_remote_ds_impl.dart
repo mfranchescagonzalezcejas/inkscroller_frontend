@@ -155,16 +155,16 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     required int offset,
   }) async {
     try {
-      final response = await dio.get<dynamic>(
+      final response = await dio.get<Object?>(
         '${ApiEndpoints.manga}/search',
         queryParameters: {'q': query, 'limit': limit, 'offset': offset},
       );
 
-      final body = response.data;
+      final Object? body = response.data;
 
-      if (body is Map<String, dynamic>) {
-        final List<dynamic> rawList =
-            (body['data'] as List<dynamic>?) ?? <dynamic>[];
+      if (body is Map<String, Object?>) {
+        final List<Object?> rawList =
+            (body['data'] as List<Object?>?) ?? <Object?>[];
         final int total = body['total'] as int? ?? rawList.length;
         return (
           rawList
@@ -176,7 +176,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
       }
 
       // Legacy: plain JSON array response — no total available.
-      final List<dynamic> rawList = body is List ? body : <dynamic>[];
+      final List<Object?> rawList = body is List<Object?> ? body : <Object?>[];
       return (
         rawList
             .whereType<Map<String, dynamic>>()
