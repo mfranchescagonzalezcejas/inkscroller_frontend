@@ -43,8 +43,8 @@ final contentRatingResolutionProvider =
       : null;
   final stored = preferencesState.preferences?.contentRatingFilter;
 
-  final allowed = ContentRating.valuesForAge(age, isGuest);
-  final effective = ContentRating.effectiveForAge(age, isGuest, stored);
+  final allowed = ContentRating.valuesForAge(age, isGuest: isGuest);
+  final effective = ContentRating.effectiveForAge(age, isGuest: isGuest, stored: stored);
 
   return ContentRatingResolution(
     effectiveRating: effective,

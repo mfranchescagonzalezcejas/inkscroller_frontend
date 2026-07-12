@@ -48,9 +48,12 @@ class UserPreferencesModel {
         _ => ReaderMode.vertical,
       },
       defaultLanguage: defaultLanguage,
-      contentRatingFilter: contentRatingFilter != null
-          ? ContentRating.values.byName(contentRatingFilter!)
-          : null,
+      contentRatingFilter: switch (contentRatingFilter) {
+        'safe' => ContentRating.safe,
+        'suggestive' => ContentRating.suggestive,
+        'all' => ContentRating.all,
+        _ => null,
+      },
       updatedAt:
           DateTime.tryParse(updatedAt) ??
           DateTime.fromMillisecondsSinceEpoch(0),

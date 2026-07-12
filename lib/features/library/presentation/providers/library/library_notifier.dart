@@ -11,8 +11,9 @@ import 'library_state.dart';
 /// Browsing mode that determines the sort order used by [LibraryNotifier].
 enum LibraryMode { normal, popular }
 
-/// Cache key for genre tabs - combines mode and genre for unique identification.
-String _cacheKey(LibraryMode mode, String? genre) => '${mode.name}:$genre';
+/// Cache key for genre tabs - combines mode, genre, and contentRating for unique identification.
+String _cacheKey(LibraryMode mode, String? genre, {String? contentRating}) =>
+    '${mode.name}:$genre:cr:${contentRating ?? 'default'}';
 
 /// Manages paginated manga list state with search, debounce, and deduplication.
 ///
@@ -56,7 +57,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     String? genre,
     String? contentRating,
   }) async {
-    final key = _cacheKey(mode, genre);
+    final key = _cacheKey(mode, genre, contentRating: contentRating);
 
     // Return cached result immediately if available.
     if (_tabCache.containsKey(key)) {
@@ -162,12 +163,13 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   ///
   /// Clears the tab cache so pull-to-refresh always fetches fresh data.
   Future<void> refresh({String? contentRating}) {
-    final key = _cacheKey(_mode, _genre);
+    final effectiveCR = contentRating ?? _contentRating;
+    final key = _cacheKey(_mode, _genre, contentRating: effectiveCR);
     _tabCache.remove(key);
     return loadInitial(
       mode: _mode,
       genre: _genre,
-      contentRating: contentRating ?? _contentRating,
+      contentRating: effectiveCR,
     );
   }
 
@@ -175,7 +177,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   Future<void> setGenre(String? genre) {
     // Genre tabs are part of the normal catalogue flow, not the dedicated
     // popularity ranking mode. Reset mode to normal whenever a genre changes.
-    return loadInitial(genre: genre);
+    return loadInitial(genre: genre, contentRating: _contentRating);
   }
 
   Future<void> _performSearch(String query) async {

@@ -13,7 +13,7 @@ enum ContentRating {
   String get wireValue => name;
 
   /// Options allowed for a given age and guest status.
-  static List<ContentRating> valuesForAge(int? age, bool isGuest) {
+  static List<ContentRating> valuesForAge(int? age, {required bool isGuest}) {
     if (isGuest || age == null || age < 16) return [ContentRating.safe];
     if (age < 18) return [ContentRating.safe, ContentRating.suggestive];
     return ContentRating.values;
@@ -21,11 +21,11 @@ enum ContentRating {
 
   /// Effective rating given stored preference and age constraints.
   static ContentRating effectiveForAge(
-    int? age,
-    bool isGuest,
+    int? age, {
+    required bool isGuest,
     ContentRating? stored,
-  ) {
-    final allowed = valuesForAge(age, isGuest);
+  }) {
+    final allowed = valuesForAge(age, isGuest: isGuest);
     if (stored != null && allowed.contains(stored)) return stored;
     if (!isGuest && age != null && age >= 18) return ContentRating.suggestive;
     return ContentRating.safe;
