@@ -62,7 +62,10 @@ class LibraryRepositoryImpl implements LibraryRepository {
         maxAge: mangaListCacheTtl,
       );
       if (cached != null) {
-        return Right((cached.map((e) => e.toEntity()).toList(), cached.length));
+        // ponytail: cache doesn't store the server total. If the cached page
+        // is full assume more pages exist to avoid false hasMore: false.
+        final total = cached.length >= limit ? cached.length + 1 : cached.length;
+        return Right((cached.map((e) => e.toEntity()).toList(), total));
       }
 
       return Left(_mapExceptionToFailure(error));
