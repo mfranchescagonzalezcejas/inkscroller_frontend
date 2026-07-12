@@ -49,3 +49,7 @@ pre-push:
       tags: [quality, slow]
       description: Run integration tests
       run: fvm flutter test integration_test/
+    coverage:
+      tags: [quality, slow]
+      description: Run tests with coverage
+      run: fvm flutter test --coverage
