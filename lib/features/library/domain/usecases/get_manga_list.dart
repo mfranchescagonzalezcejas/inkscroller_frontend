@@ -22,12 +22,14 @@ class GetMangaList {
     required int offset,
     Map<String, String>? order,
     String? genre,
+    String? contentRating,
   }) {
     return repository.getMangaList(
       limit: limit,
       offset: offset,
       order: order,
       genre: genre,
+      contentRating: contentRating,
     );
   }
 }

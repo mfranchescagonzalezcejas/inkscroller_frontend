@@ -14,10 +14,12 @@ class UpdatePreferences {
   Future<Either<Failure, UserReadingPreferences>> call({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
   }) {
     return repository.updatePreferences(
       defaultReaderMode: defaultReaderMode,
       defaultLanguage: defaultLanguage,
+      contentRatingFilter: contentRatingFilter,
     );
   }
 }

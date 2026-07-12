@@ -153,6 +153,7 @@ void _registerGetItMocks() {
     when(() => prefsRepo.updatePreferences(
       defaultReaderMode: any(named: 'defaultReaderMode'),
       defaultLanguage: any(named: 'defaultLanguage'),
+      contentRatingFilter: any(named: 'contentRatingFilter'),
     )).thenAnswer(
       (_) async => Right<Failure, UserReadingPreferences>(
         UserReadingPreferences(

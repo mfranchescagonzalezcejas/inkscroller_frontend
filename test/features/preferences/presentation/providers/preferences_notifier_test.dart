@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
+import 'package:inkscroller_flutter/features/preferences/domain/entities/content_rating.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/entities/user_reading_preferences.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/usecases/get_preferences.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/usecases/update_preferences.dart';
@@ -66,6 +67,7 @@ void main() {
       () => updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer((_) async => Right<Failure, UserReadingPreferences>(samplePrefs));
 
@@ -76,11 +78,43 @@ void main() {
     expect(notifier.state.error, isNull);
   });
 
+  test('savePreferences forwards concrete contentRatingFilter', () async {
+    final prefsWithRating = UserReadingPreferences(
+      defaultReaderMode: ReaderMode.vertical,
+      defaultLanguage: 'en',
+      contentRatingFilter: ContentRating.suggestive,
+      updatedAt: DateTime(2026),
+    );
+
+    when(
+      () => updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
+      ),
+    ).thenAnswer(
+      (_) async => Right<Failure, UserReadingPreferences>(prefsWithRating),
+    );
+
+    await notifier.savePreferences(contentRatingFilter: 'suggestive');
+
+    expect(notifier.state.isLoading, isFalse);
+    expect(notifier.state.preferences?.contentRatingFilter, ContentRating.suggestive);
+    verify(
+      () => updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: 'suggestive',
+      ),
+    ).called(1);
+  });
+
   test('savePreferences stores error message on failure', () async {
     when(
       () => updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer(
       (_) async => const Left(ServerFailure(message: 'server error')),

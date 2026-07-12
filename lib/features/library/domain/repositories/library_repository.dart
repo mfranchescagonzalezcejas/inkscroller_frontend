@@ -18,6 +18,7 @@ abstract class LibraryRepository {
     required int offset,
     Map<String, String>? order,
     String? genre,
+    String? contentRating,
   });
 
   /// Fetches the full detail of a single manga by its [mangaId].
@@ -32,7 +33,10 @@ abstract class LibraryRepository {
   Future<Either<Failure, List<String>>> getChapterPages(String chapterId);
 
   /// Searches for manga titles matching [query] and returns the results.
-  Future<Either<Failure, List<Manga>>> searchManga(String query);
+  Future<Either<Failure, List<Manga>>> searchManga(
+    String query, {
+    String? contentRating,
+  });
 
   /// Clears all persisted library cache entries.
   ///

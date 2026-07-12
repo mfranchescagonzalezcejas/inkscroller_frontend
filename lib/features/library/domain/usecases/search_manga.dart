@@ -11,7 +11,10 @@ class SearchManga {
   SearchManga(this.repository);
 
   /// Returns manga whose title or metadata match [query].
-  Future<Either<Failure, List<Manga>>> call(String query) {
-    return repository.searchManga(query);
+  Future<Either<Failure, List<Manga>>> call(
+    String query, {
+    String? contentRating,
+  }) {
+    return repository.searchManga(query, contentRating: contentRating);
   }
 }
