@@ -21,6 +21,35 @@ class ContentRatingResolution {
     required this.allowedOptions,
     required this.isEditable,
   });
+
+  /// Pure resolution function — deterministic, testable.
+  static ContentRatingResolution resolve({
+    required bool isGuest,
+    DateTime? birthDate,
+    ContentRating? stored,
+    DateTime? now,
+  }) {
+    final today = now ?? DateTime.now();
+    final age = birthDate != null
+        ? today.year -
+              birthDate.year -
+              (today.isBefore(
+                    DateTime(today.year, birthDate.month, birthDate.day),
+                  )
+                  ? 1
+                  : 0)
+        : null;
+
+    final allowed = ContentRating.valuesForAge(age, isGuest: isGuest);
+    final effective =
+        ContentRating.effectiveForAge(age, isGuest: isGuest, stored: stored);
+
+    return ContentRatingResolution(
+      effectiveRating: effective,
+      allowedOptions: allowed,
+      isEditable: allowed.length > 1,
+    );
+  }
 }
 
 /// Watches auth, profile, and preferences to resolve the effective content rating.
@@ -30,25 +59,9 @@ final contentRatingResolutionProvider =
   final profileState = ref.watch(userProfileProvider);
   final preferencesState = ref.watch(preferencesProvider);
 
-  final isGuest = authState.user == null;
-  final birthDate = profileState.profile?.birthDate;
-  final age = birthDate != null
-      ? DateTime.now().year -
-            birthDate.year -
-            (DateTime.now().isBefore(
-                  DateTime(DateTime.now().year, birthDate.month, birthDate.day),
-                )
-                ? 1
-                : 0)
-      : null;
-  final stored = preferencesState.preferences?.contentRatingFilter;
-
-  final allowed = ContentRating.valuesForAge(age, isGuest: isGuest);
-  final effective = ContentRating.effectiveForAge(age, isGuest: isGuest, stored: stored);
-
-  return ContentRatingResolution(
-    effectiveRating: effective,
-    allowedOptions: allowed,
-    isEditable: allowed.length > 1,
+  return ContentRatingResolution.resolve(
+    isGuest: authState.user == null,
+    birthDate: profileState.profile?.birthDate,
+    stored: preferencesState.preferences?.contentRatingFilter,
   );
 });

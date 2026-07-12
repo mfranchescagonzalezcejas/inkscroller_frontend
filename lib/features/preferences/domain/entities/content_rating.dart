@@ -9,13 +9,21 @@ enum ContentRating {
   suggestive,
   all;
 
+  /// Minimum age for suggestive content (16).
+  static const int suggestiveMinAge = 16;
+
+  /// Minimum age for all content (18).
+  static const int allMinAge = 18;
+
   /// Wire value sent to the backend.
   String get wireValue => name;
 
   /// Options allowed for a given age and guest status.
   static List<ContentRating> valuesForAge(int? age, {required bool isGuest}) {
-    if (isGuest || age == null || age < 16) return [ContentRating.safe];
-    if (age < 18) return [ContentRating.safe, ContentRating.suggestive];
+    if (isGuest || age == null || age < suggestiveMinAge) {
+      return [ContentRating.safe];
+    }
+    if (age < allMinAge) return [ContentRating.safe, ContentRating.suggestive];
     return ContentRating.values;
   }
 
@@ -30,7 +38,9 @@ enum ContentRating {
   }) {
     final allowed = valuesForAge(age, isGuest: isGuest);
     if (stored != null && allowed.contains(stored)) return stored;
-    if (!isGuest && age != null && age >= 16) return ContentRating.suggestive;
+    if (!isGuest && age != null && age >= suggestiveMinAge) {
+      return ContentRating.suggestive;
+    }
     return ContentRating.safe;
   }
 }

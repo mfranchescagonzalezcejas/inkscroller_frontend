@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
 import 'package:inkscroller_flutter/features/preferences/data/datasources/preferences_local_ds_impl.dart';
+import 'package:inkscroller_flutter/features/preferences/domain/entities/content_rating.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/entities/user_reading_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,7 +39,24 @@ void main() {
     expect(result, isNotNull);
     expect(result!.defaultReaderMode, ReaderMode.paged);
     expect(result.defaultLanguage, 'es');
+    expect(result.contentRatingFilter, isNull);
     expect(result.updatedAt, DateTime(2026, 4, 5, 12));
+  });
+
+  test('round-trips non-null contentRatingFilter', () async {
+    final prefsWithRating = UserReadingPreferences(
+      defaultReaderMode: ReaderMode.vertical,
+      defaultLanguage: 'en',
+      contentRatingFilter: ContentRating.suggestive,
+      updatedAt: DateTime(2026, 6),
+    );
+
+    await dataSource.savePreferences(prefsWithRating);
+    final result = await dataSource.getCachedPreferences();
+
+    expect(result, isNotNull);
+    expect(result!.contentRatingFilter, ContentRating.suggestive);
+    expect(result.defaultReaderMode, ReaderMode.vertical);
   });
 
   test('returns null when cache is expired', () async {

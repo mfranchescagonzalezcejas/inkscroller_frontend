@@ -127,7 +127,7 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
       await remoteDataSource.updatePreferences(
         defaultReaderMode: prefs.defaultReaderMode.name,
         defaultLanguage: prefs.defaultLanguage,
-        contentRatingFilter: prefs.contentRatingFilter?.name,
+        contentRatingFilter: prefs.contentRatingFilter?.wireValue,
       );
     } on Object {
       // Best-effort push — if it fails, next sync will retry.

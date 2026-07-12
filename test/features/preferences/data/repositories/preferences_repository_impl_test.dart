@@ -5,6 +5,7 @@ import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
 import 'package:inkscroller_flutter/features/preferences/data/datasources/preferences_local_ds.dart';
 import 'package:inkscroller_flutter/features/preferences/data/datasources/preferences_remote_ds.dart';
+import 'package:inkscroller_flutter/features/preferences/domain/entities/content_rating.dart';
 import 'package:inkscroller_flutter/features/preferences/data/models/user_preferences_model.dart';
 import 'package:inkscroller_flutter/features/preferences/data/repositories/preferences_repository_impl.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/entities/user_reading_preferences.dart';
@@ -196,6 +197,48 @@ void main() {
     expect(prefs.defaultLanguage, 'es');
     // Local was written optimistically.
     verify(() => localDataSource.savePreferences(any())).called(1);
+  });
+
+  test('updatePreferences with non-null contentRatingFilter passes it to remote', () async {
+    const modelWithRating = UserPreferencesModel(
+      firebaseUid: 'uid-123',
+      defaultReaderMode: 'vertical',
+      defaultLanguage: 'en',
+      contentRatingFilter: 'suggestive',
+      updatedAt: '2026-07-01T00:00:00.000',
+    );
+
+    when(
+      () => localDataSource.getCachedPreferences(),
+    ).thenAnswer((_) async => null);
+    when(
+      () => localDataSource.savePreferences(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
+      ),
+    ).thenAnswer((_) async => modelWithRating);
+
+    final result = await repository.updatePreferences(
+      defaultReaderMode: 'vertical',
+      defaultLanguage: 'en',
+      contentRatingFilter: 'suggestive',
+    );
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    final prefs = (result as Right<Failure, UserReadingPreferences>).value;
+    expect(prefs.contentRatingFilter, ContentRating.suggestive);
+
+    verify(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: 'vertical',
+        defaultLanguage: 'en',
+        contentRatingFilter: 'suggestive',
+      ),
+    ).called(1);
   });
 
   test('preserves cached fields not being updated', () async {
