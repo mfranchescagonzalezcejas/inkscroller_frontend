@@ -58,7 +58,15 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         AppConstants.mangaListPrefetchExtent;
 
     if (thresholdReached && !state.isLoadingMore) {
-      ref.read(libraryProvider.notifier).loadMore();
+      final beforeCount = state.mangas.length;
+      ref.read(libraryProvider.notifier).loadMore().then((_) {
+        // Only re-check if items were actually added — prevents tight loop
+        // when hasMore is false or the guard returned early.
+        final afterState = ref.read(libraryProvider);
+        if (afterState.mangas.length > beforeCount) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
+        }
+      });
     }
   }
 
