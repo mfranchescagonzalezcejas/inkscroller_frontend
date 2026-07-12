@@ -38,6 +38,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
   int _searchOffset = 0;
   int _searchTotal = 0;
+  static const int _searchLimit = 50;
 
   Timer? _searchDebounce;
   String _activeQuery = '';
@@ -148,7 +149,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     final result = await _searchManga(
       _activeQuery,
-      limit: _limit,
+      limit: _searchLimit,
       offset: _searchOffset,
     );
 
@@ -163,12 +164,14 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         _searchOffset += newItems.length;
         _searchTotal = total;
 
+        final beforeCount = state.mangas.length;
         final combined = dedupeMangas([...state.mangas, ...newItems]);
+        final dedupedCount = combined.length - beforeCount;
 
         state = state.copyWith(
           mangas: combined,
           isLoadingMore: false,
-          hasMore: _searchOffset < _searchTotal,
+          hasMore: dedupedCount > 0 && _searchOffset < _searchTotal,
           clearFailure: true,
         );
       },
@@ -243,7 +246,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       return;
     }
 
-    final result = await _searchManga(query, limit: _limit, offset: 0);
+    final result = await _searchManga(query, limit: _searchLimit, offset: 0);
 
     if (_activeQuery != query) return;
 
