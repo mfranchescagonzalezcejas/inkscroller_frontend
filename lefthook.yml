@@ -24,7 +24,7 @@ commit-msg:
       tags: [quality, fast]
       description: Validate Conventional Commit format
       run: |
-        cat "$1" | head -1 | grep -qE '^(feat|fix|chore|refactor|docs|hotfix)(\([a-z]+\))?: .+$' || {
+        head -n 1 "{1}" | grep -qE '^(feat|fix|chore|refactor|docs|hotfix)(\([a-z]+\))?: .+$' || {
           echo "❌ Invalid commit message format."
           echo ""
           echo "  Expected: <type>(<scope>): <description>"
