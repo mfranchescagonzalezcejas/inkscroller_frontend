@@ -33,5 +33,5 @@ class AppConstants {
   // Pagination
   static const int firstPageOffset = 0;
   static const int mangaListPrefetchExtent = 600;
-  static const int searchPageLimit = 50;
+  static const int searchPageLimit = 20;
 }
