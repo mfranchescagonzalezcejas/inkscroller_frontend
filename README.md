@@ -146,7 +146,7 @@ The project uses **lefthook** to run quality gates automatically on every commit
 ```bash
 # Install lefthook (one-time)
 #   macOS: brew install lefthook
-#   Linux: npm install -g @lefthook-io/cli
+#   Linux: npm install -g lefthook
 #   Windows (scoop): scoop bucket add lefthook https://github.com/evilmartians/scoop-lefthook && scoop install lefthook
 lefthook install
 ```
