@@ -13,6 +13,8 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/app_top_bar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../library/domain/entities/reader_mode.dart';
+import '../../../preferences/domain/entities/content_rating.dart';
+import '../../../preferences/presentation/providers/content_rating_resolution_provider.dart';
 import '../../../preferences/domain/entities/user_reading_preferences.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../../preferences/presentation/providers/preferences_state.dart';
@@ -64,6 +66,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final authState = ref.watch(authProvider);
     final profileState = ref.watch(userProfileProvider);
     final preferencesState = ref.watch(preferencesProvider);
+    final contentRatingResolution = ref.watch(contentRatingResolutionProvider);
 
     if (authState.user != null && !_profileRequested) {
       _profileRequested = true;
@@ -116,7 +119,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       body: SafeArea(
         child: authState.user == null
             ? _buildGuestView(context)
-            : _buildAuthenticatedView(context, profileState, preferencesState),
+            : _buildAuthenticatedView(
+                context,
+                profileState,
+                preferencesState,
+                contentRatingResolution,
+              ),
       ),
     );
   }
@@ -181,6 +189,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     BuildContext context,
     UserProfileState profileState,
     PreferencesState preferencesState,
+    ContentRatingResolution contentRatingResolution,
   ) {
     final appLocale = ref.watch(appLocaleProvider);
     final profile = profileState.profile;
@@ -253,6 +262,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       effectiveReadingLanguage,
                       prefs,
                     ),
+            ),
+            _PrefRow(
+              icon: Icons.visibility_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profileContentRatingTitle,
+              value: _contentRatingLabel(
+                context,
+                contentRatingResolution.effectiveRating,
+              ),
+              onTap: contentRatingResolution.isEditable
+                  ? () => _showContentRatingDialog(
+                      context,
+                      contentRatingResolution,
+                      prefs,
+                    )
+                  : null,
             ),
           ],
         ),
@@ -360,6 +385,45 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ReaderMode.vertical)
                   .name,
           defaultLanguage: selected,
+        );
+  }
+
+  String _contentRatingLabel(BuildContext context, ContentRating rating) {
+    return switch (rating) {
+      ContentRating.safe => context.l10n.profileContentRatingSafe,
+      ContentRating.suggestive => context.l10n.profileContentRatingSuggestive,
+      ContentRating.all => context.l10n.profileContentRatingAll,
+    };
+  }
+
+  Future<void> _showContentRatingDialog(
+    BuildContext context,
+    ContentRatingResolution resolution,
+    UserReadingPreferences? prefs,
+  ) async {
+    final selected = await showDialog<ContentRating>(
+      context: context,
+      builder: (ctx) => _SelectionDialog<ContentRating>(
+        title: context.l10n.profileContentRatingTitle,
+        options: resolution.allowedOptions,
+        current: resolution.effectiveRating,
+        labelFor: (rating) => _contentRatingLabel(context, rating),
+      ),
+    );
+    if (selected == null || !mounted) return;
+    await ref
+        .read(preferencesProvider.notifier)
+        .savePreferences(
+          defaultReaderMode:
+              (_selectedReaderMode ??
+                      prefs?.defaultReaderMode ??
+                      ReaderMode.vertical)
+                  .name,
+          defaultLanguage:
+              _selectedReadingLanguage ??
+              prefs?.defaultLanguage ??
+              AppConstants.defaultLanguage,
+          contentRatingFilter: selected.wireValue,
         );
   }
 }

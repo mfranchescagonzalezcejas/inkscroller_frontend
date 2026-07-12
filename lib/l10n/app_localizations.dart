@@ -1309,6 +1309,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User authentication'**
   String get aboutCreditFirebaseDescription;
+
+  /// No description provided for @profileContentRatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content rating'**
+  String get profileContentRatingTitle;
+
+  /// No description provided for @profileContentRatingSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get profileContentRatingSafe;
+
+  /// No description provided for @profileContentRatingSuggestive.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe + Suggestive'**
+  String get profileContentRatingSuggestive;
+
+  /// No description provided for @profileContentRatingAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get profileContentRatingAll;
 }
 
 class _AppLocalizationsDelegate

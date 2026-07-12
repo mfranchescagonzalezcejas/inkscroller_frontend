@@ -680,4 +680,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutCreditFirebaseDescription => 'User authentication';
+
+  @override
+  String get profileContentRatingTitle => 'Content rating';
+
+  @override
+  String get profileContentRatingSafe => 'Safe';
+
+  @override
+  String get profileContentRatingSuggestive => 'Safe + Suggestive';
+
+  @override
+  String get profileContentRatingAll => 'All';
 }
