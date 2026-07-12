@@ -36,12 +36,14 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
   Future<void> savePreferences({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await updatePreferences(
       defaultReaderMode: defaultReaderMode,
       defaultLanguage: defaultLanguage,
+      contentRatingFilter: contentRatingFilter,
     );
 
     result.fold(

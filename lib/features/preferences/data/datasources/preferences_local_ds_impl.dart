@@ -41,6 +41,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
           data['defaultReaderMode'] as String,
         ),
         defaultLanguage: data['defaultLanguage'] as String,
+        contentRatingFilter: null,
         updatedAt: DateTime.parse(data['updatedAt'] as String),
       );
     } on Object {

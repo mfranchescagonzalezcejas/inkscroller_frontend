@@ -29,6 +29,7 @@ void main() {
   final samplePrefs = UserReadingPreferences(
     defaultReaderMode: ReaderMode.vertical,
     defaultLanguage: 'en',
+    contentRatingFilter: null,
     updatedAt: DateTime(2026),
   );
 
@@ -66,6 +67,7 @@ void main() {
       () => updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer((_) async => Right<Failure, UserReadingPreferences>(samplePrefs));
 
@@ -81,6 +83,7 @@ void main() {
       () => updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer(
       (_) async => const Left(ServerFailure(message: 'server error')),

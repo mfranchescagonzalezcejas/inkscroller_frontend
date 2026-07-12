@@ -34,6 +34,7 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
   Future<UserPreferencesModel> updatePreferences({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
   }) async {
     try {
       final payload =
@@ -45,6 +46,7 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
           ).toUpdateJson(
             defaultReaderMode: defaultReaderMode,
             defaultLanguage: defaultLanguage,
+            contentRatingFilter: contentRatingFilter,
           );
 
       final Response<Map<String, dynamic>> response = await dio

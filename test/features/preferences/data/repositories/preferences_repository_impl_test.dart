@@ -24,6 +24,7 @@ void main() {
     registerFallbackValue(UserReadingPreferences(
       defaultReaderMode: ReaderMode.vertical,
       defaultLanguage: 'en',
+      contentRatingFilter: null,
       updatedAt: DateTime.now(),
     ));
   });
@@ -40,6 +41,7 @@ void main() {
   final localPrefs = UserReadingPreferences(
     defaultReaderMode: ReaderMode.paged,
     defaultLanguage: 'es',
+    contentRatingFilter: null,
     updatedAt: DateTime(2026, 4, 5, 12), // newer
   );
 
@@ -121,6 +123,7 @@ void main() {
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer((_) async => remoteModel);
 
@@ -153,6 +156,7 @@ void main() {
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer((_) async => remoteModel);
 
@@ -176,6 +180,7 @@ void main() {
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenThrow(const NetworkException(message: 'offline'));
 
@@ -205,6 +210,7 @@ void main() {
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenThrow(const NetworkException(message: 'offline'));
 

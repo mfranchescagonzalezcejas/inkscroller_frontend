@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../library/domain/entities/reader_mode.dart';
+import '../../domain/entities/content_rating.dart';
 import '../../domain/entities/user_reading_preferences.dart';
 import '../../domain/repositories/preferences_repository.dart';
 import '../datasources/preferences_local_ds.dart';
@@ -59,6 +60,7 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
   Future<Either<Failure, UserReadingPreferences>> updatePreferences({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
   }) async {
     // Read current cached preferences to preserve fields we're not updating.
     final cached = await localDataSource.getCachedPreferences();
@@ -71,11 +73,15 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     );
     final effectiveLanguage =
         defaultLanguage ?? cached?.defaultLanguage ?? 'en';
+    final effectiveContentRating = contentRatingFilter != null
+        ? ContentRating.values.byName(contentRatingFilter)
+        : cached?.contentRatingFilter;
 
     // Build the optimistic preferences with current timestamp.
     final optimistic = UserReadingPreferences(
       defaultReaderMode: effectiveReaderMode,
       defaultLanguage: effectiveLanguage,
+      contentRatingFilter: effectiveContentRating,
       updatedAt: DateTime.now(),
     );
 
@@ -89,6 +95,7 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
       final model = await remoteDataSource.updatePreferences(
         defaultReaderMode: defaultReaderMode,
         defaultLanguage: defaultLanguage,
+        contentRatingFilter: contentRatingFilter,
       );
       final preferences = model.toEntity();
       await localDataSource.savePreferences(preferences);
@@ -120,6 +127,7 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
       await remoteDataSource.updatePreferences(
         defaultReaderMode: prefs.defaultReaderMode.name,
         defaultLanguage: prefs.defaultLanguage,
+        contentRatingFilter: prefs.contentRatingFilter?.name,
       );
     } on Object {
       // Best-effort push — if it fails, next sync will retry.

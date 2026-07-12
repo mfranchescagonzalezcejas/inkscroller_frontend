@@ -12,5 +12,6 @@ abstract class PreferencesRepository {
   Future<Either<Failure, UserReadingPreferences>> updatePreferences({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
   });
 }
