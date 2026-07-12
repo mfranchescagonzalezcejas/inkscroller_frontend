@@ -135,9 +135,26 @@ fvm flutter run --flavor pro -t lib/main_pro.dart
 
 ### Quality checks
 
+The project uses **lefthook** to run quality gates automatically on every commit and push:
+
+| Gate | When | What runs |
+|------|------|-----------|
+| **pre-commit** | Before `git commit` | `fvm flutter analyze` + `fvm flutter test` (parallel) |
+| **commit-msg** | Before `git commit` | Validates Conventional Commit format (`type(scope): desc`) |
+| **pre-push** | Before `git push` | `fvm flutter build apk --debug` + integration tests |
+
 ```bash
+# Install lefthook (one-time)
+brew install lefthook
+lefthook install
+
+# Manual checks
 fvm flutter analyze
 fvm flutter test    # all green ✅
+
+# Bypass gates in emergencies
+LEFTHOOK=0 git commit -m "fix: urgent"
+git push --no-verify
 ```
 
 <br/>
