@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/app_constants.dart';
+import '../../../domain/entities/manga.dart';
 import '../../../domain/usecases/get_manga_list.dart';
 import '../../../domain/usecases/search_manga.dart';
 import 'dedupe_mangas.dart';
@@ -40,6 +41,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
   Timer? _searchDebounce;
   String _activeQuery = '';
+
+  /// Cache for recent search results — keyed by query string.
+  /// Returns cached (items, total) to avoid repeated API calls for the same term.
+  final Map<String, (List<Manga> items, int total)> _searchCache = {};
+  static const int _searchCacheMaxSize = 5;
 
   /// Cache for genre tabs - provides instant tab switching.
   final Map<String, LibraryState> _tabCache = {};
@@ -175,7 +181,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     state = state.copyWith(query: query);
 
     _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
       if (trimmed.isEmpty) {
         clearSearch();
         return;
@@ -186,6 +192,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
   Future<void> clearSearch() async {
     _searchDebounce?.cancel();
+    _searchCache.clear();
     _activeQuery = '';
     _searchOffset = 0;
     _searchTotal = 0;
@@ -221,6 +228,21 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       clearFailure: true,
     );
 
+    // Check cache first
+    final cached = _searchCache[query];
+    if (cached != null) {
+      final (cachedItems, cachedTotal) = cached;
+      _searchOffset = cachedItems.length;
+      _searchTotal = cachedTotal;
+      state = state.copyWith(
+        mangas: dedupeMangas(cachedItems),
+        isSearching: true,
+        hasMore: _searchOffset < _searchTotal,
+        clearFailure: true,
+      );
+      return;
+    }
+
     final result = await _searchManga(query, limit: _limit, offset: 0);
 
     if (_activeQuery != query) return;
@@ -233,6 +255,13 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         final (items, total) = pair;
         _searchOffset = items.length;
         _searchTotal = total;
+
+        // Cache the result, evict oldest if over limit
+        _searchCache[query] = (items, total);
+        if (_searchCache.length > _searchCacheMaxSize) {
+          final oldest = _searchCache.keys.first;
+          _searchCache.remove(oldest);
+        }
 
         state = state.copyWith(
           mangas: dedupeMangas(items),
