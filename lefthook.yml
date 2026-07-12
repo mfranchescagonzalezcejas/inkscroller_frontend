@@ -7,12 +7,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 pre-commit:
-  parallel: false
+  parallel: true
   commands:
-    gga:
-      tags: [quality, ai]
-      description: AI code review via GGA
-      run: gga run
     analyze:
       tags: [quality, fast]
       description: Analyze Dart code
