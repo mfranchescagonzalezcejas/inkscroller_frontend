@@ -168,14 +168,12 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         _searchOffset += newItems.length;
         _searchTotal = total;
 
-        final beforeCount = state.mangas.length;
         final combined = dedupeMangas([...state.mangas, ...newItems]);
-        final dedupedCount = combined.length - beforeCount;
 
         state = state.copyWith(
           mangas: combined,
           isLoadingMore: false,
-          hasMore: dedupedCount > 0 && _searchOffset < _searchTotal,
+          hasMore: _searchOffset < _searchTotal,
           clearFailure: true,
         );
       },

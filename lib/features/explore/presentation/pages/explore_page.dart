@@ -60,6 +60,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     if (thresholdReached && !state.isLoadingMore) {
       final beforeCount = state.mangas.length;
       ref.read(libraryProvider.notifier).loadMore().then((_) {
+        if (!context.mounted) return;
         // Only re-check if items were actually added — prevents tight loop
         // when hasMore is false or the guard returned early.
         final afterState = ref.read(libraryProvider);
