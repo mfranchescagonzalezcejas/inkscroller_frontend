@@ -36,7 +36,7 @@ final contentRatingResolutionProvider =
       ? DateTime.now().year -
             birthDate.year -
             (DateTime.now().isBefore(
-                  DateTime(birthDate.year, birthDate.month, birthDate.day),
+                  DateTime(DateTime.now().year, birthDate.month, birthDate.day),
                 )
                 ? 1
                 : 0)

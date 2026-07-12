@@ -271,13 +271,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 context,
                 contentRatingResolution.effectiveRating,
               ),
-              onTap: contentRatingResolution.isEditable
-                  ? () => _showContentRatingDialog(
-                      context,
-                      contentRatingResolution,
-                      prefs,
-                    )
-                  : null,
+              // Always tappable for authenticated users. The dialog shows only
+              // age-allowed options, so an under-16 user sees a single option
+              // (safe) with no effective choice — clear UX instead of a silent
+              // no-op when profile/preferences are still loading.
+              onTap: () => _showContentRatingDialog(
+                context,
+                contentRatingResolution,
+                prefs,
+              ),
             ),
           ],
         ),
