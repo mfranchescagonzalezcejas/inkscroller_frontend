@@ -137,6 +137,7 @@ void main() {
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: 'paged',
         defaultLanguage: 'es',
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).called(1);
   });

@@ -13,7 +13,9 @@ import 'library_state.dart';
 final libraryProvider =
     StateNotifierProvider<LibraryNotifier, LibraryState>(
       (ref) {
-    final resolution = ref.watch(contentRatingResolutionProvider);
+    // Use ref.read (not ref.watch) to avoid recreating LibraryNotifier
+    // when the resolution updates — ref.listen below handles reactivity.
+    final resolution = ref.read(contentRatingResolutionProvider);
     final notifier = LibraryNotifier(
       sl<GetMangaList>(),
       sl<SearchManga>(),
