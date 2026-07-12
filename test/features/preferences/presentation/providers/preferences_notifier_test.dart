@@ -100,6 +100,13 @@ void main() {
 
     expect(notifier.state.isLoading, isFalse);
     expect(notifier.state.preferences?.contentRatingFilter, ContentRating.suggestive);
+    verify(
+      () => updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: 'suggestive',
+      ),
+    ).called(1);
   });
 
   test('savePreferences stores error message on failure', () async {

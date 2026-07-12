@@ -135,7 +135,6 @@ void main() {
         now: fixedNow,
       );
 
-      // Age should be 36, so 18+ → suggestive default, editable
       expect(result.effectiveRating, ContentRating.suggestive);
       expect(result.isEditable, isTrue);
     });
@@ -148,8 +147,59 @@ void main() {
         now: fixedNow,
       );
 
-      // Age should be 35, still 18+ → suggestive
       expect(result.effectiveRating, ContentRating.suggestive);
+      expect(result.isEditable, isTrue);
+    });
+
+    test('age 15 boundary — safe only, not editable', () {
+      // Born July 13, 2010 → turns 16 tomorrow
+      final result = ContentRatingResolution.resolve(
+        isGuest: false,
+        birthDate: DateTime(2010, 7, 13),
+        now: fixedNow,
+      );
+
+      expect(result.effectiveRating, ContentRating.safe);
+      expect(result.allowedOptions, [ContentRating.safe]);
+      expect(result.isEditable, isFalse);
+    });
+
+    test('age 16 boundary — suggestive default, editable', () {
+      // Born July 12, 2010 → turns 16 today
+      final result = ContentRatingResolution.resolve(
+        isGuest: false,
+        birthDate: DateTime(2010, 7, 12),
+        now: fixedNow,
+      );
+
+      expect(result.effectiveRating, ContentRating.suggestive);
+      expect(result.allowedOptions, [ContentRating.safe, ContentRating.suggestive]);
+      expect(result.isEditable, isTrue);
+    });
+
+    test('age 17 boundary — still suggestive, not all', () {
+      // Born July 13, 2008 → still 17 until tomorrow
+      final result = ContentRatingResolution.resolve(
+        isGuest: false,
+        birthDate: DateTime(2008, 7, 13),
+        now: fixedNow,
+      );
+
+      expect(result.effectiveRating, ContentRating.suggestive);
+      expect(result.allowedOptions, [ContentRating.safe, ContentRating.suggestive]);
+      expect(result.isEditable, isTrue);
+    });
+
+    test('age 18 boundary — all options available', () {
+      // Born July 12, 2008 → turns 18 today
+      final result = ContentRatingResolution.resolve(
+        isGuest: false,
+        birthDate: DateTime(2008, 7, 12),
+        now: fixedNow,
+      );
+
+      expect(result.effectiveRating, ContentRating.suggestive);
+      expect(result.allowedOptions, ContentRating.values);
       expect(result.isEditable, isTrue);
     });
   });
