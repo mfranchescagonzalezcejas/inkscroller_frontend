@@ -135,10 +135,49 @@ fvm flutter run --flavor pro -t lib/main_pro.dart
 
 ### Quality checks
 
+The project uses **lefthook** + **GGA** to run quality gates automatically on every commit and push:
+
+| Gate | When | What runs |
+|------|------|-----------|
+| **GGA** | Before `git commit` | AI code review via OpenCode (rules in `AGENTS.md`) |
+| **pre-commit** | Before `git commit` | `fvm flutter analyze` + `fvm flutter test` (parallel) |
+| **commit-msg** | Before `git commit` | Validates Conventional Commit format (`type(scope): desc`) |
+| **pre-push** | Before `git push` | `fvm flutter build apk --debug` + integration tests |
+
 ```bash
+# Install lefthook (one-time)
+#   macOS: brew install lefthook
+#   Linux: npm install -g lefthook
+#   Windows (scoop): scoop bucket add lefthook https://github.com/evilmartians/scoop-lefthook && scoop install lefthook
+lefthook install
+```
+
+```bash
+# Manual checks — pre-commit gates
 fvm flutter analyze
 fvm flutter test    # all green ✅
+
+# Manual checks — pre-push gates
+fvm flutter build apk --debug
+fvm flutter test integration_test/   # needs connected device
 ```
+
+```bash
+# Bypass gates in emergencies
+LEFTHOOK=0 git commit -m "fix: urgent"
+git push --no-verify
+```
+
+### Code review strategy
+
+| Level | When | Tool | Bypass |
+|-------|------|------|--------|
+| **GGA** | Every commit | `gga run` (OpenCode) | `GGA_SKIP=1` |
+| **Lefthook** | Every commit/push | `fvm flutter analyze`, `test`, `build` | `LEFTHOOK=0` |
+| **CodeRabbit** | Features grandes, merge develop→main, releases | `./scripts/review.sh develop` o `@coderabbit review` en PR | Opcional |
+
+**Día a día** (features chicas, fixes, refactors): GGA + lefthook alcanza.  
+**Features gordas, merge a main, releases**: CodeRabbit como filtro extra antes de mergear.
 
 <br/>
 

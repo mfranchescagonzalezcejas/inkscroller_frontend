@@ -62,7 +62,7 @@ openspec/
 .codegraph/
 .cursor/
 .vercel/
-.gga
+# .gga — removed from gitignore, versioned for team-wide quality gates
 
 # Editor backup files
 *~
