@@ -145,13 +145,23 @@ The project uses **lefthook** to run quality gates automatically on every commit
 
 ```bash
 # Install lefthook (one-time)
-brew install lefthook
+#   macOS: brew install lefthook
+#   Linux: npm install -g @lefthook-io/cli
+#   Windows (scoop): scoop bucket add lefthook https://github.com/evilmartians/scoop-lefthook && scoop install lefthook
 lefthook install
+```
 
-# Manual checks
+```bash
+# Manual checks — pre-commit gates
 fvm flutter analyze
 fvm flutter test    # all green ✅
 
+# Manual checks — pre-push gates
+fvm flutter build apk --debug
+fvm flutter test integration_test/   # needs connected device
+```
+
+```bash
 # Bypass gates in emergencies
 LEFTHOOK=0 git commit -m "fix: urgent"
 git push --no-verify
