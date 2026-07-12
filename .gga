@@ -22,7 +22,7 @@
 #   PROVIDER="github:deepseek-r1"
 #   PROVIDER="minimax"
 #   PROVIDER="minimax:MiniMax-M3"
-PROVIDER="opencode"
+PROVIDER="opencode:opencode-go/kimi-k2.7-code"
 
 # File patterns to include in review (comma-separated)
 # Default: * (all files)
@@ -30,14 +30,14 @@ PROVIDER="opencode"
 #   FILE_PATTERNS="*.ts,*.tsx"
 #   FILE_PATTERNS="*.py"
 #   FILE_PATTERNS="*.go,*.mod"
-FILE_PATTERNS="*.dart"
+FILE_PATTERNS="*.dart,*.yaml,*.yml,*.json,*.kt,*.swift,*.ts,*.tsx"
 
 # File patterns to exclude from review (comma-separated)
 # Default: none
 # Examples:
 #   EXCLUDE_PATTERNS="*.test.ts,*.spec.ts"
 #   EXCLUDE_PATTERNS="*_test.go,*.mock.ts"
-EXCLUDE_PATTERNS="*.g.dart,*.freezed.dart,*.gen.dart"
+EXCLUDE_PATTERNS="*.g.dart,*.freezed.dart,*.gen.dart,build/**"
 
 # File containing code review rules
 # Default: AGENTS.md
