@@ -24,7 +24,6 @@ void main() {
     registerFallbackValue(UserReadingPreferences(
       defaultReaderMode: ReaderMode.vertical,
       defaultLanguage: 'en',
-      contentRatingFilter: null,
       updatedAt: DateTime.now(),
     ));
   });
@@ -41,7 +40,6 @@ void main() {
   final localPrefs = UserReadingPreferences(
     defaultReaderMode: ReaderMode.paged,
     defaultLanguage: 'es',
-    contentRatingFilter: null,
     updatedAt: DateTime(2026, 4, 5, 12), // newer
   );
 

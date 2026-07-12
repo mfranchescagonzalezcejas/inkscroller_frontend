@@ -20,7 +20,6 @@ void main() {
   final samplePrefs = UserReadingPreferences(
     defaultReaderMode: ReaderMode.paged,
     defaultLanguage: 'es',
-    contentRatingFilter: null,
     updatedAt: DateTime(2026, 4, 5, 12),
   );
 

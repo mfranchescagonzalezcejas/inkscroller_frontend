@@ -29,7 +29,6 @@ void main() {
   final samplePrefs = UserReadingPreferences(
     defaultReaderMode: ReaderMode.vertical,
     defaultLanguage: 'en',
-    contentRatingFilter: null,
     updatedAt: DateTime(2026),
   );
 

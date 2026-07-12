@@ -146,7 +146,6 @@ void _registerGetItMocks() {
         UserReadingPreferences(
           defaultReaderMode: ReaderMode.paged,
           defaultLanguage: 'es',
-          contentRatingFilter: null,
           updatedAt: _fixtureDate,
         ),
       ),
@@ -160,7 +159,6 @@ void _registerGetItMocks() {
         UserReadingPreferences(
           defaultReaderMode: ReaderMode.paged,
           defaultLanguage: 'es',
-          contentRatingFilter: null,
           updatedAt: _fixtureDate,
         ),
       ),
