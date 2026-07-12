@@ -22,7 +22,8 @@ class ContentRatingResolution {
     required this.isEditable,
   });
 
-  /// Pure resolution function — deterministic, testable.
+  /// Creates a resolution from raw data — deterministic, testable.
+  // ignore: prefer_constructors_over_static_methods
   static ContentRatingResolution resolve({
     required bool isGuest,
     DateTime? birthDate,
