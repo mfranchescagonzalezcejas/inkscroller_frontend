@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Lefthook — Quality Gates for InkScroller Flutter
+# https://github.com/evilmartians/lefthook
+#
+# Commands run in sequence per hook (parallel: false by default).
+# Use `LEFTHOOK=0 git commit` to bypass in emergencies.
+# ─────────────────────────────────────────────────────────────────────────────
+
+pre-commit:
+  parallel: true
+  commands:
+    analyze:
+      tags: [quality, fast]
+      description: Analyze Dart code
+      run: fvm flutter analyze
+    test:
+      tags: [quality, fast]
+      description: Run unit tests
+      run: fvm flutter test
+
+commit-msg:
+  commands:
+    conventional:
+      tags: [quality, fast]
+      description: Validate Conventional Commit format
+      run: |
+        cat "$1" | head -1 | grep -qE '^(feat|fix|chore|refactor|docs|hotfix)(\([a-z]+\))?: .+$' || {
+          echo "❌ Invalid commit message format."
+          echo ""
+          echo "  Expected: <type>(<scope>): <description>"
+          echo "  Examples:"
+          echo "    feat(auth): add login page"
+          echo "    fix: resolve crash on empty state"
+          echo "    chore: bump dependencies"
+          echo "    refactor: extract widget"
+          echo ""
+          echo "  Types: feat, fix, chore, refactor, docs, hotfix"
+          exit 1
+        }
+
+pre-push:
+  parallel: true
+  commands:
+    build:
+      tags: [quality, slow]
+      description: Verify debug build compiles
+      run: fvm flutter build apk --debug
+    integration:
+      tags: [quality, slow]
+      description: Run integration tests
+      run: fvm flutter test integration_test/
