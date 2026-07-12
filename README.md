@@ -168,6 +168,17 @@ LEFTHOOK=0 git commit -m "fix: urgent"
 git push --no-verify
 ```
 
+### Code review strategy
+
+| Level | When | Tool | Bypass |
+|-------|------|------|--------|
+| **GGA** | Every commit | `gga run` (OpenCode) | `GGA_SKIP=1` |
+| **Lefthook** | Every commit/push | `fvm flutter analyze`, `test`, `build` | `LEFTHOOK=0` |
+| **CodeRabbit** | Features grandes, merge develop→main, releases | `./scripts/review.sh develop` o `@coderabbit review` en PR | Opcional |
+
+**Día a día** (features chicas, fixes, refactors): GGA + lefthook alcanza.  
+**Features gordas, merge a main, releases**: CodeRabbit como filtro extra antes de mergear.
+
 <br/>
 
 <div align="center">
