@@ -137,7 +137,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         state = state.copyWith(
           mangas: combined,
           isLoadingMore: false,
-          hasMore: _offset < _total,
+          hasMore: newMangas.isNotEmpty && _offset < _total,
           clearFailure: true,
         );
       },
@@ -173,7 +173,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         state = state.copyWith(
           mangas: combined,
           isLoadingMore: false,
-          hasMore: _searchOffset < _searchTotal,
+          hasMore: newItems.isNotEmpty && _searchOffset < _searchTotal,
           clearFailure: true,
         );
       },
