@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/chapter.dart';
 import '../entities/manga.dart';
+import '../entities/search_result.dart';
 
 /// Domain contract for all library data operations.
 ///
@@ -33,8 +34,13 @@ abstract class LibraryRepository {
   Future<Either<Failure, List<String>>> getChapterPages(String chapterId);
 
   /// Searches for manga titles matching [query] and returns the results.
-  Future<Either<Failure, List<Manga>>> searchManga(
+  ///
+  /// [limit] and [offset] control pagination. The returned [SearchResult]
+  /// contains both the page items and the backend pagination metadata.
+  Future<Either<Failure, SearchResult>> searchManga(
     String query, {
+    required int limit,
+    required int offset,
     String? contentRating,
   });
 

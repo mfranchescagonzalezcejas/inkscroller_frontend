@@ -6,7 +6,9 @@ import 'package:inkscroller_flutter/features/library/data/datasources/library_lo
 import 'package:inkscroller_flutter/features/library/data/datasources/library_remote_ds.dart';
 import 'package:inkscroller_flutter/features/library/data/models/chapter_model.dart';
 import 'package:inkscroller_flutter/features/library/data/models/manga_model.dart';
+import 'package:inkscroller_flutter/features/library/data/models/search_result_model.dart';
 import 'package:inkscroller_flutter/features/library/data/repositories/library_repository_impl.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockLibraryRemoteDataSource extends Mock
@@ -25,6 +27,14 @@ void main() {
     );
     registerFallbackValue(<ChapterModel>[]);
     registerFallbackValue(<String, String>{});
+    registerFallbackValue(
+      const SearchResultModel(
+        mangas: [],
+        limit: 20,
+        offset: 0,
+        total: 0,
+      ),
+    );
   });
 
   late LibraryRemoteDataSource remoteDataSource;
@@ -162,18 +172,119 @@ void main() {
     });
   });
 
-  test('searchManga maps datasource models into entities', () async {
-    when(
-      () => remoteDataSource.searchManga('berserk'),
-    ).thenAnswer(
-      (_) async => <MangaModel>[const MangaModel(id: '1', title: 'Berserk')],
-    );
+  group('searchManga', () {
+    test('forwards limit, offset and contentRating to datasource', () async {
+      when(
+        () => remoteDataSource.searchManga(
+          'berserk',
+          limit: 20,
+          offset: 10,
+          contentRating: 'safe',
+        ),
+      ).thenAnswer(
+        (_) async => const SearchResultModel(
+          mangas: [MangaModel(id: '1', title: 'Berserk')],
+          limit: 20,
+          offset: 10,
+          total: 1,
+        ),
+      );
 
-    final result = await repository.searchManga('berserk');
+      await repository.searchManga(
+        'berserk',
+        limit: 20,
+        offset: 10,
+        contentRating: 'safe',
+      );
 
-    expect(result, isA<Right<Failure, dynamic>>());
-    result.fold((_) => fail('expected right'), (mangas) {
-      expect(mangas.single.id, '1');
+      verify(
+        () => remoteDataSource.searchManga(
+          'berserk',
+          limit: 20,
+          offset: 10,
+          contentRating: 'safe',
+        ),
+      ).called(1);
+    });
+
+    test('maps SearchResultModel to SearchResult entity', () async {
+      when(
+        () => remoteDataSource.searchManga(
+          'monster',
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+        ),
+      ).thenAnswer(
+        (_) async => const SearchResultModel(
+          mangas: [MangaModel(id: '1', title: 'Berserk')],
+          limit: 20,
+          offset: 0,
+          total: 1,
+        ),
+      );
+
+      final result = await repository.searchManga(
+        'monster',
+        limit: 20,
+        offset: 0,
+      );
+
+      expect(result, isA<Right<Failure, SearchResult>>());
+      result.fold((_) => fail('expected right'), (searchResult) {
+        expect(searchResult.mangas, hasLength(1));
+        expect(searchResult.mangas.single.id, '1');
+        expect(searchResult.limit, 20);
+        expect(searchResult.offset, 0);
+        expect(searchResult.total, 1);
+      });
+    });
+
+    test('maps AppException into typed Failure', () async {
+      when(
+        () => remoteDataSource.searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+        ),
+      ).thenThrow(const ServerException(message: 'server down', code: 500));
+
+      final result = await repository.searchManga(
+        'berserk',
+        limit: 20,
+        offset: 0,
+      );
+
+      expect(result.isLeft(), isTrue);
+      result.fold((failure) {
+        expect(failure, isA<ServerFailure>());
+        expect(failure.message, 'server down');
+        expect(failure.code, 500);
+      }, (_) => fail('expected left'));
+    });
+
+    test('maps unknown exceptions into UnexpectedFailure', () async {
+      when(
+        () => remoteDataSource.searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+        ),
+      ).thenThrow(Exception('boom'));
+
+      final result = await repository.searchManga(
+        'berserk',
+        limit: 20,
+        offset: 0,
+      );
+
+      expect(result.isLeft(), isTrue);
+      result.fold((failure) {
+        expect(failure, isA<UnexpectedFailure>());
+        expect(failure.message, contains('boom'));
+      }, (_) => fail('expected left'));
     });
   });
 

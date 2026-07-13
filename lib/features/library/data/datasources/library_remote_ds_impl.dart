@@ -3,6 +3,7 @@ import 'package:inkscroller_flutter/core/constants/api_endpoints.dart';
 import 'package:inkscroller_flutter/core/error/exceptions.dart';
 import 'package:inkscroller_flutter/features/library/data/models/chapter_model.dart';
 import '../models/manga_model.dart';
+import '../models/search_result_model.dart';
 import 'library_remote_ds.dart';
 
 /// Concrete HTTP implementation of [LibraryRemoteDataSource] using Dio.
@@ -140,37 +141,38 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   // ─────────────────────────────
   // BUSQUEDA DE MANGAS
   // ─────────────────────────────
-  /// Searches for manga via `/manga/search?q={query}`.
+  /// Searches for manga via `/manga/search?q={query}&limit={limit}&offset={offset}`.
   ///
-  /// Handles both a plain JSON array response and a wrapped `{"data": [...]}` response.
+  /// Parses the paginated envelope into a [SearchResultModel]. Throws a
+  /// [ServerException] when the response body is missing.
   @override
-  Future<List<MangaModel>> searchManga(String query, {String? contentRating}) async {
+  Future<SearchResultModel> searchManga(
+    String query, {
+    required int limit,
+    required int offset,
+    String? contentRating,
+  }) async {
     try {
       final response = await dio.get<dynamic>(
         '${ApiEndpoints.manga}/search',
         queryParameters: {
           'q': query,
+          'limit': limit,
+          'offset': offset,
           if (contentRating != null) 'content_rating': contentRating,
         },
       );
 
-      final body = response.data;
-
-      final List<dynamic> rawList;
-      if (body is List) {
-        rawList = body;
-      } else if (body is Map<String, dynamic>) {
-        rawList = (body['data'] as List<dynamic>?) ?? <dynamic>[];
-      } else {
-        rawList = <dynamic>[];
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException(message: 'server/empty-response');
       }
 
-      return rawList
-          .whereType<Map<String, dynamic>>()
-          .map(MangaModel.fromJson)
-          .toList();
+      return SearchResultModel.fromJson(data as Map<String, dynamic>);
     } on DioException catch (error) {
       throw _mapDioException(error);
+    } on AppException {
+      rethrow;
     } on Exception catch (error) {
       throw UnexpectedException(message: error.toString());
     }
