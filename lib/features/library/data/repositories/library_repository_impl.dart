@@ -7,6 +7,7 @@ import '../datasources/library_local_ds.dart';
 import '../models/chapter_model.dart';
 import '../models/manga_model.dart';
 import '../../domain/entities/manga.dart';
+import '../../domain/entities/search_result.dart';
 import '../../domain/repositories/library_repository.dart';
 import '../datasources/library_remote_ds.dart';
 import '../mappers/chapter_mapper.dart';
@@ -31,6 +32,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
   final Duration mangaListCacheTtl;
   final Duration mangaDetailCacheTtl;
   final Duration mangaChaptersCacheTtl;
+
+  // ponytail: in-memory search cache — no TTL, no DB table; cleared on restart.
+  final Map<String, SearchResult> _searchCache = {};
 
   @override
   Future<Either<Failure, List<Manga>>> getMangaList({
@@ -127,18 +131,32 @@ class LibraryRepositoryImpl implements LibraryRepository {
     }
   }
 
+  String _searchCacheKey(String query, int limit, int offset, String? contentRating) =>
+      '$query:$limit:$offset:cr:${contentRating ?? 'default'}';
+
   @override
-  Future<Either<Failure, List<Manga>>> searchManga(
+  Future<Either<Failure, SearchResult>> searchManga(
     String query, {
+    required int limit,
+    required int offset,
     String? contentRating,
   }) async {
     try {
-      final models = await remoteDataSource.searchManga(
+      final model = await remoteDataSource.searchManga(
         query,
+        limit: limit,
+        offset: offset,
         contentRating: contentRating,
       );
-      return Right(models.map((e) => e.toEntity()).toList());
+      final entity = model.toEntity();
+      _searchCache[_searchCacheKey(query, limit, offset, contentRating)] = entity;
+      return Right(entity);
     } on AppException catch (error) {
+      // Fall back to cached search result for this page when offline.
+      final cached = _searchCache[_searchCacheKey(query, limit, offset, contentRating)];
+      if (cached != null) {
+        return Right(cached);
+      }
       return Left(_mapExceptionToFailure(error));
     } on Exception catch (error) {
       return Left(UnexpectedFailure(message: error.toString()));
@@ -147,6 +165,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   @override
   Future<Either<Failure, void>> clearLibraryCache() async {
+    _searchCache.clear();
     try {
       await localDataSource.clearLibraryCache();
       return const Right(null);

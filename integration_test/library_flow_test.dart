@@ -18,6 +18,7 @@ import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_pr
 import 'package:inkscroller_flutter/features/library/domain/entities/chapter.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_reading_progress.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reading_preferences.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_entry.dart';
@@ -312,8 +313,15 @@ void main() {
     when(() => getMangaList(limit: 20, offset: 0)).thenAnswer(
       (_) async => Right<Failure, List<Manga>>(<Manga>[berserk, monster]),
     );
-    when(() => searchManga('monster')).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(<Manga>[monster]),
+    when(() => searchManga(
+      'monster',
+      limit: any(named: 'limit'),
+      offset: any(named: 'offset'),
+      contentRating: any(named: 'contentRating'),
+    )).thenAnswer(
+      (_) async => Right<Failure, SearchResult>(
+        SearchResult(mangas: [monster], limit: 20, offset: 0, total: 1),
+      ),
     );
     when(() => getMangaChapters('monster')).thenAnswer(
       (_) async => Right<Failure, List<Chapter>>(<Chapter>[

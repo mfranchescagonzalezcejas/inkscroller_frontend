@@ -1,5 +1,6 @@
 import '../models/chapter_model.dart';
 import '../models/manga_model.dart';
+import '../models/search_result_model.dart';
 
 /// Contract for the remote data source that communicates with the backend API.
 ///
@@ -31,5 +32,13 @@ abstract class LibraryRemoteDataSource {
   Future<List<String>> getChapterPages(String chapterId);
 
   /// Searches the API for manga matching [query] and returns matching models.
-  Future<List<MangaModel>> searchManga(String query, {String? contentRating});
+  ///
+  /// [limit] and [offset] control pagination. The response envelope is parsed
+  /// into a [SearchResultModel] containing both the page items and metadata.
+  Future<SearchResultModel> searchManga(
+    String query, {
+    required int limit,
+    required int offset,
+    String? contentRating,
+  });
 }

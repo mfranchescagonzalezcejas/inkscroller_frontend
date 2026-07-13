@@ -34,6 +34,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   late final ScrollController _scrollController;
   late final TextEditingController _searchController;
   bool _canTriggerLoadMore = true;
+  bool _wasActive = true;
   int _selectedGenreIndex = 0; // 0=All, 1=Popular, 2=Romance, 3=Action
 
   @override
@@ -41,6 +42,25 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _searchController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final tickerValues = TickerMode.valuesOf(context);
+    final isActive = tickerValues.enabled;
+    if (_wasActive && !isActive) {
+      // Leaving the Explore tab — reset retained state so the catalogue is
+      // fresh when the user returns. Must defer because Riverpod forbids
+      // provider modification during widget lifecycle methods.
+      _selectedGenreIndex = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(libraryProvider.notifier).resetExplore();
+        }
+      });
+    }
+    _wasActive = isActive;
   }
 
   @override
@@ -52,7 +72,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
   void _onScroll() {
     final state = ref.read(libraryProvider);
-    if (state.isSearching || state.query.trim().isNotEmpty) return;
+    if (state.isSearching) return;
     if (!_scrollController.hasClients) return;
 
     final thresholdReached =
@@ -61,7 +81,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
     if (thresholdReached && !state.isLoadingMore && _canTriggerLoadMore) {
       _canTriggerLoadMore = false;
-      ref.read(libraryProvider.notifier).loadMore();
+      final notifier = ref.read(libraryProvider.notifier);
+      if (state.query.trim().isNotEmpty) {
+        notifier.loadMoreSearch();
+      } else {
+        notifier.loadMore();
+      }
     }
     if (!thresholdReached) _canTriggerLoadMore = true;
   }
@@ -321,9 +346,9 @@ class _ExploreGrid extends StatelessWidget {
           crossAxisCount = LibraryUiConstants.smallGridColumns;
         }
 
-        final showBottomLoader = state.isLoadingMore && !state.isSearching;
+        final showBottomLoader = state.isLoadingMore;
         final showEndReached =
-            !state.isSearching && !state.isLoadingMore && !state.hasMore;
+            !state.isLoadingMore && !state.hasMore && state.mangas.isNotEmpty;
 
         return MasonryGridView.builder(
           controller: controller,

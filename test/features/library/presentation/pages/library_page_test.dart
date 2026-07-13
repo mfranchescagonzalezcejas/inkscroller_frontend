@@ -17,6 +17,7 @@ import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_pr
 import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_reading_progress.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_entry.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_status.dart';
@@ -159,8 +160,17 @@ void main() {
       () => getMangaList(limit: 20, offset: 0),
     ).thenAnswer((_) => completer.future);
     when(
-      () => searchManga(any()),
-    ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+      () => searchManga(
+        any(),
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+        contentRating: any(named: 'contentRating'),
+      ),
+    ).thenAnswer(
+      (_) async => const Right<Failure, SearchResult>(
+        SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+      ),
+    );
 
     await pumpLibraryPage(
       tester,
@@ -185,8 +195,17 @@ void main() {
       () => getMangaList(limit: 20, offset: 0),
     ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
     when(
-      () => searchManga(any()),
-    ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+      () => searchManga(
+        any(),
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+        contentRating: any(named: 'contentRating'),
+      ),
+    ).thenAnswer(
+      (_) async => const Right<Failure, SearchResult>(
+        SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+      ),
+    );
 
     await pumpLibraryPage(
       tester,
@@ -210,8 +229,17 @@ void main() {
       (_) async => Right<Failure, List<Manga>>(<Manga>[manga1, manga2]),
     );
     when(
-      () => searchManga(any()),
-    ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+      () => searchManga(
+        any(),
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+        contentRating: any(named: 'contentRating'),
+      ),
+    ).thenAnswer(
+      (_) async => const Right<Failure, SearchResult>(
+        SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+      ),
+    );
 
     await pumpLibraryPage(
       tester,
@@ -246,8 +274,17 @@ void main() {
         () => getMangaList(limit: 20, offset: 0),
       ).thenAnswer((_) async => Right<Failure, List<Manga>>(<Manga>[manga]));
       when(
-        () => searchManga('pluto'),
-      ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+        () => searchManga(
+          'pluto',
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
 
       await pumpLibraryPage(
         tester,
@@ -279,8 +316,17 @@ void main() {
         () => getMangaList(limit: 20, offset: 0),
       ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
       when(
-        () => searchManga(any()),
-      ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
 
       await pumpLibraryPage(
         tester,
