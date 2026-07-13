@@ -164,11 +164,11 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
       );
 
       final data = response.data;
-      if (data == null) {
+      if (data is! Map<String, dynamic>) {
         throw const ServerException(message: 'server/empty-response');
       }
 
-      return SearchResultModel.fromJson(data as Map<String, dynamic>);
+      return SearchResultModel.fromJson(data);
     } on DioException catch (error) {
       throw _mapDioException(error);
     } on AppException {
