@@ -35,3 +35,28 @@ final libraryProvider =
     return notifier;
   },
 );
+
+/// Explore tab's own provider — identical to [libraryProvider] but isolated
+/// so ExplorePage state never leaks into Home/Library.
+final exploreProvider =
+    StateNotifierProvider<LibraryNotifier, LibraryState>(
+      (ref) {
+    final resolution = ref.read(contentRatingResolutionProvider);
+    final notifier = LibraryNotifier(
+      sl<GetMangaList>(),
+      sl<SearchManga>(),
+      initialContentRating: resolution.effectiveRating.wireValue,
+    );
+
+    ref.listen<ContentRatingResolution>(
+      contentRatingResolutionProvider,
+      (previous, next) {
+        if (previous?.effectiveRating != next.effectiveRating) {
+          notifier.refresh(contentRating: next.effectiveRating.wireValue);
+        }
+      },
+    );
+
+    return notifier;
+  },
+);

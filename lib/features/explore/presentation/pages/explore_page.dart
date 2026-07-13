@@ -56,7 +56,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       _selectedGenreIndex = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ref.read(libraryProvider.notifier).resetExplore();
+          ref.read(exploreProvider.notifier).resetExplore();
         }
       });
     }
@@ -71,7 +71,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   }
 
   void _onScroll() {
-    final state = ref.read(libraryProvider);
+    final state = ref.read(exploreProvider);
     if (state.isSearching) return;
     if (!_scrollController.hasClients) return;
 
@@ -81,7 +81,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
     if (thresholdReached && !state.isLoadingMore && _canTriggerLoadMore) {
       _canTriggerLoadMore = false;
-      final notifier = ref.read(libraryProvider.notifier);
+      final notifier = ref.read(exploreProvider.notifier);
       if (state.query.trim().isNotEmpty) {
         notifier.loadMoreSearch();
       } else {
@@ -93,7 +93,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(libraryProvider);
+    final state = ref.watch(exploreProvider);
     final authState = ref.watch(authProvider);
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
@@ -114,14 +114,14 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (isOffline) const OfflineBanner(),
-          _ExploreHeader(),
+          const _ExploreHeader(),
           _ExploreSearchBar(
             controller: _searchController,
             query: state.query,
-            onChanged: (v) => ref.read(libraryProvider.notifier).setQuery(v),
+            onChanged: (v) => ref.read(exploreProvider.notifier).setQuery(v),
             onClear: () {
               _searchController.clear();
-              ref.read(libraryProvider.notifier).clearSearch();
+              ref.read(exploreProvider.notifier).clearSearch();
             },
           ),
           if (state.query.trim().isEmpty)
@@ -131,12 +131,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                 setState(() => _selectedGenreIndex = i);
                 if (i == 1) {
                   ref
-                      .read(libraryProvider.notifier)
+                      .read(exploreProvider.notifier)
                       .loadInitial(mode: LibraryMode.popular);
                 } else {
                   const genres = [null, 'romance', 'action'];
                   final genre = i > 1 ? genres[i - 1] : null;
-                  ref.read(libraryProvider.notifier).setGenre(genre);
+                  ref.read(exploreProvider.notifier).setGenre(genre);
                 }
               },
             ),
@@ -144,7 +144,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             child: RefreshIndicator(
               color: AppColors.primary,
               backgroundColor: AppColors.card,
-              onRefresh: () => ref.read(libraryProvider.notifier).refresh(),
+              onRefresh: () => ref.read(exploreProvider.notifier).refresh(),
               child: _ExploreGrid(state: state, controller: _scrollController),
             ),
           ),
@@ -159,10 +159,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 // ── Header ────────────────────────────────────────────────────────────────────
 
 class _ExploreHeader extends StatelessWidget {
+  const _ExploreHeader();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.fromLTRB(20, AppSpacing.lg, 20, AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -175,12 +177,12 @@ class _ExploreHeader extends StatelessWidget {
               color: AppColors.onSurface,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.exploreSubtitle,
             style: const TextStyle(
               fontFamily: AppTypography.fontFamily,
-              fontSize: 14,
+              fontSize: AppTypography.body,
               fontWeight: FontWeight.w400,
               color: AppColors.onSurfaceVariant,
             ),
@@ -209,13 +211,15 @@ class _ExploreSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, AppSpacing.md),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
         decoration: BoxDecoration(
-          // color-surface-highest from design
-          color: const Color(0xFF181B1E),
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.surfaceHighest,
+          borderRadius: BorderRadius.circular(AppSpacing.md),
         ),
         child: Row(
           children: [
@@ -226,14 +230,14 @@ class _ExploreSearchBar extends StatelessWidget {
                 controller: controller,
                 style: const TextStyle(
                   fontFamily: AppTypography.fontFamily,
-                  fontSize: 14,
+                  fontSize: AppTypography.body,
                   color: AppColors.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: context.l10n.searchMangaHint,
                   hintStyle: const TextStyle(
                     fontFamily: AppTypography.fontFamily,
-                    fontSize: 14,
+                    fontSize: AppTypography.body,
                     color: AppColors.outline,
                   ),
                   border: InputBorder.none,
@@ -292,7 +296,7 @@ class _ExploreGrid extends StatelessWidget {
 
   const _ExploreGrid({required this.state, required this.controller});
 
-  // Server-side filtering already applied via libraryProvider.setGenre().
+  // Server-side filtering already applied via exploreProvider.setGenre().
   // Just return the manga list directly - no local filtering needed.
   List<Manga> get _filteredMangas => state.mangas;
 

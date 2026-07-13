@@ -166,7 +166,7 @@ void main() {
             (ref) => Stream<bool>.value(isOnline),
           ),
           authProvider.overrideWith((_) => _makeStubAuthNotifier()),
-          libraryProvider.overrideWith((ref) => notifier),
+          exploreProvider.overrideWith((ref) => notifier),
           readingProgressProvider.overrideWith(
             (ref) => _makeStubReadingProgressNotifier(),
           ),
@@ -340,7 +340,7 @@ void main() {
               (ref) => Stream<bool>.value(true),
             ),
             authProvider.overrideWith((_) => _makeStubAuthNotifier()),
-            libraryProvider.overrideWith((ref) => notifier),
+            exploreProvider.overrideWith((ref) => notifier),
             readingProgressProvider.overrideWith(
               (ref) => _makeStubReadingProgressNotifier(),
             ),
