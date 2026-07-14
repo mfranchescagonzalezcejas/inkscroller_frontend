@@ -159,7 +159,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String profileDemographicCount(int count) {
-    return '$count selected';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
   }
 
   @override

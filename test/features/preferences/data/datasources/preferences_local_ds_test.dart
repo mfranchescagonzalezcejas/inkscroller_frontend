@@ -60,6 +60,29 @@ void main() {
     expect(result.defaultReaderMode, ReaderMode.vertical);
   });
 
+  test('drops unknown demographic values from cache', () async {
+    // Pre-seed cache with a known good value + an unknown `kodomo` token.
+    await prefs.setString('cached_user_reading_preferences', '''
+{
+  "defaultReaderMode": "vertical",
+  "defaultLanguage": "en",
+  "demographicFilter": ["seinen", "kodomo", "josei"],
+  "updatedAt": "${DateTime(2026, 6).toIso8601String()}"
+}''');
+    await prefs.setInt(
+      'cached_preferences_timestamp',
+      DateTime.now().millisecondsSinceEpoch,
+    );
+
+    final result = await dataSource.getCachedPreferences();
+
+    expect(result, isNotNull);
+    expect(
+      result!.demographicFilter,
+      const <MangaDemographic>[MangaDemographic.seinen, MangaDemographic.josei],
+    );
+  });
+
   test('round-trips demographicFilter', () async {
     final prefsWithDemographics = UserReadingPreferences(
       defaultReaderMode: ReaderMode.vertical,

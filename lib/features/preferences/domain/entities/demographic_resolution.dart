@@ -35,7 +35,7 @@ class DemographicResolution {
     required List<MangaDemographic>? stored,
     required DemographicResolution resolution,
   }) {
-    if (stored != null && stored.every(resolution.allowedOptions.contains)) {
+    if (stored != null && stored.isNotEmpty && stored.every(resolution.allowedOptions.contains)) {
       return stored;
     }
     return resolution.effectiveFilter;

@@ -73,7 +73,7 @@
   "demographicJosei": "Josei",
   "demographicUnspecified": "Sin especificar",
   "profileDemographicTitle": "Demografía mostrada",
-  "profileDemographicCount": "{count} seleccionados",
+  "profileDemographicCount": "{count,plural, =1{1 seleccionado} other{{count} seleccionados}}",
   "profileDemographicSelectionRequired": "Selecciona al menos una demografía",
   "@profileDemographicCount": {
     "placeholders": {

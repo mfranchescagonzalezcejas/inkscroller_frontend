@@ -435,7 +435,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (ctx) => DemographicSelectionDialog(
         options: resolution.allowedOptions,
         current: current.toSet(),
-        labelFor: _demographicLabel,
+        labelFor: (demo) => _demographicLabel(context, demo),
         emptySelectionMessage:
             context.l10n.profileDemographicSelectionRequired,
       ),
@@ -467,14 +467,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         );
   }
 
-  String _demographicLabel(MangaDemographic demo) {
+  String _demographicLabel(BuildContext context, MangaDemographic demo) {
     return switch (demo) {
-      // kodomo removed — MangaDex does not support it
-      MangaDemographic.shounen => 'Shounen',
-      MangaDemographic.shoujo => 'Shoujo',
-      MangaDemographic.seinen => 'Seinen',
-      MangaDemographic.josei => 'Josei',
-      MangaDemographic.unspecified => 'Unspecified',
+      MangaDemographic.shounen => context.l10n.demographicShounen,
+      MangaDemographic.shoujo => context.l10n.demographicShoujo,
+      MangaDemographic.seinen => context.l10n.demographicSeinen,
+      MangaDemographic.josei => context.l10n.demographicJosei,
+      MangaDemographic.unspecified => context.l10n.demographicUnspecified,
     };
   }
 

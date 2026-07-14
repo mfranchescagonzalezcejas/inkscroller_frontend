@@ -41,7 +41,8 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       final crf = data['contentRatingFilter'] as String?;
       final demographicFilter = (data['demographicFilter'] as List<dynamic>?)
           ?.whereType<String>()
-          .map(MangaDemographic.fromJson)
+          .map(MangaDemographic.tryFromJson)
+          .whereType<MangaDemographic>()
           .toList();
       return UserReadingPreferences(
         defaultReaderMode: ReaderMode.values.byName(

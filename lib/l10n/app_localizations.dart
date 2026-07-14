@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileDemographicCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} selected'**
+  /// **'{count,plural, =1{1 selected} other{{count} selected}}'**
   String profileDemographicCount(int count);
 
   /// No description provided for @profileDemographicSelectionRequired.
