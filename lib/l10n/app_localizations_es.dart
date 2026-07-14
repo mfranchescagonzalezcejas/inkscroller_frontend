@@ -492,6 +492,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ocultar barras de navegación del sistema';
 
   @override
+  String get dialogConfirm => 'OK';
+
+  @override
+  String get dialogCancel => 'Cancelar';
+
+  @override
   String get readerSettingsConfirm => 'Confirmar ajustes';
 
   @override

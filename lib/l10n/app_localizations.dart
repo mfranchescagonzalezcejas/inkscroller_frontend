@@ -968,6 +968,18 @@ abstract class AppLocalizations {
   /// **'Hide system navigation bars'**
   String get readerSettingsImmersiveSubtitle;
 
+  /// No description provided for @dialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get dialogConfirm;
+
+  /// No description provided for @dialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get dialogCancel;
+
   /// No description provided for @readerSettingsConfirm.
   ///
   /// In en, this message translates to:

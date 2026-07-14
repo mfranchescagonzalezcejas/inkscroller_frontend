@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n.dart';
 
 import '../../../library/domain/entities/manga_tags.dart';
 
@@ -16,11 +17,11 @@ class _DemographicSelectionDialogState extends State<DemographicSelectionDialog>
   late Set<MangaDemographic> selected = Set.of(widget.current);
   String? error;
   @override Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Demographics'),
+    title: Text(context.l10n.profileDemographicTitle),
     content: Column(mainAxisSize: MainAxisSize.min, children: [
       ...widget.options.map((option) => CheckboxListTile(value: selected.contains(option), title: Text(widget.labelFor(option)), onChanged: (checked) => setState(() { if (checked ?? false) { selected.add(option); } else { selected.remove(option); } }))),
       if (error != null) Text(error!),
     ]),
-    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')), FilledButton(onPressed: () { if (selected.isEmpty) { setState(() => error = widget.emptySelectionMessage); } else { Navigator.pop(context, selected); } }, child: const Text('OK'))],
+    actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.l10n.dialogCancel)), FilledButton(onPressed: () { if (selected.isEmpty) { setState(() => error = widget.emptySelectionMessage); } else { Navigator.pop(context, selected); } }, child: Text(context.l10n.dialogConfirm))],
   );
 }

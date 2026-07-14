@@ -233,6 +233,8 @@
   "readerSettingsAmoledSubtitle": "Ahorra batería en pantallas OLED",
   "readerSettingsImmersive": "Modo inmersivo",
   "readerSettingsImmersiveSubtitle": "Ocultar barras de navegación del sistema",
+  "dialogConfirm": "OK",
+  "dialogCancel": "Cancelar",
   "readerSettingsConfirm": "Confirmar ajustes",
   "readerDirectionLtr": "LTR",
   "readerDirectionRtl": "RTL",

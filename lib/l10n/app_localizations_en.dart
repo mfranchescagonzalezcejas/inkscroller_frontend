@@ -487,6 +487,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readerSettingsImmersiveSubtitle => 'Hide system navigation bars';
 
   @override
+  String get dialogConfirm => 'OK';
+
+  @override
+  String get dialogCancel => 'Cancel';
+
+  @override
   String get readerSettingsConfirm => 'Confirm settings';
 
   @override
