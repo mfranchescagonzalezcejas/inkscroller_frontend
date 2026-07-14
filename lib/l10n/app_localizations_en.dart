@@ -152,9 +152,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get demographicJosei => 'Josei';
 
   @override
-  String get demographicKodomo => 'Kodomo';
-
-  @override
   String get demographicUnspecified => 'Unspecified';
 
   @override

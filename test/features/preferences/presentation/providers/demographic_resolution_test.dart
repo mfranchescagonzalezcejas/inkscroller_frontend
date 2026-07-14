@@ -32,7 +32,7 @@ void main() {
       );
       expect(
         result.allowedOptions,
-        [MangaDemographic.kodomo, MangaDemographic.shounen, MangaDemographic.shoujo],
+        [MangaDemographic.shounen, MangaDemographic.shoujo],
       );
     });
 
@@ -50,7 +50,7 @@ void main() {
       expect(result.effectiveFilter, [MangaDemographic.shounen]);
       expect(
         result.allowedOptions,
-        [MangaDemographic.kodomo, MangaDemographic.shounen, MangaDemographic.shoujo],
+        [MangaDemographic.shounen, MangaDemographic.shoujo],
       );
     });
 
@@ -80,7 +80,6 @@ void main() {
       final result = DemographicResolution.resolve(
         isGuest: false,
         stored: [
-          MangaDemographic.kodomo,
           MangaDemographic.seinen,
           MangaDemographic.josei,
           MangaDemographic.unspecified,
@@ -90,7 +89,6 @@ void main() {
       expect(
         result.effectiveFilter,
         [
-          MangaDemographic.kodomo,
           MangaDemographic.seinen,
           MangaDemographic.josei,
           MangaDemographic.unspecified,

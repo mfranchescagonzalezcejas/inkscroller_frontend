@@ -71,7 +71,6 @@
   "demographicShoujo": "Shoujo",
   "demographicSeinen": "Seinen",
   "demographicJosei": "Josei",
-  "demographicKodomo": "Kodomo",
   "demographicUnspecified": "Unspecified",
   "profileDemographicTitle": "Demographics shown",
   "profileDemographicCount": "{count} selected",

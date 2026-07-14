@@ -362,12 +362,6 @@ abstract class AppLocalizations {
   /// **'Josei'**
   String get demographicJosei;
 
-  /// No description provided for @demographicKodomo.
-  ///
-  /// In en, this message translates to:
-  /// **'Kodomo'**
-  String get demographicKodomo;
-
   /// No description provided for @demographicUnspecified.
   ///
   /// In en, this message translates to:

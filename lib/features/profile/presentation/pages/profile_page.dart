@@ -459,7 +459,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   String _demographicLabel(MangaDemographic demo) {
     return switch (demo) {
-      MangaDemographic.kodomo => 'Kodomo',
+      // kodomo removed — MangaDex does not support it
       MangaDemographic.shounen => 'Shounen',
       MangaDemographic.shoujo => 'Shoujo',
       MangaDemographic.seinen => 'Seinen',

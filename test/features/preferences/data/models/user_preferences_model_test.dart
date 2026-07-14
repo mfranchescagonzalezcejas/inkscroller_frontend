@@ -129,7 +129,6 @@ void main() {
         defaultReaderMode: 'vertical',
         defaultLanguage: 'en',
         demographicFilter: [
-          MangaDemographic.kodomo,
           MangaDemographic.seinen,
           MangaDemographic.unspecified,
         ],

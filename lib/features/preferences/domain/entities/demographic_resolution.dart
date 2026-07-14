@@ -1,8 +1,8 @@
 import '../../../library/domain/entities/manga_tags.dart';
 
-/// Guest-allowed demographic values — kodomo, shounen, shoujo.
+/// Guest-allowed demographic values — only those MangaDex supports (shounen,
+/// shoujo). `kodomo` was removed from the enum — MangaDex does not support it.
 const List<MangaDemographic> _guestAllowed = [
-  MangaDemographic.kodomo,
   MangaDemographic.shounen,
   MangaDemographic.shoujo,
 ];

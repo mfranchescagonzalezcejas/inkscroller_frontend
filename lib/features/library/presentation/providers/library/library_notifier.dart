@@ -56,6 +56,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   int _offset = 0;
   static const int _limit = AppConstants.mangaPageLimit;
 
+  /// Monotonic version counter that invalidates stale [loadInitial] responses.
+  /// When preferences resolve after the initial constructor load, a second
+  /// call supersedes the first — the wrong-demographics response is discarded.
+  int _loadVersion = 0;
+
   Timer? _searchDebounce;
   String _activeQuery = '';
 
@@ -96,6 +101,8 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       return;
     }
 
+    _loadVersion++;
+    final capturedVersion = _loadVersion;
     state = state.copyWith(isLoading: true, clearFailure: true);
 
     _mode = mode;
@@ -115,6 +122,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     result.fold(
       (failure) {
+        if (capturedVersion != _loadVersion) return;
         state = state.copyWith(
           isLoading: false,
           mangas: const [],
@@ -124,6 +132,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         // Skip caching failures so refresh() triggers a real network retry.
       },
       (mangas) {
+        if (capturedVersion != _loadVersion) return;
         _offset += mangas.length;
 
         final newState = state.copyWith(
