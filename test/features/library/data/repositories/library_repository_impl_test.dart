@@ -304,7 +304,7 @@ void main() {
           demographics: any(named: 'demographics'),
         ),
       ).thenAnswer((invocation) async {
-        final symbol = Symbol('demographics');
+        const symbol = Symbol('demographics');
         final demographics = invocation.namedArguments[symbol]
             as List<MangaDemographic>?;
         if (demographics == filterA) {

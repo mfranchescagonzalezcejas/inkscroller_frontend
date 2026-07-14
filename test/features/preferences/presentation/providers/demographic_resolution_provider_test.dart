@@ -36,7 +36,7 @@ void main() {
     final d = _D(); when(() => d()).thenAnswer((_) => const Stream<AppUser?>.empty());
     final auth = AuthNotifier(signIn: _A(), signUp: _B(), signOut: _C(), getAuthState: d, getUserProfile: _E(), updateUserProfile: _I())..state = const AuthState(user: AppUser(uid: 'user-1', email: 'adult@example.test'));
     final prefs = PreferencesNotifier(getPreferences: _F(), updatePreferences: _G());
-    final profile = UserProfileNotifier(getUserProfile: _E())..state = UserProfileState(profile: UserProfile(firebaseUid: 'user-1', email: 'adult@example.test', birthDate: DateTime(1990, 1, 1), createdAt: DateTime(2020)));
+    final profile = UserProfileNotifier(getUserProfile: _E())..state = UserProfileState(profile: UserProfile(firebaseUid: 'user-1', email: 'adult@example.test', birthDate: DateTime(1990), createdAt: DateTime(2020)));
     when(() => remote.getMangaCapabilities()).thenAnswer((_) async => const MangaCapabilities(supportsUnspecified: true));
     final c = ProviderContainer(overrides: [authProvider.overrideWith((_) => auth), preferencesProvider.overrideWith((_) => prefs), userProfileProvider.overrideWith((_) => profile)]); addTearDown(c.dispose);
     await c.read(mangaCapabilitiesProvider.future);
@@ -54,7 +54,7 @@ void main() {
   }
 
   test('minor may select unspecified when capability supports it (age gate removed)', () async {
-    final c = await containerFor(user: const AppUser(uid: 'minor', email: 'minor@test'), birthDate: DateTime(2010, 1, 1), fails: false);
+    final c = await containerFor(user: const AppUser(uid: 'minor', email: 'minor@test'), birthDate: DateTime(2010), fails: false);
     await c.read(mangaCapabilitiesProvider.future);
     expect(c.read(demographicResolutionProvider).allowedOptions.map((e) => e.name), contains('unspecified'));
   });
@@ -64,7 +64,7 @@ void main() {
     expect(c.read(demographicResolutionProvider).allowedOptions.map((e) => e.name), isNot(contains('unspecified')));
   });
   test('capability DioException fails closed and denies unspecified', () async {
-    final c = await containerFor(user: const AppUser(uid: 'adult', email: 'adult@test'), birthDate: DateTime(1990, 1, 1), fails: true);
+    final c = await containerFor(user: const AppUser(uid: 'adult', email: 'adult@test'), birthDate: DateTime(1990), fails: true);
     final capabilities = await c.read(mangaCapabilitiesProvider.future);
     expect(capabilities, const MangaCapabilities(supportsUnspecified: false));
     expect(c.read(demographicResolutionProvider).allowedOptions.map((e) => e.name), isNot(contains('unspecified')));
