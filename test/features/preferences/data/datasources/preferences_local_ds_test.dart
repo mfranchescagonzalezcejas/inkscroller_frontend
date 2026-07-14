@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
 import 'package:inkscroller_flutter/features/preferences/data/datasources/preferences_local_ds_impl.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/entities/content_rating.dart';
@@ -57,6 +58,20 @@ void main() {
     expect(result, isNotNull);
     expect(result!.contentRatingFilter, ContentRating.suggestive);
     expect(result.defaultReaderMode, ReaderMode.vertical);
+  });
+
+  test('round-trips demographicFilter', () async {
+    final prefsWithDemographics = UserReadingPreferences(
+      defaultReaderMode: ReaderMode.vertical,
+      defaultLanguage: 'en',
+      demographicFilter: const <MangaDemographic>[MangaDemographic.seinen, MangaDemographic.josei],
+      updatedAt: DateTime(2026, 6),
+    );
+
+    await dataSource.savePreferences(prefsWithDemographics);
+    final result = await dataSource.getCachedPreferences();
+
+    expect(result!.demographicFilter, const <MangaDemographic>[MangaDemographic.seinen, MangaDemographic.josei]);
   });
 
   test('returns null when cache is expired', () async {

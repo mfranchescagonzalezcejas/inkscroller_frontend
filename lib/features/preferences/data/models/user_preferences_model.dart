@@ -28,9 +28,7 @@ class UserPreferencesModel {
       defaultReaderMode: json['default_reader_mode'] as String? ?? 'vertical',
       defaultLanguage: json['default_language'] as String? ?? 'en',
       contentRatingFilter: json['content_rating_filter'] as String?,
-      demographicFilter: rawDemographics
-          ?.map((e) => MangaDemographic.fromJson(e as String))
-          .toList(),
+      demographicFilter: _canonicalDemographics(rawDemographics?.whereType<String>()),
       updatedAt: json['updated_at'] as String,
     );
   }
@@ -42,7 +40,9 @@ class UserPreferencesModel {
     List<MangaDemographic>? demographicFilter,
   }) {
     // Use the explicit parameter, or fall back to the model's stored field.
-    final effectiveDemographics = demographicFilter ?? this.demographicFilter;
+    final effectiveDemographics = _canonicalDemographics(
+      (demographicFilter ?? this.demographicFilter)?.map((item) => item.name),
+    );
 
     return <String, dynamic>{
       if (defaultReaderMode != null) 'default_reader_mode': defaultReaderMode,
@@ -54,6 +54,17 @@ class UserPreferencesModel {
             ? null
             : effectiveDemographics.map((e) => e.toJson()).toList(),
     };
+  }
+
+  static List<MangaDemographic>? _canonicalDemographics(Iterable<String>? raw) {
+    if (raw == null) return null;
+    final values = raw
+        .map(MangaDemographic.tryFromJson)
+        .whereType<MangaDemographic>()
+        .toSet()
+        .toList()
+      ..sort((left, right) => left.index.compareTo(right.index));
+    return values;
   }
 
   UserReadingPreferences toEntity() {

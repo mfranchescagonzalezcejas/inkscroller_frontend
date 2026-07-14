@@ -12,10 +12,10 @@ void main() {
         allowedOptions: MangaDemographic.values,
       );
 
-      expect(
-        resolution.effectiveFilter,
-        [MangaDemographic.shounen, MangaDemographic.shoujo],
-      );
+      expect(resolution.effectiveFilter, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
       expect(resolution.allowedOptions, MangaDemographic.values);
     });
   });
@@ -26,14 +26,14 @@ void main() {
     test('guest with no stored preference gets default [shounen, shoujo]', () {
       final result = DemographicResolution.resolve(isGuest: true);
 
-      expect(
-        result.effectiveFilter,
-        [MangaDemographic.shounen, MangaDemographic.shoujo],
-      );
-      expect(
-        result.allowedOptions,
-        [MangaDemographic.shounen, MangaDemographic.shoujo],
-      );
+      expect(result.effectiveFilter, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
+      expect(result.allowedOptions, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
     });
 
     test('guest with stored preference filters out disallowed values', () {
@@ -48,10 +48,10 @@ void main() {
 
       // seinen and josei removed for guest; shounen kept
       expect(result.effectiveFilter, [MangaDemographic.shounen]);
-      expect(
-        result.allowedOptions,
-        [MangaDemographic.shounen, MangaDemographic.shoujo],
-      );
+      expect(result.allowedOptions, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
     });
 
     test('guest with only disallowed stored values falls back to default', () {
@@ -60,25 +60,32 @@ void main() {
         stored: [MangaDemographic.seinen, MangaDemographic.josei],
       );
 
-      expect(
-        result.effectiveFilter,
-        [MangaDemographic.shounen, MangaDemographic.shoujo],
-      );
+      expect(result.effectiveFilter, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
     });
 
     test('authenticated user with no stored preference gets default', () {
       final result = DemographicResolution.resolve(isGuest: false);
 
-      expect(
-        result.effectiveFilter,
-        [MangaDemographic.shounen, MangaDemographic.shoujo],
-      );
-      expect(result.allowedOptions, MangaDemographic.values);
+      expect(result.effectiveFilter, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
+      expect(result.allowedOptions, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+        MangaDemographic.seinen,
+        MangaDemographic.josei,
+      ]);
     });
 
-    test('authenticated user keeps all stored values', () {
+    test('supported adult keeps an unspecified mixed selection', () {
       final result = DemographicResolution.resolve(
         isGuest: false,
+        isAdult: true,
+        supportsUnspecified: true,
         stored: [
           MangaDemographic.seinen,
           MangaDemographic.josei,
@@ -86,27 +93,70 @@ void main() {
         ],
       );
 
+      expect(result.effectiveFilter, [
+        MangaDemographic.seinen,
+        MangaDemographic.josei,
+        MangaDemographic.unspecified,
+      ]);
+      expect(result.allowedOptions, contains(MangaDemographic.unspecified));
+    });
+
+    test('minor and unsupported adult both remove unspecified', () {
+      final minor = DemographicResolution.resolve(
+        isGuest: false,
+        isAdult: false,
+        supportsUnspecified: true,
+        stored: <MangaDemographic>[MangaDemographic.unspecified],
+      );
+      final unavailable = DemographicResolution.resolve(
+        isGuest: false,
+        isAdult: true,
+        supportsUnspecified: false,
+        stored: <MangaDemographic>[MangaDemographic.unspecified],
+      );
+
       expect(
-        result.effectiveFilter,
-        [
-          MangaDemographic.seinen,
-          MangaDemographic.josei,
+        minor.allowedOptions,
+        isNot(contains(MangaDemographic.unspecified)),
+      );
+      expect(
+        unavailable.allowedOptions,
+        isNot(contains(MangaDemographic.unspecified)),
+      );
+      expect(minor.effectiveFilter, <MangaDemographic>[
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
+    });
+
+    test('unavailable capability with stored unspecified falls back to default', () {
+      final result = DemographicResolution.resolve(
+        isGuest: false,
+        isAdult: true,
+        supportsUnspecified: false,
+        stored: <MangaDemographic>[
           MangaDemographic.unspecified,
+          MangaDemographic.shounen,
         ],
       );
-      expect(result.allowedOptions, MangaDemographic.values);
+
+      expect(result.effectiveFilter, <MangaDemographic>[
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
+      expect(
+        result.allowedOptions,
+        isNot(contains(MangaDemographic.unspecified)),
+      );
     });
 
     test('authenticated user with empty stored list gets default', () {
-      final result = DemographicResolution.resolve(
-        isGuest: false,
-        stored: [],
-      );
+      final result = DemographicResolution.resolve(isGuest: false, stored: []);
 
-      expect(
-        result.effectiveFilter,
-        [MangaDemographic.shounen, MangaDemographic.shoujo],
-      );
+      expect(result.effectiveFilter, [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ]);
     });
 
     test('guest allowedOptions never includes seinen/josei/unspecified', () {
@@ -117,6 +167,68 @@ void main() {
       expect(
         result.allowedOptions,
         isNot(contains(MangaDemographic.unspecified)),
+      );
+    });
+  });
+
+  group('DemographicResolution.isValidSelection', () {
+    test('requires at least one selected demographic', () {
+      expect(
+        DemographicResolution.isValidSelection(<MangaDemographic>[]),
+        isFalse,
+      );
+      expect(
+        DemographicResolution.isValidSelection(<MangaDemographic>[
+          MangaDemographic.shounen,
+        ]),
+        isTrue,
+      );
+    });
+  });
+
+  group('DemographicResolution.selectionForDialog', () {
+    test('uses the effective filter when stored values are unavailable', () {
+      final resolution = DemographicResolution.resolve(
+        isGuest: false,
+        isAdult: false,
+        supportsUnspecified: false,
+        stored: <MangaDemographic>[
+          MangaDemographic.shounen,
+          MangaDemographic.unspecified,
+        ],
+      );
+
+      expect(
+        DemographicResolution.selectionForDialog(
+          stored: <MangaDemographic>[
+            MangaDemographic.shounen,
+            MangaDemographic.unspecified,
+          ],
+          resolution: resolution,
+        ),
+        <MangaDemographic>[
+          MangaDemographic.shounen,
+          MangaDemographic.shoujo,
+        ],
+      );
+    });
+
+    test('keeps a fully allowed stored selection', () {
+      const stored = <MangaDemographic>[
+        MangaDemographic.shounen,
+        MangaDemographic.seinen,
+      ];
+      final resolution = DemographicResolution.resolve(
+        isGuest: false,
+        stored: stored,
+      );
+
+      expect(
+        DemographicResolution.selectionForDialog(
+          stored: stored,
+          resolution: resolution,
+        ),
+        stored,
       );
     });
   });

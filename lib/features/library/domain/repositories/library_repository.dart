@@ -40,11 +40,13 @@ abstract class LibraryRepository {
   ///
   /// [limit] and [offset] control pagination. The returned [SearchResult]
   /// contains both the page items and the backend pagination metadata.
+  /// [demographics] filters by publication demographic.
   Future<Either<Failure, SearchResult>> searchManga(
     String query, {
     required int limit,
     required int offset,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   });
 
   /// Clears all persisted library cache entries.

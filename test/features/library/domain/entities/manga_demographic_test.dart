@@ -26,19 +26,48 @@ void main() {
       );
     });
 
-    test('fromJson maps unknown values to unspecified', () {
-      expect(MangaDemographic.fromJson('ecchi'), MangaDemographic.unspecified);
-      expect(MangaDemographic.fromJson('kodomo'), MangaDemographic.unspecified);
+    test('tryFromJson returns null for unknown values', () {
+      expect(MangaDemographic.tryFromJson('ecchi'), isNull);
+      expect(MangaDemographic.tryFromJson('kodomo'), isNull);
     });
 
-    test('fromJson is case-sensitive — unknown casing maps to unspecified', () {
-      expect(MangaDemographic.fromJson('Shounen'), MangaDemographic.unspecified);
+    test('fromJson returns default for unknown values', () {
+      expect(MangaDemographic.fromJson('ecchi'), MangaDemographic.shounen);
+      expect(MangaDemographic.fromJson('kodomo'), MangaDemographic.shounen);
+    });
+
+    test('fromJson is case-sensitive — unknown casing falls back to default', () {
+      expect(MangaDemographic.fromJson('Shounen'), MangaDemographic.shounen);
     });
 
     test('roundtrip toJson/fromJson preserves value', () {
       for (final value in MangaDemographic.values) {
         expect(MangaDemographic.fromJson(value.toJson()), value);
       }
+    });
+  });
+
+  group('canonicalDemographicsKey', () {
+    test('returns none for null', () {
+      expect(canonicalDemographicsKey(null), 'none');
+    });
+
+    test('returns none for empty list', () {
+      expect(canonicalDemographicsKey(<String>[]), 'none');
+    });
+
+    test('sorts and deduplicates values', () {
+      expect(
+        canonicalDemographicsKey(<String>['seinen', 'shounen', 'shounen']),
+        'seinen,shounen',
+      );
+    });
+
+    test('maps reordered input to the same canonical key', () {
+      expect(
+        canonicalDemographicsKey(<String>['shoujo', 'shounen']),
+        canonicalDemographicsKey(<String>['shounen', 'shoujo']),
+      );
     });
   });
 }

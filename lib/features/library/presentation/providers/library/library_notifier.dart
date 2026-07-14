@@ -12,17 +12,16 @@ import 'library_state.dart';
 /// Browsing mode that determines the sort order used by [LibraryNotifier].
 enum LibraryMode { normal, popular }
 
-/// Cache key for genre tabs — includes demographics so different filters
-/// never share cached pages.
+/// Cache key for genre tabs — includes canonical demographics so different
+/// filters never share cached pages and reordered selections reuse the tab.
 String _cacheKey(
   LibraryMode mode,
   String? genre, {
   String? contentRating,
   List<String>? demographics,
 }) {
-  final demoPart =
-      demographics == null || demographics.isEmpty ? 'none' : demographics.join(',');
-  return '${mode.name}:$genre:cr:${contentRating ?? 'default'}:d:$demoPart';
+  return '${mode.name}:$genre:cr:${contentRating ?? 'default'}'
+      ':d:${canonicalDemographicsKey(demographics)}';
 }
 
 /// Manages paginated manga list state with search, debounce, and deduplication.
@@ -83,11 +82,12 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     String? contentRating,
     List<String>? demographics,
   }) async {
+    final effectiveDemographics = demographics ?? _demographics;
     final key = _cacheKey(
       mode,
       genre,
       contentRating: contentRating,
-      demographics: demographics,
+      demographics: effectiveDemographics,
     );
 
     // Return cached result immediately if available.
@@ -97,7 +97,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       _mode = mode;
       _genre = genre;
       _contentRating = contentRating;
-      _demographics = demographics;
+      _demographics = effectiveDemographics;
       return;
     }
 
@@ -108,7 +108,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     _mode = mode;
     _genre = genre;
     _contentRating = contentRating;
-    _demographics = demographics;
+    _demographics = effectiveDemographics;
     _offset = 0;
 
     final result = await _getMangaList(
@@ -117,7 +117,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       order: _mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
       genre: _genre,
       contentRating: _contentRating,
-      demographics: demographics?.map(MangaDemographic.fromJson).toList(),
+      demographics: effectiveDemographics?.map(MangaDemographic.fromJson).toList(),
     );
 
     result.fold(
@@ -222,6 +222,12 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   /// Clears the tab cache so catalogue refresh always fetches fresh data.
   Future<void> refresh({String? contentRating, List<String>? demographics}) {
     final query = _activeQuery;
+    if (demographics != null) {
+      _demographics = demographics;
+    }
+    if (contentRating != null) {
+      _contentRating = contentRating;
+    }
     if (query.isNotEmpty) {
       // ponytail: search refresh reuses _performSearch which resets offset
       // and version internally — no need to duplicate cursor reset here.
@@ -299,6 +305,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       limit: _limit,
       offset: _searchOffset,
       contentRating: _contentRating,
+      demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
     );
 
     if (_searchQueryVersion != capturedGeneration) return;
@@ -346,6 +353,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       limit: _limit,
       offset: 0,
       contentRating: _contentRating,
+      demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
     );
 
     if (_searchQueryVersion != capturedGeneration) return;

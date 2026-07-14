@@ -163,6 +163,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get profileDemographicSelectionRequired =>
+      'Select at least one demographic';
+
+  @override
   String get readNow => 'Read Now';
 
   @override

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
 import 'package:inkscroller_flutter/features/library/domain/repositories/library_repository.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/search_manga.dart';
@@ -34,6 +35,7 @@ void main() {
         limit: 20,
         offset: 0,
         contentRating: any(named: 'contentRating'),
+        demographics: any(named: 'demographics'),
       ),
     ).thenAnswer((_) async => expected);
 
@@ -46,6 +48,43 @@ void main() {
         limit: 20,
         offset: 0,
         contentRating: any(named: 'contentRating'),
+        demographics: any(named: 'demographics'),
+      ),
+    ).called(1);
+  });
+
+  test('forwards demographics to repository', () async {
+    final expected = Right<Failure, SearchResult>(result);
+    const demographics = <MangaDemographic>[
+      MangaDemographic.shounen,
+      MangaDemographic.unspecified,
+    ];
+
+    when(
+      () => repository.searchManga(
+        'monster',
+        limit: 20,
+        offset: 0,
+        contentRating: any(named: 'contentRating'),
+        demographics: demographics,
+      ),
+    ).thenAnswer((_) async => expected);
+
+    final actual = await useCase(
+      'monster',
+      limit: 20,
+      offset: 0,
+      demographics: demographics,
+    );
+
+    expect(actual, expected);
+    verify(
+      () => repository.searchManga(
+        'monster',
+        limit: 20,
+        offset: 0,
+        contentRating: any(named: 'contentRating'),
+        demographics: demographics,
       ),
     ).called(1);
   });
@@ -57,6 +96,7 @@ void main() {
         limit: any(named: 'limit'),
         offset: any(named: 'offset'),
         contentRating: any(named: 'contentRating'),
+        demographics: any(named: 'demographics'),
       ),
     ).thenAnswer((_) async => Right<Failure, SearchResult>(result));
 
@@ -73,6 +113,7 @@ void main() {
         limit: any(named: 'limit'),
         offset: any(named: 'offset'),
         contentRating: any(named: 'contentRating'),
+        demographics: any(named: 'demographics'),
       ),
     ).thenAnswer((_) async => const Left<Failure, SearchResult>(failure));
 

@@ -380,6 +380,12 @@ abstract class AppLocalizations {
   /// **'{count} selected'**
   String profileDemographicCount(int count);
 
+  /// No description provided for @profileDemographicSelectionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one demographic'**
+  String get profileDemographicSelectionRequired;
+
   /// No description provided for @readNow.
   ///
   /// In en, this message translates to:

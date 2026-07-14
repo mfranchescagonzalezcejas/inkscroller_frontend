@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_list.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/search_manga.dart';
@@ -85,6 +86,67 @@ void main() {
       expect(notifier.state.isLoading, isFalse);
       expect(notifier.state.mangas, isEmpty);
       expect(notifier.state.failure, isA<NetworkFailure>());
+    });
+
+    test('retains active demographics when none are provided', () async {
+      when(
+        () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order'), genre: any(named: 'genre'), contentRating: any(named: 'contentRating'), demographics: any(named: 'demographics')),
+      ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+      when(
+        () => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'), contentRating: any(named: 'contentRating'), demographics: any(named: 'demographics')),
+      ).thenAnswer((_) async => const Right<Failure, SearchResult>(SearchResult(mangas: [], limit: 20, offset: 0, total: 0)));
+
+      final notifier = LibraryNotifier(getMangaList, searchManga, initialDemographics: const <String>['seinen']);
+      await Future<void>.delayed(Duration.zero);
+      await notifier.loadInitial();
+
+      verify(
+        () => getMangaList(limit: 20, offset: 0, order: any(named: 'order'), genre: any(named: 'genre'), contentRating: any(named: 'contentRating'), demographics: const <MangaDemographic>[MangaDemographic.seinen]),
+      ).called(1);
+    });
+
+    test('reordered demographics reuse the tab cache', () async {
+      final page = List<Manga>.generate(
+        20,
+        (index) => Manga(id: 'g$index', title: 'Genre $index'),
+      );
+
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer((_) async => Right<Failure, List<Manga>>(page));
+      when(
+        () => searchManga(any(), limit: any(named: 'limit'), offset: any(named: 'offset'), contentRating: any(named: 'contentRating'), demographics: any(named: 'demographics')),
+      ).thenAnswer((_) async => const Right<Failure, SearchResult>(SearchResult(mangas: [], limit: 20, offset: 0, total: 0)));
+
+      final notifier = LibraryNotifier(getMangaList, searchManga);
+      await Future<void>.delayed(Duration.zero);
+
+      await notifier.loadInitial(
+        demographics: const <String>['shounen', 'shoujo'],
+      );
+      await notifier.loadInitial(
+        demographics: const <String>['shoujo', 'shounen'],
+      );
+
+      // Constructor issues one load; the first explicit load hits the network;
+      // the reordered second explicit load hits the canonical cache key.
+      verify(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).called(2);
     });
   });
 
@@ -297,6 +359,45 @@ void main() {
       return SearchResult(mangas: mangas, limit: limit, offset: offset, total: total);
     }
 
+    test('performSearch forwards active demographics', () async {
+      when(
+        () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order'), genre: any(named: 'genre'), contentRating: any(named: 'contentRating'), demographics: any(named: 'demographics')),
+      ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+      when(
+        () => searchManga(
+          'monster',
+          limit: 20,
+          offset: 0,
+          contentRating: any(named: 'contentRating'),
+          demographics: const <MangaDemographic>[MangaDemographic.seinen],
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, SearchResult>(
+          searchPage(mangas: mangas, total: 2),
+        ),
+      );
+
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+        initialDemographics: const <String>['seinen'],
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      notifier.setQuery('monster');
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+
+      verify(
+        () => searchManga(
+          'monster',
+          limit: 20,
+          offset: 0,
+          contentRating: any(named: 'contentRating'),
+          demographics: const <MangaDemographic>[MangaDemographic.seinen],
+        ),
+      ).called(1);
+    });
+
     test('performSearch sends limit=20, offset=0 and stores total', () async {
       when(
         () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order'), genre: any(named: 'genre'), contentRating: any(named: 'contentRating')),
@@ -476,6 +577,70 @@ void main() {
     }) {
       return SearchResult(mangas: mangas, limit: limit, offset: offset, total: total);
     }
+
+    test('loadMoreSearch forwards active demographics', () async {
+      const demographics = <MangaDemographic>[MangaDemographic.shoujo];
+      when(
+        () => getMangaList(limit: 20, offset: any(named: 'offset'), order: any(named: 'order'), genre: any(named: 'genre'), contentRating: any(named: 'contentRating'), demographics: any(named: 'demographics')),
+      ).thenAnswer((_) async => const Right<Failure, List<Manga>>(<Manga>[]));
+      when(
+        () => searchManga(
+          'query',
+          limit: 20,
+          offset: 0,
+          contentRating: any(named: 'contentRating'),
+          demographics: demographics,
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, SearchResult>(
+          searchPage(
+            mangas: List<Manga>.generate(
+              20,
+              (index) => Manga(id: 's$index', title: 'Search $index'),
+            ),
+            total: 21,
+          ),
+        ),
+      );
+      when(
+        () => searchManga(
+          'query',
+          limit: 20,
+          offset: 20,
+          contentRating: any(named: 'contentRating'),
+          demographics: demographics,
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, SearchResult>(
+          searchPage(
+            mangas: [Manga(id: 's20', title: 'Search 20')],
+            offset: 20,
+            total: 21,
+          ),
+        ),
+      );
+
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+        initialDemographics: const <String>['shoujo'],
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      notifier.setQuery('query');
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await notifier.loadMoreSearch();
+
+      verify(
+        () => searchManga(
+          'query',
+          limit: 20,
+          offset: 20,
+          contentRating: any(named: 'contentRating'),
+          demographics: demographics,
+        ),
+      ).called(1);
+    });
 
     test('appends deduplicated results and advances offset', () async {
       final pageOne = List<Manga>.generate(

@@ -8,6 +8,7 @@ import 'package:inkscroller_flutter/features/library/data/models/chapter_model.d
 import 'package:inkscroller_flutter/features/library/data/models/manga_model.dart';
 import 'package:inkscroller_flutter/features/library/data/models/search_result_model.dart';
 import 'package:inkscroller_flutter/features/library/data/repositories/library_repository_impl.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -27,6 +28,8 @@ void main() {
     );
     registerFallbackValue(<ChapterModel>[]);
     registerFallbackValue(<String, String>{});
+    registerFallbackValue(<String>[]);
+    registerFallbackValue(<MangaDemographic>[]);
     registerFallbackValue(
       const SearchResultModel(
         mangas: [],
@@ -57,6 +60,9 @@ void main() {
         limit: any(named: 'limit'),
         offset: any(named: 'offset'),
         order: any(named: 'order'),
+        genre: any(named: 'genre'),
+        contentRating: any(named: 'contentRating'),
+        demographics: any(named: 'demographics'),
         mangas: any(named: 'mangas'),
       ),
     ).thenAnswer((_) async {});
@@ -71,6 +77,9 @@ void main() {
         limit: any(named: 'limit'),
         offset: any(named: 'offset'),
         order: any(named: 'order'),
+        genre: any(named: 'genre'),
+        contentRating: any(named: 'contentRating'),
+        demographics: any(named: 'demographics'),
         maxAge: any(named: 'maxAge'),
       ),
     ).thenAnswer((_) async => null);
@@ -170,6 +179,39 @@ void main() {
         expect(mangas.single.id, 'cached');
       });
     });
+
+    test('persisted cache key includes genre, contentRating and demographics', () async {
+      when(
+        () => remoteDataSource.getMangaList(
+          limit: 20,
+          offset: 0,
+          genre: 'action',
+          contentRating: 'safe',
+          demographics: [MangaDemographic.shounen, MangaDemographic.unspecified],
+        ),
+      ).thenAnswer(
+        (_) async => <MangaModel>[const MangaModel(id: '1', title: 'One')],
+      );
+
+      await repository.getMangaList(
+        limit: 20,
+        offset: 0,
+        genre: 'action',
+        contentRating: 'safe',
+        demographics: [MangaDemographic.shounen, MangaDemographic.unspecified],
+      );
+
+      verify(
+        () => localDataSource.cacheMangaList(
+          limit: 20,
+          offset: 0,
+          genre: 'action',
+          contentRating: 'safe',
+          demographics: ['shounen', 'unspecified'],
+          mangas: [const MangaModel(id: '1', title: 'One')],
+        ),
+      ).called(1);
+    });
   });
 
   group('searchManga', () {
@@ -180,6 +222,7 @@ void main() {
           limit: 20,
           offset: 10,
           contentRating: 'safe',
+          demographics: any(named: 'demographics'),
         ),
       ).thenAnswer(
         (_) async => const SearchResultModel(
@@ -203,8 +246,133 @@ void main() {
           limit: 20,
           offset: 10,
           contentRating: 'safe',
+          demographics: any(named: 'demographics'),
         ),
       ).called(1);
+    });
+
+    test('forwards demographics to datasource', () async {
+      const demographics = <MangaDemographic>[
+        MangaDemographic.shounen,
+        MangaDemographic.unspecified,
+      ];
+      when(
+        () => remoteDataSource.searchManga(
+          'berserk',
+          limit: 20,
+          offset: 0,
+          contentRating: any(named: 'contentRating'),
+          demographics: demographics,
+        ),
+      ).thenAnswer(
+        (_) async => const SearchResultModel(
+          mangas: [MangaModel(id: '1', title: 'Berserk')],
+          limit: 20,
+          offset: 0,
+          total: 1,
+        ),
+      );
+
+      await repository.searchManga(
+        'berserk',
+        limit: 20,
+        offset: 0,
+        demographics: demographics,
+      );
+
+      verify(
+        () => remoteDataSource.searchManga(
+          'berserk',
+          limit: 20,
+          offset: 0,
+          contentRating: any(named: 'contentRating'),
+          demographics: demographics,
+        ),
+      ).called(1);
+    });
+
+    test('search memory cache isolates different demographic filters', () async {
+      const filterA = <MangaDemographic>[MangaDemographic.shounen];
+      const filterB = <MangaDemographic>[MangaDemographic.shoujo];
+
+      when(
+        () => remoteDataSource.searchManga(
+          'query',
+          limit: 20,
+          offset: 0,
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer((invocation) async {
+        final symbol = Symbol('demographics');
+        final demographics = invocation.namedArguments[symbol]
+            as List<MangaDemographic>?;
+        if (demographics == filterA) {
+          return const SearchResultModel(
+            mangas: [MangaModel(id: 'a', title: 'A')],
+            limit: 20,
+            offset: 0,
+            total: 1,
+          );
+        }
+        return const SearchResultModel(
+          mangas: [MangaModel(id: 'b', title: 'B')],
+          limit: 20,
+          offset: 0,
+          total: 1,
+        );
+      });
+
+      final resultA = await repository.searchManga(
+        'query',
+        limit: 20,
+        offset: 0,
+        demographics: filterA,
+      );
+      final resultB = await repository.searchManga(
+        'query',
+        limit: 20,
+        offset: 0,
+        demographics: filterB,
+      );
+
+      resultA.fold((_) => fail('expected right'), (searchResult) {
+        expect(searchResult.mangas.single.id, 'a');
+      });
+      resultB.fold((_) => fail('expected right'), (searchResult) {
+        expect(searchResult.mangas.single.id, 'b');
+      });
+
+      // Now fail the network and verify each filter falls back to its own cache.
+      when(
+        () => remoteDataSource.searchManga(
+          'query',
+          limit: 20,
+          offset: 0,
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenThrow(const NetworkException(message: 'offline'));
+
+      final cachedA = await repository.searchManga(
+        'query',
+        limit: 20,
+        offset: 0,
+        demographics: filterA,
+      );
+      final cachedB = await repository.searchManga(
+        'query',
+        limit: 20,
+        offset: 0,
+        demographics: filterB,
+      );
+
+      cachedA.fold((_) => fail('expected right'), (searchResult) {
+        expect(searchResult.mangas.single.id, 'a');
+      });
+      cachedB.fold((_) => fail('expected right'), (searchResult) {
+        expect(searchResult.mangas.single.id, 'b');
+      });
     });
 
     test('maps SearchResultModel to SearchResult entity', () async {

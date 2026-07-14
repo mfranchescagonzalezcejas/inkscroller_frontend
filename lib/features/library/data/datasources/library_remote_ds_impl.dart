@@ -3,6 +3,7 @@ import 'package:inkscroller_flutter/core/constants/api_endpoints.dart';
 import 'package:inkscroller_flutter/core/error/exceptions.dart';
 import 'package:inkscroller_flutter/features/library/data/models/chapter_model.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_capabilities.dart';
 import '../models/manga_model.dart';
 import '../models/search_result_model.dart';
 import 'library_remote_ds.dart';
@@ -15,6 +16,20 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   final Dio dio;
 
   const LibraryRemoteDataSourceImpl(this.dio);
+
+  @override
+  Future<MangaCapabilities> getMangaCapabilities() async {
+    try {
+      final response = await dio.get<Map<String, dynamic>>(
+        ApiEndpoints.mangaCapabilities,
+      );
+      return MangaCapabilities.fromJson(response.data ?? <String, Object?>{});
+    } on DioException {
+      return const MangaCapabilities(supportsUnspecified: false);
+    } on Exception {
+      return const MangaCapabilities(supportsUnspecified: false);
+    }
+  }
 
   // ─────────────────────────────
   // LISTA DE MANGAS
@@ -43,8 +58,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
         },
       );
 
-      final List<dynamic> data = (response.data?['data'] as List<dynamic>?) ??
-          <dynamic>[];
+      final List<dynamic> data =
+          (response.data?['data'] as List<dynamic>?) ?? <dynamic>[];
 
       return data
           .whereType<Map<String, dynamic>>()
@@ -155,6 +170,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     required int limit,
     required int offset,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   }) async {
     try {
       final response = await dio.get<dynamic>(
@@ -164,6 +180,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           'limit': limit,
           'offset': offset,
           if (contentRating != null) 'content_rating': contentRating,
+          if (demographics != null && demographics.isNotEmpty)
+            'demographic': demographics.map((e) => e.toJson()).toList(),
         },
       );
 
@@ -189,20 +207,22 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
       DioExceptionType.receiveTimeout ||
-      DioExceptionType.connectionError =>
-        const NetworkException(message: 'network/no-connection'),
+      DioExceptionType.connectionError => const NetworkException(
+        message: 'network/no-connection',
+      ),
       DioExceptionType.badResponse => ServerException(
         message: 'server/bad-response',
         code: statusCode,
       ),
-      DioExceptionType.cancel =>
-        const UnexpectedException(message: 'client/cancelled'),
-      DioExceptionType.badCertificate =>
-        const UnexpectedException(message: 'server/invalid-certificate'),
-      DioExceptionType.unknown =>
-        const NetworkException(message: 'network/unknown'),
+      DioExceptionType.cancel => const UnexpectedException(
+        message: 'client/cancelled',
+      ),
+      DioExceptionType.badCertificate => const UnexpectedException(
+        message: 'server/invalid-certificate',
+      ),
+      DioExceptionType.unknown => const NetworkException(
+        message: 'network/unknown',
+      ),
     };
   }
-
-
 }

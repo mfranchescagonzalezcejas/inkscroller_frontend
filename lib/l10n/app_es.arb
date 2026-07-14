@@ -74,6 +74,7 @@
   "demographicUnspecified": "Sin especificar",
   "profileDemographicTitle": "Demografía mostrada",
   "profileDemographicCount": "{count} seleccionados",
+  "profileDemographicSelectionRequired": "Selecciona al menos una demografía",
   "@profileDemographicCount": {
     "placeholders": {
       "count": {

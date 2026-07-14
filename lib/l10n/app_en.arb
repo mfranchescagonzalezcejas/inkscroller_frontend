@@ -74,6 +74,7 @@
   "demographicUnspecified": "Unspecified",
   "profileDemographicTitle": "Demographics shown",
   "profileDemographicCount": "{count} selected",
+  "profileDemographicSelectionRequired": "Select at least one demographic",
   "@profileDemographicCount": {
     "placeholders": {
       "count": {

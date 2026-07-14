@@ -24,6 +24,7 @@ import '../../../library/domain/entities/manga_tags.dart';
 import '../../domain/entities/user_profile.dart';
 import '../providers/user_profile_provider.dart';
 import '../providers/user_profile_state.dart';
+import '../widgets/demographic_selection_dialog.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -95,6 +96,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       _preferencesRequested = false;
       _selectedReaderMode = null;
       _selectedReadingLanguage = null;
+      _selectedDemographics = null;
     }
 
     ref.listen(preferencesProvider, (previous, next) {
@@ -295,13 +297,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               title: context.l10n.profileDemographicTitle,
               value: _demographicCountLabel(
                 context,
-                _selectedDemographics ?? demographicResolution.effectiveFilter.map((d) => d).toList(),
+                _selectedDemographics ??
+                    demographicResolution.effectiveFilter
+                        .map((d) => d)
+                        .toList(),
               ),
-              onTap: () => _showDemographicDialog(
-                context,
-                demographicResolution,
-                prefs,
-              ),
+              onTap: () =>
+                  _showDemographicDialog(context, demographicResolution, prefs),
             ),
           ],
         ),
@@ -424,20 +426,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     DemographicResolution resolution,
     UserReadingPreferences? prefs,
   ) async {
-    final current = _selectedDemographics ??
-        prefs?.demographicFilter ??
-        resolution.effectiveFilter;
+    final current = DemographicResolution.selectionForDialog(
+      stored: _selectedDemographics ?? prefs?.demographicFilter,
+      resolution: resolution,
+    );
     final selected = await showDialog<Set<MangaDemographic>>(
       context: context,
-      builder: (ctx) => _MultiSelectDialog<MangaDemographic>(
-        title: context.l10n.profileDemographicTitle,
+      builder: (ctx) => DemographicSelectionDialog(
         options: resolution.allowedOptions,
         current: current.toSet(),
         labelFor: _demographicLabel,
+        emptySelectionMessage:
+            context.l10n.profileDemographicSelectionRequired,
       ),
     );
-    if (selected == null || !mounted) return;
+    if (selected == null || !context.mounted) return;
     final demographics = selected.toList();
+    if (!DemographicResolution.isValidSelection(demographics)) {
+      AppFeedback.showError(
+        context,
+        title: context.l10n.profileDemographicSelectionRequired,
+      );
+      return;
+    }
     setState(() => _selectedDemographics = demographics);
     await ref
         .read(preferencesProvider.notifier)
@@ -451,8 +462,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               _selectedReadingLanguage ??
               prefs?.defaultLanguage ??
               AppConstants.defaultLanguage,
-          contentRatingFilter:
-              prefs?.contentRatingFilter?.wireValue,
+          contentRatingFilter: prefs?.contentRatingFilter?.wireValue,
           demographicFilter: demographics.map((d) => d.toJson()).toList(),
         );
   }
@@ -1003,7 +1013,7 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
-                      context.l10n.clearAction,
+                      context.l10n.deleteAccountCancelAction,
                       style: const TextStyle(
                         fontFamily: 'Plus Jakarta Sans',
                         color: AppColors.onSurfaceVariant,

@@ -50,6 +50,26 @@ void main() {
       expect(model.demographicFilter, isEmpty);
     });
 
+    test('fromJson drops unknown values, deduplicates, and preserves unspecified', () {
+      final model = UserPreferencesModel.fromJson(<String, dynamic>{
+        'firebase_uid': 'uid-123',
+        'demographic_filter': <String>[
+          'seinen',
+          'unknown',
+          'unspecified',
+          'seinen',
+          'shoujo',
+        ],
+        'updated_at': '2026-01-01T00:00:00.000',
+      });
+
+      expect(model.demographicFilter, <MangaDemographic>[
+        MangaDemographic.shoujo,
+        MangaDemographic.seinen,
+        MangaDemographic.unspecified,
+      ]);
+    });
+
     test('toUpdateJson includes demographic_filter when provided', () {
       const model = UserPreferencesModel(
         firebaseUid: 'uid-123',

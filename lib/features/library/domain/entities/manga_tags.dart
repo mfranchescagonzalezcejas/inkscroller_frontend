@@ -17,14 +17,25 @@ enum MangaDemographic {
 
   /// Parses a wire string into a [MangaDemographic].
   ///
-  /// Falls back to [unspecified] for unknown values so cached/preference data
-  /// with removed entries (e.g. `kodomo`) does not crash on load.
-  static MangaDemographic fromJson(String value) {
-    for (final demo in MangaDemographic.values) {
-      if (demo.name == value) return demo;
-    }
-    return MangaDemographic.unspecified;
-  }
+  /// Returns the exact persisted value, or `null` for an unsupported token.
+  static MangaDemographic? tryFromJson(String value) =>
+      MangaDemographic.values.where((demo) => demo.name == value).firstOrNull;
+
+  /// Parses a supported wire value.
+  ///
+  /// Call [tryFromJson] when handling untrusted persisted data.
+  static MangaDemographic fromJson(String value) =>
+      tryFromJson(value) ?? MangaDemographic.shounen;
+}
+
+/// Returns a deterministic cache-key fragment for a list of demographic tokens.
+///
+/// Sorts, deduplicates, and joins the values so that different orderings of
+/// the same selection produce the same key.
+String canonicalDemographicsKey(List<String>? demographics) {
+  if (demographics == null || demographics.isEmpty) return 'none';
+  final normalized = demographics.toSet().toList()..sort();
+  return normalized.join(',');
 }
 
 /// String constants for manga publication status values.
