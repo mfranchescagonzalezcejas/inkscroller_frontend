@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:inkscroller_flutter/core/constants/api_endpoints.dart';
 import 'package:inkscroller_flutter/core/error/exceptions.dart';
 import 'package:inkscroller_flutter/features/library/data/models/chapter_model.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 import '../models/manga_model.dart';
 import '../models/search_result_model.dart';
 import 'library_remote_ds.dart';
@@ -26,6 +27,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     Map<String, String>? order,
     String? genre,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   }) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
@@ -35,6 +37,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           'offset': offset,
           if (genre != null) 'genre': genre,
           if (contentRating != null) 'content_rating': contentRating,
+          if (demographics != null && demographics.isNotEmpty)
+            'demographic': demographics.map((e) => e.toJson()).toList(),
           ...?order?.map((key, value) => MapEntry('order[$key]', value)),
         },
       );

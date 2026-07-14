@@ -362,6 +362,30 @@ abstract class AppLocalizations {
   /// **'Josei'**
   String get demographicJosei;
 
+  /// No description provided for @demographicKodomo.
+  ///
+  /// In en, this message translates to:
+  /// **'Kodomo'**
+  String get demographicKodomo;
+
+  /// No description provided for @demographicUnspecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unspecified'**
+  String get demographicUnspecified;
+
+  /// No description provided for @profileDemographicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Demographics shown'**
+  String get profileDemographicTitle;
+
+  /// No description provided for @profileDemographicCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String profileDemographicCount(int count);
+
   /// No description provided for @readNow.
   ///
   /// In en, this message translates to:

@@ -71,6 +71,17 @@
   "demographicShoujo": "Shoujo",
   "demographicSeinen": "Seinen",
   "demographicJosei": "Josei",
+  "demographicKodomo": "Kodomo",
+  "demographicUnspecified": "Sin especificar",
+  "profileDemographicTitle": "Demografía mostrada",
+  "profileDemographicCount": "{count} seleccionados",
+  "@profileDemographicCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readNow": "Leer ahora",
   "addToLibrary": "Añadir a biblioteca",
   "removeFromLibrary": "Quitar de biblioteca",

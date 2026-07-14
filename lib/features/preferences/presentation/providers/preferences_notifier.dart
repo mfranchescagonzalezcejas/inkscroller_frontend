@@ -37,6 +37,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
     String? defaultReaderMode,
     String? defaultLanguage,
     String? contentRatingFilter,
+    List<String>? demographicFilter,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
@@ -44,6 +45,7 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
       defaultReaderMode: defaultReaderMode,
       defaultLanguage: defaultLanguage,
       contentRatingFilter: contentRatingFilter,
+      demographicFilter: demographicFilter,
     );
 
     result.fold(

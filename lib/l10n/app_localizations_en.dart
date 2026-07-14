@@ -152,6 +152,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get demographicJosei => 'Josei';
 
   @override
+  String get demographicKodomo => 'Kodomo';
+
+  @override
+  String get demographicUnspecified => 'Unspecified';
+
+  @override
+  String get profileDemographicTitle => 'Demographics shown';
+
+  @override
+  String profileDemographicCount(int count) {
+    return '$count selected';
+  }
+
+  @override
   String get readNow => 'Read Now';
 
   @override

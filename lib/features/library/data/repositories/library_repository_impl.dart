@@ -7,6 +7,7 @@ import '../datasources/library_local_ds.dart';
 import '../models/chapter_model.dart';
 import '../models/manga_model.dart';
 import '../../domain/entities/manga.dart';
+import '../../domain/entities/manga_tags.dart';
 import '../../domain/entities/search_result.dart';
 import '../../domain/repositories/library_repository.dart';
 import '../datasources/library_remote_ds.dart';
@@ -43,6 +44,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     Map<String, String>? order,
     String? genre,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   }) async {
     try {
       final models = await remoteDataSource.getMangaList(
@@ -51,6 +53,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         order: order,
         genre: genre,
         contentRating: contentRating,
+        demographics: demographics,
       );
       await _cacheMangaList(
         limit: limit,

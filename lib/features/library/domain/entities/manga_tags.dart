@@ -1,9 +1,22 @@
-/// String constants for manga demographic categories used in API queries and UI filters.
-class MangaDemographic {
-  static const String shounen = 'shounen';
-  static const String shoujo = 'shoujo';
-  static const String seinen = 'seinen';
-  static const String josei = 'josei';
+/// Publication demographic categories for manga titles.
+///
+/// Maps to MangaDex demographic values. Serialises to lowercase string
+/// form for API requests via [toJson] / [fromJson].
+enum MangaDemographic {
+  kodomo,
+  shounen,
+  shoujo,
+  seinen,
+  josei,
+  unspecified;
+
+  /// Wire value sent to the backend (lowercase name).
+  String toJson() => name;
+
+  /// Parses a wire string into a [MangaDemographic].
+  ///
+  /// Throws [ArgumentError] if [value] is not a valid demographic.
+  static MangaDemographic fromJson(String value) => values.byName(value);
 }
 
 /// String constants for manga publication status values.

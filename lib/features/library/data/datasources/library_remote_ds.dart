@@ -1,6 +1,7 @@
 import '../models/chapter_model.dart';
 import '../models/manga_model.dart';
 import '../models/search_result_model.dart';
+import '../../domain/entities/manga_tags.dart';
 
 /// Contract for the remote data source that communicates with the backend API.
 ///
@@ -12,12 +13,14 @@ abstract class LibraryRemoteDataSource {
   /// [limit] and [offset] control pagination; [order] provides sort parameters.
   /// [genre] filters by genre name (e.g. "romance", "action") — resolved to
   /// a MangaDex tag UUID on the backend.
+  /// [demographics] filters by publication demographic (e.g. shounen).
   Future<List<MangaModel>> getMangaList({
     required int limit,
     required int offset,
     Map<String, String>? order,
     String? genre,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   });
 
   /// Fetches the full detail model for a single manga by [mangaId].

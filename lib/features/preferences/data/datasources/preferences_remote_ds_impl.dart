@@ -42,6 +42,7 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
     String? defaultReaderMode,
     String? defaultLanguage,
     String? contentRatingFilter,
+    List<String>? demographicFilter,
   }) async {
     try {
       final payload =
@@ -55,6 +56,13 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
             defaultLanguage: defaultLanguage,
             contentRatingFilter: contentRatingFilter,
           );
+
+      // If demographicFilter is explicitly passed, add it to the payload.
+      if (demographicFilter != null) {
+        payload['demographic_filter'] = demographicFilter.isEmpty
+            ? null
+            : demographicFilter;
+      }
 
       final Response<Map<String, dynamic>> response = await dio
           .put<Map<String, dynamic>>(
