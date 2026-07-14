@@ -53,10 +53,10 @@ void main() {
       return c;
   }
 
-  test('minor denies unspecified even when capability is supported', () async {
+  test('minor may select unspecified when capability supports it (age gate removed)', () async {
     final c = await containerFor(user: const AppUser(uid: 'minor', email: 'minor@test'), birthDate: DateTime(2010, 1, 1), fails: false);
     await c.read(mangaCapabilitiesProvider.future);
-    expect(c.read(demographicResolutionProvider).allowedOptions.map((e) => e.name), isNot(contains('unspecified')));
+    expect(c.read(demographicResolutionProvider).allowedOptions.map((e) => e.name), contains('unspecified'));
   });
   test('guest denies unspecified even when capability is supported', () async {
     final c = await containerFor(user: null, birthDate: null, fails: false);

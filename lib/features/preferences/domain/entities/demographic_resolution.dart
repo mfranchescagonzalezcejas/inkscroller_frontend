@@ -45,7 +45,6 @@ class DemographicResolution {
   // ignore: prefer_constructors_over_static_methods
   static DemographicResolution resolve({
     required bool isGuest,
-    bool isAdult = false,
     bool supportsUnspecified = false,
     List<MangaDemographic>? stored,
   }) {
@@ -55,7 +54,7 @@ class DemographicResolution {
               .where(
                 (demographic) =>
                     demographic != MangaDemographic.unspecified ||
-                    (isAdult && supportsUnspecified),
+                    supportsUnspecified,
               )
               .toList();
 

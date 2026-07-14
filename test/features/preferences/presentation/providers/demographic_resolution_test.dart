@@ -81,10 +81,9 @@ void main() {
       ]);
     });
 
-    test('supported adult keeps an unspecified mixed selection', () {
+    test('supported user keeps an unspecified mixed selection', () {
       final result = DemographicResolution.resolve(
         isGuest: false,
-        isAdult: true,
         supportsUnspecified: true,
         stored: [
           MangaDemographic.seinen,
@@ -101,29 +100,18 @@ void main() {
       expect(result.allowedOptions, contains(MangaDemographic.unspecified));
     });
 
-    test('minor and unsupported adult both remove unspecified', () {
-      final minor = DemographicResolution.resolve(
+    test('unsupported capability removes unspecified regardless of age', () {
+      final result = DemographicResolution.resolve(
         isGuest: false,
-        isAdult: false,
-        supportsUnspecified: true,
-        stored: <MangaDemographic>[MangaDemographic.unspecified],
-      );
-      final unavailable = DemographicResolution.resolve(
-        isGuest: false,
-        isAdult: true,
         supportsUnspecified: false,
         stored: <MangaDemographic>[MangaDemographic.unspecified],
       );
 
       expect(
-        minor.allowedOptions,
+        result.allowedOptions,
         isNot(contains(MangaDemographic.unspecified)),
       );
-      expect(
-        unavailable.allowedOptions,
-        isNot(contains(MangaDemographic.unspecified)),
-      );
-      expect(minor.effectiveFilter, <MangaDemographic>[
+      expect(result.effectiveFilter, <MangaDemographic>[
         MangaDemographic.shounen,
         MangaDemographic.shoujo,
       ]);
@@ -132,7 +120,6 @@ void main() {
     test('unavailable capability with stored unspecified falls back to default', () {
       final result = DemographicResolution.resolve(
         isGuest: false,
-        isAdult: true,
         supportsUnspecified: false,
         stored: <MangaDemographic>[
           MangaDemographic.unspecified,
@@ -190,7 +177,6 @@ void main() {
     test('uses the effective filter when stored values are unavailable', () {
       final resolution = DemographicResolution.resolve(
         isGuest: false,
-        isAdult: false,
         supportsUnspecified: false,
         stored: <MangaDemographic>[
           MangaDemographic.shounen,
