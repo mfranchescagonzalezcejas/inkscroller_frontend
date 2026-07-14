@@ -103,7 +103,6 @@ void main() {
     test('unsupported capability removes unspecified regardless of age', () {
       final result = DemographicResolution.resolve(
         isGuest: false,
-        supportsUnspecified: false,
         stored: <MangaDemographic>[MangaDemographic.unspecified],
       );
 
@@ -120,7 +119,6 @@ void main() {
     test('unavailable capability with stored unspecified falls back to default', () {
       final result = DemographicResolution.resolve(
         isGuest: false,
-        supportsUnspecified: false,
         stored: <MangaDemographic>[
           MangaDemographic.unspecified,
           MangaDemographic.shounen,
@@ -177,7 +175,6 @@ void main() {
     test('uses the effective filter when stored values are unavailable', () {
       final resolution = DemographicResolution.resolve(
         isGuest: false,
-        supportsUnspecified: false,
         stored: <MangaDemographic>[
           MangaDemographic.shounen,
           MangaDemographic.unspecified,

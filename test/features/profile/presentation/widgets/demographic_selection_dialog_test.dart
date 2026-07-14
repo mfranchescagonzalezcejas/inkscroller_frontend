@@ -7,7 +7,7 @@ import '../../../../support/l10n_test_helpers.dart';
 void main() {
   Future<Future<Set<MangaDemographic>?> Function()> pump(WidgetTester tester, List<MangaDemographic> options) async {
     late Future<Set<MangaDemographic>?> result;
-    await tester.pumpWidget(wrapWithL10n(Builder(builder: (context) => ElevatedButton(onPressed: () { result = showDialog<Set<MangaDemographic>>(context: context, builder: (_) => DemographicSelectionDialog(options: options, current: <MangaDemographic>{}, labelFor: (value) => value.name, emptySelectionMessage: 'Select at least one demographic')); }, child: const Text('open'))), locale: const Locale('en')));
+    await tester.pumpWidget(wrapWithL10n(Builder(builder: (context) => ElevatedButton(onPressed: () { result = showDialog<Set<MangaDemographic>>(context: context, builder: (_) => DemographicSelectionDialog(options: options, current: const <MangaDemographic>{}, labelFor: (value) => value.name, emptySelectionMessage: 'Select at least one demographic')); }, child: const Text('open'))), locale: const Locale('en')));
     await tester.tap(find.text('open')); await tester.pump();
     return () => result;
   }
