@@ -93,29 +93,47 @@ jobs:
           TAG="${{ github.ref_name }}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-          PREVIOUS_TAG=$(git rev-list --tags --skip=1 --max-count=1 \
-            | xargs -r git describe --tags 2>/dev/null || echo "")
+          # Anchor lookup to the current tag so re-running an older release
+          # still resolves the correct previous tag (avoid --sort global list).
+          PREVIOUS_TAG=$(git tag --sort=-v:refname \
+            | awk -v tag="$TAG" '$0 == tag {getline; print}')
+          # Guard: when TAG is the oldest/only tag, awk hits EOF and leaves
+          # $0 as the current tag — treat as empty so RANGE falls back to HEAD.
+          [ "$PREVIOUS_TAG" = "$TAG" ] && PREVIOUS_TAG=""
           RANGE="$PREVIOUS_TAG..HEAD"
           [ -z "$PREVIOUS_TAG" ] && RANGE="HEAD"
 
           mkdir -p release-metadata
 
           ALL_COMMITS=$(git log "$RANGE" --pretty=format:"%s")
-          FEATURES=$(printf '%s\n' "$ALL_COMMITS" | grep '^feat' || true)
-          FIXES=$(printf '%s\n' "$ALL_COMMITS" | grep '^fix' || true)
 
-          # DEV: feat + fix
-          {
-            [ -z "$FEATURES" ] || { echo "### 🚀 Features"; echo "$FEATURES" | sed 's/^/- /'; echo ""; }
-            [ -z "$FIXES" ] || { echo "### 🐛 Bug Fixes"; echo "$FIXES" | sed 's/^/- /'; }
-          } > release-metadata/release_notes_dev.txt
+          # Count and clean by type (support feat!: / feat(scope)!: breaking changes)
+          FEATURES=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^feat(!|\(|:)' || true)
+          FIXES=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^fix(!|\(|:)' || true)
+          REFACTORS=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^(refactor|perf)(!|\(|:)' || true)
+          FEAT_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^feat(!|\(|:)' || true)
+          FIX_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^fix(!|\(|:)' || true)
+          REFACTOR_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^(refactor|perf)(!|\(|:)' || true)
 
-          # STAGING/PRO: fix only
-          {
-            [ -z "$FIXES" ] || { echo "### 🐛 Bug Fixes"; echo "$FIXES" | sed 's/^/- /'; }
-          } > release-metadata/release_notes_staging.txt
+          # Strip conventional-commit prefix/scope (including ! for breaking)
+          STRIP_PREFIX='s/^(feat|fix|refactor|perf)(\([^)]*\))?!?:[[:space:]]*/- /'
 
-          cp release-metadata/release_notes_staging.txt release-metadata/release_notes_pro.txt
+          # Full notes: Summary + Features + Bug Fixes + Refactors (same for all flavors)
+          # Only write when there is at least one section — otherwise the fallback handles it.
+          if [ -n "$FEATURES" ] || [ -n "$FIXES" ] || [ -n "$REFACTORS" ]; then
+            {
+              echo "**Summary**"
+              echo "Release $TAG includes **$FEAT_COUNT features**, **$FIX_COUNT bug fixes** and **$REFACTOR_COUNT improvements** across the app."
+              echo ""
+              [ -z "$FEATURES" ] || { echo "**🚀 Features**"; printf '%s\n' "$FEATURES" | sed -E "$STRIP_PREFIX"; echo ""; }
+              [ -z "$FIXES" ] || { echo "**🐛 Bug Fixes**"; printf '%s\n' "$FIXES" | sed -E "$STRIP_PREFIX"; echo ""; }
+              [ -z "$REFACTORS" ] || { echo "**🔧 Refactors & Improvements**"; printf '%s\n' "$REFACTORS" | sed -E "$STRIP_PREFIX"; }
+            } > release-metadata/release_notes.txt
+
+            for f in dev staging pro; do
+              cp release-metadata/release_notes.txt "release-metadata/release_notes_${f}.txt"
+            done
+          fi
 
           DEFAULT_MESSAGE="- No user-visible changes"
           for f in dev staging pro; do
