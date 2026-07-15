@@ -112,7 +112,8 @@ jobs:
           # Strip conventional-commit prefix/scope so messages read naturally
           STRIP_PREFIX='s/^(feat|fix|refactor|perf)(\([^)]*\))?:[[:space:]]*/- /'
 
-          # DEV: full notes — Summary + Features + Bug Fixes + Refactors
+          # Full notes: Summary + Features + Bug Fixes + Refactors (same for all flavors)
+          FULL_NOTES="release-metadata/release_notes.txt"
           {
             echo "**Summary**"
             echo "Release $TAG includes **$FEAT_COUNT features**, **$FIX_COUNT bug fixes** and **$REFACTOR_COUNT improvements** across the app."
@@ -120,14 +121,11 @@ jobs:
             [ -z "$FEATURES" ] || { echo "**🚀 Features**"; printf '%s\n' "$FEATURES" | sed -E "$STRIP_PREFIX"; echo ""; }
             [ -z "$FIXES" ] || { echo "**🐛 Bug Fixes**"; printf '%s\n' "$FIXES" | sed -E "$STRIP_PREFIX"; echo ""; }
             [ -z "$REFACTORS" ] || { echo "**🔧 Refactors & Improvements**"; printf '%s\n' "$REFACTORS" | sed -E "$STRIP_PREFIX"; }
-          } > release-metadata/release_notes_dev.txt
+          } > "$FULL_NOTES"
 
-          # STAGING/PRO: fix only
-          {
-            [ -z "$FIXES" ] || { echo "**🐛 Bug Fixes**"; printf '%s\n' "$FIXES" | sed -E "$STRIP_PREFIX"; }
-          } > release-metadata/release_notes_staging.txt
-
-          cp release-metadata/release_notes_staging.txt release-metadata/release_notes_pro.txt
+          cp "$FULL_NOTES" release-metadata/release_notes_dev.txt
+          cp "$FULL_NOTES" release-metadata/release_notes_staging.txt
+          cp "$FULL_NOTES" release-metadata/release_notes_pro.txt
 
           DEFAULT_MESSAGE="- No user-visible changes"
           for f in dev staging pro; do
