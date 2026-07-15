@@ -75,7 +75,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: context.l10n.settingsAccountDeletedSuccessfully,
           );
         }
-        context.go(AppRoutes.login);
+        // Defer to the next frame so GoRouter's auth redirect settles
+        // before we request a route transition.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          context.go(AppRoutes.login);
+        });
       }
       if (next.deleteError != null && mounted) {
         final errorTitle = next.cleanupRecoveryPending
