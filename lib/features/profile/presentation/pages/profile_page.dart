@@ -18,9 +18,13 @@ import '../../../preferences/presentation/providers/content_rating_resolution_pr
 import '../../../preferences/domain/entities/user_reading_preferences.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../../preferences/presentation/providers/preferences_state.dart';
+import '../../../preferences/presentation/providers/demographic_resolution_provider.dart';
+import '../../../preferences/domain/entities/demographic_resolution.dart';
+import '../../../library/domain/entities/manga_tags.dart';
 import '../../domain/entities/user_profile.dart';
 import '../providers/user_profile_provider.dart';
 import '../providers/user_profile_state.dart';
+import '../widgets/demographic_selection_dialog.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -34,6 +38,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _preferencesRequested = false;
   ReaderMode? _selectedReaderMode;
   String? _selectedReadingLanguage;
+  List<MangaDemographic>? _selectedDemographics;
 
   static const List<String> _supportedAppLanguages = <String>['en', 'es'];
 
@@ -67,6 +72,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final profileState = ref.watch(userProfileProvider);
     final preferencesState = ref.watch(preferencesProvider);
     final contentRatingResolution = ref.watch(contentRatingResolutionProvider);
+    final demographicResolution = ref.watch(demographicResolutionProvider);
 
     if (authState.user != null && !_profileRequested) {
       _profileRequested = true;
@@ -90,6 +96,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       _preferencesRequested = false;
       _selectedReaderMode = null;
       _selectedReadingLanguage = null;
+      _selectedDemographics = null;
     }
 
     ref.listen(preferencesProvider, (previous, next) {
@@ -98,6 +105,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         setState(() {
           _selectedReaderMode = next.preferences?.defaultReaderMode;
           _selectedReadingLanguage = next.preferences?.defaultLanguage;
+          _selectedDemographics = next.preferences?.demographicFilter;
         });
       }
     });
@@ -124,6 +132,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 profileState,
                 preferencesState,
                 contentRatingResolution,
+                demographicResolution,
               ),
       ),
     );
@@ -190,6 +199,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     UserProfileState profileState,
     PreferencesState preferencesState,
     ContentRatingResolution contentRatingResolution,
+    DemographicResolution demographicResolution,
   ) {
     final appLocale = ref.watch(appLocaleProvider);
     final profile = profileState.profile;
@@ -280,6 +290,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 contentRatingResolution,
                 prefs,
               ),
+            ),
+            _PrefRow(
+              icon: Icons.category_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profileDemographicTitle,
+              value: _demographicCountLabel(
+                context,
+                DemographicResolution.selectionForDialog(
+                  stored: _selectedDemographics,
+                  resolution: demographicResolution,
+                ),
+              ),
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showDemographicDialog(
+                        context, demographicResolution, prefs,
+                      ),
             ),
           ],
         ),
@@ -388,6 +415,69 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   .name,
           defaultLanguage: selected,
         );
+  }
+
+  String _demographicCountLabel(
+    BuildContext context,
+    List<MangaDemographic> selected,
+  ) {
+    return context.l10n.profileDemographicCount(selected.length);
+  }
+
+  Future<void> _showDemographicDialog(
+    BuildContext context,
+    DemographicResolution resolution,
+    UserReadingPreferences? prefs,
+  ) async {
+    final current = DemographicResolution.selectionForDialog(
+      stored: _selectedDemographics ?? prefs?.demographicFilter,
+      resolution: resolution,
+    );
+    final selected = await showDialog<Set<MangaDemographic>>(
+      context: context,
+      builder: (ctx) => DemographicSelectionDialog(
+        options: resolution.allowedOptions,
+        current: current.toSet(),
+        labelFor: (demo) => _demographicLabel(context, demo),
+        emptySelectionMessage:
+            context.l10n.profileDemographicSelectionRequired,
+      ),
+    );
+    if (selected == null || !context.mounted) return;
+    final demographics = selected.toList();
+    if (!DemographicResolution.isValidSelection(demographics)) {
+      AppFeedback.showError(
+        context,
+        title: context.l10n.profileDemographicSelectionRequired,
+      );
+      return;
+    }
+    setState(() => _selectedDemographics = demographics);
+    await ref
+        .read(preferencesProvider.notifier)
+        .savePreferences(
+          defaultReaderMode:
+              (_selectedReaderMode ??
+                      prefs?.defaultReaderMode ??
+                      ReaderMode.vertical)
+                  .name,
+          defaultLanguage:
+              _selectedReadingLanguage ??
+              prefs?.defaultLanguage ??
+              AppConstants.defaultLanguage,
+          contentRatingFilter: prefs?.contentRatingFilter?.wireValue,
+          demographicFilter: demographics.map((d) => d.toJson()).toList(),
+        );
+  }
+
+  String _demographicLabel(BuildContext context, MangaDemographic demo) {
+    return switch (demo) {
+      MangaDemographic.shounen => context.l10n.demographicShounen,
+      MangaDemographic.shoujo => context.l10n.demographicShoujo,
+      MangaDemographic.seinen => context.l10n.demographicSeinen,
+      MangaDemographic.josei => context.l10n.demographicJosei,
+      MangaDemographic.unspecified => context.l10n.demographicUnspecified,
+    };
   }
 
   String _contentRatingLabel(BuildContext context, ContentRating rating) {
@@ -821,6 +911,126 @@ class _SelectionDialog<T> extends StatelessWidget {
                       )
                       .toList(),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Multi-select dialog ──────────────────────────────────────────────────────
+
+class _MultiSelectDialog<T> extends StatefulWidget {
+  const _MultiSelectDialog({
+    required this.title,
+    required this.options,
+    required this.current,
+    required this.labelFor,
+  });
+
+  final String title;
+  final List<T> options;
+  final Set<T> current;
+  final String Function(T) labelFor;
+
+  @override
+  State<_MultiSelectDialog<T>> createState() => _MultiSelectDialogState<T>();
+}
+
+class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
+  late Set<T> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Set<T>.from(widget.current);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.card,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+              child: Text(
+                widget.title,
+                style: const TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onSurface,
+                ),
+              ),
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: widget.options
+                      .map(
+                        (option) => CheckboxListTile(
+                          value: _selected.contains(option),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value ?? false) {
+                                _selected.add(option);
+                              } else {
+                                _selected.remove(option);
+                              }
+                            });
+                          },
+                          title: Text(
+                            widget.labelFor(option),
+                            style: const TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 14,
+                              color: AppColors.onSurface,
+                            ),
+                          ),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: AppColors.primary,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      context.l10n.deleteAccountCancelAction,
+                      style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(_selected),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                    ),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
             ),
           ],

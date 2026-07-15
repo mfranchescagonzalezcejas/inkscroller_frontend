@@ -93,11 +93,27 @@ class HomePage extends ConsumerWidget {
       appBar: AppTopBar(authState: authState),
       body: libraryState.isLoading && libraryState.mangas.isEmpty
           ? const LibraryShimmer()
-          : RefreshIndicator(
-              color: AppColors.primary,
-              backgroundColor: AppColors.card,
-              onRefresh: () => ref.read(libraryProvider.notifier).refresh(),
-              child: _HomeBody(homeState: homeState),
+          : Stack(
+              children: [
+                RefreshIndicator(
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.card,
+                  onRefresh: () =>
+                      ref.read(libraryProvider.notifier).refresh(),
+                  child: _HomeBody(homeState: homeState),
+                ),
+                if (libraryState.isLoading && libraryState.mangas.isNotEmpty)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.transparent,
+                      color: AppColors.primary.withValues(alpha: 0.5),
+                      minHeight: 2,
+                    ),
+                  ),
+              ],
             ),
     );
   }

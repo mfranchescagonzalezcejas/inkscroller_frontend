@@ -114,6 +114,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (isOffline) const OfflineBanner(),
+          if (state.isLoading && state.mangas.isNotEmpty)
+            LinearProgressIndicator(
+              backgroundColor: Colors.transparent,
+              color: AppColors.primary.withValues(alpha: 0.5),
+              minHeight: 2,
+            ),
           const _ExploreHeader(),
           _ExploreSearchBar(
             controller: _searchController,

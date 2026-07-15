@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
 import 'package:inkscroller_flutter/features/preferences/data/datasources/preferences_local_ds_impl.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/entities/content_rating.dart';
@@ -57,6 +58,43 @@ void main() {
     expect(result, isNotNull);
     expect(result!.contentRatingFilter, ContentRating.suggestive);
     expect(result.defaultReaderMode, ReaderMode.vertical);
+  });
+
+  test('drops unknown demographic values from cache', () async {
+    // Pre-seed cache with a known good value + an unknown `kodomo` token.
+    await prefs.setString('cached_user_reading_preferences', '''
+{
+  "defaultReaderMode": "vertical",
+  "defaultLanguage": "en",
+  "demographicFilter": ["seinen", "kodomo", "josei"],
+  "updatedAt": "${DateTime(2026, 6).toIso8601String()}"
+}''');
+    await prefs.setInt(
+      'cached_preferences_timestamp',
+      DateTime.now().millisecondsSinceEpoch,
+    );
+
+    final result = await dataSource.getCachedPreferences();
+
+    expect(result, isNotNull);
+    expect(
+      result!.demographicFilter,
+      const <MangaDemographic>[MangaDemographic.seinen, MangaDemographic.josei],
+    );
+  });
+
+  test('round-trips demographicFilter', () async {
+    final prefsWithDemographics = UserReadingPreferences(
+      defaultReaderMode: ReaderMode.vertical,
+      defaultLanguage: 'en',
+      demographicFilter: const <MangaDemographic>[MangaDemographic.seinen, MangaDemographic.josei],
+      updatedAt: DateTime(2026, 6),
+    );
+
+    await dataSource.savePreferences(prefsWithDemographics);
+    final result = await dataSource.getCachedPreferences();
+
+    expect(result!.demographicFilter, const <MangaDemographic>[MangaDemographic.seinen, MangaDemographic.josei]);
   });
 
   test('returns null when cache is expired', () async {

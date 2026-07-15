@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../library/domain/entities/manga_tags.dart';
 import '../../../library/domain/entities/reader_mode.dart';
 import '../../domain/entities/content_rating.dart';
 import '../../domain/entities/user_reading_preferences.dart';
@@ -38,6 +39,11 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
     try {
       final data = jsonDecode(json) as Map<String, dynamic>;
       final crf = data['contentRatingFilter'] as String?;
+      final demographicFilter = (data['demographicFilter'] as List<dynamic>?)
+          ?.whereType<String>()
+          .map(MangaDemographic.tryFromJson)
+          .whereType<MangaDemographic>()
+          .toList();
       return UserReadingPreferences(
         defaultReaderMode: ReaderMode.values.byName(
           data['defaultReaderMode'] as String,
@@ -49,6 +55,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
           'all' => ContentRating.all,
           _ => null,
         },
+        demographicFilter: demographicFilter,
         updatedAt: DateTime.parse(data['updatedAt'] as String),
       );
     } on Object {
@@ -64,6 +71,10 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       'defaultLanguage': preferences.defaultLanguage,
       if (preferences.contentRatingFilter != null)
         'contentRatingFilter': preferences.contentRatingFilter!.wireValue,
+      if (preferences.demographicFilter != null)
+        'demographicFilter': preferences.demographicFilter!
+            .map((demographic) => demographic.toJson())
+            .toList(),
       'updatedAt': preferences.updatedAt.toIso8601String(),
     });
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/app_constants.dart';
+import '../../../domain/entities/manga_tags.dart';
 import '../../../domain/usecases/get_manga_list.dart';
 import '../../../domain/usecases/search_manga.dart';
 import 'dedupe_mangas.dart';
@@ -11,9 +12,17 @@ import 'library_state.dart';
 /// Browsing mode that determines the sort order used by [LibraryNotifier].
 enum LibraryMode { normal, popular }
 
-/// Cache key for genre tabs - combines mode, genre, and contentRating for unique identification.
-String _cacheKey(LibraryMode mode, String? genre, {String? contentRating}) =>
-    '${mode.name}:$genre:cr:${contentRating ?? 'default'}';
+/// Cache key for genre tabs — includes canonical demographics so different
+/// filters never share cached pages and reordered selections reuse the tab.
+String _cacheKey(
+  LibraryMode mode,
+  String? genre, {
+  String? contentRating,
+  List<String>? demographics,
+}) {
+  return '${mode.name}:$genre:cr:${contentRating ?? 'default'}'
+      ':d:${canonicalDemographicsKey(demographics)}';
+}
 
 /// Manages paginated manga list state with search, debounce, and deduplication.
 ///
@@ -24,10 +33,15 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     this._getMangaList,
     this._searchManga, {
     String? initialContentRating,
+    List<String>? initialDemographics,
   })  : _mode = LibraryMode.normal,
         _contentRating = initialContentRating,
+        _demographics = initialDemographics,
         super(LibraryState.initial()) {
-    loadInitial(contentRating: initialContentRating);
+    loadInitial(
+      contentRating: initialContentRating,
+      demographics: initialDemographics,
+    );
   }
 
   final GetMangaList _getMangaList;
@@ -36,9 +50,15 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   LibraryMode _mode;
   String? _genre;
   String? _contentRating;
+  List<String>? _demographics;
 
   int _offset = 0;
   static const int _limit = AppConstants.mangaPageLimit;
+
+  /// Monotonic version counter that invalidates stale [loadInitial] responses.
+  /// When preferences resolve after the initial constructor load, a second
+  /// call supersedes the first — the wrong-demographics response is discarded.
+  int _loadVersion = 0;
 
   Timer? _searchDebounce;
   String _activeQuery = '';
@@ -47,8 +67,21 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   int _totalResults = 0;
   int _searchQueryVersion = 0;
 
-  /// Cache for genre tabs - provides instant tab switching.
-  final Map<String, LibraryState> _tabCache = {};
+  /// Shared cache for genre tabs — static so sibling [LibraryNotifier]
+  /// instances (Home and Explore) reuse each other's cached pages instead
+  /// of fetching the same data twice.
+  static final Map<String, LibraryState> _tabCache = {};
+
+  /// Offset per cache key, kept alongside [id://_tabCache] so pagination
+  /// resumes correctly when a sibling notifier reuses cached state.
+  static final Map<String, int> _tabCacheOffset = {};
+
+  /// Clears the shared cache so a subsequent [loadInitial] fetches fresh data.
+  /// Exposed for testing — call in [setUp] to isolate test cases.
+  static void resetSharedCache() {
+    _tabCache.clear();
+    _tabCacheOffset.clear();
+  }
 
   @override
   void dispose() {
@@ -60,24 +93,37 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     LibraryMode mode = LibraryMode.normal,
     String? genre,
     String? contentRating,
+    List<String>? demographics,
   }) async {
-    final key = _cacheKey(mode, genre, contentRating: contentRating);
+    final effectiveDemographics = demographics ?? _demographics;
+    final key = _cacheKey(
+      mode,
+      genre,
+      contentRating: contentRating,
+      demographics: effectiveDemographics,
+    );
 
     // Return cached result immediately if available.
     if (_tabCache.containsKey(key)) {
+      _loadVersion++; // Invalidate any in-flight stale requests.
       final cached = _tabCache[key]!;
-      state = cached;
+      state = cached.copyWith(isLoadingMore: false);
       _mode = mode;
       _genre = genre;
       _contentRating = contentRating;
+      _demographics = effectiveDemographics;
+      _offset = _tabCacheOffset[key] ?? 0;
       return;
     }
 
-    state = state.copyWith(isLoading: true, clearFailure: true);
+    _loadVersion++;
+    final capturedVersion = _loadVersion;
+    state = state.copyWith(isLoading: true, isLoadingMore: false, clearFailure: true);
 
     _mode = mode;
     _genre = genre;
     _contentRating = contentRating;
+    _demographics = effectiveDemographics;
     _offset = 0;
 
     final result = await _getMangaList(
@@ -86,10 +132,12 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       order: _mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
       genre: _genre,
       contentRating: _contentRating,
+      demographics: effectiveDemographics?.map(MangaDemographic.fromJson).toList(),
     );
 
     result.fold(
       (failure) {
+        if (capturedVersion != _loadVersion) return;
         state = state.copyWith(
           isLoading: false,
           mangas: const [],
@@ -99,6 +147,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         // Skip caching failures so refresh() triggers a real network retry.
       },
       (mangas) {
+        if (capturedVersion != _loadVersion) return;
         _offset += mangas.length;
 
         final newState = state.copyWith(
@@ -109,6 +158,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         );
         state = newState;
         _tabCache[key] = newState;
+        _tabCacheOffset[key] = _offset;
       },
     );
   }
@@ -118,6 +168,8 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     if (state.isSearching) return;
     if (state.isLoadingMore || !state.hasMore) return;
 
+    _loadVersion++;
+    final capturedVersion = _loadVersion;
     state = state.copyWith(isLoadingMore: true, clearFailure: true);
 
     final result = await _getMangaList(
@@ -125,13 +177,16 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       offset: _offset,
       genre: _genre,
       contentRating: _contentRating,
+      demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
     );
 
     result.fold(
       (failure) {
+        if (capturedVersion != _loadVersion) return;
         state = state.copyWith(isLoadingMore: false, failure: failure);
       },
       (newMangas) {
+        if (capturedVersion != _loadVersion) return;
         _offset += newMangas.length;
 
         final combined = dedupeMangas([...state.mangas, ...newMangas]);
@@ -185,8 +240,14 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   /// When a search query is active, re-runs the search from offset 0 instead
   /// of loading the catalogue, so pull-to-refresh refreshes search results.
   /// Clears the tab cache so catalogue refresh always fetches fresh data.
-  Future<void> refresh({String? contentRating}) {
+  Future<void> refresh({String? contentRating, List<String>? demographics}) {
     final query = _activeQuery;
+    if (demographics != null) {
+      _demographics = demographics;
+    }
+    if (contentRating != null) {
+      _contentRating = contentRating;
+    }
     if (query.isNotEmpty) {
       // ponytail: search refresh reuses _performSearch which resets offset
       // and version internally — no need to duplicate cursor reset here.
@@ -194,12 +255,20 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       return _performSearch(query);
     }
     final effectiveCR = contentRating ?? _contentRating;
-    final key = _cacheKey(_mode, _genre, contentRating: effectiveCR);
+    final effectiveDemo = demographics ?? _demographics;
+    final key = _cacheKey(
+      _mode,
+      _genre,
+      contentRating: effectiveCR,
+      demographics: effectiveDemo,
+    );
     _tabCache.remove(key);
+    _tabCacheOffset.remove(key);
     return loadInitial(
       mode: _mode,
       genre: _genre,
       contentRating: effectiveCR,
+      demographics: effectiveDemo,
     );
   }
 
@@ -207,7 +276,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   Future<void> setGenre(String? genre) {
     // Genre tabs are part of the normal catalogue flow, not the dedicated
     // popularity ranking mode. Reset mode to normal whenever a genre changes.
-    return loadInitial(genre: genre, contentRating: _contentRating);
+    return loadInitial(
+      genre: genre,
+      contentRating: _contentRating,
+      demographics: _demographics,
+    );
   }
 
   /// Resets Explore to its initial catalogue state.
@@ -225,8 +298,12 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     _genre = null;
     _mode = LibraryMode.normal;
     _tabCache.clear();
+    _tabCacheOffset.clear();
     state = LibraryState.initial();
-    await loadInitial(contentRating: _contentRating);
+    await loadInitial(
+      contentRating: _contentRating,
+      demographics: _demographics,
+    );
   }
 
   /// Loads the next page of search results.
@@ -250,6 +327,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       limit: _limit,
       offset: _searchOffset,
       contentRating: _contentRating,
+      demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
     );
 
     if (_searchQueryVersion != capturedGeneration) return;
@@ -297,6 +375,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       limit: _limit,
       offset: 0,
       contentRating: _contentRating,
+      demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
     );
 
     if (_searchQueryVersion != capturedGeneration) return;

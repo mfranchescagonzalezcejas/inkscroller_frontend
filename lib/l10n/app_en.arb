@@ -71,6 +71,17 @@
   "demographicShoujo": "Shoujo",
   "demographicSeinen": "Seinen",
   "demographicJosei": "Josei",
+  "demographicUnspecified": "Unspecified",
+  "profileDemographicTitle": "Demographics shown",
+  "profileDemographicCount": "{count,plural, =1{1 selected} other{{count} selected}}",
+  "profileDemographicSelectionRequired": "Select at least one demographic",
+  "@profileDemographicCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readNow": "Read Now",
   "addToLibrary": "Add to Library",
   "removeFromLibrary": "Remove from Library",
@@ -222,6 +233,8 @@
   "readerSettingsAmoledSubtitle": "Save battery on OLED screens",
   "readerSettingsImmersive": "Immersive mode",
   "readerSettingsImmersiveSubtitle": "Hide system navigation bars",
+  "dialogConfirm": "OK",
+  "dialogCancel": "Cancel",
   "readerSettingsConfirm": "Confirm settings",
   "readerDirectionLtr": "LTR",
   "readerDirectionRtl": "RTL",

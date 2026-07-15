@@ -13,5 +13,6 @@ abstract class PreferencesRepository {
     String? defaultReaderMode,
     String? defaultLanguage,
     String? contentRatingFilter,
+    List<String>? demographicFilter,
   });
 }

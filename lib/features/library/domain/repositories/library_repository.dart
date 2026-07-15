@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/chapter.dart';
 import '../entities/manga.dart';
+import '../entities/manga_tags.dart';
 import '../entities/search_result.dart';
 
 /// Domain contract for all library data operations.
@@ -14,12 +15,14 @@ abstract class LibraryRepository {
   /// Returns a paginated list of manga titles.
   ///
   /// [genre] filters by genre name (e.g. "romance", "action").
+  /// [demographics] filters by publication demographic (e.g. shounen).
   Future<Either<Failure, List<Manga>>> getMangaList({
     required int limit,
     required int offset,
     Map<String, String>? order,
     String? genre,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   });
 
   /// Fetches the full detail of a single manga by its [mangaId].
@@ -37,11 +40,13 @@ abstract class LibraryRepository {
   ///
   /// [limit] and [offset] control pagination. The returned [SearchResult]
   /// contains both the page items and the backend pagination metadata.
+  /// [demographics] filters by publication demographic.
   Future<Either<Failure, SearchResult>> searchManga(
     String query, {
     required int limit,
     required int offset,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   });
 
   /// Clears all persisted library cache entries.

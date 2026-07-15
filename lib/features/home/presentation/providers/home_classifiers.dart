@@ -32,8 +32,13 @@ class HomeClassifier {
       );
 
   /// Returns up to the configured limit whose [Manga.demographic] matches [demo].
-  static List<Manga> byDemographic(List<Manga> all, String demo) =>
-      takeSafe(all.where((m) => m.demographic == demo).toList());
+  static List<Manga> byDemographic(
+    List<Manga> all,
+    MangaDemographic demo,
+  ) =>
+      takeSafe(
+        all.where((m) => m.demographic == demo.toJson()).toList(),
+      );
 
   /// Classifies [all] into a complete [HomeState] ready for the home screen.
   static HomeState classify(List<Manga> all) => HomeState(

@@ -152,6 +152,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get demographicJosei => 'Josei';
 
   @override
+  String get demographicUnspecified => 'Unspecified';
+
+  @override
+  String get profileDemographicTitle => 'Demographics shown';
+
+  @override
+  String profileDemographicCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileDemographicSelectionRequired =>
+      'Select at least one demographic';
+
+  @override
   String get readNow => 'Read Now';
 
   @override
@@ -464,6 +485,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readerSettingsImmersiveSubtitle => 'Hide system navigation bars';
+
+  @override
+  String get dialogConfirm => 'OK';
+
+  @override
+  String get dialogCancel => 'Cancel';
 
   @override
   String get readerSettingsConfirm => 'Confirm settings';

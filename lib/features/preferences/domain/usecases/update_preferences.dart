@@ -15,11 +15,13 @@ class UpdatePreferences {
     String? defaultReaderMode,
     String? defaultLanguage,
     String? contentRatingFilter,
+    List<String>? demographicFilter,
   }) {
     return repository.updatePreferences(
       defaultReaderMode: defaultReaderMode,
       defaultLanguage: defaultLanguage,
       contentRatingFilter: contentRatingFilter,
+      demographicFilter: demographicFilter,
     );
   }
 }

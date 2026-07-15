@@ -362,6 +362,30 @@ abstract class AppLocalizations {
   /// **'Josei'**
   String get demographicJosei;
 
+  /// No description provided for @demographicUnspecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unspecified'**
+  String get demographicUnspecified;
+
+  /// No description provided for @profileDemographicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Demographics shown'**
+  String get profileDemographicTitle;
+
+  /// No description provided for @profileDemographicCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{1 selected} other{{count} selected}}'**
+  String profileDemographicCount(int count);
+
+  /// No description provided for @profileDemographicSelectionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one demographic'**
+  String get profileDemographicSelectionRequired;
+
   /// No description provided for @readNow.
   ///
   /// In en, this message translates to:
@@ -943,6 +967,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide system navigation bars'**
   String get readerSettingsImmersiveSubtitle;
+
+  /// No description provided for @dialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get dialogConfirm;
+
+  /// No description provided for @dialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get dialogCancel;
 
   /// No description provided for @readerSettingsConfirm.
   ///

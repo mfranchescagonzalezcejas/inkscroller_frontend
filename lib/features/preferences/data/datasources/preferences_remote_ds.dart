@@ -10,5 +10,6 @@ abstract class PreferencesRemoteDataSource {
     String? defaultReaderMode,
     String? defaultLanguage,
     String? contentRatingFilter,
+    List<String>? demographicFilter,
   });
 }

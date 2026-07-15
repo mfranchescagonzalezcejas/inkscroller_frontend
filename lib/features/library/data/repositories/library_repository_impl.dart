@@ -7,6 +7,7 @@ import '../datasources/library_local_ds.dart';
 import '../models/chapter_model.dart';
 import '../models/manga_model.dart';
 import '../../domain/entities/manga.dart';
+import '../../domain/entities/manga_tags.dart';
 import '../../domain/entities/search_result.dart';
 import '../../domain/repositories/library_repository.dart';
 import '../datasources/library_remote_ds.dart';
@@ -43,6 +44,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     Map<String, String>? order,
     String? genre,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   }) async {
     try {
       final models = await remoteDataSource.getMangaList(
@@ -51,11 +53,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
         order: order,
         genre: genre,
         contentRating: contentRating,
+        demographics: demographics,
       );
       await _cacheMangaList(
         limit: limit,
         offset: offset,
         order: order,
+        genre: genre,
+        contentRating: contentRating,
+        demographics: demographics?.map((d) => d.name).toList(),
         mangas: models,
       );
 
@@ -65,6 +71,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
         limit: limit,
         offset: offset,
         order: order,
+        genre: genre,
+        contentRating: contentRating,
+        demographics: demographics?.map((d) => d.name).toList(),
         maxAge: mangaListCacheTtl,
       );
       if (cached != null) {
@@ -131,8 +140,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
     }
   }
 
-  String _searchCacheKey(String query, int limit, int offset, String? contentRating) =>
-      '$query:$limit:$offset:cr:${contentRating ?? 'default'}';
+  String _searchCacheKey(
+    String query,
+    int limit,
+    int offset,
+    String? contentRating,
+    List<String>? demographics,
+  ) =>
+      '$query:$limit:$offset:cr:${contentRating ?? 'default'}'
+      ':d:${canonicalDemographicsKey(demographics)}';
 
   @override
   Future<Either<Failure, SearchResult>> searchManga(
@@ -140,6 +156,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     required int limit,
     required int offset,
     String? contentRating,
+    List<MangaDemographic>? demographics,
   }) async {
     try {
       final model = await remoteDataSource.searchManga(
@@ -147,13 +164,28 @@ class LibraryRepositoryImpl implements LibraryRepository {
         limit: limit,
         offset: offset,
         contentRating: contentRating,
+        demographics: demographics,
       );
       final entity = model.toEntity();
-      _searchCache[_searchCacheKey(query, limit, offset, contentRating)] = entity;
+      final demographicTokens = demographics?.map((d) => d.name).toList();
+      _searchCache[_searchCacheKey(
+        query,
+        limit,
+        offset,
+        contentRating,
+        demographicTokens,
+      )] = entity;
       return Right(entity);
     } on AppException catch (error) {
       // Fall back to cached search result for this page when offline.
-      final cached = _searchCache[_searchCacheKey(query, limit, offset, contentRating)];
+      final demographicTokens = demographics?.map((d) => d.name).toList();
+      final cached = _searchCache[_searchCacheKey(
+        query,
+        limit,
+        offset,
+        contentRating,
+        demographicTokens,
+      )];
       if (cached != null) {
         return Right(cached);
       }
@@ -201,6 +233,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
     required int limit,
     required int offset,
     Map<String, String>? order,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
     required List<MangaModel> mangas,
   }) async {
     try {
@@ -208,6 +243,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
         limit: limit,
         offset: offset,
         order: order,
+        genre: genre,
+        contentRating: contentRating,
+        demographics: demographics,
         mangas: mangas,
       );
     } on CacheException {
@@ -238,6 +276,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
     required int limit,
     required int offset,
     Map<String, String>? order,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
     required Duration maxAge,
   }) async {
     try {
@@ -245,6 +286,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
         limit: limit,
         offset: offset,
         order: order,
+        genre: genre,
+        contentRating: contentRating,
+        demographics: demographics,
         maxAge: maxAge,
       );
     } on CacheException {

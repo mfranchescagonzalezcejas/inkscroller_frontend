@@ -10,6 +10,9 @@ abstract class LibraryLocalDataSource {
     required int limit,
     required int offset,
     Map<String, String>? order,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
     required Duration maxAge,
   });
 
@@ -18,6 +21,9 @@ abstract class LibraryLocalDataSource {
     required int limit,
     required int offset,
     Map<String, String>? order,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
     required List<MangaModel> mangas,
   });
 

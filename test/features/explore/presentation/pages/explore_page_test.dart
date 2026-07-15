@@ -67,6 +67,7 @@ class _SpyLibraryNotifier extends LibraryNotifier {
     LibraryMode mode = LibraryMode.normal,
     String? genre,
     String? contentRating,
+    List<String>? demographics,
   }) async {}
 
   @override
@@ -99,6 +100,7 @@ class _FixedStateNotifier extends LibraryNotifier {
     LibraryMode mode = LibraryMode.normal,
     String? genre,
     String? contentRating,
+    List<String>? demographics,
   }) async {}
 }
 
