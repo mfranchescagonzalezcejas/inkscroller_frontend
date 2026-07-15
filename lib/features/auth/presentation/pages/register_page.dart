@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
@@ -371,13 +372,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       controlAffinity: ListTileControlAffinity.leading,
                       activeColor: AppColors.primary,
                       checkColor: Colors.white,
-                      title: Text(
-                        context.l10n.authTermsAcknowledgement,
-                        style: const TextStyle(
-                          fontFamily: AppTypography.fontFamily,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.onSurfaceVariant,
+                      title: GestureDetector(
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'https://inkscroller-privacy.vercel.app/',
+                          ),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        child: Text(
+                          context.l10n.authTermsAcknowledgement,
+                          style: const TextStyle(
+                            fontFamily: AppTypography.fontFamily,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            decoration: TextDecoration.underline,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                     ),
