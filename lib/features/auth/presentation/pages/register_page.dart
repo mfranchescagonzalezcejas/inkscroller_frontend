@@ -146,6 +146,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return '$year-$month-$day';
   }
 
+  Future<void> _openTermsUrl() async {
+    final uri = Uri.parse('https://inkscroller-privacy.vercel.app/');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } on Exception catch (e, st) {
+      debugPrint('[TermsLink] Failed to launch URL: $e\n$st');
+      if (!mounted) return;
+      AppFeedback.showWarning(
+        context,
+        title: context.l10n.authTermsAcknowledgement,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -362,34 +376,35 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   if (!isProfileCompletion) ...<Widget>[
                     const SizedBox(height: 16),
 
-                    CheckboxListTile(
-                      value: _acceptedTerms,
-                      onChanged: isActionLocked
-                          ? null
-                          : (value) =>
-                                setState(() => _acceptedTerms = value ?? false),
-                      contentPadding: EdgeInsets.zero,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      activeColor: AppColors.primary,
-                      checkColor: Colors.white,
-                      title: GestureDetector(
-                        onTap: () => launchUrl(
-                          Uri.parse(
-                            'https://inkscroller-privacy.vercel.app/',
-                          ),
-                          mode: LaunchMode.externalApplication,
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _acceptedTerms,
+                          onChanged: isActionLocked
+                              ? null
+                              : (value) => setState(
+                                  () => _acceptedTerms = value ?? false),
+                          activeColor: AppColors.primary,
+                          checkColor: Colors.white,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: Text(
-                          context.l10n.authTermsAcknowledgement,
-                          style: const TextStyle(
-                            fontFamily: AppTypography.fontFamily,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                            decoration: TextDecoration.underline,
-                            color: AppColors.primary,
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: _openTermsUrl,
+                            child: Text(
+                              context.l10n.authTermsAcknowledgement,
+                              style: const TextStyle(
+                                fontFamily: AppTypography.fontFamily,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                decoration: TextDecoration.underline,
+                                color: AppColors.primary,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
 
