@@ -107,7 +107,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     if (_tabCache.containsKey(key)) {
       _loadVersion++; // Invalidate any in-flight stale requests.
       final cached = _tabCache[key]!;
-      state = cached;
+      state = cached.copyWith(isLoadingMore: false);
       _mode = mode;
       _genre = genre;
       _contentRating = contentRating;
@@ -118,7 +118,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     _loadVersion++;
     final capturedVersion = _loadVersion;
-    state = state.copyWith(isLoading: true, clearFailure: true);
+    state = state.copyWith(isLoading: true, isLoadingMore: false, clearFailure: true);
 
     _mode = mode;
     _genre = genre;
