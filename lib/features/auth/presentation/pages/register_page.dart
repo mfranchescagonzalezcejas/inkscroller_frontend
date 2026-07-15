@@ -382,36 +382,41 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   if (!isProfileCompletion) ...<Widget>[
                     const SizedBox(height: 16),
 
-                    Row(
-                      children: [
-                        Semantics(
-                          label: context.l10n.authTermsAcknowledgement,
-                          child: Checkbox(
-                            value: _acceptedTerms,
-                            onChanged: isActionLocked
-                                ? null
-                                : (value) => setState(
-                                    () => _acceptedTerms = value ?? false),
-                            activeColor: AppColors.primary,
-                            checkColor: Colors.white,
-                          ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Checkbox(
+                        value: _acceptedTerms,
+                        onChanged: isActionLocked
+                            ? null
+                            : (value) => setState(
+                                () => _acceptedTerms = value ?? false),
+                        activeColor: AppColors.primary,
+                        checkColor: Colors.white,
+                      ),
+                      title: Text(
+                        context.l10n.authTermsAcknowledgement,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.onSurfaceVariant,
                         ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _openTermsUrl,
-                            child: Text(
-                              context.l10n.authTermsAcknowledgement,
-                              style: const TextStyle(
-                                fontFamily: AppTypography.fontFamily,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                                decoration: TextDecoration.underline,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(
+                          Icons.open_in_new,
+                          size: 16,
+                          color: AppColors.primary,
                         ),
-                      ],
+                        onPressed: isActionLocked ? null : _openTermsUrl,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        tooltip: context.l10n.authTermsAcknowledgement,
+                      ),
+                      onTap: isActionLocked
+                          ? null
+                          : () => setState(
+                              () => _acceptedTerms = !_acceptedTerms),
                     ),
                   ],
 
