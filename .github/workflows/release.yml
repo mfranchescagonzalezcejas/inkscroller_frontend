@@ -100,18 +100,31 @@ jobs:
           mkdir -p release-metadata
 
           ALL_COMMITS=$(git log "$RANGE" --pretty=format:"%s")
+
+          # Count and clean by type
           FEATURES=$(printf '%s\n' "$ALL_COMMITS" | grep '^feat' || true)
           FIXES=$(printf '%s\n' "$ALL_COMMITS" | grep '^fix' || true)
+          REFACTORS=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^(refactor|perf)' || true)
+          FEAT_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -c '^feat' || true)
+          FIX_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -c '^fix' || true)
+          REFACTOR_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^(refactor|perf)' || true)
 
-          # DEV: feat + fix
+          # Strip conventional-commit prefix/scope so messages read naturally
+          STRIP_PREFIX='s/^(feat|fix|refactor|perf)(\([^)]*\))?:[[:space:]]*/- /'
+
+          # DEV: full notes — Summary + Features + Bug Fixes + Refactors
           {
-            [ -z "$FEATURES" ] || { echo "### 🚀 Features"; echo "$FEATURES" | sed 's/^/- /'; echo ""; }
-            [ -z "$FIXES" ] || { echo "### 🐛 Bug Fixes"; echo "$FIXES" | sed 's/^/- /'; }
+            echo "**Summary**"
+            echo "Release $TAG includes **$FEAT_COUNT features**, **$FIX_COUNT bug fixes** and **$REFACTOR_COUNT improvements** across the app."
+            echo ""
+            [ -z "$FEATURES" ] || { echo "**🚀 Features**"; printf '%s\n' "$FEATURES" | sed -E "$STRIP_PREFIX"; echo ""; }
+            [ -z "$FIXES" ] || { echo "**🐛 Bug Fixes**"; printf '%s\n' "$FIXES" | sed -E "$STRIP_PREFIX"; echo ""; }
+            [ -z "$REFACTORS" ] || { echo "**🔧 Refactors & Improvements**"; printf '%s\n' "$REFACTORS" | sed -E "$STRIP_PREFIX"; }
           } > release-metadata/release_notes_dev.txt
 
           # STAGING/PRO: fix only
           {
-            [ -z "$FIXES" ] || { echo "### 🐛 Bug Fixes"; echo "$FIXES" | sed 's/^/- /'; }
+            [ -z "$FIXES" ] || { echo "**🐛 Bug Fixes**"; printf '%s\n' "$FIXES" | sed -E "$STRIP_PREFIX"; }
           } > release-metadata/release_notes_staging.txt
 
           cp release-metadata/release_notes_staging.txt release-metadata/release_notes_pro.txt
