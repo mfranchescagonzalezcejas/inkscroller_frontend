@@ -63,7 +63,13 @@ class AccountSection extends ConsumerWidget {
     ).then((confirmed) {
       if (!scaffoldContext.mounted) return;
       if (confirmed ?? false) {
-        scaffoldContext.go(AppRoutes.login);
+        // Defer navigation to the next frame so GoRouter's internal auth
+        // redirect listener settles from the Firebase auth state change
+        // before we request a route transition.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!scaffoldContext.mounted) return;
+          scaffoldContext.go(AppRoutes.login);
+        });
       }
     });
   }
