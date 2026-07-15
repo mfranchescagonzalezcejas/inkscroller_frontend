@@ -97,6 +97,9 @@ jobs:
           # still resolves the correct previous tag (avoid --sort global list).
           PREVIOUS_TAG=$(git tag --sort=-v:refname \
             | awk -v tag="$TAG" '$0 == tag {getline; print}')
+          # Guard: when TAG is the oldest/only tag, awk hits EOF and leaves
+          # $0 as the current tag — treat as empty so RANGE falls back to HEAD.
+          [ "$PREVIOUS_TAG" = "$TAG" ] && PREVIOUS_TAG=""
           RANGE="$PREVIOUS_TAG..HEAD"
           [ -z "$PREVIOUS_TAG" ] && RANGE="HEAD"
 
