@@ -93,7 +93,10 @@ jobs:
           TAG="${{ github.ref_name }}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-          PREVIOUS_TAG=$(git tag --sort=-v:refname | sed -n '2p')
+          # Anchor lookup to the current tag so re-running an older release
+          # still resolves the correct previous tag (avoid --sort global list).
+          PREVIOUS_TAG=$(git tag --sort=-v:refname \
+            | awk -v tag="$TAG" '$0 == tag {getline; print}')
           RANGE="$PREVIOUS_TAG..HEAD"
           [ -z "$PREVIOUS_TAG" ] && RANGE="HEAD"
 
@@ -101,31 +104,33 @@ jobs:
 
           ALL_COMMITS=$(git log "$RANGE" --pretty=format:"%s")
 
-          # Count and clean by type
-          FEATURES=$(printf '%s\n' "$ALL_COMMITS" | grep '^feat' || true)
-          FIXES=$(printf '%s\n' "$ALL_COMMITS" | grep '^fix' || true)
-          REFACTORS=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^(refactor|perf)' || true)
-          FEAT_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -c '^feat' || true)
-          FIX_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -c '^fix' || true)
-          REFACTOR_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^(refactor|perf)' || true)
+          # Count and clean by type (support feat!: / feat(scope)!: breaking changes)
+          FEATURES=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^feat(!|\(|:)' || true)
+          FIXES=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^fix(!|\(|:)' || true)
+          REFACTORS=$(printf '%s\n' "$ALL_COMMITS" | grep -E '^(refactor|perf)(!|\(|:)' || true)
+          FEAT_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^feat(!|\(|:)' || true)
+          FIX_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^fix(!|\(|:)' || true)
+          REFACTOR_COUNT=$(printf '%s\n' "$ALL_COMMITS" | grep -cE '^(refactor|perf)(!|\(|:)' || true)
 
-          # Strip conventional-commit prefix/scope so messages read naturally
-          STRIP_PREFIX='s/^(feat|fix|refactor|perf)(\([^)]*\))?:[[:space:]]*/- /'
+          # Strip conventional-commit prefix/scope (including ! for breaking)
+          STRIP_PREFIX='s/^(feat|fix|refactor|perf)(\([^)]*\))?!?:[[:space:]]*/- /'
 
           # Full notes: Summary + Features + Bug Fixes + Refactors (same for all flavors)
-          FULL_NOTES="release-metadata/release_notes.txt"
-          {
-            echo "**Summary**"
-            echo "Release $TAG includes **$FEAT_COUNT features**, **$FIX_COUNT bug fixes** and **$REFACTOR_COUNT improvements** across the app."
-            echo ""
-            [ -z "$FEATURES" ] || { echo "**🚀 Features**"; printf '%s\n' "$FEATURES" | sed -E "$STRIP_PREFIX"; echo ""; }
-            [ -z "$FIXES" ] || { echo "**🐛 Bug Fixes**"; printf '%s\n' "$FIXES" | sed -E "$STRIP_PREFIX"; echo ""; }
-            [ -z "$REFACTORS" ] || { echo "**🔧 Refactors & Improvements**"; printf '%s\n' "$REFACTORS" | sed -E "$STRIP_PREFIX"; }
-          } > "$FULL_NOTES"
+          # Only write when there is at least one section — otherwise the fallback handles it.
+          if [ -n "$FEATURES" ] || [ -n "$FIXES" ] || [ -n "$REFACTORS" ]; then
+            {
+              echo "**Summary**"
+              echo "Release $TAG includes **$FEAT_COUNT features**, **$FIX_COUNT bug fixes** and **$REFACTOR_COUNT improvements** across the app."
+              echo ""
+              [ -z "$FEATURES" ] || { echo "**🚀 Features**"; printf '%s\n' "$FEATURES" | sed -E "$STRIP_PREFIX"; echo ""; }
+              [ -z "$FIXES" ] || { echo "**🐛 Bug Fixes**"; printf '%s\n' "$FIXES" | sed -E "$STRIP_PREFIX"; echo ""; }
+              [ -z "$REFACTORS" ] || { echo "**🔧 Refactors & Improvements**"; printf '%s\n' "$REFACTORS" | sed -E "$STRIP_PREFIX"; }
+            } > release-metadata/release_notes.txt
 
-          cp "$FULL_NOTES" release-metadata/release_notes_dev.txt
-          cp "$FULL_NOTES" release-metadata/release_notes_staging.txt
-          cp "$FULL_NOTES" release-metadata/release_notes_pro.txt
+            for f in dev staging pro; do
+              cp release-metadata/release_notes.txt "release-metadata/release_notes_${f}.txt"
+            done
+          fi
 
           DEFAULT_MESSAGE="- No user-visible changes"
           for f in dev staging pro; do
