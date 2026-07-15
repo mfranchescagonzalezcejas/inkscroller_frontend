@@ -382,19 +382,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   if (!isProfileCompletion) ...<Widget>[
                     const SizedBox(height: 16),
 
-                    MergeSemantics(
-                      child: Row(
+                    Row(
                       children: [
-                        Checkbox(
-                          value: _acceptedTerms,
-                          onChanged: isActionLocked
-                              ? null
-                              : (value) => setState(
-                                  () => _acceptedTerms = value ?? false),
-                          activeColor: AppColors.primary,
-                          checkColor: Colors.white,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                        Semantics(
+                          label: context.l10n.authTermsAcknowledgement,
+                          child: Checkbox(
+                            value: _acceptedTerms,
+                            onChanged: isActionLocked
+                                ? null
+                                : (value) => setState(
+                                    () => _acceptedTerms = value ?? false),
+                            activeColor: AppColors.primary,
+                            checkColor: Colors.white,
+                          ),
                         ),
                         Expanded(
                           child: GestureDetector(
@@ -412,7 +412,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                         ),
                       ],
-                    ),
                     ),
                   ],
 
