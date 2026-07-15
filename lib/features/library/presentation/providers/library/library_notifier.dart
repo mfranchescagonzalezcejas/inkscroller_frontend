@@ -67,8 +67,21 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   int _totalResults = 0;
   int _searchQueryVersion = 0;
 
-  /// Cache for genre tabs - provides instant tab switching.
-  final Map<String, LibraryState> _tabCache = {};
+  /// Shared cache for genre tabs — static so sibling [LibraryNotifier]
+  /// instances (Home and Explore) reuse each other's cached pages instead
+  /// of fetching the same data twice.
+  static final Map<String, LibraryState> _tabCache = {};
+
+  /// Offset per cache key, kept alongside [id://_tabCache] so pagination
+  /// resumes correctly when a sibling notifier reuses cached state.
+  static final Map<String, int> _tabCacheOffset = {};
+
+  /// Clears the shared cache so a subsequent [loadInitial] fetches fresh data.
+  /// Exposed for testing — call in [setUp] to isolate test cases.
+  static void resetSharedCache() {
+    _tabCache.clear();
+    _tabCacheOffset.clear();
+  }
 
   @override
   void dispose() {
@@ -98,6 +111,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       _genre = genre;
       _contentRating = contentRating;
       _demographics = effectiveDemographics;
+      _offset = _tabCacheOffset[key] ?? 0;
       return;
     }
 
@@ -143,6 +157,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         );
         state = newState;
         _tabCache[key] = newState;
+        _tabCacheOffset[key] = _offset;
       },
     );
   }
@@ -243,6 +258,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       demographics: effectiveDemo,
     );
     _tabCache.remove(key);
+    _tabCacheOffset.remove(key);
     return loadInitial(
       mode: _mode,
       genre: _genre,
@@ -277,6 +293,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     _genre = null;
     _mode = LibraryMode.normal;
     _tabCache.clear();
+    _tabCacheOffset.clear();
     state = LibraryState.initial();
     await loadInitial(
       contentRating: _contentRating,

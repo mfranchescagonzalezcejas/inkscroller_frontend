@@ -25,6 +25,7 @@ void main() {
   setUp(() {
     getMangaList = _MockGetMangaList();
     searchManga = _MockSearchManga();
+    LibraryNotifier.resetSharedCache();
   });
 
   group('loadInitial', () {
