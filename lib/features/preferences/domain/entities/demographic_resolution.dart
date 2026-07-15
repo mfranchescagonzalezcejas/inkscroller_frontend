@@ -21,6 +21,9 @@ class DemographicResolution {
   /// All demographic values the user is allowed to select.
   final List<MangaDemographic> allowedOptions;
 
+  /// Stable string key for value equality comparisons.
+  String get stableKey => effectiveFilter.map((d) => d.toJson()).join(',');
+
   const DemographicResolution({
     required this.effectiveFilter,
     required this.allowedOptions,

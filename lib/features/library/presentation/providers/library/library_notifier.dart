@@ -168,6 +168,8 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     if (state.isSearching) return;
     if (state.isLoadingMore || !state.hasMore) return;
 
+    _loadVersion++;
+    final capturedVersion = _loadVersion;
     state = state.copyWith(isLoadingMore: true, clearFailure: true);
 
     final result = await _getMangaList(
@@ -180,9 +182,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     result.fold(
       (failure) {
+        if (capturedVersion != _loadVersion) return;
         state = state.copyWith(isLoadingMore: false, failure: failure);
       },
       (newMangas) {
+        if (capturedVersion != _loadVersion) return;
         _offset += newMangas.length;
 
         final combined = dedupeMangas([...state.mangas, ...newMangas]);

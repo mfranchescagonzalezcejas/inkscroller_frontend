@@ -40,11 +40,11 @@ final libraryProvider =
     ref.listen<DemographicResolution>(
       demographicResolutionProvider,
       (previous, next) {
-        final prevDemos = previous?.effectiveFilter ?? [];
-        final nextDemos = next.effectiveFilter;
-        if (prevDemos != nextDemos) {
+        if (previous?.stableKey != next.stableKey) {
           notifier.refresh(
-            demographics: nextDemos.map((d) => d.toJson()).toList(),
+            demographics: next.effectiveFilter
+                .map((d) => d.toJson())
+                .toList(),
           );
         }
       },
@@ -82,11 +82,11 @@ final exploreProvider =
     ref.listen<DemographicResolution>(
       demographicResolutionProvider,
       (previous, next) {
-        final prevDemos = previous?.effectiveFilter ?? [];
-        final nextDemos = next.effectiveFilter;
-        if (prevDemos != nextDemos) {
+        if (previous?.stableKey != next.stableKey) {
           notifier.refresh(
-            demographics: nextDemos.map((d) => d.toJson()).toList(),
+            demographics: next.effectiveFilter
+                .map((d) => d.toJson())
+                .toList(),
           );
         }
       },
