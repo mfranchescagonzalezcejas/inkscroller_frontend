@@ -149,7 +149,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Future<void> _openTermsUrl() async {
     final uri = Uri.parse('https://inkscroller-privacy.vercel.app/');
     try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (!mounted) return;
+        AppFeedback.showWarning(
+          context,
+          title: context.l10n.authTermsAcknowledgement,
+        );
+      }
     } on Exception catch (e, st) {
       debugPrint('[TermsLink] Failed to launch URL: $e\n$st');
       if (!mounted) return;
@@ -376,7 +382,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   if (!isProfileCompletion) ...<Widget>[
                     const SizedBox(height: 16),
 
-                    Row(
+                    MergeSemantics(
+                      child: Row(
                       children: [
                         Checkbox(
                           value: _acceptedTerms,
@@ -405,6 +412,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                         ),
                       ],
+                    ),
                     ),
                   ],
 
