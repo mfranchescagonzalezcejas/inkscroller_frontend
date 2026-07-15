@@ -105,6 +105,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     // Return cached result immediately if available.
     if (_tabCache.containsKey(key)) {
+      _loadVersion++; // Invalidate any in-flight stale requests.
       final cached = _tabCache[key]!;
       state = cached;
       _mode = mode;

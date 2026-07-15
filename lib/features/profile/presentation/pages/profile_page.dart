@@ -302,8 +302,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   resolution: demographicResolution,
                 ),
               ),
-              onTap: () =>
-                  _showDemographicDialog(context, demographicResolution, prefs),
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showDemographicDialog(
+                        context, demographicResolution, prefs,
+                      ),
             ),
           ],
         ),

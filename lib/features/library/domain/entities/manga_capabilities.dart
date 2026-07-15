@@ -14,8 +14,7 @@ class MangaCapabilities {
     return MangaCapabilities(
       supportsUnspecified:
           filter['contract_version'] == 1 &&
-          filter['null_union'] == true &&
-          filter['pagination'] == 'cursor-v1',
+          filter['null_union'] == true,
     );
   }
 }
