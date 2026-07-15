@@ -297,10 +297,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               title: context.l10n.profileDemographicTitle,
               value: _demographicCountLabel(
                 context,
-                _selectedDemographics ??
-                    demographicResolution.effectiveFilter
-                        .map((d) => d)
-                        .toList(),
+                DemographicResolution.selectionForDialog(
+                  stored: _selectedDemographics,
+                  resolution: demographicResolution,
+                ),
               ),
               onTap: () =>
                   _showDemographicDialog(context, demographicResolution, prefs),
