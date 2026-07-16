@@ -6,6 +6,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
+import '../auth_error_text.dart';
 import '../providers/auth_provider.dart';
 
 /// Post-registration email verification page.
@@ -28,6 +29,12 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
     final authState = ref.watch(authProvider);
     final email = authState.user?.email ?? '';
     final l10n = context.l10n;
+
+    ref.listen(authProvider, (previous, next) {
+      if (next.error != null && next.error != previous?.error) {
+        AppFeedback.showError(context, title: authErrorText(context, next.error));
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.stage,
