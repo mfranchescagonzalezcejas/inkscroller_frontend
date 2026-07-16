@@ -30,15 +30,20 @@ final userLibraryProvider =
             ref.read(userLibrarySyncingProvider.notifier).state = false,
       );
 
-      // Hydrate immediately if user is already authenticated (during splash).
+      // Hydrate immediately if user is already verified (during splash).
+      // Skip hydrate for unverified users — the backend returns 403.
       final authState = ref.read(authProvider);
-      if (authState.user != null) {
+      if (authState.user != null && authState.user!.isEmailVerified) {
         notifier.onAuthStateChanged(authState.user!.uid);
       }
 
       // Also listen for future auth changes.
       ref.listen<AuthState>(authProvider, (_, authState) {
-        notifier.onAuthStateChanged(authState.user?.uid);
+        if (authState.user != null && authState.user!.isEmailVerified) {
+          notifier.onAuthStateChanged(authState.user!.uid);
+        } else if (authState.user == null) {
+          notifier.onAuthStateChanged(null);
+        }
       });
 
       return notifier;

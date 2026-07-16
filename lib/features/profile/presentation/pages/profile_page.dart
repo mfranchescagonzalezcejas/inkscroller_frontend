@@ -75,14 +75,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final contentRatingResolution = ref.watch(contentRatingResolutionProvider);
     final demographicResolution = ref.watch(demographicResolutionProvider);
 
-    if (authState.user != null && !_profileRequested) {
+    // Skip data loading for unverified users — the backend returns 403.
+    final shouldLoad = authState.user != null && authState.needsEmailVerification == false;
+
+    if (shouldLoad && !_profileRequested) {
       _profileRequested = true;
       Future<void>.microtask(
         () => ref.read(userProfileProvider.notifier).loadProfile(),
       );
     }
 
-    if (authState.user != null &&
+    if (shouldLoad &&
         !_preferencesRequested &&
         !preferencesState.isLoading &&
         preferencesState.preferences == null) {
