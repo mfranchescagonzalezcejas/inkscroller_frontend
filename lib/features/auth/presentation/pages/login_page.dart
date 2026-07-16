@@ -129,7 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Expanded(
                           child: Text(
                             context.l10n.authVerifyEmailBody(
-                              _emailController.text,
+                              authState.user?.email ?? _emailController.text,
                             ),
                             style: const TextStyle(
                               fontFamily: AppTypography.fontFamily,
