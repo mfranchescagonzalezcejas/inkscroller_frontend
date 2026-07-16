@@ -1214,6 +1214,72 @@ abstract class AppLocalizations {
   /// **'Authentication failed. Please try again.'**
   String get authUnknownError;
 
+  /// No description provided for @authVerifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get authVerifyEmailTitle;
+
+  /// No description provided for @authVerifyEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to {email}. Click the link in the email to activate your account.'**
+  String authVerifyEmailBody(String email);
+
+  /// No description provided for @authVerifyEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Verification email sent'**
+  String get authVerifyEmailSent;
+
+  /// No description provided for @authVerifyEmailContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve verified — continue'**
+  String get authVerifyEmailContinue;
+
+  /// No description provided for @authVerifyEmailResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend verification email'**
+  String get authVerifyEmailResend;
+
+  /// No description provided for @authVerifyEmailDifferentEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get authVerifyEmailDifferentEmail;
+
+  /// No description provided for @authVerifyEmailSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified! Welcome to InkScroller.'**
+  String get authVerifyEmailSuccess;
+
+  /// No description provided for @authVerifyEmailNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email hasn\'t been verified yet. Check your inbox and click the link.'**
+  String get authVerifyEmailNotYet;
+
+  /// No description provided for @authVerifyEmailResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email resent.'**
+  String get authVerifyEmailResent;
+
+  /// No description provided for @authVerifyInProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get authVerifyInProfile;
+
+  /// No description provided for @authVerifyInProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unverified account'**
+  String get authVerifyInProfileSubtitle;
+
   /// No description provided for @libraryErrorNetworkNoConnection.
   ///
   /// In en, this message translates to:

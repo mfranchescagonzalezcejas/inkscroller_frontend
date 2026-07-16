@@ -295,6 +295,22 @@
   "authTooManyRequests": "Demasiados intentos. Espera e intenta de nuevo.",
   "authNetworkError": "Sin conexión a internet. Verifica tu red.",
   "authUnknownError": "Error de autenticación. Intenta de nuevo.",
+  "authVerifyEmailTitle": "Verificá tu email",
+  "authVerifyEmailBody": "Enviamos un link de verificación a {email}. Hacé clic en el link del email para activar tu cuenta.",
+  "@authVerifyEmailBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "authVerifyEmailSent": "✅ Email de verificación enviado",
+  "authVerifyEmailContinue": "Ya verifiqué — continuar",
+  "authVerifyEmailResend": "Reenviar email de verificación",
+  "authVerifyEmailDifferentEmail": "Usar otro email",
+  "authVerifyEmailSuccess": "¡Email verificado! Bienvenida a InkScroller.",
+  "authVerifyEmailNotYet": "Tu email todavía no fue verificado. Revisá tu bandeja de entrada y hacé clic en el link.",
+  "authVerifyEmailResent": "Email de verificación reenviado.",
+  "authVerifyInProfile": "Verificar email",
+  "authVerifyInProfileSubtitle": "Cuenta sin verificar",
   "libraryErrorNetworkNoConnection": "No se pudo conectar con el servidor.",
   "libraryErrorServerBadResponse": "El servidor respondió con un error.",
   "libraryErrorRequestCancelled": "La solicitud fue cancelada.",

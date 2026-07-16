@@ -22,16 +22,25 @@ class AuthState {
   /// metadata submission orchestration is in-flight.
   final bool registrationInProgress;
 
+  /// True after a verification email has been sent to the user.
+  final bool emailVerificationSent;
+
   const AuthState({
     this.isLoading = false,
     this.user,
     this.error,
     this.profileCompletionPending = false,
     this.registrationInProgress = false,
+    this.emailVerificationSent = false,
   });
 
   /// Convenience getter — true when a user is signed in.
   bool get isAuthenticated => user != null;
+
+  /// Convenience getter — true when the user is signed in but their email
+  /// has not been verified.
+  bool get needsEmailVerification =>
+      user != null && !user!.isEmailVerified;
 
   /// Returns a copy of this state with the provided fields overwritten.
   AuthState copyWith({
@@ -40,6 +49,7 @@ class AuthState {
     String? error,
     bool? profileCompletionPending,
     bool? registrationInProgress,
+    bool? emailVerificationSent,
     bool clearUser = false,
     bool clearError = false,
   }) {
@@ -53,6 +63,9 @@ class AuthState {
       registrationInProgress:
           registrationInProgress ??
               (!clearUser && this.registrationInProgress),
+      emailVerificationSent:
+          emailVerificationSent ??
+              (!clearUser && this.emailVerificationSent),
     );
   }
 }

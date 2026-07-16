@@ -7,6 +7,7 @@ import '../l10n/l10n.dart';
 import 'app_routes.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/verify_email_page.dart';
 import '../../features/explore/presentation/pages/explore_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/library/domain/entities/chapter.dart';
@@ -35,12 +36,15 @@ const _protectedRoutes = <String>[AppRoutes.profile];
 ///
 /// Authenticated users landing here are redirected to `/`.
 const _authOnlyRoutes = <String>[AppRoutes.login, AppRoutes.register];
+const _authVerifiedRoutes = <String>[AppRoutes.verifyEmail];
 
 /// Computes the auth redirect for a given route and Firebase auth state.
 ///
 /// Redirect rules:
 /// - Authenticated user on an auth-only surface (`/login`, `/register`) → `/`
+/// - Authenticated+verified user on `/verify-email` → `/`
 /// - Guest on a protected surface (`/profile`) → `/login`
+/// - Guest on `/verify-email` → `/login`
 /// - All other combinations → `null` (no redirect, allow navigation)
 ///
 /// Public routes (home, explore, library, manga-detail, reader) remain fully
@@ -56,8 +60,20 @@ String? resolveAuthRedirect({
     return AppRoutes.home;
   }
 
+  // Authenticated+verified user does not need the verification page.
+  if (isLoggedIn &&
+      _authVerifiedRoutes.contains(matchedLocation) &&
+      currentUser.emailVerified) {
+    return AppRoutes.home;
+  }
+
   // Guest must not access protected routes — redirect to login.
   if (!isLoggedIn && _protectedRoutes.contains(matchedLocation)) {
+    return AppRoutes.login;
+  }
+
+  // Guest cannot access verification page.
+  if (!isLoggedIn && _authVerifiedRoutes.contains(matchedLocation)) {
     return AppRoutes.login;
   }
 
@@ -140,6 +156,13 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+
+    // ── Auth sub-routes ─────────────────────────────────────────────────
+    GoRoute(
+      path: AppRoutes.verifyEmail,
+      name: 'verify-email',
+      builder: (context, state) => const VerifyEmailPage(),
     ),
 
     // ── Sub-routes (accessible from tabs, not tabs themselves) ────────────

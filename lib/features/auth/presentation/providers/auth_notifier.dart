@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/app_user.dart';
 import '../../domain/usecases/get_auth_state.dart';
+import '../../domain/usecases/reload_user.dart';
+import '../../domain/usecases/send_email_verification.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up.dart';
@@ -70,6 +72,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignUp _signUp;
   final SignOut _signOut;
   final GetAuthState _getAuthState;
+  final SendEmailVerification _sendEmailVerification;
+  final ReloadUser _reloadUser;
   final GetUserProfile _getUserProfile;
   final UpdateUserProfile _updateUserProfile;
   final ProfileMetadataFailureReporter _profileMetadataFailureReporter;
@@ -84,6 +88,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required SignUp signUp,
     required SignOut signOut,
     required GetAuthState getAuthState,
+    required SendEmailVerification sendEmailVerification,
+    required ReloadUser reloadUser,
     required GetUserProfile getUserProfile,
     required UpdateUserProfile updateUserProfile,
     ProfileMetadataFailureReporter profileMetadataFailureReporter =
@@ -92,6 +98,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
        _signUp = signUp,
        _signOut = signOut,
        _getAuthState = getAuthState,
+       _sendEmailVerification = sendEmailVerification,
+       _reloadUser = reloadUser,
        _getUserProfile = getUserProfile,
        _updateUserProfile = updateUserProfile,
        _profileMetadataFailureReporter = profileMetadataFailureReporter,
@@ -278,12 +286,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
               registrationInProgress: false,
             );
           },
-          (_) => state = state.copyWith(
-            isLoading: false,
-            clearError: true,
-            profileCompletionPending: false,
-            registrationInProgress: false,
-          ),
+          (_) {
+            state = state.copyWith(
+              isLoading: false,
+              clearError: true,
+              profileCompletionPending: false,
+              registrationInProgress: false,
+            );
+            // Fire verification email — non-blocking; user can resend
+            // from the verification page if this fails.
+            unawaited(_sendEmailVerification().then((result) {
+              result.fold(
+                (_) {},
+                (_) => state = state.copyWith(
+                  emailVerificationSent: true,
+                ),
+              );
+            }));
+          },
         );
       },
     );
@@ -340,6 +360,48 @@ class AuthNotifier extends StateNotifier<AuthState> {
         profileCompletionPending: false,
         registrationInProgress: false,
       ),
+    );
+  }
+
+  /// Sends a verification email to the current user.
+  Future<void> sendVerificationEmail() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _sendEmailVerification();
+
+    result.fold(
+      (failure) => state = state.copyWith(
+        isLoading: false,
+        error: failure.message,
+      ),
+      (_) => state = state.copyWith(
+        isLoading: false,
+        emailVerificationSent: true,
+      ),
+    );
+  }
+
+  /// Reloads the current user and checks if email is verified.
+  ///
+  /// Returns `true` when email is now verified.
+  Future<bool> checkEmailVerification() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _reloadUser();
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+        return false;
+      },
+      (user) {
+        state = state.copyWith(
+          user: user,
+          isLoading: false,
+          clearError: true,
+        );
+        return user.isEmailVerified;
+      },
     );
   }
 

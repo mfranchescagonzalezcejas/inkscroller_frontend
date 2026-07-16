@@ -22,6 +22,12 @@ abstract class FirebaseAuthDataSource {
 
   /// Returns the current Firebase ID token, refreshing if needed.
   Future<String> getIdToken();
+
+  /// Sends an email verification link to the current user.
+  Future<void> sendEmailVerification();
+
+  /// Reloads the current Firebase user and returns the updated [AppUser].
+  Future<AppUser> reloadUser();
 }
 
 /// Concrete implementation wrapping [FirebaseAuth].
@@ -104,6 +110,46 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
     }
   }
 
+  @override
+  Future<void> sendEmailVerification() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const ServerException(
+        message: 'auth/requires-authentication',
+        code: 401,
+      );
+    }
+    try {
+      await user.sendEmailVerification();
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<AppUser> reloadUser() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const ServerException(
+        message: 'auth/requires-authentication',
+        code: 401,
+      );
+    }
+    try {
+      await user.reload();
+      final refreshed = _firebaseAuth.currentUser;
+      if (refreshed == null) {
+        throw const ServerException(
+          message: 'auth/session-expired',
+          code: 401,
+        );
+      }
+      return _mapUserStrict(refreshed);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
   // --- Mapping helpers --------------------------------------------------------
 
   AppUser? _mapUser(User? user) {
@@ -116,6 +162,7 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       uid: user.uid,
       email: user.email ?? '',
       displayName: user.displayName,
+      isEmailVerified: user.emailVerified,
     );
   }
 
