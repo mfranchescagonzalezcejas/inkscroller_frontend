@@ -30,9 +30,8 @@ class _AboutPageState extends State<AboutPage> {
       final info = await PackageInfo.fromPlatform();
       if (!mounted) return;
       setState(() => _packageInfo = info);
-    } on Object catch (_) {
-      // ponytail: PackageInfo fails silently — version row stays empty.
-      // Add a retry or Sentry breadcrumb when error tracking is wired.
+    } on Object catch (e, st) {
+      debugPrint('[AboutPage] Failed to load package info: $e\n$st');
     }
   }
 
