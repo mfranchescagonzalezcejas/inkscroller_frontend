@@ -295,9 +295,9 @@
   "authTooManyRequests": "Demasiados intentos. Espera e intenta de nuevo.",
   "authNetworkError": "Sin conexión a internet. Verifica tu red.",
   "authUnknownError": "Error de autenticación. Intenta de nuevo.",
-  "authEmailNotVerified": "Verificá tu email antes de iniciar sesión. Revisá tu bandeja de entrada y hacé clic en el link de verificación.",
-  "authVerifyEmailTitle": "Verificá tu email",
-  "authVerifyEmailBody": "Enviamos un link de verificación a {email}. Hacé clic en el link del email para activar tu cuenta.",
+  "authEmailNotVerified": "Verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el link de verificación.",
+  "authVerifyEmailTitle": "Verifica tu email",
+  "authVerifyEmailBody": "Enviamos un link de verificación a {email}. Haz clic en el link del email para activar tu cuenta.",
   "@authVerifyEmailBody": {
     "placeholders": {
       "email": {"type": "String"}
@@ -307,8 +307,8 @@
   "authVerifyEmailContinue": "Ya verifiqué — continuar",
   "authVerifyEmailResend": "Reenviar email de verificación",
   "authVerifyEmailDifferentEmail": "Usar otro email",
-  "authVerifyEmailSuccess": "¡Email verificado! Bienvenida a InkScroller.",
-  "authVerifyEmailNotYet": "Tu email todavía no fue verificado. Revisá tu bandeja de entrada y hacé clic en el link.",
+  "authVerifyEmailSuccess": "¡Email verificado! Bienvenido/a a InkScroller.",
+  "authVerifyEmailNotYet": "Tu email todavía no fue verificado. Revisa tu bandeja de entrada y haz clic en el link.",
   "authVerifyEmailResent": "Email de verificación reenviado.",
   "authVerifyInProfile": "Verificar email",
   "authVerifyInProfileSubtitle": "Cuenta sin verificar",

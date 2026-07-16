@@ -637,14 +637,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authEmailNotVerified =>
-      'Verificá tu email antes de iniciar sesión. Revisá tu bandeja de entrada y hacé clic en el link de verificación.';
+      'Verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el link de verificación.';
 
   @override
-  String get authVerifyEmailTitle => 'Verificá tu email';
+  String get authVerifyEmailTitle => 'Verifica tu email';
 
   @override
   String authVerifyEmailBody(String email) {
-    return 'Enviamos un link de verificación a $email. Hacé clic en el link del email para activar tu cuenta.';
+    return 'Enviamos un link de verificación a $email. Haz clic en el link del email para activar tu cuenta.';
   }
 
   @override
@@ -661,11 +661,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authVerifyEmailSuccess =>
-      '¡Email verificado! Bienvenida a InkScroller.';
+      '¡Email verificado! Bienvenido/a a InkScroller.';
 
   @override
   String get authVerifyEmailNotYet =>
-      'Tu email todavía no fue verificado. Revisá tu bandeja de entrada y hacé clic en el link.';
+      'Tu email todavía no fue verificado. Revisa tu bandeja de entrada y haz clic en el link.';
 
   @override
   String get authVerifyEmailResent => 'Email de verificación reenviado.';
