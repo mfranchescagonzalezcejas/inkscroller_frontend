@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -109,6 +110,11 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
       return;
     }
 
+    // Remote sync in background — optimistic UI: caller updates state immediately.
+    unawaited(_syncSaveToRemote(entry, userId));
+  }
+
+  Future<void> _syncSaveToRemote(UserLibraryEntry entry, String userId) async {
     try {
       if (entry.isInLibrary) {
         await _remoteDataSource.addToLibrary(
@@ -139,6 +145,11 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
       return;
     }
 
+    // Remote sync in background — optimistic UI: caller updates state immediately.
+    unawaited(_syncRemoveFromRemote(mangaId));
+  }
+
+  Future<void> _syncRemoveFromRemote(String mangaId) async {
     try {
       await _remoteDataSource.removeFromLibrary(mangaId);
     } on Object {
