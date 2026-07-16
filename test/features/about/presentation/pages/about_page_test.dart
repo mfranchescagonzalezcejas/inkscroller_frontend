@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
@@ -51,9 +52,11 @@ Future<void> pumpAboutPage(
   );
 
   await tester.pumpWidget(
-    wrapWithL10n(const AboutPage(), locale: locale),
+    ProviderScope(
+      child: wrapWithL10n(const AboutPage(), locale: locale),
+    ),
   );
-  // Let the async PackageInfo.fromPlatform() resolve.
+  // Let the async appVersionProvider resolve.
   await tester.pumpAndSettle();
 }
 
