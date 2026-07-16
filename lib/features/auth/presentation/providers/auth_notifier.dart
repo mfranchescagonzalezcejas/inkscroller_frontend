@@ -120,6 +120,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           clearUser: user == null,
           clearError: true,
           isLoading: state.registrationInProgress && state.isLoading,
+          // Preserve emailVerificationSent across auth state changes so the
+          // login page still shows the verification banner after signOut.
+          emailVerificationSent: state.emailVerificationSent,
         );
         _checkProfileCompletionIfNeeded(user);
       },
@@ -316,13 +319,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
           (_) async {},
         );
 
-        // Send verification email. The router treats unverified users as
-        // guests, so no need to sign out — they will be redirected to login.
+        // Send verification email, then sign out. Firebase auto-signs in
+        // after account creation, but the router now prevents the redirect
+        // to home during the auto-sign-in window (unverified → stay on
+        // register). Signing out gives the user a clean guest login page.
         await _sendEmailVerification();
+        await _signOut();
 
         state = state.copyWith(
           isLoading: false,
           clearError: true,
+          clearUser: true,
           profileCompletionPending: false,
           registrationInProgress: false,
           emailVerificationSent: true,
