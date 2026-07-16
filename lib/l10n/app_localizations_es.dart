@@ -725,4 +725,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileContentRatingAll => 'Todo';
+
+  @override
+  String get chaptersSortAsc => 'Número ↑';
+
+  @override
+  String get chaptersSortDesc => 'Número ↓';
+
+  @override
+  String get chaptersFilterAll => 'Todos los capítulos';
+
+  @override
+  String get chaptersFilterUnread => 'Solo no leídos';
 }

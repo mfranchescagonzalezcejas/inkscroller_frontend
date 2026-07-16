@@ -78,6 +78,36 @@ class ReadingProgressNotifier
     return previous;
   }
 
+  /// Toggles a single chapter read state — mark read if unread, unmark if read.
+  ///
+  /// Direct toggle without dialog or navigation. Updates persisted state
+  /// immediately so the UI rebuilds.
+  Future<void> toggleChapter({
+    required String mangaId,
+    required String chapterId,
+    required int totalChaptersCount,
+  }) async {
+    final current = progressFor(mangaId);
+    final Set<String> nextReadIds = current.readChapterIds.toSet();
+    if (current.isChapterRead(chapterId)) {
+      nextReadIds.remove(chapterId);
+    } else {
+      nextReadIds.add(chapterId);
+    }
+    final next = current.copyWith(
+      readChapterIds: nextReadIds,
+      totalChaptersCount: totalChaptersCount,
+    );
+
+    // Optimistic update — set state immediately so rapid toggles don't
+    // both snapshot the same readChapterIds set before the first persists.
+    state = <String, MangaReadingProgress>{
+      ...state,
+      next.mangaId: next,
+    };
+    await _repository.save(next);
+  }
+
   Future<void> restore(MangaReadingProgress progress) {
     return _save(progress);
   }

@@ -20,4 +20,54 @@ void main() {
 
     expect(ordered.map((chapter) => chapter.id), <String>['c9', 'c9.5', 'c10']);
   });
+
+  group('organizeChapters', () {
+    final chapters = <Chapter>[
+      Chapter(id: 'c10', number: 10, readable: true, external: false),
+      Chapter(id: 'c1', number: 1, readable: true, external: false),
+      Chapter(id: 'c5', number: 5, readable: true, external: false),
+      Chapter(id: 'extra', readable: false, external: true),
+    ];
+
+    test('sorts ascending by default', () {
+      final result = organizeChapters(chapters);
+      expect(result.map((c) => c.id), <String>['c1', 'c5', 'c10', 'extra']);
+    });
+
+    test('reverses order when descending', () {
+      final result = organizeChapters(chapters, descending: true);
+      expect(result.map((c) => c.id), <String>['extra', 'c10', 'c5', 'c1']);
+    });
+
+    test('filters out read chapters', () {
+      final result = organizeChapters(
+        chapters,
+        readChapterIds: {'c1', 'c5'},
+      );
+      expect(result.map((c) => c.id), <String>['c10', 'extra']);
+    });
+
+    test('combines descending + unread filter', () {
+      final result = organizeChapters(
+        chapters,
+        descending: true,
+        readChapterIds: {'c5'},
+      );
+      expect(result.map((c) => c.id), <String>['extra', 'c10', 'c1']);
+    });
+
+    test('empty readChapterIds keeps all', () {
+      final result = organizeChapters(
+        chapters,
+        readChapterIds: <String>{},
+      );
+      expect(result.length, 4);
+    });
+
+    test('null readChapterIds keeps all (filter inactive)', () {
+      final result = organizeChapters(chapters);
+      expect(result.map((c) => c.id),
+          <String>['c1', 'c5', 'c10', 'extra']);
+    });
+  });
 }

@@ -1369,6 +1369,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get profileContentRatingAll;
+
+  /// No description provided for @chaptersSortAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Number ↑'**
+  String get chaptersSortAsc;
+
+  /// No description provided for @chaptersSortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Number ↓'**
+  String get chaptersSortDesc;
+
+  /// No description provided for @chaptersFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All chapters'**
+  String get chaptersFilterAll;
+
+  /// No description provided for @chaptersFilterUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread only'**
+  String get chaptersFilterUnread;
 }
 
 class _AppLocalizationsDelegate

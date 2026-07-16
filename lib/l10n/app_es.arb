@@ -341,5 +341,9 @@
   "profileContentRatingTitle": "Clasificación de contenido",
   "profileContentRatingSafe": "Seguro",
   "profileContentRatingSuggestive": "Seguro + Sugestivo",
-  "profileContentRatingAll": "Todo"
+  "profileContentRatingAll": "Todo",
+  "chaptersSortAsc": "Número ↑",
+  "chaptersSortDesc": "Número ↓",
+  "chaptersFilterAll": "Todos los capítulos",
+  "chaptersFilterUnread": "Solo no leídos"
 }

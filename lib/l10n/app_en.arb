@@ -341,5 +341,9 @@
   "profileContentRatingTitle": "Content rating",
   "profileContentRatingSafe": "Safe",
   "profileContentRatingSuggestive": "Safe + Suggestive",
-  "profileContentRatingAll": "All"
+  "profileContentRatingAll": "All",
+  "chaptersSortAsc": "Number ↑",
+  "chaptersSortDesc": "Number ↓",
+  "chaptersFilterAll": "All chapters",
+  "chaptersFilterUnread": "Unread only"
 }

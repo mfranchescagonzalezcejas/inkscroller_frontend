@@ -9,11 +9,15 @@ class MangaChaptersState {
   final List<Chapter> chapters;
   final bool isLoading;
   final Failure? failure;
+  final bool sortDescending;
+  final bool filterUnreadOnly;
 
   const MangaChaptersState({
     this.chapters = const [],
     this.isLoading = false,
     this.failure,
+    this.sortDescending = false,
+    this.filterUnreadOnly = false,
   });
 
   MangaChaptersState copyWith({
@@ -21,11 +25,15 @@ class MangaChaptersState {
     bool? isLoading,
     Failure? failure,
     bool clearFailure = false,
+    bool? sortDescending,
+    bool? filterUnreadOnly,
   }) {
     return MangaChaptersState(
       chapters: chapters ?? this.chapters,
       isLoading: isLoading ?? this.isLoading,
       failure: clearFailure ? null : failure ?? this.failure,
+      sortDescending: sortDescending ?? this.sortDescending,
+      filterUnreadOnly: filterUnreadOnly ?? this.filterUnreadOnly,
     );
   }
 }
