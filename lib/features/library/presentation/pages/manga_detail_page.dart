@@ -147,8 +147,11 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   child: _CtaButton(
                     label: context.l10n.readNow.toUpperCase(),
                     onTap: () {
-                      if (displayChapters.isNotEmpty) {
-                        final first = displayChapters.first;
+                      // Use the unfiltered/raw chapter list so the CTA always
+                      // opens something, even when the active sort/filter
+                      // would otherwise leave the visible list empty.
+                      if (state.chapters.isNotEmpty) {
+                        final first = state.chapters.first;
                         context.push(
                           AppRoutes.readerPath(
                             mangaId: widget.manga.id,

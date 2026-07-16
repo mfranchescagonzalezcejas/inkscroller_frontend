@@ -345,5 +345,7 @@
   "chaptersSortAsc": "Número ↑",
   "chaptersSortDesc": "Número ↓",
   "chaptersFilterAll": "Todos los capítulos",
-  "chaptersFilterUnread": "Solo no leídos"
+  "chaptersFilterUnread": "Solo no leídos",
+  "markAsRead": "Marcar como leído",
+  "markAsUnread": "Marcar como no leído"
 }

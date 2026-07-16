@@ -36,7 +36,8 @@ void main() {
 
     test('reverses order when descending', () {
       final result = organizeChapters(chapters, descending: true);
-      expect(result.map((c) => c.id), <String>['extra', 'c10', 'c5', 'c1']);
+      // Extras stay at the bottom even in descending order.
+      expect(result.map((c) => c.id), <String>['c10', 'c5', 'c1', 'extra']);
     });
 
     test('filters out read chapters', () {
@@ -53,7 +54,7 @@ void main() {
         descending: true,
         readChapterIds: {'c5'},
       );
-      expect(result.map((c) => c.id), <String>['extra', 'c10', 'c1']);
+      expect(result.map((c) => c.id), <String>['c10', 'c1', 'extra']);
     });
 
     test('empty readChapterIds keeps all', () {
@@ -66,6 +67,20 @@ void main() {
 
     test('null readChapterIds keeps all (filter inactive)', () {
       final result = organizeChapters(chapters);
+      expect(result.map((c) => c.id),
+          <String>['c1', 'c5', 'c10', 'extra']);
+    });
+
+    test('unnumbered chapters always at the bottom (descending)', () {
+      final result = organizeChapters(chapters, descending: true);
+      expect(result.last.number, isNull);
+      expect(result.map((c) => c.id),
+          <String>['c10', 'c5', 'c1', 'extra']);
+    });
+
+    test('unnumbered chapters always at the bottom (ascending)', () {
+      final result = organizeChapters(chapters);
+      expect(result.last.number, isNull);
       expect(result.map((c) => c.id),
           <String>['c1', 'c5', 'c10', 'extra']);
     });

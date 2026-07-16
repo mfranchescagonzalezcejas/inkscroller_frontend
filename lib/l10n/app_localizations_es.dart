@@ -737,4 +737,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chaptersFilterUnread => 'Solo no leídos';
+
+  @override
+  String get markAsRead => 'Marcar como leído';
+
+  @override
+  String get markAsUnread => 'Marcar como no leído';
 }

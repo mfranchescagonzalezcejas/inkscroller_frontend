@@ -33,21 +33,29 @@ List<Chapter> chaptersUpToTarget(
 /// Sorts chapters by number (ascending by default) and optionally keeps only
 /// unread chapters (those whose [id] is NOT in [readChapterIds]).
 ///
-/// Reuses [orderChaptersForProgress] for stable ascending sort, then applies
-/// descending and/or unread filtering on top.
+/// Reuses [orderChaptersForProgress] for stable ascending sort of numbered
+/// chapters. Unnumbered chapters (extras, oneshots) always stay at the
+/// bottom regardless of [descending], so the descending view never starts
+/// with specials.
 List<Chapter> organizeChapters(
   List<Chapter> chapters, {
   bool descending = false,
   Set<String>? readChapterIds,
 }) {
-  var result = orderChaptersForProgress(chapters);
-  if (descending) {
-    result = result.reversed.toList();
-  }
+  final ordered = orderChaptersForProgress(chapters);
+  final List<Chapter> numbered =
+      ordered.where((c) => c.number != null).toList();
+  final List<Chapter> unnumbered =
+      ordered.where((c) => c.number == null).toList();
+  final List<Chapter> sorted = descending
+      ? <Chapter>[...numbered.reversed, ...unnumbered]
+      : <Chapter>[...numbered, ...unnumbered];
   if (readChapterIds != null && readChapterIds.isNotEmpty) {
-    result = result.where((c) => !readChapterIds.contains(c.id)).toList();
+    return sorted
+        .where((c) => !readChapterIds.contains(c.id))
+        .toList();
   }
-  return result;
+  return sorted;
 }
 
 int _compareChaptersForProgress(Chapter left, Chapter right) {

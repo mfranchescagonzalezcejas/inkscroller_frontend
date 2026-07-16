@@ -40,14 +40,15 @@ class ChapterTile extends StatelessWidget {
     }
 
     return ListTile(
-      leading: GestureDetector(
-        onTap: onToggleRead,
-        behavior: HitTestBehavior.opaque,
-        child: Icon(
+      leading: IconButton(
+        icon: Icon(
           isRead ? Icons.check_circle : Icons.radio_button_unchecked,
           size: 22,
           color: isRead ? Theme.of(context).colorScheme.primary : null,
         ),
+        onPressed: onToggleRead,
+        tooltip: isRead ? context.l10n.markAsUnread : context.l10n.markAsRead,
+        visualDensity: VisualDensity.compact,
       ),
       title: Text(label),
       subtitle: chapter.title != null ? Text(chapter.title!) : null,
