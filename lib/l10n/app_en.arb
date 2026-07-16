@@ -347,5 +347,6 @@
   "chaptersFilterAll": "All chapters",
   "chaptersFilterUnread": "Unread only",
   "markAsRead": "Mark as read",
-  "markAsUnread": "Mark as unread"
+  "markAsUnread": "Mark as unread",
+  "chaptersFilteredOut": "No chapters match the current filter"
 }

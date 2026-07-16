@@ -147,11 +147,16 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   child: _CtaButton(
                     label: context.l10n.readNow.toUpperCase(),
                     onTap: () {
-                      // Use the unfiltered/raw chapter list so the CTA always
-                      // opens something, even when the active sort/filter
-                      // would otherwise leave the visible list empty.
-                      if (state.chapters.isNotEmpty) {
-                        final first = state.chapters.first;
+                      // Prefer the first visible chapter so the CTA honors
+                      // the user's active sort/filter. Fall back to the
+                      // unfiltered list only when the filter leaves nothing
+                      // visible — this avoids a silent no-op when, e.g.,
+                      // the unread-only filter hides every chapter because
+                      // the user is fully caught up.
+                      final first = displayChapters.isNotEmpty
+                          ? displayChapters.first
+                          : state.chapters.firstOrNull;
+                      if (first != null) {
                         context.push(
                           AppRoutes.readerPath(
                             mangaId: widget.manga.id,
@@ -231,6 +236,18 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     child: Center(
                       child: Text(
                         context.l10n.noChaptersAvailable,
+                        style: const TextStyle(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  )
+                else if (displayChapters.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Text(
+                        context.l10n.chaptersFilteredOut,
                         style: const TextStyle(
                           color: AppColors.onSurfaceVariant,
                         ),

@@ -347,5 +347,6 @@
   "chaptersFilterAll": "Todos los capítulos",
   "chaptersFilterUnread": "Solo no leídos",
   "markAsRead": "Marcar como leído",
-  "markAsUnread": "Marcar como no leído"
+  "markAsUnread": "Marcar como no leído",
+  "chaptersFilteredOut": "Ningún capítulo coincide con el filtro"
 }

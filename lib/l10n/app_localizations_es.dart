@@ -743,4 +743,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get markAsUnread => 'Marcar como no leído';
+
+  @override
+  String get chaptersFilteredOut => 'Ningún capítulo coincide con el filtro';
 }

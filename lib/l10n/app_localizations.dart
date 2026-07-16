@@ -1405,6 +1405,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark as unread'**
   String get markAsUnread;
+
+  /// No description provided for @chaptersFilteredOut.
+  ///
+  /// In en, this message translates to:
+  /// **'No chapters match the current filter'**
+  String get chaptersFilteredOut;
 }
 
 class _AppLocalizationsDelegate
