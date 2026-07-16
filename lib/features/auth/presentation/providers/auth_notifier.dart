@@ -316,20 +316,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
           (_) async {},
         );
 
-        // Send verification email and sign out regardless of profile result.
-        // The Firebase account was already created; the user can complete
-        // their profile after logging in.
-        final verifyResult = await _sendEmailVerification();
-        await _signOut();
+        // Send verification email. The router treats unverified users as
+        // guests, so no need to sign out — they will be redirected to login.
+        await _sendEmailVerification();
 
         state = state.copyWith(
           isLoading: false,
           clearError: true,
-          clearUser: true,
           profileCompletionPending: false,
           registrationInProgress: false,
-          emailVerificationSent:
-              verifyResult.isRight() || state.emailVerificationSent,
+          emailVerificationSent: true,
         );
       },
     );

@@ -41,11 +41,16 @@ const _authVerifiedRoutes = <String>[AppRoutes.verifyEmail];
 /// Computes the auth redirect for a given route and Firebase auth state.
 ///
 /// Redirect rules:
-/// - Authenticated user on an auth-only surface (`/login`, `/register`) → `/`
+/// - Authenticated+verified user on an auth-only surface (`/login`, `/register`) → `/`
 /// - Authenticated+verified user on `/verify-email` → `/`
+/// - Unverified user on a protected surface (`/profile`) → `/login`
 /// - Guest on a protected surface (`/profile`) → `/login`
 /// - Guest on `/verify-email` → `/login`
 /// - All other combinations → `null` (no redirect, allow navigation)
+///
+/// Unverified users are treated as guests: they cannot access protected
+/// routes but stay on auth surfaces. This allows the registration flow to
+/// navigate to `/login` without an explicit sign-out.
 ///
 /// Public routes (home, explore, library, manga-detail, reader) remain fully
 /// accessible without authentication so the app is usable as a guest.
@@ -54,17 +59,23 @@ String? resolveAuthRedirect({
   required String matchedLocation,
 }) {
   final isLoggedIn = currentUser != null;
+  final isVerified = currentUser?.emailVerified ?? false;
 
-  // Authenticated user should not stay on auth screens.
-  if (isLoggedIn && _authOnlyRoutes.contains(matchedLocation)) {
+  // Verified user should not stay on auth screens.
+  if (isLoggedIn && isVerified && _authOnlyRoutes.contains(matchedLocation)) {
     return AppRoutes.home;
   }
 
-  // Authenticated+verified user does not need the verification page.
+  // Verified user does not need the verification page.
   if (isLoggedIn &&
-      _authVerifiedRoutes.contains(matchedLocation) &&
-      currentUser.emailVerified) {
+      isVerified &&
+      _authVerifiedRoutes.contains(matchedLocation)) {
     return AppRoutes.home;
+  }
+
+  // Unverified user on a protected route — treat as guest.
+  if (isLoggedIn && !isVerified && _protectedRoutes.contains(matchedLocation)) {
+    return AppRoutes.login;
   }
 
   // Guest must not access protected routes — redirect to login.
@@ -75,6 +86,11 @@ String? resolveAuthRedirect({
   // Guest cannot access verification page.
   if (!isLoggedIn && _authVerifiedRoutes.contains(matchedLocation)) {
     return AppRoutes.login;
+  }
+
+  // Unverified users stay on auth surfaces (no redirect to home).
+  if (isLoggedIn && !isVerified && _authOnlyRoutes.contains(matchedLocation)) {
+    return null;
   }
 
   return null;
