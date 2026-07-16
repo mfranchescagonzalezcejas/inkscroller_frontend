@@ -86,9 +86,13 @@ String? resolveAuthRedirect({
   }
 
   // Unverified user on any app page → redirect to verification page.
-  // Only /register is exempt (signUp flow needs it) so the user can
-  // complete registration before being redirected to verify-email.
-  if (isLoggedIn && !isVerified && matchedLocation != AppRoutes.register) {
+  // Only /register and /verify-email are exempt: /register so the
+  // signUp flow completes first, /verify-email to prevent an infinite
+  // redirect loop when the user is already on that page.
+  if (isLoggedIn &&
+      !isVerified &&
+      matchedLocation != AppRoutes.register &&
+      matchedLocation != AppRoutes.verifyEmail) {
     return AppRoutes.verifyEmail;
   }
 

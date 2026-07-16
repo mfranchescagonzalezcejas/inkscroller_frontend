@@ -211,6 +211,10 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                     : () async {
                         await ref.read(authProvider.notifier).signOut();
                         if (!context.mounted) return;
+                        // If signOut failed (network error, etc.), the user
+                        // is still authenticated and stays on this page to
+                        // see the error snackbar from ref.listen() above.
+                        if (ref.read(authProvider).user != null) return;
                         context.go(AppRoutes.register);
                       },
                 child: Text(

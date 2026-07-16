@@ -303,8 +303,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
 
         if (kDebugMode) debugPrint('[AUTH] signUp: sending verification email');
-        await _sendEmailVerification();
-        if (kDebugMode) debugPrint('[AUTH] signUp: verification email sent, user stays signed in');
+        final verificationResult = await _sendEmailVerification();
+        if (kDebugMode) debugPrint('[AUTH] signUp: verification email result received');
 
         final now = DateTime.now().millisecondsSinceEpoch;
         final profileError = await profileResult.fold(
@@ -318,14 +318,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
           (_) async => null,
         );
 
+        final verificationSent = verificationResult.fold(
+          (failure) {
+            if (kDebugMode) debugPrint('[AUTH] signUp sendVerification FAILED: ${failure.message}');
+            return false;
+          },
+          (_) => true,
+        );
+
         state = state.copyWith(
           isLoading: false,
           clearError: profileError == null,
-          error: profileError,
+          error: profileError ?? verificationResult.fold((f) => f.message, (_) => null),
           profileCompletionPending: profileError != null,
           registrationInProgress: false,
-          emailVerificationSent: true,
-          lastVerificationSentAt: now,
+          emailVerificationSent: verificationSent,
+          lastVerificationSentAt: verificationSent ? now : null,
         );
       },
     );
@@ -384,6 +392,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         clearError: true,
         profileCompletionPending: false,
         registrationInProgress: false,
+        clearLastVerificationSentAt: true,
       ),
     );
   }
@@ -433,6 +442,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isLoading: false,
           clearError: true,
         );
+        if (user.isEmailVerified) {
+          // Trigger profile completion check now that the user is verified.
+          _checkProfileCompletionIfNeeded(user);
+        }
         return user.isEmailVerified;
       },
     );

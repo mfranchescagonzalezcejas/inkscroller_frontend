@@ -100,9 +100,11 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       throw const ServerException(message: 'No authenticated user for token retrieval.');
     }
     try {
-      // Force-refresh so the backend sees the latest claims, especially
-      // email_verified after the user clicks the verification link.
-      final token = await user.getIdToken(true);
+      // Use the cached token for normal requests — the backend already validates
+      // claims on each call. Force-refresh (getIdToken(true)) is only needed
+      // after reloadUser(), which calls it explicitly to pick up the latest
+      // email_verified claim.
+      final token = await user.getIdToken();
       if (token == null || token.isEmpty) {
         throw const ServerException(message: 'Firebase returned an empty ID token.');
       }
