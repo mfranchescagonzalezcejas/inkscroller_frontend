@@ -306,6 +306,7 @@
   "authVerifyEmailSent": "✅ Email de verificación enviado",
   "authVerifyEmailContinue": "Ya verifiqué — continuar",
   "authVerifyEmailResend": "Reenviar email de verificación",
+  "authVerifyEmailWait": "Espera un momento antes de reenviar",
   "authVerifyEmailDifferentEmail": "Usar otro email",
   "authVerifyEmailSuccess": "¡Email verificado! Bienvenido/a a InkScroller.",
   "authVerifyEmailNotYet": "Tu email todavía no fue verificado. Revisa tu bandeja de entrada y haz clic en el link.",

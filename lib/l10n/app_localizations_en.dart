@@ -651,6 +651,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authVerifyEmailResend => 'Resend verification email';
 
   @override
+  String get authVerifyEmailWait => 'Wait a moment before resending';
+
+  @override
   String get authVerifyEmailDifferentEmail => 'Use a different email';
 
   @override

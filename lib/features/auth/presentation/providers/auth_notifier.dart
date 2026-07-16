@@ -405,6 +405,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(
           isLoading: false,
           emailVerificationSent: true,
+          lastVerificationSentAt: DateTime.now().millisecondsSinceEpoch,
         );
       },
     );

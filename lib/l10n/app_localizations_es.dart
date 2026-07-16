@@ -657,6 +657,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authVerifyEmailResend => 'Reenviar email de verificación';
 
   @override
+  String get authVerifyEmailWait => 'Espera un momento antes de reenviar';
+
+  @override
   String get authVerifyEmailDifferentEmail => 'Usar otro email';
 
   @override

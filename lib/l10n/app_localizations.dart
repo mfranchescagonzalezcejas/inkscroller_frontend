@@ -1250,6 +1250,12 @@ abstract class AppLocalizations {
   /// **'Resend verification email'**
   String get authVerifyEmailResend;
 
+  /// No description provided for @authVerifyEmailWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait a moment before resending'**
+  String get authVerifyEmailWait;
+
   /// No description provided for @authVerifyEmailDifferentEmail.
   ///
   /// In en, this message translates to:

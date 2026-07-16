@@ -148,14 +148,21 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
 
               // ── Resend button ───────────────────────────────────────────
               TextButton(
-                onPressed: authState.isLoading ? null : _onResend,
+                onPressed:
+                    authState.isLoading || !authState.canResendVerification
+                        ? null
+                        : _onResend,
                 child: Text(
-                  l10n.authVerifyEmailResend,
-                  style: const TextStyle(
+                  authState.canResendVerification
+                      ? l10n.authVerifyEmailResend
+                      : l10n.authVerifyEmailWait,
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.primary,
+                    color: authState.canResendVerification
+                        ? AppColors.primary
+                        : AppColors.onSurfaceVariant,
                   ),
                 ),
               ),

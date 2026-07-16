@@ -25,6 +25,17 @@ class AuthState {
   /// True after a verification email has been sent to the user.
   final bool emailVerificationSent;
 
+  /// [DateTime.now().millisecondsSinceEpoch] when the last verification email
+  /// was sent. Used to enforce a 60-second cooldown on the resend button.
+  final int? lastVerificationSentAt;
+
+  /// True when enough time has passed since the last verification email to
+  /// allow another resend (60-second cooldown).
+  bool get canResendVerification {
+    if (lastVerificationSentAt == null) return true;
+    return DateTime.now().millisecondsSinceEpoch - lastVerificationSentAt! >= 60000;
+  }
+
   const AuthState({
     this.isLoading = false,
     this.user,
@@ -32,6 +43,7 @@ class AuthState {
     this.profileCompletionPending = false,
     this.registrationInProgress = false,
     this.emailVerificationSent = false,
+    this.lastVerificationSentAt,
   });
 
   /// Convenience getter — true when a user is signed in.
@@ -50,8 +62,10 @@ class AuthState {
     bool? profileCompletionPending,
     bool? registrationInProgress,
     bool? emailVerificationSent,
+    int? lastVerificationSentAt,
     bool clearUser = false,
     bool clearError = false,
+    bool clearLastVerificationSentAt = false,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -66,6 +80,10 @@ class AuthState {
       emailVerificationSent:
           emailVerificationSent ??
               (!clearUser && this.emailVerificationSent),
+      lastVerificationSentAt:
+          clearLastVerificationSentAt
+              ? null
+              : lastVerificationSentAt ?? this.lastVerificationSentAt,
     );
   }
 }
