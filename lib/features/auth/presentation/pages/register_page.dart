@@ -93,15 +93,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
     if (!mounted) return;
 
-    // After signUp the user is signed out (verification email sent).
-    // Navigate to login when no fatal error occurred during account creation.
+    // After signUp the user stays signed in. The backend enforces email
+    // verification, and the router redirects unverified users to the
+    // verification page. Navigate to home — the router handles the rest.
     final completedAuthState = ref.read(authProvider);
-    final shouldGoToLogin =
+    final signUpSucceeded =
         !completedAuthState.registrationInProgress &&
         completedAuthState.error == null;
 
-    if (shouldGoToLogin) {
-      context.go(AppRoutes.login);
+    if (signUpSucceeded) {
+      context.go(AppRoutes.home);
     }
   }
 

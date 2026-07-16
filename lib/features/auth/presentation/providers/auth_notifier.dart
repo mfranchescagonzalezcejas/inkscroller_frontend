@@ -227,9 +227,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Signs in with [email] and [password].
   ///
-  /// After a successful Firebase sign-in, the user's email verification status
-  /// is checked. If the email is not verified, the session is signed out and
-  /// [authEmailNotVerifiedKey] is set as the error.
+  /// The backend enforces email verification — unverified users receive
+  /// 403/email_not_verified on protected API calls. The router redirects
+  /// unverified users to the verification page.
   Future<void> signIn({required String email, required String password}) async {
     state = state.copyWith(
       isLoading: true,
@@ -240,42 +240,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     final result = await _signIn(email: email, password: password);
 
-    await result.fold(
-      (failure) async =>
+    result.fold(
+      (failure) =>
           state = state.copyWith(isLoading: false, error: failure.message),
-      (_) async {
-        // Reload to get the latest emailVerified status.
-        final reloadResult = await _reloadUser();
-
-        await reloadResult.fold(
-          (failure) async {
-            await _signOut();
-            state = state.copyWith(
-              isLoading: false,
-              error: failure.message,
-              clearUser: true,
-            );
-          },
-          (user) async {
-            if (user.isEmailVerified) {
-              state = state.copyWith(
-                user: user,
-                isLoading: false,
-                clearError: true,
-                profileCompletionPending: false,
-              );
-              _checkProfileCompletionIfNeeded(user);
-            } else {
-              await _signOut();
-              state = state.copyWith(
-                isLoading: false,
-                error: authEmailNotVerifiedKey,
-                emailVerificationSent: true,
-                clearUser: true,
-              );
-            }
-          },
+      (user) {
+        state = state.copyWith(
+          user: user,
+          isLoading: false,
+          clearError: true,
+          profileCompletionPending: false,
         );
+        _checkProfileCompletionIfNeeded(user);
       },
     );
   }
@@ -319,17 +294,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
           (_) async {},
         );
 
-        // Send verification email, then sign out. Firebase auto-signs in
-        // after account creation, but the router now prevents the redirect
-        // to home during the auto-sign-in window (unverified → stay on
-        // register). Signing out gives the user a clean guest login page.
+        // Send verification email. The user stays signed in; the backend
+        // returns 403/email_not_verified on protected API calls and the
+        // router redirects unverified users to the verification page.
         await _sendEmailVerification();
-        await _signOut();
 
         state = state.copyWith(
           isLoading: false,
           clearError: true,
-          clearUser: true,
           profileCompletionPending: false,
           registrationInProgress: false,
           emailVerificationSent: true,
@@ -432,6 +404,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return user.isEmailVerified;
       },
     );
+  }
+
+  /// Called by the Dio error interceptor when the backend returns
+  /// 403/email_not_verified. Sets [AuthState.emailVerificationSent]
+  /// so the app redirects the user to the verification page.
+  void setEmailVerificationRequired() {
+    state = state.copyWith(emailVerificationSent: true);
   }
 
   /// Clears any pending auth error from the state.

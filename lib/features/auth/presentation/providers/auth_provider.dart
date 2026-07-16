@@ -2,6 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/network/dio_client.dart';
 import '../../domain/usecases/get_auth_state.dart';
 import '../../domain/usecases/reload_user.dart';
 import '../../domain/usecases/send_email_verification.dart';
@@ -18,7 +19,7 @@ import 'auth_state.dart';
 /// Resolves use cases from get_it following the project convention that
 /// providers bridge get_it singletons to the Riverpod layer.
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(
+  final notifier = AuthNotifier(
     signIn: sl<SignIn>(),
     signUp: sl<SignUp>(),
     signOut: sl<SignOut>(),
@@ -34,4 +35,10 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
       );
     },
   );
+
+  // Wire the Dio interceptor to the AuthNotifier so that 403/email_not_verified
+  // from the backend triggers the verification flow in the UI.
+  EmailVerificationInterceptor.onEmailNotVerified = () => notifier.setEmailVerificationRequired();
+
+  return notifier;
 });
