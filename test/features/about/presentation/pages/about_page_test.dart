@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:inkscroller_flutter/core/config/app_version_provider.dart';
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
 import 'package:inkscroller_flutter/features/about/presentation/pages/about_page.dart';
 
