@@ -252,9 +252,13 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
   Future<void> _onResend() async {
     await ref.read(authProvider.notifier).sendVerificationEmail();
     if (!mounted) return;
-    AppFeedback.showInfo(
-      context,
-      title: context.l10n.authVerifyEmailResent,
-    );
+    // Only show success if no error was set by the notifier.
+    // Errors (rate-limit, etc.) are shown by the ref.listen above.
+    if (ref.read(authProvider).error == null) {
+      AppFeedback.showInfo(
+        context,
+        title: context.l10n.authVerifyEmailResent,
+      );
+    }
   }
 }

@@ -29,11 +29,12 @@ class AuthState {
   /// was sent. Used to enforce a 60-second cooldown on the resend button.
   final int? lastVerificationSentAt;
 
-  /// True when a verification email has been sent AND enough time has passed
-  /// to allow another resend (60-second cooldown). Returns false when no
-  /// email has been sent yet or the cooldown is still active.
+  /// True when enough time has passed since the last verification email to
+  /// allow another resend (60-second cooldown). Returns true when no email
+  /// has been sent yet (cold start, existing unverified account) so the user
+  /// can request their first verification email.
   bool get canResendVerification {
-    if (lastVerificationSentAt == null) return false;
+    if (lastVerificationSentAt == null) return true;
     return DateTime.now().millisecondsSinceEpoch - lastVerificationSentAt! >= 60000;
   }
 
