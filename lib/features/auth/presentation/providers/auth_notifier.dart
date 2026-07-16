@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/app_user.dart';
@@ -115,6 +116,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void _listenToAuthState() {
     _authSubscription = _getAuthState().listen(
       (user) {
+        if (kDebugMode) {
+          debugPrint('[AUTH] authStateChange → ${user != null ? "user=${user.uid} verified=${user.isEmailVerified}" : "null"}');
+        }
         state = state.copyWith(
           user: user,
           clearUser: user == null,
@@ -142,10 +146,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   void _checkProfileCompletionIfNeeded(AppUser? user) {
-    if (user == null || state.registrationInProgress) return;
-    // Skip profile check for unverified users — the backend returns
-    // 403/email_not_verified on all protected endpoints.
-    if (!user.isEmailVerified) return;
+    if (user == null || state.registrationInProgress) {
+      if (kDebugMode) debugPrint('[AUTH] checkProfileCompletion skipped: user=null or regInProgress');
+      return;
+    }
+    if (!user.isEmailVerified) {
+      if (kDebugMode) debugPrint('[AUTH] checkProfileCompletion skipped: email not verified');
+      return;
+    }
 
     final userId = user.uid;
     if (_profileCompletionCheckUserId == userId &&
@@ -234,6 +242,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 403/email_not_verified on protected API calls. The router redirects
   /// unverified users to the verification page.
   Future<void> signIn({required String email, required String password}) async {
+    if (kDebugMode) debugPrint('[AUTH] signIn: attempting login for $email');
     state = state.copyWith(
       isLoading: true,
       clearError: true,
@@ -244,8 +253,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _signIn(email: email, password: password);
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] signIn FAILED: ${failure.message}');
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
       (user) {
         state = state.copyWith(
           user: user,
@@ -272,15 +283,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
       registrationInProgress: true,
     );
 
+    if (kDebugMode) debugPrint('[AUTH] signUp: calling _signUp for $email');
     final result = await _signUp(email: email, password: password);
 
     await result.fold(
-      (failure) async => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-        registrationInProgress: false,
-      ),
+      (failure) async {
+        if (kDebugMode) debugPrint('[AUTH] signUp FAILED: ${failure.message}');
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+          registrationInProgress: false,
+        );
+      },
       (_) async {
+        if (kDebugMode) debugPrint('[AUTH] signUp: Firebase account created, updating profile');
         final profileResult = await _updateUserProfile(
           username: username,
           birthDate: birthDate,
@@ -297,10 +313,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           (_) async {},
         );
 
-        // Send verification email. The user stays signed in; the backend
-        // returns 403/email_not_verified on protected API calls and the
-        // router redirects unverified users to the verification page.
+        if (kDebugMode) debugPrint('[AUTH] signUp: sending verification email');
         await _sendEmailVerification();
+        if (kDebugMode) debugPrint('[AUTH] signUp: verification email sent, user stays signed in');
 
         state = state.copyWith(
           isLoading: false,
@@ -350,13 +365,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Signs out the current user.
   Future<void> signOut() async {
+    if (kDebugMode) debugPrint('[AUTH] signOut');
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _signOut();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] signOut FAILED: ${failure.message}');
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
       (_) => state = state.copyWith(
         isLoading: false,
         clearUser: true,
@@ -413,6 +431,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 403/email_not_verified. Sets [AuthState.emailVerificationSent]
   /// so the app redirects the user to the verification page.
   void setEmailVerificationRequired() {
+    if (kDebugMode) debugPrint('[AUTH] setEmailVerificationRequired called');
     state = state.copyWith(emailVerificationSent: true);
   }
 

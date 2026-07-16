@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -57,6 +58,13 @@ String? resolveAuthRedirect({
 }) {
   final isLoggedIn = currentUser != null;
   final isVerified = currentUser?.emailVerified ?? false;
+
+  if (kDebugMode) {
+    debugPrint(
+      '[ROUTER] resolveRedirect route=$matchedLocation '
+      'loggedIn=$isLoggedIn verified=$isVerified',
+    );
+  }
 
   // Verified user should not stay on auth or verification screens.
   if (isLoggedIn && isVerified) {

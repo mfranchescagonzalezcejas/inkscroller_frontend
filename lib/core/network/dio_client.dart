@@ -145,11 +145,21 @@ class EmailVerificationInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 403) {
-      final data = err.response?.data;
-      if (data is Map && data['error'] == 'email_not_verified') {
-        onEmailNotVerified?.call();
-      }
+    final data = err.response?.data;
+    final isEmailNotVerified = err.response?.statusCode == 403 &&
+        data is Map &&
+        data['error'] == 'email_not_verified';
+
+    if (kDebugMode) {
+      debugPrint(
+        '[HTTP] ${err.response?.statusCode} ${err.requestOptions.method} '
+        '${err.requestOptions.path}'
+        '${isEmailNotVerified ? " → email_not_verified" : ""}',
+      );
+    }
+
+    if (isEmailNotVerified) {
+      onEmailNotVerified?.call();
     }
     handler.next(err);
   }
