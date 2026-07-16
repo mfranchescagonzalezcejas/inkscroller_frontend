@@ -143,6 +143,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void _checkProfileCompletionIfNeeded(AppUser? user) {
     if (user == null || state.registrationInProgress) return;
+    // Skip profile check for unverified users — the backend returns
+    // 403/email_not_verified on all protected endpoints.
+    if (!user.isEmailVerified) return;
 
     final userId = user.uid;
     if (_profileCompletionCheckUserId == userId &&
