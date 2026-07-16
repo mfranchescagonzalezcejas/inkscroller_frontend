@@ -302,26 +302,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
           birthDate: birthDate,
         );
 
-        // Both callbacks return Future<void> so Either.fold inference is happy.
-        await profileResult.fold(
-          (failure) async {
-            _reportProfileMetadataFailure(
-              flow: 'sign_up',
-              reason: _signUpProfileMetadataFailureReason,
-            );
-          },
-          (_) async {},
-        );
-
         if (kDebugMode) debugPrint('[AUTH] signUp: sending verification email');
         await _sendEmailVerification();
         if (kDebugMode) debugPrint('[AUTH] signUp: verification email sent, user stays signed in');
 
         final now = DateTime.now().millisecondsSinceEpoch;
+        final profileError = await profileResult.fold(
+          (failure) async {
+            _reportProfileMetadataFailure(
+              flow: 'sign_up',
+              reason: _signUpProfileMetadataFailureReason,
+            );
+            return failure.message;
+          },
+          (_) async => null,
+        );
+
         state = state.copyWith(
           isLoading: false,
-          clearError: true,
-          profileCompletionPending: false,
+          clearError: profileError == null,
+          error: profileError,
+          profileCompletionPending: profileError != null,
           registrationInProgress: false,
           emailVerificationSent: true,
           lastVerificationSentAt: now,
