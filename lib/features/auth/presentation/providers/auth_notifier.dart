@@ -387,19 +387,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Sends a verification email to the current user.
   Future<void> sendVerificationEmail() async {
+    if (kDebugMode) debugPrint('[AUTH] sendVerificationEmail');
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _sendEmailVerification();
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
-      (_) => state = state.copyWith(
-        isLoading: false,
-        emailVerificationSent: true,
-      ),
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] sendVerificationEmail FAILED: ${failure.message}');
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
+      (_) {
+        if (kDebugMode) debugPrint('[AUTH] sendVerificationEmail SUCCESS');
+        state = state.copyWith(
+          isLoading: false,
+          emailVerificationSent: true,
+        );
+      },
     );
   }
 
