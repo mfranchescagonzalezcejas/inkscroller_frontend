@@ -68,7 +68,7 @@ class AccountSection extends ConsumerWidget {
         // before we request a route transition.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!scaffoldContext.mounted) return;
-          scaffoldContext.go(AppRoutes.login);
+          scaffoldContext.go(AppRoutes.home);
         });
       }
     });
