@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -20,7 +21,8 @@ final appVersionProvider = FutureProvider<AppVersionInfo>((ref) async {
   try {
     final info = await PackageInfo.fromPlatform();
     return AppVersionInfo(version: info.version, buildNumber: info.buildNumber);
-  } on Exception {
+  } on Object catch (e, st) {
+    debugPrint('[AppVersionProvider] Failed to load package info: $e\n$st');
     return const AppVersionInfo(version: '-', buildNumber: '-');
   }
 });
