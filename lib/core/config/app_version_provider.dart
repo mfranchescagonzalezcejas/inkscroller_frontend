@@ -21,7 +21,7 @@ final appVersionProvider = FutureProvider<AppVersionInfo>((ref) async {
   try {
     final info = await PackageInfo.fromPlatform();
     return AppVersionInfo(version: info.version, buildNumber: info.buildNumber);
-  } on Object catch (e, st) {
+  } on Exception catch (e, st) {
     debugPrint('[AppVersionProvider] Failed to load package info: $e\n$st');
     return const AppVersionInfo(version: '-', buildNumber: '-');
   }
