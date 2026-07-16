@@ -79,7 +79,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         // before we request a route transition.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          context.go(AppRoutes.login);
+          context.go(AppRoutes.home);
         });
       }
       if (next.deleteError != null && mounted) {

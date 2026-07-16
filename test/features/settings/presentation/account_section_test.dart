@@ -76,8 +76,8 @@ Widget _buildTestApp({
         builder: (_, __) => const Scaffold(body: AccountSection()),
       ),
       GoRoute(
-        path: AppRoutes.login,
-        builder: (_, __) => const Scaffold(body: Text('Login Page')),
+        path: AppRoutes.home,
+        builder: (_, __) => const Scaffold(body: Text('Home Page')),
       ),
     ],
   );
@@ -158,10 +158,8 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
       await tester.pumpAndSettle();
 
-      // Verify navigation to /login happened.
-      // The addPostFrameCallback ensures the go() call runs after
-      // the current frame, avoiding the auth-redirect race.
-      expect(find.text('Login Page'), findsOneWidget);
+      // Verify navigation to home happened after account deletion.
+      expect(find.text('Home Page'), findsOneWidget);
     });
 
     testWidgets('does not navigate when dialog is cancelled', (tester) async {
@@ -177,8 +175,8 @@ void main() {
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
       await tester.pumpAndSettle();
 
-      // Should still be on settings page, not on login.
-      expect(find.text('Login Page'), findsNothing);
+      // Should still be on settings page, not on home.
+      expect(find.text('Home Page'), findsNothing);
     });
   });
 }

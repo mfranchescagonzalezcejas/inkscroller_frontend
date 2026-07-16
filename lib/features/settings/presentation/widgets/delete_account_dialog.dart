@@ -231,7 +231,14 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                     if (!context.mounted) return;
                     final latestState = ref.read(settingsProvider);
                     if (latestState.accountDeleted) {
-                      Navigator.of(context).pop(true);
+                      // Defer the pop to the next frame so GoRouter's auth
+                      // redirect re-evaluation (triggered by Firebase auth
+                      // state change during deleteAccount) settles before
+                      // we interact with the Navigator.
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!context.mounted) return;
+                        Navigator.of(context).pop(true);
+                      });
                     } else {
                       setState(() => _isDeleting = false);
                     }
