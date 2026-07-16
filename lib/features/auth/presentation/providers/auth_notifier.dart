@@ -312,29 +312,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
               flow: 'sign_up',
               reason: _signUpProfileMetadataFailureReason,
             );
-            state = state.copyWith(
-              isLoading: false,
-              error: failure.message,
-              profileCompletionPending: true,
-              registrationInProgress: false,
-            );
           },
-          (_) async {
-            // Send verification email, then sign out so the user must
-            // log in again after verifying via email link.
-            final verifyResult = await _sendEmailVerification();
-            await _signOut();
+          (_) async {},
+        );
 
-            state = state.copyWith(
-              isLoading: false,
-              clearError: true,
-              clearUser: true,
-              profileCompletionPending: false,
-              registrationInProgress: false,
-              emailVerificationSent:
-                  verifyResult.isRight() || state.emailVerificationSent,
-            );
-          },
+        // Send verification email and sign out regardless of profile result.
+        // The Firebase account was already created; the user can complete
+        // their profile after logging in.
+        final verifyResult = await _sendEmailVerification();
+        await _signOut();
+
+        state = state.copyWith(
+          isLoading: false,
+          clearError: true,
+          clearUser: true,
+          profileCompletionPending: false,
+          registrationInProgress: false,
+          emailVerificationSent:
+              verifyResult.isRight() || state.emailVerificationSent,
         );
       },
     );

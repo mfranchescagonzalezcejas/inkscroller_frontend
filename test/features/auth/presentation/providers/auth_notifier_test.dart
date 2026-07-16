@@ -46,11 +46,6 @@ const _kUser = AppUser(
   isEmailVerified: true,
 );
 
-const _kUnverifiedUser = AppUser(
-  uid: 'uid-456',
-  email: 'bob@example.com',
-  isEmailVerified: false,
-);
 
 /// Returns an [AuthNotifier] backed by the provided stubs, with a
 /// [GetAuthState] that emits a single empty stream by default so the
