@@ -101,7 +101,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         completedAuthState.user != null;
 
     if (registrationSucceeded) {
-      context.go(AppRoutes.verifyEmail);
+      context.go(AppRoutes.login);
     }
   }
 

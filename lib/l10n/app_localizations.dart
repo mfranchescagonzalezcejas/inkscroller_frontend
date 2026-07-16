@@ -1214,6 +1214,12 @@ abstract class AppLocalizations {
   /// **'Authentication failed. Please try again.'**
   String get authUnknownError;
 
+  /// No description provided for @authEmailNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify your email before signing in. Check your inbox and click the verification link.'**
+  String get authEmailNotVerified;
+
   /// No description provided for @authVerifyEmailTitle.
   ///
   /// In en, this message translates to:

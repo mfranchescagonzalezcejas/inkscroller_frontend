@@ -636,6 +636,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authUnknownError => 'Error de autenticación. Intenta de nuevo.';
 
   @override
+  String get authEmailNotVerified =>
+      'Verificá tu email antes de iniciar sesión. Revisá tu bandeja de entrada y hacé clic en el link de verificación.';
+
+  @override
   String get authVerifyEmailTitle => 'Verificá tu email';
 
   @override

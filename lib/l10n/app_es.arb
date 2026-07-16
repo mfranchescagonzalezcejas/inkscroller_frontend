@@ -295,6 +295,7 @@
   "authTooManyRequests": "Demasiados intentos. Espera e intenta de nuevo.",
   "authNetworkError": "Sin conexión a internet. Verifica tu red.",
   "authUnknownError": "Error de autenticación. Intenta de nuevo.",
+  "authEmailNotVerified": "Verificá tu email antes de iniciar sesión. Revisá tu bandeja de entrada y hacé clic en el link de verificación.",
   "authVerifyEmailTitle": "Verificá tu email",
   "authVerifyEmailBody": "Enviamos un link de verificación a {email}. Hacé clic en el link del email para activar tu cuenta.",
   "@authVerifyEmailBody": {

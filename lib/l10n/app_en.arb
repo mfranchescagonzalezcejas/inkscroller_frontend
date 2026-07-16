@@ -295,6 +295,7 @@
   "authTooManyRequests": "Too many attempts. Please wait and try again.",
   "authNetworkError": "No internet connection. Check your network.",
   "authUnknownError": "Authentication failed. Please try again.",
+  "authEmailNotVerified": "Please verify your email before signing in. Check your inbox and click the verification link.",
   "authVerifyEmailTitle": "Verify your email",
   "authVerifyEmailBody": "We sent a verification link to {email}. Click the link in the email to activate your account.",
   "@authVerifyEmailBody": {

@@ -40,7 +40,17 @@ class _MockReloadUser extends Mock implements ReloadUser {}
 // Helpers
 // ---------------------------------------------------------------------------
 
-const _kUser = AppUser(uid: 'uid-123', email: 'alice@example.com');
+const _kUser = AppUser(
+  uid: 'uid-123',
+  email: 'alice@example.com',
+  isEmailVerified: true,
+);
+
+const _kUnverifiedUser = AppUser(
+  uid: 'uid-456',
+  email: 'bob@example.com',
+  isEmailVerified: false,
+);
 
 /// Returns an [AuthNotifier] backed by the provided stubs, with a
 /// [GetAuthState] that emits a single empty stream by default so the
@@ -96,6 +106,10 @@ void main() {
     // Default: reloadUser returns the default user (no status change).
     when(() => mockReloadUser()).thenAnswer(
       (_) async => const Right<Failure, AppUser>(_kUser),
+    );
+    // Default: signOut returns success.
+    when(() => mockSignOut()).thenAnswer(
+      (_) async => const Right<Failure, void>(null),
     );
     // Default: profile check returns a complete profile (no pending completion).
     when(() => mockGetUserProfile()).thenAnswer(

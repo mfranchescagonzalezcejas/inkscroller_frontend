@@ -52,6 +52,9 @@ const String authNetworkErrorKey = 'auth/network-error';
 /// An unexpected / uncategorised auth failure.
 const String authUnknownErrorKey = 'auth/unknown-error';
 
+/// The user's email has not been verified yet.
+const String authEmailNotVerifiedKey = 'auth/email-not-verified';
+
 /// Reports profile metadata failures to observability without coupling the
 /// notifier to a concrete analytics SDK.
 typedef ProfileMetadataFailureReporter =
@@ -220,6 +223,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // --- Public methods --------------------------------------------------------
 
   /// Signs in with [email] and [password].
+  ///
+  /// After a successful Firebase sign-in, the user's email verification status
+  /// is checked. If the email is not verified, the session is signed out and
+  /// [authEmailNotVerifiedKey] is set as the error.
   Future<void> signIn({required String email, required String password}) async {
     state = state.copyWith(
       isLoading: true,
@@ -230,17 +237,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     final result = await _signIn(email: email, password: password);
 
-    result.fold(
-      (failure) =>
+    await result.fold(
+      (failure) async =>
           state = state.copyWith(isLoading: false, error: failure.message),
-      (user) {
-        state = state.copyWith(
-          user: user,
-          isLoading: false,
-          clearError: true,
-          profileCompletionPending: false,
+      (_) async {
+        // Reload to get the latest emailVerified status.
+        final reloadResult = await _reloadUser();
+
+        await reloadResult.fold(
+          (failure) async {
+            await _signOut();
+            state = state.copyWith(
+              isLoading: false,
+              error: failure.message,
+              clearUser: true,
+            );
+          },
+          (user) async {
+            if (user.isEmailVerified) {
+              state = state.copyWith(
+                user: user,
+                isLoading: false,
+                clearError: true,
+                profileCompletionPending: false,
+              );
+              _checkProfileCompletionIfNeeded(user);
+            } else {
+              await _signOut();
+              state = state.copyWith(
+                isLoading: false,
+                error: authEmailNotVerifiedKey,
+                emailVerificationSent: true,
+                clearUser: true,
+              );
+            }
+          },
         );
-        _checkProfileCompletionIfNeeded(user);
       },
     );
   }
@@ -273,8 +305,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           birthDate: birthDate,
         );
 
-        profileResult.fold(
-          (failure) {
+        // Both callbacks return Future<void> so Either.fold inference is happy.
+        await profileResult.fold(
+          (failure) async {
             _reportProfileMetadataFailure(
               flow: 'sign_up',
               reason: _signUpProfileMetadataFailureReason,
@@ -286,23 +319,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
               registrationInProgress: false,
             );
           },
-          (_) {
+          (_) async {
+            // Send verification email, then sign out so the user must
+            // log in again after verifying via email link.
+            final verifyResult = await _sendEmailVerification();
+            await _signOut();
+
             state = state.copyWith(
               isLoading: false,
               clearError: true,
+              clearUser: true,
               profileCompletionPending: false,
               registrationInProgress: false,
+              emailVerificationSent:
+                  verifyResult.isRight() || state.emailVerificationSent,
             );
-            // Fire verification email — non-blocking; user can resend
-            // from the verification page if this fails.
-            unawaited(_sendEmailVerification().then((result) {
-              result.fold(
-                (_) {},
-                (_) => state = state.copyWith(
-                  emailVerificationSent: true,
-                ),
-              );
-            }));
           },
         );
       },
