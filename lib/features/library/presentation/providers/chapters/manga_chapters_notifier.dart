@@ -35,4 +35,12 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
       },
     );
   }
+
+  void setSortDescending({required bool value}) {
+    state = state.copyWith(sortDescending: value);
+  }
+
+  void setFilterUnreadOnly({required bool value}) {
+    state = state.copyWith(filterUnreadOnly: value);
+  }
 }

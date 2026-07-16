@@ -117,6 +117,12 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
         .maybeWhen(data: (isOnline) => !isOnline, orElse: () => false);
+    final List<Chapter> displayChapters = organizeChapters(
+      state.chapters,
+      descending: state.sortDescending,
+      readChapterIds:
+          state.filterUnreadOnly ? progress.readChapterIds : null,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
@@ -141,9 +147,16 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   child: _CtaButton(
                     label: context.l10n.readNow.toUpperCase(),
                     onTap: () {
-                      final chapters = ref.read(mangaChaptersProvider).chapters;
-                      if (chapters.isNotEmpty) {
-                        final first = chapters.first;
+                      // Prefer the first visible chapter so the CTA honors
+                      // the user's active sort/filter. Fall back to the
+                      // unfiltered list only when the filter leaves nothing
+                      // visible — this avoids a silent no-op when, e.g.,
+                      // the unread-only filter hides every chapter because
+                      // the user is fully caught up.
+                      final first = displayChapters.isNotEmpty
+                          ? displayChapters.first
+                          : state.chapters.firstOrNull;
+                      if (first != null) {
                         context.push(
                           AppRoutes.readerPath(
                             mangaId: widget.manga.id,
@@ -229,10 +242,22 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                       ),
                     ),
                   )
+                else if (displayChapters.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Text(
+                        context.l10n.chaptersFilteredOut,
+                        style: const TextStyle(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  )
                 else
                   SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
-                      final chapter = state.chapters[index];
+                      final chapter = displayChapters[index];
                       return ChapterTile(
                         chapter: chapter,
                         isRead: progress.isChapterRead(chapter.id),
@@ -243,8 +268,17 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             state.chapters,
                           );
                         },
+                        onToggleRead: () {
+                          ref
+                              .read(readingProgressProvider.notifier)
+                              .toggleChapter(
+                                mangaId: widget.manga.id,
+                                chapterId: chapter.id,
+                                totalChaptersCount: state.chapters.length,
+                              );
+                        },
                       );
-                    }, childCount: state.chapters.length),
+                    }, childCount: displayChapters.length),
                   ),
 
                 // safe bottom padding for floating nav
@@ -721,17 +755,18 @@ class _CtaButton extends StatelessWidget {
 
 // ── Chapters Header ──────────────────────────────────────────────────────────
 
-class _ChaptersHeader extends StatelessWidget {
+class _ChaptersHeader extends ConsumerWidget {
   final int count;
   final MangaReadingProgress progress;
 
   const _ChaptersHeader({required this.count, required this.progress});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final int total = progress.hasKnownTotal
         ? progress.totalChaptersCount
         : count;
+    final state = ref.watch(mangaChaptersProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -763,7 +798,43 @@ class _ChaptersHeader extends StatelessWidget {
             ),
           ],
         ),
-        const Icon(Icons.tune, color: Color(0xFF889391), size: 22),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(
+                state.sortDescending
+                    ? Icons.arrow_downward
+                    : Icons.arrow_upward,
+                color: const Color(0xFF889391),
+                size: 20,
+              ),
+              onPressed: () => ref
+                  .read(mangaChaptersProvider.notifier)
+                  .setSortDescending(value: !state.sortDescending),
+              tooltip: state.sortDescending
+                  ? context.l10n.chaptersSortDesc
+                  : context.l10n.chaptersSortAsc,
+              visualDensity: VisualDensity.compact,
+            ),
+            IconButton(
+              icon: Icon(
+                state.filterUnreadOnly
+                    ? Icons.visibility_off
+                    : Icons.visibility,
+                color: const Color(0xFF889391),
+                size: 20,
+              ),
+              onPressed: () => ref
+                  .read(mangaChaptersProvider.notifier)
+                  .setFilterUnreadOnly(value: !state.filterUnreadOnly),
+              tooltip: state.filterUnreadOnly
+                  ? context.l10n.chaptersFilterUnread
+                  : context.l10n.chaptersFilterAll,
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
+        ),
       ],
     );
   }

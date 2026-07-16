@@ -341,5 +341,12 @@
   "profileContentRatingTitle": "Content rating",
   "profileContentRatingSafe": "Safe",
   "profileContentRatingSuggestive": "Safe + Suggestive",
-  "profileContentRatingAll": "All"
+  "profileContentRatingAll": "All",
+  "chaptersSortAsc": "Number ↑",
+  "chaptersSortDesc": "Number ↓",
+  "chaptersFilterAll": "All chapters",
+  "chaptersFilterUnread": "Unread only",
+  "markAsRead": "Mark as read",
+  "markAsUnread": "Mark as unread",
+  "chaptersFilteredOut": "No chapters match the current filter"
 }

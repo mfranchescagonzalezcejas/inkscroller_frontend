@@ -719,4 +719,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileContentRatingAll => 'All';
+
+  @override
+  String get chaptersSortAsc => 'Number ↑';
+
+  @override
+  String get chaptersSortDesc => 'Number ↓';
+
+  @override
+  String get chaptersFilterAll => 'All chapters';
+
+  @override
+  String get chaptersFilterUnread => 'Unread only';
+
+  @override
+  String get markAsRead => 'Mark as read';
+
+  @override
+  String get markAsUnread => 'Mark as unread';
+
+  @override
+  String get chaptersFilteredOut => 'No chapters match the current filter';
 }
