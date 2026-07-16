@@ -19,6 +19,9 @@ final sessionStartupProvider = Provider<void>((ref) {
   ref.listen<AuthState>(authProvider, (previous, next) {
     final justSignedIn = previous?.user == null && next.user != null;
     if (!justSignedIn) return;
+    // Skip data loading for unverified users — the backend returns
+    // 403/email_not_verified on all protected endpoints.
+    if (!next.user!.isEmailVerified) return;
 
     // ponytail: fire-and-forget loads — failures are handled internally
     // by each notifier and surfaced to the UI via their error states.
