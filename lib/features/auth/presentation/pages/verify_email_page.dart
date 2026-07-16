@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,12 +25,38 @@ class VerifyEmailPage extends ConsumerStatefulWidget {
 
 class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
   bool _isChecking = false;
+  Timer? _cooldownTimer;
+
+  @override
+  void dispose() {
+    _cooldownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCooldownTimer() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      final canResend = ref.read(authProvider).canResendVerification;
+      if (canResend) {
+        _cooldownTimer?.cancel();
+        _cooldownTimer = null;
+      }
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final email = authState.user?.email ?? '';
     final l10n = context.l10n;
+
+    // Start a 1-second periodic timer while the resend cooldown is active
+    // so the button text/state updates automatically when it expires.
+    if (!authState.canResendVerification && _cooldownTimer == null) {
+      _startCooldownTimer();
+    }
 
     ref.listen(authProvider, (previous, next) {
       if (next.error != null && next.error != previous?.error) {
