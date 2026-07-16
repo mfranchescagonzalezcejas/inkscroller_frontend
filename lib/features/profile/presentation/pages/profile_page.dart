@@ -114,7 +114,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       backgroundColor: AppColors.stage,
       appBar: AppTopBar(
         authState: authState,
-        enableDrawer: false,
         rightWidget: GestureDetector(
           onTap: () => context.push(AppRoutes.settings),
           child: const Icon(
