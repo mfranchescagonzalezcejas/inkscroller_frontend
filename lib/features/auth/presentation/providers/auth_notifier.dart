@@ -317,12 +317,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _sendEmailVerification();
         if (kDebugMode) debugPrint('[AUTH] signUp: verification email sent, user stays signed in');
 
+        final now = DateTime.now().millisecondsSinceEpoch;
         state = state.copyWith(
           isLoading: false,
           clearError: true,
           profileCompletionPending: false,
           registrationInProgress: false,
           emailVerificationSent: true,
+          lastVerificationSentAt: now,
         );
       },
     );
