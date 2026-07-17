@@ -463,9 +463,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// so the app redirects the user to the verification page.
   void setEmailVerificationRequired() {
     if (kDebugMode) debugPrint('[AUTH] setEmailVerificationRequired called');
-    state = state.copyWith(emailVerificationSent: true);
-    // Trigger router re-evaluation so the user is immediately redirected
-    // to /verify-email instead of staying on the page that got the 403.
+    // Don't set emailVerificationSent — no email was actually sent by this
+    // interceptor path. The user lands on /verify-email and can request one
+    // via the resend button.
     triggerRouterRefresh();
   }
 
