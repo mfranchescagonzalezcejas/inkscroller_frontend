@@ -15,7 +15,7 @@ void main() {
     test('P0-F6: public paths are not protected', () {
       expect(isProtectedAuthPath('/ping'), isFalse);
       expect(isProtectedAuthPath('/manga'), isTrue);
-      expect(isProtectedAuthPath('/chapters/latest'), isFalse);
+      expect(isProtectedAuthPath('/chapters/latest'), isTrue);
     });
   });
 

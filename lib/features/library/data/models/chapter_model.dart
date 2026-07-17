@@ -14,6 +14,9 @@ class ChapterModel {
   final bool external;
   final String? externalUrl;
 
+  /// Chapter language code as returned by the API. `null` when omitted.
+  final String? language;
+
   ChapterModel({
     required this.id,
     this.number,
@@ -22,6 +25,7 @@ class ChapterModel {
     required this.readable,
     required this.external,
     this.externalUrl,
+    this.language,
   });
 
   /// Deserializes a [ChapterModel] from the JSON map returned by the API.
@@ -36,6 +40,7 @@ class ChapterModel {
       readable: json['readable'] as bool,
       external: json['external'] as bool,
       externalUrl: json['externalUrl'] as String?,
+      language: json['language'] as String?,
     );
   }
 
@@ -49,6 +54,7 @@ class ChapterModel {
       'readable': readable,
       'external': external,
       'externalUrl': externalUrl,
+      'language': language,
     };
   }
 }

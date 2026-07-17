@@ -1,4 +1,5 @@
 import '../models/chapter_model.dart';
+import '../models/manga_languages_response.dart';
 import '../models/manga_model.dart';
 import '../models/search_result_model.dart';
 import '../../domain/entities/manga_tags.dart';
@@ -31,7 +32,26 @@ abstract class LibraryRemoteDataSource {
   Future<MangaModel> getMangaDetail(String mangaId);
 
   /// Fetches the list of chapter models for the manga identified by [mangaId].
-  Future<List<ChapterModel>> getMangaChapters(String mangaId);
+  ///
+  /// When [language] is provided, the request is filtered to chapters in that
+  /// language via the `lang` query parameter.
+  Future<List<ChapterModel>> getMangaChapters(
+    String mangaId, {
+    String? language,
+  });
+
+  /// Fetches the list of available chapter language codes for the manga
+  /// identified by [mangaId].
+  Future<List<String>> getMangaLanguages(String mangaId);
+
+  /// Fetches available languages and chapters for the preferred language in a
+  /// single call via `GET /chapters/manga/{id}/languages?preferred_lang=...`.
+  ///
+  /// When [preferredLang] is omitted, the backend defaults to `'en'`.
+  Future<MangaLanguagesResponse> getMangaChaptersWithLanguages(
+    String mangaId, {
+    String? preferredLang,
+  });
 
   /// Fetches the ordered list of page image URLs for the chapter [chapterId].
   ///

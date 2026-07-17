@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/chapter.dart';
+import '../../domain/entities/chapters_with_languages.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -108,9 +109,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
-  Future<Either<Failure, List<Chapter>>> getMangaChapters(String mangaId) async {
+  Future<Either<Failure, List<Chapter>>> getMangaChapters(
+    String mangaId, {
+    String? language,
+  }) async {
     try {
-      final chapters = await remoteDataSource.getMangaChapters(mangaId);
+      final chapters = await remoteDataSource.getMangaChapters(
+        mangaId,
+        language: language,
+      );
       await _cacheMangaChapters(mangaId, chapters);
       return Right(chapters.map((e) => e.toEntity()).toList());
     } on AppException catch (error) {
@@ -122,6 +129,42 @@ class LibraryRepositoryImpl implements LibraryRepository {
         return Right(cached.map((e) => e.toEntity()).toList());
       }
 
+      return Left(_mapExceptionToFailure(error));
+    } on Exception catch (error) {
+      return Left(UnexpectedFailure(message: error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getMangaLanguages(String mangaId) async {
+    try {
+      final languages = await remoteDataSource.getMangaLanguages(mangaId);
+      return Right(languages);
+    } on AppException catch (error) {
+      return Left(_mapExceptionToFailure(error));
+    } on Exception catch (error) {
+      return Left(UnexpectedFailure(message: error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ChaptersWithLanguages>> getMangaChaptersWithLanguages(
+    String mangaId, {
+    String? preferredLang,
+  }) async {
+    try {
+      final response = await remoteDataSource.getMangaChaptersWithLanguages(
+        mangaId,
+        preferredLang: preferredLang,
+      );
+      return Right(
+        ChaptersWithLanguages(
+          availableLanguages: response.availableLanguages,
+          matchedLanguage: response.matchedLanguage,
+          chapters: response.chapters.map((e) => e.toEntity()).toList(),
+        ),
+      );
+    } on AppException catch (error) {
       return Left(_mapExceptionToFailure(error));
     } on Exception catch (error) {
       return Left(UnexpectedFailure(message: error.toString()));

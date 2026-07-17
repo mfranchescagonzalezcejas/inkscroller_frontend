@@ -12,6 +12,7 @@ void main() {
         'readable': true,
         'external': false,
         'externalUrl': null,
+        'language': 'en',
       });
 
       expect(model.id, 'chapter-1');
@@ -21,6 +22,34 @@ void main() {
       expect(model.readable, isTrue);
       expect(model.external, isFalse);
       expect(model.externalUrl, isNull);
+      expect(model.language, 'en');
+    });
+
+    test('parses payload with language', () {
+      final model = ChapterModel.fromJson(<String, dynamic>{
+        'id': 'chapter-lang',
+        'number': '1',
+        'title': 'Lang chapter',
+        'date': null,
+        'readable': true,
+        'external': false,
+        'language': 'es',
+      });
+
+      expect(model.language, 'es');
+    });
+
+    test('parses payload without language', () {
+      final model = ChapterModel.fromJson(<String, dynamic>{
+        'id': 'chapter-no-lang',
+        'number': '2',
+        'title': 'No lang chapter',
+        'date': null,
+        'readable': true,
+        'external': false,
+      });
+
+      expect(model.language, isNull);
     });
 
     test('keeps optional values nullable', () {

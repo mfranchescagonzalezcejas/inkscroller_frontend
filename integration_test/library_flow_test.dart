@@ -30,6 +30,7 @@ import 'package:inkscroller_flutter/features/library/domain/repositories/reading
 import 'package:inkscroller_flutter/features/library/domain/repositories/user_library_repository.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/repositories/preferences_repository.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_chapters.dart';
+import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_languages.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_list.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_per_title_override.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/remove_per_title_override.dart';
@@ -58,6 +59,11 @@ class _MockGetMangaList extends Mock implements GetMangaList {}
 class _MockSearchManga extends Mock implements SearchManga {}
 
 class _MockGetMangaChapters extends Mock implements GetMangaChapters {}
+
+class _MockGetMangaChaptersWithLanguages extends Mock
+    implements GetMangaChaptersWithLanguages {}
+
+class _MockGetMangaLanguages extends Mock implements GetMangaLanguages {}
 
 class _MockSignIn extends Mock implements SignIn {}
 
@@ -236,6 +242,8 @@ void main() {
   late GetMangaList getMangaList;
   late SearchManga searchManga;
   late GetMangaChapters getMangaChapters;
+  late GetMangaChaptersWithLanguages getMangaChaptersWithLanguages;
+  late GetMangaLanguages getMangaLanguages;
 
   Future<void> pumpApp(WidgetTester tester) {
     final router = GoRouter(
@@ -265,7 +273,11 @@ void main() {
             (ref) => LibraryNotifier(getMangaList, searchManga),
           ),
           mangaChaptersProvider.overrideWith(
-            (ref) => MangaChaptersNotifier(getMangaChapters: getMangaChapters),
+            (ref) => MangaChaptersNotifier(
+              getMangaChapters: getMangaChapters,
+              getMangaLanguages: getMangaLanguages,
+              getMangaChaptersWithLanguages: getMangaChaptersWithLanguages,
+            ),
           ),
           readingProgressProvider.overrideWith(
             (ref) => _makeStubReadingProgressNotifier(),
@@ -317,6 +329,21 @@ void main() {
     getMangaList = _MockGetMangaList();
     searchManga = _MockSearchManga();
     getMangaChapters = _MockGetMangaChapters();
+    getMangaChaptersWithLanguages = _MockGetMangaChaptersWithLanguages();
+    getMangaLanguages = _MockGetMangaLanguages();
+
+    when(() => getMangaChaptersWithLanguages('monster')).thenAnswer(
+      (_) async => Right<Failure, ChaptersWithLanguages>(
+        ChaptersWithLanguages(
+          availableLanguages: ['en'],
+          matchedLanguage: 'en',
+          chapters: [],
+        ),
+      ),
+    );
+    when(() => getMangaLanguages('monster')).thenAnswer(
+      (_) async => const Right<Failure, List<String>>(['en']),
+    );
 
     when(() => getMangaList(limit: 20, offset: 0)).thenAnswer(
       (_) async => Right<Failure, List<Manga>>(<Manga>[berserk, monster]),
@@ -331,7 +358,7 @@ void main() {
         SearchResult(mangas: [monster], limit: 20, offset: 0, total: 1),
       ),
     );
-    when(() => getMangaChapters('monster')).thenAnswer(
+    when(() => getMangaChapters('monster', language: 'en')).thenAnswer(
       (_) async => Right<Failure, List<Chapter>>(<Chapter>[
         Chapter(
           id: 'chapter-1',

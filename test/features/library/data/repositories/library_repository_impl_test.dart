@@ -478,4 +478,85 @@ void main() {
       expect(chapters.single.id, 'chapter-1');
     });
   });
+
+  test('getMangaChapters forwards language to datasource', () async {
+    when(
+      () => remoteDataSource.getMangaChapters(
+        'manga-1',
+        language: 'es',
+      ),
+    ).thenAnswer(
+      (_) async => <ChapterModel>[
+        ChapterModel(id: 'chapter-1', readable: true, external: false),
+      ],
+    );
+
+    final result = await repository.getMangaChapters(
+      'manga-1',
+      language: 'es',
+    );
+
+    expect(result.isRight(), isTrue);
+    result.fold((_) => fail('expected right'), (chapters) {
+      expect(chapters.single.id, 'chapter-1');
+    });
+    verify(
+      () => remoteDataSource.getMangaChapters('manga-1', language: 'es'),
+    ).called(1);
+  });
+
+  test('getMangaChapters maps failure when datasource fails with language',
+      () async {
+    when(
+      () => remoteDataSource.getMangaChapters(
+        'manga-1',
+        language: 'es',
+      ),
+    ).thenThrow(const ServerException(message: 'server down', code: 500));
+    when(
+      () => localDataSource.getCachedMangaChapters(
+        'manga-1',
+        maxAge: any(named: 'maxAge'),
+      ),
+    ).thenAnswer((_) async => null);
+
+    final result = await repository.getMangaChapters(
+      'manga-1',
+      language: 'es',
+    );
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<ServerFailure>());
+      expect(failure.message, 'server down');
+      expect(failure.code, 500);
+    }, (_) => fail('expected left'));
+  });
+
+  test('getMangaLanguages returns list of language codes', () async {
+    when(() => remoteDataSource.getMangaLanguages('manga-1')).thenAnswer(
+      (_) async => <String>['en', 'es'],
+    );
+
+    final result = await repository.getMangaLanguages('manga-1');
+
+    expect(result.isRight(), isTrue);
+    result.fold((_) => fail('expected right'), (languages) {
+      expect(languages, ['en', 'es']);
+    });
+  });
+
+  test('getMangaLanguages maps datasource failure', () async {
+    when(() => remoteDataSource.getMangaLanguages('manga-1')).thenThrow(
+      const NetworkException(message: 'offline'),
+    );
+
+    final result = await repository.getMangaLanguages('manga-1');
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<NetworkFailure>());
+      expect(failure.message, 'offline');
+    }, (_) => fail('expected left'));
+  });
 }

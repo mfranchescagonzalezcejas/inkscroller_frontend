@@ -187,7 +187,7 @@ Future<void> attachAuthHeaderForRequest(
 }
 
 class _AuthInterceptor extends Interceptor {
-  static const _protectedPaths = <String>['/users', '/manga'];
+  static const _protectedPaths = <String>['/users', '/manga', '/chapters'];
 
   final Future<String?> Function() _tokenProvider;
 

@@ -11,6 +11,9 @@ class MangaChaptersState {
   final Failure? failure;
   final bool sortDescending;
   final bool filterUnreadOnly;
+  final List<String> availableLanguages;
+  final String selectedLanguage;
+  final bool isLanguageLoading;
 
   const MangaChaptersState({
     this.chapters = const [],
@@ -18,6 +21,9 @@ class MangaChaptersState {
     this.failure,
     this.sortDescending = false,
     this.filterUnreadOnly = false,
+    this.availableLanguages = const ['en'],
+    this.selectedLanguage = 'en',
+    this.isLanguageLoading = false,
   });
 
   MangaChaptersState copyWith({
@@ -27,6 +33,9 @@ class MangaChaptersState {
     bool clearFailure = false,
     bool? sortDescending,
     bool? filterUnreadOnly,
+    List<String>? availableLanguages,
+    String? selectedLanguage,
+    bool? isLanguageLoading,
   }) {
     return MangaChaptersState(
       chapters: chapters ?? this.chapters,
@@ -34,6 +43,9 @@ class MangaChaptersState {
       failure: clearFailure ? null : failure ?? this.failure,
       sortDescending: sortDescending ?? this.sortDescending,
       filterUnreadOnly: filterUnreadOnly ?? this.filterUnreadOnly,
+      availableLanguages: availableLanguages ?? this.availableLanguages,
+      selectedLanguage: selectedLanguage ?? this.selectedLanguage,
+      isLanguageLoading: isLanguageLoading ?? this.isLanguageLoading,
     );
   }
 }
