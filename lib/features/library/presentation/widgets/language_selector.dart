@@ -123,6 +123,9 @@ class LanguageSelector extends ConsumerWidget {
       );
     }
 
+    // No languages available → hide the entire selector.
+    if (availableLanguages.isEmpty) return const SizedBox.shrink();
+
     // Single language: show as plain text, no dropdown needed.
     if (availableLanguages.length == 1) {
       return Text(

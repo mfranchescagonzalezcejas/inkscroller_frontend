@@ -30,6 +30,24 @@ void main() {
       expect(find.text('Japonés'), findsOneWidget);
     });
 
+    testWidgets('shows nothing when no languages available', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const [],
+              selectedLanguage: 'en',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+      expect(find.text('Inglés'), findsNothing);
+      expect(find.text('Cargando…'), findsNothing);
+    });
+
     testWidgets('shows plain text label when only one language available', (
       tester,
     ) async {
