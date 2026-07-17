@@ -88,4 +88,133 @@ void main() {
 
     expect(notifier.state.loadedPages, pages.length);
   });
+
+  // ── Background precache batch ───────────────────────────────────────────
+
+  group('background precache batch', () {
+    const _initialPrecacheCount = 5;
+
+    test('completes after initial display and loadedPages reaches total', () async {
+      const pageCount = 8;
+      final pages = List.generate(
+        pageCount,
+        (i) => 'https://example.com/$i.jpg',
+      );
+
+      when(() => getChapterPages('ch-bg')).thenAnswer(
+        (_) async => Right<Failure, List<String>>(pages),
+      );
+      when(() => resolveReaderMode(
+        globalReaderMode: any(named: 'globalReaderMode'),
+        titleOverride: any(named: 'titleOverride'),
+        contentMetadata: any(named: 'contentMetadata'),
+      )).thenReturn(ReaderMode.vertical);
+
+      notifier = ReaderNotifier(
+        getChapterPages: getChapterPages,
+        resolveReaderMode: resolveReaderMode,
+        initialPrecacheTimeout: const Duration(milliseconds: 1),
+        precacheNetworkImage: (_) async {},
+      );
+
+      await notifier.loadChapter(chapterId: 'ch-bg');
+
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.loadedPages, _initialPrecacheCount);
+      expect(notifier.state.pages.length, pageCount);
+
+      // Let the unawaited background batch drain.
+      await Future<void>.delayed(Duration.zero);
+
+      expect(notifier.state.loadedPages, pageCount);
+    });
+
+    test('individual page failures do not block remaining pages', () async {
+      const pageCount = 8;
+      final pages = List.generate(
+        pageCount,
+        (i) => 'https://example.com/$i.jpg',
+      );
+      // pages[6] is in the background sublist (pages.sublist(5)).
+      final failUrl = pages[6];
+
+      when(() => getChapterPages('ch-fail')).thenAnswer(
+        (_) async => Right<Failure, List<String>>(pages),
+      );
+      when(() => resolveReaderMode(
+        globalReaderMode: any(named: 'globalReaderMode'),
+        titleOverride: any(named: 'titleOverride'),
+        contentMetadata: any(named: 'contentMetadata'),
+      )).thenReturn(ReaderMode.vertical);
+
+      notifier = ReaderNotifier(
+        getChapterPages: getChapterPages,
+        resolveReaderMode: resolveReaderMode,
+        initialPrecacheTimeout: const Duration(milliseconds: 1),
+        precacheNetworkImage: (url) async {
+          if (url == failUrl) throw Exception('fail');
+        },
+      );
+
+      await notifier.loadChapter(chapterId: 'ch-fail');
+      await Future<void>.delayed(Duration.zero);
+
+      // All 8 pages processed: initial 5 load + 3 background pages
+      // (2 succeed, 1 throws, but loaded increments either way).
+      expect(notifier.state.loadedPages, pageCount);
+    });
+
+    test(
+      '_loadGeneration guard prevents stale background writes across '
+      'chapter loads',
+      () async {
+        final firstPages = List.generate(
+          8,
+          (i) => 'https://example.com/first-$i.jpg',
+        );
+        final secondPages = List.generate(
+          3,
+          (i) => 'https://example.com/second-$i.jpg',
+        );
+        final slowCompleter = Completer<void>();
+
+        when(() => getChapterPages('ch-first')).thenAnswer(
+          (_) async => Right<Failure, List<String>>(firstPages),
+        );
+        when(() => getChapterPages('ch-second')).thenAnswer(
+          (_) async => Right<Failure, List<String>>(secondPages),
+        );
+        when(() => resolveReaderMode(
+          globalReaderMode: any(named: 'globalReaderMode'),
+          titleOverride: any(named: 'titleOverride'),
+          contentMetadata: any(named: 'contentMetadata'),
+        )).thenReturn(ReaderMode.vertical);
+
+        notifier = ReaderNotifier(
+          getChapterPages: getChapterPages,
+          resolveReaderMode: resolveReaderMode,
+          initialPrecacheTimeout: const Duration(milliseconds: 1),
+          precacheNetworkImage: (url) async {
+            if (url == firstPages[6]) await slowCompleter.future;
+          },
+        );
+
+        await notifier.loadChapter(chapterId: 'ch-first');
+        expect(notifier.state.loadedPages, _initialPrecacheCount);
+
+        // Load a second chapter while the first's background batch is still
+        // blocked — this bumps _loadGeneration.
+        await notifier.loadChapter(chapterId: 'ch-second');
+        expect(notifier.state.loadedPages, secondPages.length);
+
+        // Release the blocked background page.
+        slowCompleter.complete();
+        await Future<void>.delayed(Duration.zero);
+
+        // The first's stale background write must NOT have overwritten state.
+        expect(notifier.state.loadedPages, secondPages.length);
+        expect(notifier.state.pages, secondPages);
+      },
+    );
+  });
 }
