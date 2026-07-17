@@ -193,18 +193,20 @@ class LibraryRepositoryImpl implements LibraryRepository {
         maxAge: mangaChaptersCacheTtl,
         language: preferredLang,
       );
+      bool usedLegacyFallback = false;
       if (cached == null && preferredLang != null) {
         cached = await _getCachedMangaChapters(
           mangaId,
           maxAge: mangaChaptersCacheTtl,
         );
+        usedLegacyFallback = cached != null;
       }
       if (cached != null) {
-        final cachedLang = preferredLang ?? 'en';
+        final fallbackLang = usedLegacyFallback ? 'en' : (preferredLang ?? 'en');
         return Right(
           ChaptersWithLanguages(
-            availableLanguages: [cachedLang],
-            matchedLanguage: cachedLang,
+            availableLanguages: [fallbackLang],
+            matchedLanguage: fallbackLang,
             chapters: cached.map((e) => e.toEntity()).toList(),
           ),
         );

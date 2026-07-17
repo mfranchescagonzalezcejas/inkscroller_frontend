@@ -65,15 +65,19 @@ class ReadingProgressNotifier
       ...chaptersToMark.map((chapter) => chapter.id),
     };
 
+    final int nextTotal = current.totalChaptersCount > chapters.length
+        ? current.totalChaptersCount
+        : chapters.length;
+
     if (nextReadIds.length == current.readChapterIds.length &&
-        current.totalChaptersCount == chapters.length) {
+        (nextTotal <= current.totalChaptersCount)) {
       return null;
     }
 
     final previous = current;
     final next = current.copyWith(
       readChapterIds: nextReadIds,
-      totalChaptersCount: chapters.length,
+      totalChaptersCount: nextTotal,
     );
     await _save(next);
     return previous;
@@ -95,9 +99,12 @@ class ReadingProgressNotifier
     } else {
       nextReadIds.add(chapterId);
     }
+    final nextTotal = current.totalChaptersCount > totalChaptersCount
+        ? current.totalChaptersCount
+        : totalChaptersCount;
     final next = current.copyWith(
       readChapterIds: nextReadIds,
-      totalChaptersCount: totalChaptersCount,
+      totalChaptersCount: nextTotal,
     );
 
     // Optimistic update — set state immediately so rapid toggles don't

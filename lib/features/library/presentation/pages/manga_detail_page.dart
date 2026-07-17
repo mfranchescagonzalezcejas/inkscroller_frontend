@@ -77,7 +77,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
       // Show shimmer immediately so the user doesn't see a false empty state
       // while preferences load (P2 Codex finding).
-      notifier.setLoading();
+      notifier.setLoading(widget.manga.id);
 
       // Await preferences if not yet loaded so the correct default language
       // is used for the initial chapters request (P2 Codex finding #4).
@@ -241,8 +241,17 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             const SizedBox(height: 16),
                             FilledButton(
                               onPressed: () {
-                                final prefs = ref.read(preferencesProvider);
-                                final lang = prefs.preferences?.defaultLanguage ?? 'en';
+                                // Use the last selected language (user may have
+                                // switched manually). On first load failure
+                                // selectedLanguage is still 'en', so fall back
+                                // to the user's preference from settings.
+                                final lang = state.selectedLanguage != 'en'
+                                    ? state.selectedLanguage
+                                    : (ref
+                                            .read(preferencesProvider)
+                                            .preferences
+                                            ?.defaultLanguage ??
+                                        'en');
                                 ref
                                     .read(mangaChaptersProvider.notifier)
                                     .loadLanguages(
