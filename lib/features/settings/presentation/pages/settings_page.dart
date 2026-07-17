@@ -34,6 +34,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Future<void> _clearCache() async {
     setState(() => _isClearingCache = true);
 
+    // Clear the in-memory chapter cache BEFORE the mounted guard so it
+    // runs even if the settings page was already popped. The persisted
+    // library cache is cleared inside clearLibraryCache() below.
+    ref.read(mangaChaptersProvider.notifier).clearCache();
+
     final result = await ref
         .read(settingsCacheControllerProvider)
         .clearLibraryCache();
@@ -42,12 +47,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     // Refresh the displayed cache size after clearing.
     ref.invalidate(cacheSizeProvider);
-
-    // Also clear the in-memory chapter cache so stale data is not served
-    // from the session-scoped notifier cache. Uses clearCache() instead of
-    // provider invalidation so an in-flight loadChapters doesn't write to
-    // a disposed notifier.
-    ref.read(mangaChaptersProvider.notifier).clearCache();
 
     result.fold(
       (failure) => AppFeedback.showError(
