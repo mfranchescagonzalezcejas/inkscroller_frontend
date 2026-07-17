@@ -91,6 +91,10 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   /// dispose the notifier, so in-flight requests remain safe.
   void clearCache() {
     _chapterCache.clear();
+    // Reset the last-requested guard so any in-flight response arriving
+    // after this point is discarded — it would otherwise repopulate the
+    // cache with stale data from a request that started before clearing.
+    _lastRequestedMangaId = null;
     // Also reset the state so the next visit starts fresh.
     state = const MangaChaptersState();
   }

@@ -207,7 +207,7 @@ void main() {
     test('keeps empty chapter list when background refresh fails', () async {
       // First load — cache miss, API returns empty list.
       when(() => getMangaChapters('manga-1')).thenAnswer(
-        (_) async => Right<Failure, List<Chapter>>(const <Chapter>[]),
+        (_) async => const Right<Failure, List<Chapter>>(<Chapter>[]),
       );
       await notifier.loadChapters('manga-1');
       expect(notifier.state.chapters, isEmpty);
