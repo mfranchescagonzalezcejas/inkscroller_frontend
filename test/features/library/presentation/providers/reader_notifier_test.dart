@@ -92,7 +92,7 @@ void main() {
   // ── Background precache batch ───────────────────────────────────────────
 
   group('background precache batch', () {
-    const _initialPrecacheCount = 5;
+    const initialPrecacheCount = 5;
 
     test('completes after initial display and loadedPages reaches total', () async {
       const pageCount = 8;
@@ -120,7 +120,7 @@ void main() {
       await notifier.loadChapter(chapterId: 'ch-bg');
 
       expect(notifier.state.isLoading, isFalse);
-      expect(notifier.state.loadedPages, _initialPrecacheCount);
+      expect(notifier.state.loadedPages, initialPrecacheCount);
       expect(notifier.state.pages.length, pageCount);
 
       // Let the unawaited background batch drain.
@@ -200,7 +200,7 @@ void main() {
         );
 
         await notifier.loadChapter(chapterId: 'ch-first');
-        expect(notifier.state.loadedPages, _initialPrecacheCount);
+        expect(notifier.state.loadedPages, initialPrecacheCount);
 
         // Load a second chapter while the first's background batch is still
         // blocked — this bumps _loadGeneration.
