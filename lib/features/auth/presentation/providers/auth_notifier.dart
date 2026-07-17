@@ -14,6 +14,7 @@ import '../../../profile/domain/entities/user_profile.dart';
 import '../../../profile/domain/usecases/get_user_profile.dart';
 import '../../../profile/domain/usecases/update_user_profile.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/router/redirect_notifier.dart';
 import 'auth_state.dart';
 
 const String _signUpProfileMetadataFailureReason =
@@ -463,6 +464,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void setEmailVerificationRequired() {
     if (kDebugMode) debugPrint('[AUTH] setEmailVerificationRequired called');
     state = state.copyWith(emailVerificationSent: true);
+    // Trigger router re-evaluation so the user is immediately redirected
+    // to /verify-email instead of staying on the page that got the 403.
+    triggerRouterRefresh();
   }
 
   /// Clears any pending auth error from the state.

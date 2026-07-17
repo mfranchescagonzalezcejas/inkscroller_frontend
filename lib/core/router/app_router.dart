@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../constants/app_constants.dart';
 import '../l10n/l10n.dart';
 import 'app_routes.dart';
+import 'redirect_notifier.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/verify_email_page.dart';
@@ -20,13 +21,6 @@ import '../../features/navigation/presentation/pages/main_scaffold.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/about/presentation/pages/about_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-
-/// Notifier that rebuilds the router whenever the Firebase auth state changes.
-///
-/// [GoRouter] holds a [Listenable] that it watches for changes; connecting it
-/// to the Firebase auth stream ensures route redirects fire immediately after
-/// sign-in or sign-out without requiring an explicit refresh.
-final _authStateListenable = _FirebaseAuthStateListenable();
 
 /// Routes that require an authenticated user.
 ///
@@ -99,12 +93,6 @@ String? resolveAuthRedirect({
   return null;
 }
 
-class _FirebaseAuthStateListenable extends ChangeNotifier {
-  _FirebaseAuthStateListenable() {
-    FirebaseAuth.instance.authStateChanges().listen((_) => notifyListeners());
-  }
-}
-
 /// Centralized application router with authentication guard.
 ///
 /// Public areas remain accessible without authentication. The guard only
@@ -112,7 +100,7 @@ class _FirebaseAuthStateListenable extends ChangeNotifier {
 /// to `/`.
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.home,
-  refreshListenable: _authStateListenable,
+  refreshListenable: routerRefreshNotifier,
   redirect: (context, state) {
     return resolveAuthRedirect(
       currentUser: FirebaseAuth.instance.currentUser,

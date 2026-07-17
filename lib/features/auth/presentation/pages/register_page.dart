@@ -93,17 +93,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
     if (!mounted) return;
 
-    // After signUp the user stays signed in. The backend enforces email
-    // verification, and the router redirects unverified users to the
-    // verification page. Navigate to home — the router handles the rest.
-    final completedAuthState = ref.read(authProvider);
-    final signUpSucceeded =
-        !completedAuthState.registrationInProgress &&
-        completedAuthState.error == null;
+    if (!mounted) return;
 
-    if (signUpSucceeded) {
-      context.go(AppRoutes.home);
-    }
+    // Navigate to home when registration finishes, regardless of errors.
+    // If the account was created and the user is signed in but unverified,
+    // the router redirects to /verify-email. If verification failed, the
+    // error is shown there via the auth state listener and the user can
+    // use the resend button.
+    context.go(AppRoutes.home);
   }
 
   Future<void> _signOutRecovery() async {
