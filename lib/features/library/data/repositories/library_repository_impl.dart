@@ -164,6 +164,16 @@ class LibraryRepositoryImpl implements LibraryRepository {
         response.chapters,
         language: response.matchedLanguage,
       );
+      // Also seed under the preferred language key so offline fallback
+      // matches when the backend matched a variant (e.g. es → es-la).
+      if (preferredLang != null &&
+          preferredLang != response.matchedLanguage) {
+        await _cacheMangaChapters(
+          mangaId,
+          response.chapters,
+          language: preferredLang,
+        );
+      }
       return Right(
         ChaptersWithLanguages(
           availableLanguages: response.availableLanguages,

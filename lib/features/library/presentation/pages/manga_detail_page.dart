@@ -82,6 +82,10 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
         await ref.read(preferencesProvider.notifier).loadPreferences();
       }
 
+      // Guard: if the user left this page while preferences were loading,
+      // don't continue with a disposed widget (P2 Codex finding).
+      if (!context.mounted) return;
+
       final updatedPrefs = ref.read(preferencesProvider);
       final defaultLang = updatedPrefs.preferences?.defaultLanguage ?? 'en';
 
@@ -234,9 +238,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             FilledButton(
                               onPressed: () => ref
                                   .read(mangaChaptersProvider.notifier)
-                                  .loadChapters(
+                                  .loadLanguages(
                                     widget.manga.id,
-                                    language: state.selectedLanguage,
+                                    preferredLang: state.selectedLanguage,
                                   ),
                               child: Text(context.l10n.retryAction),
                             ),

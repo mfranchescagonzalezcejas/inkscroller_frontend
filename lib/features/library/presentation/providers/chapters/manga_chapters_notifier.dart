@@ -142,6 +142,12 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
       (response) {
         _chapterCache['$mangaId:${response.matchedLanguage}'] =
             response.chapters;
+        // Also cache under the preferred language key so offline fallback
+        // works when the backend matched a variant (e.g. es → es-la).
+        if (preferredLang != null &&
+            preferredLang != response.matchedLanguage) {
+          _chapterCache['$mangaId:$preferredLang'] = response.chapters;
+        }
         state = state.copyWith(
           isLanguageLoading: false,
           isLoading: false,

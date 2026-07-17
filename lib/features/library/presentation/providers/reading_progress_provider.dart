@@ -31,19 +31,26 @@ class ReadingProgressNotifier
 
   Future<void> syncChapters(String mangaId, List<Chapter> chapters) async {
     final current = progressFor(mangaId);
+    final Set<String> validReadIds = current.readChapterIds
+        .where(
+          (chapterId) => chapters.any((chapter) => chapter.id == chapterId),
+        )
+        .toSet();
 
     // ponytail: only grow totalChaptersCount, never shrink it — chapters
     // arriving from a language-specific request are a subset of the full
-    // set, so pruning read IDs would delete progress from other languages.
-    // Pruning read IDs is handled separately when a chapter is explicitly
-    // removed from MangaDex.
+    // set. Pruning read IDs to the current language is intentional: per-
+    // language progress will be tracked separately in a future iteration.
     final nextTotal = current.totalChaptersCount > chapters.length
         ? current.totalChaptersCount
         : chapters.length;
 
-    final next = current.copyWith(totalChaptersCount: nextTotal);
-    if (next == current) return;
+    final next = current.copyWith(
+      readChapterIds: validReadIds,
+      totalChaptersCount: nextTotal,
+    );
 
+    if (next == current) return;
     await _save(next);
   }
 
