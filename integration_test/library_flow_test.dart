@@ -335,11 +335,19 @@ void main() {
     getMangaLanguages = _MockGetMangaLanguages();
 
     when(() => getMangaChaptersWithLanguages('monster')).thenAnswer(
-      (_) async => const Right<Failure, ChaptersWithLanguages>(
+      (_) async => Right<Failure, ChaptersWithLanguages>(
         ChaptersWithLanguages(
           availableLanguages: ['en'],
           matchedLanguage: 'en',
-          chapters: [],
+          chapters: [
+            Chapter(
+              id: 'chapter-1',
+              number: 1,
+              title: 'Capítulo 1',
+              readable: true,
+              external: false,
+            ),
+          ],
         ),
       ),
     );
