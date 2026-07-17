@@ -125,6 +125,7 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       unawaited(_precacheAllConcurrent(
         pages.sublist(_initialPrecacheCount),
         generation: _loadGeneration,
+        initialLoaded: _initialPrecacheCount,
       ));
     }
   }
@@ -138,9 +139,10 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     List<String> urls, {
     int concurrency = 4,
     required int generation,
+    int initialLoaded = 0,
   }) async {
     var index = 0;
-    var loaded = 0;
+    var loaded = initialLoaded;
 
     Future<void> worker() async {
       while (!_isDisposed) {
