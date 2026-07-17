@@ -326,10 +326,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
           (_) => true,
         );
 
+        final verificationError = verificationResult.fold<String?>(
+          (f) => f.message,
+          (_) => null,
+        );
+        final bothSucceeded = profileError == null && verificationError == null;
+
         state = state.copyWith(
           isLoading: false,
-          clearError: profileError == null,
-          error: profileError ?? verificationResult.fold((f) => f.message, (_) => null),
+          clearError: bothSucceeded,
+          error: profileError ?? verificationError,
           profileCompletionPending: profileError != null,
           registrationInProgress: false,
           emailVerificationSent: verificationSent,

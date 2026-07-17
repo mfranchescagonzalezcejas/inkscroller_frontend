@@ -17,12 +17,13 @@ import '../../features/profile/presentation/providers/user_profile_provider.dart
 /// app start — no page-level boilerplate needed.
 final sessionStartupProvider = Provider<void>((ref) {
   ref.listen<AuthState>(authProvider, (previous, next) {
+    // Skip loads for unverified users — the backend returns
+    // 403/email_not_verified on all protected endpoints.
+    if (next.user == null || !next.user!.isEmailVerified) return;
+
     final prevUser = previous?.user;
-    final justSignedIn = prevUser == null && next.user != null;
-    final justVerified = prevUser != null &&
-        !prevUser.isEmailVerified &&
-        next.user != null &&
-        next.user!.isEmailVerified;
+    final justSignedIn = prevUser == null;
+    final justVerified = prevUser != null && !prevUser.isEmailVerified;
     if (!justSignedIn && !justVerified) return;
 
     // ponytail: fire-and-forget loads — failures are handled internally
