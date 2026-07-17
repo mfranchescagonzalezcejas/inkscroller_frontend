@@ -75,6 +75,10 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
       final notifier = ref.read(mangaChaptersProvider.notifier);
       final prefsState = ref.read(preferencesProvider);
 
+      // Show shimmer immediately so the user doesn't see a false empty state
+      // while preferences load (P2 Codex finding).
+      notifier.setLoading();
+
       // Await preferences if not yet loaded so the correct default language
       // is used for the initial chapters request (P2 Codex finding #4).
       if (!_preferencesRequested && prefsState.preferences == null) {

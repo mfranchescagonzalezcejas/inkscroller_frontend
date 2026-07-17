@@ -6,7 +6,7 @@ import '../../../../core/design/design_tokens.dart' show AppColors, AppSpacing;
 /// Maps ISO 639-1 language codes to user-facing Spanish names.
 ///
 /// Covers the most common languages found in manga translations.
-const _languageNames = <String, String>{
+const _languageNamesEs = <String, String>{
   'en': 'Inglés',
   'ja': 'Japonés',
   'ko': 'Coreano',
@@ -58,11 +58,66 @@ const _languageNames = <String, String>{
   'sl': 'Esloveno',
 };
 
-/// Returns the user-facing name for a language code (e.g. `'en'` → `'Inglés'`).
+/// English-language names for the same codes.
+const _languageNamesEn = <String, String>{
+  'en': 'English',
+  'ja': 'Japanese',
+  'ko': 'Korean',
+  'zh': 'Chinese',
+  'zh-hk': 'Chinese (HK)',
+  'es': 'Spanish',
+  'es-la': 'Spanish (LATAM)',
+  'fr': 'French',
+  'pt': 'Portuguese',
+  'pt-br': 'Portuguese (BR)',
+  'id': 'Indonesian',
+  'eu': 'Basque',
+  'vi': 'Vietnamese',
+  'th': 'Thai',
+  'ru': 'Russian',
+  'de': 'German',
+  'it': 'Italian',
+  'ar': 'Arabic',
+  'pl': 'Polish',
+  'nl': 'Dutch',
+  'sv': 'Swedish',
+  'tr': 'Turkish',
+  'ro': 'Romanian',
+  'uk': 'Ukrainian',
+  'cs': 'Czech',
+  'el': 'Greek',
+  'hu': 'Hungarian',
+  'da': 'Danish',
+  'fi': 'Finnish',
+  'nb': 'Norwegian',
+  'ms': 'Malay',
+  'tl': 'Tagalog',
+  'mn': 'Mongolian',
+  'my': 'Burmese',
+  'bn': 'Bengali',
+  'hi': 'Hindi',
+  'ne': 'Nepali',
+  'sr': 'Serbian',
+  'hr': 'Croatian',
+  'he': 'Hebrew',
+  'fa': 'Persian',
+  'bg': 'Bulgarian',
+  'ca': 'Catalan',
+  'ka': 'Georgian',
+  'lt': 'Lithuanian',
+  'lv': 'Latvian',
+  'et': 'Estonian',
+  'sk': 'Slovak',
+  'sl': 'Slovenian',
+};
+
+/// Returns the user-facing name for a language code (e.g. `'en'` → `'Inglés'`)
+/// localized according to the active app [locale].
 ///
 /// Falls back to the uppercased code when the code is not in the map.
-String languageDisplayName(String code) {
-  return _languageNames[code] ?? code.toUpperCase();
+String languageDisplayName(String code, [Locale? locale]) {
+  final map = locale?.languageCode == 'en' ? _languageNamesEn : _languageNamesEs;
+  return map[code] ?? code.toUpperCase();
 }
 
 /// Dropdown that lets the reader choose which language to display chapters in.

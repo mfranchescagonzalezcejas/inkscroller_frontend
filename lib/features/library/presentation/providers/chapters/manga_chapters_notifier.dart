@@ -111,16 +111,32 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   Future<void> loadLanguages(String mangaId, {String? preferredLang}) async {
     final requestKey = '$mangaId:languages';
 
-    // Clear previous manga's chapters immediately so stale data is never
-    // visible when navigating between different manga.
-    state = state.copyWith(
-      chapters: const [],
-      isLoading: true,
-      isLanguageLoading: true,
-      clearFailure: true,
-    );
+    // Stale-while-revalidate: if we have cached chapters for the preferred
+    // language, show them immediately while the API refreshes in background.
+    final cacheKey = '$mangaId:${preferredLang ?? 'en'}';
+    final cached = _chapterCache[cacheKey];
+    final bool isCacheHit = cached != null;
 
     _lastRequestKey = requestKey;
+
+    if (isCacheHit) {
+      state = state.copyWith(
+        chapters: cached,
+        isLoading: false,
+        isLanguageLoading: true,
+        clearFailure: true,
+      );
+    } else {
+      // Clear previous manga's chapters immediately so stale data is never
+      // visible when navigating between different manga.
+      state = state.copyWith(
+        chapters: const [],
+        isLoading: true,
+        isLanguageLoading: true,
+        clearFailure: true,
+      );
+    }
+
     final result = await getMangaChaptersWithLanguages(
       mangaId,
       preferredLang: preferredLang,
@@ -132,12 +148,21 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLanguageLoading: false,
-          isLoading: false,
-          failure: failure,
-          availableLanguages: const ['en'],
-        );
+        // On a cache hit, keep cached data silently. Only show error on
+        // fresh load so previous chapters aren't replaced by a failure.
+        if (!isCacheHit) {
+          state = state.copyWith(
+            isLanguageLoading: false,
+            isLoading: false,
+            failure: failure,
+            availableLanguages: const ['en'],
+          );
+        } else {
+          state = state.copyWith(
+            isLanguageLoading: false,
+            isLoading: false,
+          );
+        }
       },
       (response) {
         _chapterCache['$mangaId:${response.matchedLanguage}'] =
@@ -157,6 +182,16 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
           clearFailure: true,
         );
       },
+    );
+  }
+
+  /// Sets the loading state before an async operation (e.g. awaiting preferences)
+  /// so the UI shows a shimmer instead of an empty "no chapters" state.
+  void setLoading() {
+    state = state.copyWith(
+      chapters: const [],
+      isLoading: true,
+      clearFailure: true,
     );
   }
 

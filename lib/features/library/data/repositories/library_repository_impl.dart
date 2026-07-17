@@ -188,10 +188,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
         language: preferredLang,
       );
       if (cached != null) {
+        final cachedLang = preferredLang ?? 'en';
         return Right(
           ChaptersWithLanguages(
-            availableLanguages: const ['en'],
-            matchedLanguage: preferredLang ?? 'en',
+            availableLanguages: [cachedLang],
+            matchedLanguage: cachedLang,
             chapters: cached.map((e) => e.toEntity()).toList(),
           ),
         );
