@@ -264,7 +264,7 @@ void main() {
           preferredLang: any<String>(named: 'preferredLang'),
         ),
       ).thenAnswer(
-        (_) async => Right<Failure, ChaptersWithLanguages>(
+        (_) async => const Right<Failure, ChaptersWithLanguages>(
           ChaptersWithLanguages(
             availableLanguages: ['en', 'es'],
             matchedLanguage: 'es',

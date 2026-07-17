@@ -413,7 +413,7 @@ void main() {
         ]),
       );
       when(() => getMangaChaptersWithLanguages('manga-1', preferredLang: any(named: 'preferredLang'))).thenAnswer(
-        (_) async => Right<Failure, ChaptersWithLanguages>(
+        (_) async => const Right<Failure, ChaptersWithLanguages>(
           ChaptersWithLanguages(
             availableLanguages: ['en', 'es'],
             matchedLanguage: 'en',
