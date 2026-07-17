@@ -636,6 +636,50 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authUnknownError => 'Error de autenticación. Intenta de nuevo.';
 
   @override
+  String get authEmailNotVerified =>
+      'Verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el link de verificación.';
+
+  @override
+  String get authVerifyEmailTitle => 'Verifica tu email';
+
+  @override
+  String authVerifyEmailBody(String email) {
+    return 'Enviamos un link de verificación a $email. Haz clic en el link del email para activar tu cuenta.';
+  }
+
+  @override
+  String get authVerifyEmailSent => '✅ Email de verificación enviado';
+
+  @override
+  String get authVerifyEmailContinue => 'Ya verifiqué — continuar';
+
+  @override
+  String get authVerifyEmailResend => 'Reenviar email de verificación';
+
+  @override
+  String get authVerifyEmailWait => 'Espera un momento antes de reenviar';
+
+  @override
+  String get authVerifyEmailDifferentEmail => 'Usar otro email';
+
+  @override
+  String get authVerifyEmailSuccess =>
+      '¡Email verificado! Bienvenido/a a InkScroller.';
+
+  @override
+  String get authVerifyEmailNotYet =>
+      'Tu email todavía no fue verificado. Revisa tu bandeja de entrada y haz clic en el link.';
+
+  @override
+  String get authVerifyEmailResent => 'Email de verificación reenviado.';
+
+  @override
+  String get authVerifyInProfile => 'Verificar email';
+
+  @override
+  String get authVerifyInProfileSubtitle => 'Cuenta sin verificar';
+
+  @override
   String get libraryErrorNetworkNoConnection =>
       'No se pudo conectar con el servidor.';
 

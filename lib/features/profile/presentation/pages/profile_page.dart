@@ -12,6 +12,7 @@ import '../../../../core/l10n/app_locale_provider.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/app_top_bar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/providers/auth_state.dart';
 import '../../../library/domain/entities/reader_mode.dart';
 import '../../../preferences/domain/entities/content_rating.dart';
 import '../../../preferences/presentation/providers/content_rating_resolution_provider.dart';
@@ -74,14 +75,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final contentRatingResolution = ref.watch(contentRatingResolutionProvider);
     final demographicResolution = ref.watch(demographicResolutionProvider);
 
-    if (authState.user != null && !_profileRequested) {
+    // Skip data loading for unverified users — the backend returns 403.
+    final shouldLoad = authState.user != null && authState.needsEmailVerification == false;
+
+    if (shouldLoad && !_profileRequested) {
       _profileRequested = true;
       Future<void>.microtask(
         () => ref.read(userProfileProvider.notifier).loadProfile(),
       );
     }
 
-    if (authState.user != null &&
+    if (shouldLoad &&
         !_preferencesRequested &&
         !preferencesState.isLoading &&
         preferencesState.preferences == null) {
@@ -128,6 +132,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ? _buildGuestView(context)
             : _buildAuthenticatedView(
                 context,
+                authState,
                 profileState,
                 preferencesState,
                 contentRatingResolution,
@@ -195,6 +200,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Widget _buildAuthenticatedView(
     BuildContext context,
+    AuthState authState,
     UserProfileState profileState,
     PreferencesState preferencesState,
     ContentRatingResolution contentRatingResolution,
@@ -225,6 +231,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
         // ── Avatar section ────────────────────────────────────────────────
         _AvatarSection(profile: profile, isLoading: profileState.isLoading),
+
+        // ── Email verification section ────────────────────────────────────
+        if (authState.needsEmailVerification) ...[
+          const SizedBox(height: 20),
+          _EmailVerificationSection(
+            onResend: () => ref.read(authProvider.notifier).sendVerificationEmail(),
+            isLoading: authState.isLoading,
+          ),
+        ],
 
         // ── Preferences section ───────────────────────────────────────────
         _SectionLabel(label: context.l10n.profileReadingPreferencesSection),
@@ -721,6 +736,88 @@ class _PrefRow extends StatelessWidget {
             const Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Email verification section ─────────────────────────────────────────────────
+
+class _EmailVerificationSection extends ConsumerWidget {
+  const _EmailVerificationSection({
+    required this.onResend,
+    required this.isLoading,
+  });
+
+  final VoidCallback onResend;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.cardHighest,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.mark_email_unread_outlined,
+              size: 20,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  context.l10n.authVerifyInProfile,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 14,
+                    color: AppColors.accent,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  context.l10n.authVerifyInProfileSubtitle,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 12,
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: isLoading ? null : onResend,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              context.l10n.authVerifyEmailResend,
+              style: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -295,6 +295,24 @@
   "authTooManyRequests": "Too many attempts. Please wait and try again.",
   "authNetworkError": "No internet connection. Check your network.",
   "authUnknownError": "Authentication failed. Please try again.",
+  "authEmailNotVerified": "Please verify your email before signing in. Check your inbox and click the verification link.",
+  "authVerifyEmailTitle": "Verify your email",
+  "authVerifyEmailBody": "We sent a verification link to {email}. Click the link in the email to activate your account.",
+  "@authVerifyEmailBody": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "authVerifyEmailSent": "✅ Verification email sent",
+  "authVerifyEmailContinue": "I've verified — continue",
+  "authVerifyEmailResend": "Resend verification email",
+  "authVerifyEmailWait": "Wait a moment before resending",
+  "authVerifyEmailDifferentEmail": "Use a different email",
+  "authVerifyEmailSuccess": "Email verified! Welcome to InkScroller.",
+  "authVerifyEmailNotYet": "Your email hasn't been verified yet. Check your inbox and click the link.",
+  "authVerifyEmailResent": "Verification email resent.",
+  "authVerifyInProfile": "Verify email",
+  "authVerifyInProfileSubtitle": "Unverified account",
   "libraryErrorNetworkNoConnection": "Could not connect to the server.",
   "libraryErrorServerBadResponse": "The server responded with an error.",
   "libraryErrorRequestCancelled": "The request was cancelled.",

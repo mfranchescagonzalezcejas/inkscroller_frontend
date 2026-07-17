@@ -48,6 +48,7 @@ class DioClient {
       ),
     );
     dio.interceptors.add(_AuthInterceptor(tokenProvider: tokenProvider));
+    dio.interceptors.add(EmailVerificationInterceptor());
   }
 }
 
@@ -129,6 +130,43 @@ class _BaseUrlFallbackInterceptor extends Interceptor {
 /// work normally.
 bool isProtectedAuthPath(String path) {
   return _AuthInterceptor.isProtectedPath(path);
+}
+
+/// Intercepts 403 responses with `email_not_verified` payload and notifies
+/// the [AuthNotifier] so the UI redirects to the verification page.
+///
+/// The static [onEmailNotVerified] callback is set by [AuthProvider] during
+/// initialization — no Riverpod dependency in the Dio layer.
+class EmailVerificationInterceptor extends Interceptor {
+  /// Called when the backend returns 403 with `error: email_not_verified`.
+  /// Set by [authProvider] during initialization to call
+  /// [AuthNotifier.setEmailVerificationRequired].
+  static void Function()? onEmailNotVerified;
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    final data = err.response?.data;
+    final statusCode = err.response?.statusCode;
+    final isEmailNotVerified = statusCode == 403 &&
+        data is Map &&
+        data['error'] == 'email_not_verified';
+
+    if (kDebugMode) {
+      final body =
+          data is Map ? data.toString() : (err.response?.statusMessage ?? '');
+      debugPrint(
+        '[HTTP] $statusCode ${err.requestOptions.method} '
+        '${err.requestOptions.path}'
+        '${isEmailNotVerified ? " → email_not_verified" : ""}'
+        '${!isEmailNotVerified ? " $body" : ""}',
+      );
+    }
+
+    if (isEmailNotVerified) {
+      onEmailNotVerified?.call();
+    }
+    handler.next(err);
+  }
 }
 
 /// Attaches a `Bearer` authorization header to [options] when the request

@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_email_verification.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
@@ -30,11 +32,20 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
+class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+
+class _MockReloadUser extends Mock implements ReloadUser {}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-const _kUser = AppUser(uid: 'uid-123', email: 'alice@example.com');
+const _kUser = AppUser(
+  uid: 'uid-123',
+  email: 'alice@example.com',
+  isEmailVerified: true,
+);
+
 
 /// Returns an [AuthNotifier] backed by the provided stubs, with a
 /// [GetAuthState] that emits a single empty stream by default so the
@@ -44,6 +55,8 @@ AuthNotifier _makeNotifier({
   required SignUp signUp,
   required SignOut signOut,
   required GetAuthState getAuthState,
+  required SendEmailVerification sendEmailVerification,
+  required ReloadUser reloadUser,
   required GetUserProfile getUserProfile,
   required UpdateUserProfile updateUserProfile,
 }) {
@@ -52,6 +65,8 @@ AuthNotifier _makeNotifier({
     signUp: signUp,
     signOut: signOut,
     getAuthState: getAuthState,
+    sendEmailVerification: sendEmailVerification,
+    reloadUser: reloadUser,
     getUserProfile: getUserProfile,
     updateUserProfile: updateUserProfile,
   );
@@ -64,6 +79,8 @@ void main() {
   late _MockGetAuthState mockGetAuthState;
   late _MockGetUserProfile mockGetUserProfile;
   late _MockUpdateUserProfile mockUpdateUserProfile;
+  late _MockSendEmailVerification mockSendEmailVerification;
+  late _MockReloadUser mockReloadUser;
 
   setUp(() {
     mockSignIn = _MockSignIn();
@@ -72,9 +89,23 @@ void main() {
     mockGetAuthState = _MockGetAuthState();
     mockGetUserProfile = _MockGetUserProfile();
     mockUpdateUserProfile = _MockUpdateUserProfile();
+    mockSendEmailVerification = _MockSendEmailVerification();
+    mockReloadUser = _MockReloadUser();
 
     // Default: auth state stream never emits — keeps notifier initial state clean.
     when(() => mockGetAuthState()).thenAnswer((_) => const Stream.empty());
+    // Default: sendEmailVerification returns success.
+    when(() => mockSendEmailVerification()).thenAnswer(
+      (_) async => const Right<Failure, void>(null),
+    );
+    // Default: reloadUser returns the default user (no status change).
+    when(() => mockReloadUser()).thenAnswer(
+      (_) async => const Right<Failure, AppUser>(_kUser),
+    );
+    // Default: signOut returns success.
+    when(() => mockSignOut()).thenAnswer(
+      (_) async => const Right<Failure, void>(null),
+    );
     // Default: profile check returns a complete profile (no pending completion).
     when(() => mockGetUserProfile()).thenAnswer(
       (_) async => Right<Failure, UserProfile>(
@@ -104,6 +135,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -134,6 +167,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -161,6 +196,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -188,6 +225,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -215,6 +254,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -246,6 +287,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -269,6 +312,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -294,6 +339,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -331,6 +378,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -358,6 +407,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );
@@ -393,6 +444,8 @@ void main() {
         signUp: mockSignUp,
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
       );

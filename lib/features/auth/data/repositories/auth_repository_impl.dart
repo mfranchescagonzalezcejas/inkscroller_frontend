@@ -76,6 +76,30 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> sendEmailVerification() async {
+    try {
+      await _dataSource.sendEmailVerification();
+      return const Right(null);
+    } on AppException catch (e) {
+      return Left(_mapToFailure(e));
+    } on Exception catch (e) {
+      return Left(UnexpectedFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AppUser>> reloadUser() async {
+    try {
+      final user = await _dataSource.reloadUser();
+      return Right(user);
+    } on AppException catch (e) {
+      return Left(_mapToFailure(e));
+    } on Exception catch (e) {
+      return Left(UnexpectedFailure(message: e.toString()));
+    }
+  }
+
   Failure _mapToFailure(AppException exception) {
     return switch (exception) {
       ServerException() => ServerFailure(

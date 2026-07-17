@@ -13,5 +13,13 @@ class AppUser {
   /// Optional display name. May be null when not set on the Firebase account.
   final String? displayName;
 
-  const AppUser({required this.uid, required this.email, this.displayName});
+  /// Whether the user's email has been verified via Firebase.
+  final bool isEmailVerified;
+
+  const AppUser({
+    required this.uid,
+    required this.email,
+    this.displayName,
+    this.isEmailVerified = false,
+  });
 }

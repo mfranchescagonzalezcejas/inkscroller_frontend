@@ -4,6 +4,13 @@ import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/core/router/app_router.dart';
 
 class _FakeUser implements User {
+  final bool _emailVerified;
+
+  _FakeUser({bool emailVerified = true}) : _emailVerified = emailVerified;
+
+  @override
+  bool get emailVerified => _emailVerified;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

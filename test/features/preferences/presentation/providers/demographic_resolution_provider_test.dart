@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:inkscroller_flutter/core/di/injection.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_email_verification.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
@@ -26,7 +28,7 @@ import 'package:inkscroller_flutter/features/profile/presentation/providers/user
 import 'package:inkscroller_flutter/features/profile/presentation/providers/user_profile_state.dart';
 import 'package:mocktail/mocktail.dart';
 
-class _A extends Mock implements SignIn {} class _B extends Mock implements SignUp {} class _C extends Mock implements SignOut {} class _D extends Mock implements GetAuthState {} class _E extends Mock implements GetUserProfile {} class _I extends Mock implements UpdateUserProfile {} class _F extends Mock implements GetPreferences {} class _G extends Mock implements UpdatePreferences {} class _H extends Mock implements LibraryRemoteDataSource {}
+class _A extends Mock implements SignIn {} class _B extends Mock implements SignUp {} class _C extends Mock implements SignOut {} class _D extends Mock implements GetAuthState {} class _E extends Mock implements GetUserProfile {} class _I extends Mock implements UpdateUserProfile {} class _J extends Mock implements SendEmailVerification {} class _K extends Mock implements ReloadUser {} class _F extends Mock implements GetPreferences {} class _G extends Mock implements UpdatePreferences {} class _H extends Mock implements LibraryRemoteDataSource {}
 
 void main() {
   late _H remote;
@@ -34,7 +36,7 @@ void main() {
   tearDown(() async => sl.reset());
   test('adult with supported capability may select unspecified', () async {
     final d = _D(); when(() => d()).thenAnswer((_) => const Stream<AppUser?>.empty());
-    final auth = AuthNotifier(signIn: _A(), signUp: _B(), signOut: _C(), getAuthState: d, getUserProfile: _E(), updateUserProfile: _I())..state = const AuthState(user: AppUser(uid: 'user-1', email: 'adult@example.test'));
+    final auth = AuthNotifier(signIn: _A(), signUp: _B(), signOut: _C(), getAuthState: d, sendEmailVerification: _J(), reloadUser: _K(), getUserProfile: _E(), updateUserProfile: _I())..state = const AuthState(user: AppUser(uid: 'user-1', email: 'adult@example.test'));
     final prefs = PreferencesNotifier(getPreferences: _F(), updatePreferences: _G());
     final profile = UserProfileNotifier(getUserProfile: _E())..state = UserProfileState(profile: UserProfile(firebaseUid: 'user-1', email: 'adult@example.test', birthDate: DateTime(1990), createdAt: DateTime(2020)));
     when(() => remote.getMangaCapabilities()).thenAnswer((_) async => const MangaCapabilities(supportsUnspecified: true));
@@ -45,7 +47,7 @@ void main() {
 
   Future<ProviderContainer> containerFor({required AppUser? user, required DateTime? birthDate, required bool fails}) async {
       final d = _D(); when(() => d()).thenAnswer((_) => const Stream<AppUser?>.empty());
-      final auth = AuthNotifier(signIn: _A(), signUp: _B(), signOut: _C(), getAuthState: d, getUserProfile: _E(), updateUserProfile: _I())..state = AuthState(user: user);
+      final auth = AuthNotifier(signIn: _A(), signUp: _B(), signOut: _C(), getAuthState: d, sendEmailVerification: _J(), reloadUser: _K(), getUserProfile: _E(), updateUserProfile: _I())..state = AuthState(user: user);
       final prefs = PreferencesNotifier(getPreferences: _F(), updatePreferences: _G());
       final profile = UserProfileNotifier(getUserProfile: _E())..state = UserProfileState(profile: user == null ? null : UserProfile(firebaseUid: user.uid, email: user.email, birthDate: birthDate, createdAt: DateTime(2020)));
       if (fails) { when(() => remote.getMangaCapabilities()).thenThrow(DioException(requestOptions: RequestOptions(path: '/manga/capabilities'), type: DioExceptionType.connectionError)); } else { when(() => remote.getMangaCapabilities()).thenAnswer((_) async => const MangaCapabilities(supportsUnspecified: true)); }
