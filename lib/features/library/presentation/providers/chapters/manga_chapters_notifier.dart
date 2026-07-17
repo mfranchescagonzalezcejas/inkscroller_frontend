@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../domain/entities/chapter.dart';
@@ -28,6 +29,7 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   }) : super(const MangaChaptersState());
 
   Future<void> loadChapters(String mangaId) async {
+    debugPrint('[ChaptersNotifier] loadChapters(mangaId=$mangaId) hash=${identityHashCode(this)}');
     final cached = _chapterCache[mangaId];
 
     if (cached != null) {
@@ -39,7 +41,13 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
       );
     } else {
       // First load for this manga: show shimmer until API responds.
-      state = state.copyWith(isLoading: true, clearFailure: true);
+      // Clear any stale chapters from a previous manga so the error branch
+      // below correctly detects an empty state if the API call fails.
+      state = state.copyWith(
+        chapters: const [],
+        isLoading: true,
+        clearFailure: true,
+      );
     }
 
     final result = await getMangaChapters(mangaId);
@@ -62,6 +70,17 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
         );
       },
     );
+  }
+
+  /// Clears the in-memory per-manga chapter cache.
+  ///
+  /// Called from the settings "Clear cached data" action so that stale
+  /// in-memory chapters are not served after the user explicitly clears
+  /// all persisted cache.
+  void clearCache() {
+    _chapterCache.clear();
+    // Also reset the state so the next visit starts fresh.
+    state = const MangaChaptersState();
   }
 
   void setSortDescending({required bool value}) {

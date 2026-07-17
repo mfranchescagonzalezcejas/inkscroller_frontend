@@ -12,6 +12,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/info_list_card.dart';
 import '../../../../flavors/flavor_config.dart';
+import '../../../../features/library/presentation/providers/chapters/manga_chapter_provider.dart';
 import '../providers/settings_cache_controller.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/account_section.dart';
@@ -41,6 +42,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     // Refresh the displayed cache size after clearing.
     ref.invalidate(cacheSizeProvider);
+
+    // Also clear the in-memory chapter cache so stale data is not served
+    // from the session-scoped notifier cache.
+    ref.invalidate(mangaChaptersProvider);
 
     result.fold(
       (failure) => AppFeedback.showError(

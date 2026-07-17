@@ -125,6 +125,8 @@ void main() {
 
       // Should be loading because manga-2 is not in cache.
       expect(notifier.state.isLoading, isTrue);
+      // Stale chapters from manga-1 should be cleared on cache miss.
+      expect(notifier.state.chapters, isEmpty);
 
       completer.complete(
         Right<Failure, List<Chapter>>(<Chapter>[
@@ -135,6 +137,63 @@ void main() {
 
       expect(notifier.state.chapters, hasLength(1));
       expect(notifier.state.chapters.first.id, 'c2');
+      expect(notifier.state.isLoading, isFalse);
+    });
+
+    test('shows error when new manga fails and previous chapters were cleared',
+        () async {
+      // Load manga-1 first.
+      when(() => getMangaChapters('manga-1')).thenAnswer(
+        (_) async => Right<Failure, List<Chapter>>(<Chapter>[
+          Chapter(id: 'c1', readable: true, external: false),
+        ]),
+      );
+      await notifier.loadChapters('manga-1');
+      expect(notifier.state.chapters, hasLength(1));
+
+      // Load manga-2 — cache miss, API fails.
+      when(() => getMangaChapters('manga-2')).thenAnswer(
+        (_) async => const Left<Failure, List<Chapter>>(
+          ServerFailure(message: 'server error'),
+        ),
+      );
+
+      await notifier.loadChapters('manga-2');
+
+      // Should show error: previous chapters were cleared, nothing to fall back to.
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.chapters, isEmpty);
+      expect(notifier.state.failure, isA<ServerFailure>());
+    });
+  });
+
+  group('clearCache', () {
+    test('clears in-memory cache and resets state', () async {
+      // Load chapters first.
+      when(() => getMangaChapters('manga-1')).thenAnswer(
+        (_) async => Right<Failure, List<Chapter>>(<Chapter>[
+          Chapter(id: 'c1', readable: true, external: false),
+        ]),
+      );
+      await notifier.loadChapters('manga-1');
+      expect(notifier.state.chapters, hasLength(1));
+
+      // Clear cache.
+      notifier.clearCache();
+
+      expect(notifier.state.chapters, isEmpty);
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.failure, isNull);
+
+      // Next load should be a cache miss (shimmer then loaded).
+      when(() => getMangaChapters('manga-1')).thenAnswer(
+        (_) async => Right<Failure, List<Chapter>>(<Chapter>[
+          Chapter(id: 'c1', readable: true, external: false),
+        ]),
+      );
+
+      await notifier.loadChapters('manga-1');
+      expect(notifier.state.chapters, hasLength(1));
       expect(notifier.state.isLoading, isFalse);
     });
   });
