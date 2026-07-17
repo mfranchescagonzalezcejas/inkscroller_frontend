@@ -93,14 +93,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
     if (!mounted) return;
 
-    if (!mounted) return;
-
-    // Navigate to home when registration finishes, regardless of errors.
-    // If the account was created and the user is signed in but unverified,
-    // the router redirects to /verify-email. If verification failed, the
-    // error is shown there via the auth state listener and the user can
-    // use the resend button.
-    context.go(AppRoutes.home);
+    // Only navigate away when the account was actually created and the user
+    // is signed in. If signUp itself failed (email in use, weak password,
+    // network error), the user stays on this page to retry.
+    // When signed in but unverified, the router redirects to /verify-email.
+    if (ref.read(authProvider).user != null) {
+      context.go(AppRoutes.home);
+    }
   }
 
   Future<void> _signOutRecovery() async {
