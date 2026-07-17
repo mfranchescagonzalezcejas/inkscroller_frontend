@@ -22,11 +22,18 @@ class MangaLanguagesResponse {
   });
 
   factory MangaLanguagesResponse.fromJson(Map<String, dynamic> json) {
+    final available = (json['available'] as List<dynamic>?)
+            ?.cast<String>() ??
+        <String>['en'];
+    final matched = (json['matched'] as String?) ?? 'en';
+    // Ensure matchedLanguage is always included in availableLanguages so
+    // the selector never has a selected value with no matching option.
+    if (!available.contains(matched)) {
+      available.add(matched);
+    }
     return MangaLanguagesResponse(
-      availableLanguages: (json['available'] as List<dynamic>?)
-              ?.cast<String>() ??
-          <String>['en'],
-      matchedLanguage: (json['matched'] as String?) ?? 'en',
+      availableLanguages: available,
+      matchedLanguage: matched,
       chapters: ((json['chapters'] as List<dynamic>?) ?? <dynamic>[])
           .whereType<Map<String, dynamic>>()
           .map(ChapterModel.fromJson)

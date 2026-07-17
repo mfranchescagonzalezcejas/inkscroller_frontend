@@ -169,7 +169,8 @@ class LibraryRepositoryImpl implements LibraryRepository {
       // Only alias for real variants, not unrelated fallback languages.
       if (preferredLang != null &&
           preferredLang != response.matchedLanguage) {
-        final isVariant = response.matchedLanguage.startsWith('$preferredLang-');
+        final isVariant = response.matchedLanguage.startsWith('$preferredLang-') ||
+            preferredLang.startsWith('${response.matchedLanguage}-');
         if (isVariant) {
           await _cacheMangaChapters(
             mangaId,

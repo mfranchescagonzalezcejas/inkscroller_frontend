@@ -109,11 +109,12 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   /// [preferredLang] is the user's default language preference. The backend
   /// selects the best match (e.g. `es-la` when `es` is not available).
   Future<void> loadLanguages(String mangaId, {String? preferredLang}) async {
-    final requestKey = '$mangaId:languages';
+    final lang = preferredLang ?? 'en';
+    final requestKey = '$mangaId:languages:$lang';
 
     // Stale-while-revalidate: if we have cached chapters for the preferred
     // language, show them immediately while the API refreshes in background.
-    final cacheKey = '$mangaId:${preferredLang ?? 'en'}';
+    final cacheKey = '$mangaId:$lang';
     final cached = _chapterCache[cacheKey];
     final bool isCacheHit = cached != null;
 
@@ -177,7 +178,8 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
         // when the backend returned a completely unrelated language.
         if (preferredLang != null &&
             preferredLang != response.matchedLanguage) {
-          final isVariant = response.matchedLanguage.startsWith('$preferredLang-');
+          final isVariant = response.matchedLanguage.startsWith('$preferredLang-') ||
+              preferredLang.startsWith('${response.matchedLanguage}-');
           if (isVariant) {
             _chapterCache['$mangaId:$preferredLang'] = response.chapters;
           }
@@ -199,7 +201,8 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   /// Also invalidates any in-flight request by updating the stale guard.
   void setLoading([String? mangaId]) {
     if (mangaId != null) {
-      _lastRequestKey = '$mangaId:languages';
+      // Invalidate any in-flight request so it's discarded on arrival.
+      _lastRequestKey = '';
     }
     state = state.copyWith(
       chapters: const [],

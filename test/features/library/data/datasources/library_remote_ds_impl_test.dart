@@ -274,6 +274,25 @@ void main() {
       ).called(1);
     });
 
+    test('returns [en] fallback when response is empty', () async {
+      when(
+        () => dio.get<List<dynamic>>(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response<List<dynamic>>(
+          data: <dynamic>[],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/chapters/manga/1/languages'),
+        ),
+      );
+
+      final result = await dataSource.getMangaLanguages('1');
+
+      expect(result, <String>[]);
+    });
+
     test('throws NetworkException on Dio connection error', () async {
       when(
         () => dio.get<List<dynamic>>(
