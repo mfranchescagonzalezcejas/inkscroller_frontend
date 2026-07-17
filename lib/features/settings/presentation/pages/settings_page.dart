@@ -44,8 +44,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     ref.invalidate(cacheSizeProvider);
 
     // Also clear the in-memory chapter cache so stale data is not served
-    // from the session-scoped notifier cache.
-    ref.invalidate(mangaChaptersProvider);
+    // from the session-scoped notifier cache. Uses clearCache() instead of
+    // provider invalidation so an in-flight loadChapters doesn't write to
+    // a disposed notifier.
+    ref.read(mangaChaptersProvider.notifier).clearCache();
 
     result.fold(
       (failure) => AppFeedback.showError(

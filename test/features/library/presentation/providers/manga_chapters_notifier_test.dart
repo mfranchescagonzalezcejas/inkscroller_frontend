@@ -167,6 +167,68 @@ void main() {
     });
   });
 
+  group('stale response guard', () {
+    test('ignores stale response when navigating to another manga mid-flight',
+        () async {
+      final completer = Completer<Either<Failure, List<Chapter>>>();
+      when(() => getMangaChapters('manga-1')).thenAnswer(
+        (_) => completer.future,
+      );
+      when(() => getMangaChapters('manga-2')).thenAnswer(
+        (_) async => Right<Failure, List<Chapter>>(<Chapter>[
+          Chapter(id: 'c2', readable: true, external: false),
+        ]),
+      );
+
+      // Start loading manga-1, but don't await yet.
+      final manga1Future = notifier.loadChapters('manga-1');
+      expect(notifier.state.isLoading, isTrue);
+
+      // Navigate to manga-2 — this should update _lastRequestedMangaId.
+      await notifier.loadChapters('manga-2');
+      expect(notifier.state.chapters.first.id, 'c2');
+
+      // Now resolve manga-1 — its response should be ignored since
+      // manga-2 was the last requested.
+      completer.complete(
+        Right<Failure, List<Chapter>>(<Chapter>[
+          Chapter(id: 'c1', readable: true, external: false),
+        ]),
+      );
+      await manga1Future;
+
+      // State should still be manga-2's data.
+      expect(notifier.state.chapters, hasLength(1));
+      expect(notifier.state.chapters.first.id, 'c2');
+    });
+  });
+
+  group('empty cache hit', () {
+    test('keeps empty chapter list when background refresh fails', () async {
+      // First load — cache miss, API returns empty list.
+      when(() => getMangaChapters('manga-1')).thenAnswer(
+        (_) async => Right<Failure, List<Chapter>>(const <Chapter>[]),
+      );
+      await notifier.loadChapters('manga-1');
+      expect(notifier.state.chapters, isEmpty);
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.failure, isNull);
+
+      // Second load — cache hit, API fails.
+      when(() => getMangaChapters('manga-1')).thenAnswer(
+        (_) async => const Left<Failure, List<Chapter>>(
+          ServerFailure(message: 'server error'),
+        ),
+      );
+      await notifier.loadChapters('manga-1');
+
+      // Should keep the cached empty list, NOT show an error.
+      expect(notifier.state.chapters, isEmpty);
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.failure, isNull);
+    });
+  });
+
   group('clearCache', () {
     test('clears in-memory cache and resets state', () async {
       // Load chapters first.

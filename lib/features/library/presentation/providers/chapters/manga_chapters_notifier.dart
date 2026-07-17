@@ -24,15 +24,23 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   /// returning to a previously viewed manga shows chapters instantly.
   final Map<String, List<Chapter>> _chapterCache = {};
 
+  /// Tracks the mangaId of the most recent [loadChapters] call so stale
+  /// responses from a previous navigation are discarded.
+  String? _lastRequestedMangaId;
+
   MangaChaptersNotifier({
     required this.getMangaChapters,
   }) : super(const MangaChaptersState());
 
   Future<void> loadChapters(String mangaId) async {
-    debugPrint('[ChaptersNotifier] loadChapters(mangaId=$mangaId) hash=${identityHashCode(this)}');
-    final cached = _chapterCache[mangaId];
+    debugPrint('[ChaptersNotifier] loadChapters(mangaId=$mangaId)'
+        ' hash=${identityHashCode(this)}');
 
-    if (cached != null) {
+    _lastRequestedMangaId = mangaId;
+    final cached = _chapterCache[mangaId];
+    final bool isCacheHit = cached != null;
+
+    if (isCacheHit) {
       // Stale-while-revalidate: serve cached data immediately, no loading.
       state = state.copyWith(
         chapters: cached,
@@ -52,14 +60,17 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
 
     final result = await getMangaChapters(mangaId);
 
+    // Guard: discard stale responses if the user navigated to another manga
+    // while this request was in-flight.
+    if (_lastRequestedMangaId != mangaId) return;
+
     result.fold(
       (failure) {
-        // Only show error when we have absolutely nothing to display.
-        if (state.chapters.isEmpty) {
+        // On a cache hit (including a legitimate empty chapter list), keep
+        // the cached data silently. Only show the error on a fresh load.
+        if (!isCacheHit) {
           state = state.copyWith(isLoading: false, failure: failure);
         }
-        // When cached chapters exist, keep them silently — the user is
-        // already seeing useful content.
       },
       (chapters) {
         _chapterCache[mangaId] = chapters;
@@ -76,7 +87,8 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   ///
   /// Called from the settings "Clear cached data" action so that stale
   /// in-memory chapters are not served after the user explicitly clears
-  /// all persisted cache.
+  /// all persisted cache. Unlike provider invalidation, this does not
+  /// dispose the notifier, so in-flight requests remain safe.
   void clearCache() {
     _chapterCache.clear();
     // Also reset the state so the next visit starts fresh.
