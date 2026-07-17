@@ -93,11 +93,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
     if (!mounted) return;
 
-    // Only navigate away when the account was actually created and the user
-    // is signed in. If signUp itself failed (email in use, weak password,
-    // network error), the user stays on this page to retry.
-    // When signed in but unverified, the router redirects to /verify-email.
-    if (ref.read(authProvider).user != null) {
+    // Only navigate away when the account was created AND the profile was
+    // saved. If signUp itself failed (email in use, weak password, network),
+    // or the profile PATCH failed (username conflict, server error), the
+    // user stays on this page to retry or correct the input.
+    // When signed in with a complete profile but unverified, the router
+    // redirects to /verify-email.
+    final postSignUpState = ref.read(authProvider);
+    if (postSignUpState.user != null && !postSignUpState.profileCompletionPending) {
       context.go(AppRoutes.home);
     }
   }
