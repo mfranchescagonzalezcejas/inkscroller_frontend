@@ -11,6 +11,7 @@ void main() {
       date: DateTime.parse('2024-01-01T00:00:00.000Z'),
       readable: true,
       external: false,
+      language: 'en',
     );
 
     final entity = model.toEntity();
@@ -21,6 +22,34 @@ void main() {
     expect(entity.date, model.date);
     expect(entity.readable, isTrue);
     expect(entity.external, isFalse);
+    expect(entity.language, 'en');
+  });
+
+  test('ChapterModelMapper.toEntity maps language when present', () {
+    final model = ChapterModel(
+      id: 'chapter-lang',
+      number: '1',
+      readable: true,
+      external: false,
+      language: 'es',
+    );
+
+    final entity = model.toEntity();
+
+    expect(entity.language, 'es');
+  });
+
+  test('ChapterModelMapper.toEntity keeps language null when omitted', () {
+    final model = ChapterModel(
+      id: 'chapter-no-lang',
+      number: '2',
+      readable: true,
+      external: false,
+    );
+
+    final entity = model.toEntity();
+
+    expect(entity.language, isNull);
   });
 
   test('ChapterModelMapper.toEntity keeps null number as null', () {

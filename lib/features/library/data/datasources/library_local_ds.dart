@@ -37,13 +37,23 @@ abstract class LibraryLocalDataSource {
   Future<void> cacheMangaDetail(String mangaId, MangaModel manga);
 
   /// Returns cached chapters when present and not expired.
+  ///
+  /// [mangaId] uniquely identifies the manga. When [language] is provided,
+  /// the cache key is scoped to that language as well, preventing one
+  /// language's chapters from serving as fallback for another.
   Future<List<ChapterModel>?> getCachedMangaChapters(
     String mangaId, {
     required Duration maxAge,
+    String? language,
   });
 
-  /// Persists a chapter list cache entry.
-  Future<void> cacheMangaChapters(String mangaId, List<ChapterModel> chapters);
+  /// Persists a chapter list cache entry scoped by [mangaId] and optionally
+  /// [language].
+  Future<void> cacheMangaChapters(
+    String mangaId,
+    List<ChapterModel> chapters, {
+    String? language,
+  });
 
   /// Clears all cached library payloads.
   Future<void> clearLibraryCache();

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/chapter.dart';
+import '../../domain/entities/chapters_with_languages.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -108,20 +109,109 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
-  Future<Either<Failure, List<Chapter>>> getMangaChapters(String mangaId) async {
+  Future<Either<Failure, List<Chapter>>> getMangaChapters(
+    String mangaId, {
+    String? language,
+  }) async {
     try {
-      final chapters = await remoteDataSource.getMangaChapters(mangaId);
-      await _cacheMangaChapters(mangaId, chapters);
+      final chapters = await remoteDataSource.getMangaChapters(
+        mangaId,
+        language: language,
+      );
+      await _cacheMangaChapters(mangaId, chapters, language: language);
       return Right(chapters.map((e) => e.toEntity()).toList());
     } on AppException catch (error) {
       final cached = await _getCachedMangaChapters(
         mangaId,
         maxAge: mangaChaptersCacheTtl,
+        language: language,
       );
       if (cached != null) {
         return Right(cached.map((e) => e.toEntity()).toList());
       }
 
+      return Left(_mapExceptionToFailure(error));
+    } on Exception catch (error) {
+      return Left(UnexpectedFailure(message: error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getMangaLanguages(String mangaId) async {
+    try {
+      final languages = await remoteDataSource.getMangaLanguages(mangaId);
+      return Right(languages);
+    } on AppException catch (error) {
+      return Left(_mapExceptionToFailure(error));
+    } on Exception catch (error) {
+      return Left(UnexpectedFailure(message: error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ChaptersWithLanguages>> getMangaChaptersWithLanguages(
+    String mangaId, {
+    String? preferredLang,
+  }) async {
+    try {
+      final response = await remoteDataSource.getMangaChaptersWithLanguages(
+        mangaId,
+        preferredLang: preferredLang,
+      );
+      // Seed offline cache with the matched-language chapters.
+      await _cacheMangaChapters(
+        mangaId,
+        response.chapters,
+        language: response.matchedLanguage,
+      );
+      // Also seed under the preferred language key so offline fallback
+      // matches when the backend matched a variant (e.g. es → es-la).
+      // Only alias for real variants, not unrelated fallback languages.
+      if (preferredLang != null &&
+          preferredLang != response.matchedLanguage) {
+        final isVariant = response.matchedLanguage.startsWith('$preferredLang-') ||
+            preferredLang.startsWith('${response.matchedLanguage}-');
+        if (isVariant) {
+          await _cacheMangaChapters(
+            mangaId,
+            response.chapters,
+            language: preferredLang,
+          );
+        }
+      }
+      return Right(
+        ChaptersWithLanguages(
+          availableLanguages: response.availableLanguages,
+          matchedLanguage: response.matchedLanguage,
+          chapters: response.chapters.map((e) => e.toEntity()).toList(),
+        ),
+      );
+    } on AppException catch (error) {
+      // Try language-scoped cache first, then fall back to legacy unscoped
+      // cache for users upgrading from a previous version (P2 Codex).
+      var cached = await _getCachedMangaChapters(
+        mangaId,
+        maxAge: mangaChaptersCacheTtl,
+        language: preferredLang,
+      );
+      bool usedLegacyFallback = false;
+      if (cached == null && preferredLang != null) {
+        cached = await _getCachedMangaChapters(
+          mangaId,
+          maxAge: mangaChaptersCacheTtl,
+        );
+        usedLegacyFallback = cached != null;
+      }
+      if (cached != null) {
+        final fallbackLang = usedLegacyFallback ? 'en' : (preferredLang ?? 'en');
+        return Right(
+          ChaptersWithLanguages(
+            availableLanguages: [fallbackLang],
+            matchedLanguage: fallbackLang,
+            chapters: cached.map((e) => e.toEntity()).toList(),
+          ),
+        );
+      }
       return Left(_mapExceptionToFailure(error));
     } on Exception catch (error) {
       return Left(UnexpectedFailure(message: error.toString()));
@@ -263,10 +353,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   Future<void> _cacheMangaChapters(
     String mangaId,
-    List<ChapterModel> chapters,
-  ) async {
+    List<ChapterModel> chapters, {
+    String? language,
+  }) async {
     try {
-      await localDataSource.cacheMangaChapters(mangaId, chapters);
+      await localDataSource.cacheMangaChapters(mangaId, chapters, language: language);
     } on CacheException {
       // Cache writes are best-effort only.
     }
@@ -313,11 +404,13 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<List<ChapterModel>?> _getCachedMangaChapters(
     String mangaId, {
     required Duration maxAge,
+    String? language,
   }) async {
     try {
       return await localDataSource.getCachedMangaChapters(
         mangaId,
         maxAge: maxAge,
+        language: language,
       );
     } on CacheException {
       return null;

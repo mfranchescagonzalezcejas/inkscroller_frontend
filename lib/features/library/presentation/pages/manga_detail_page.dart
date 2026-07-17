@@ -25,6 +25,7 @@ import '../providers/per_title_override_provider.dart';
 import '../providers/reading_progress_provider.dart';
 import '../providers/user_library_provider.dart';
 import '../widgets/chapter_tile.dart';
+import '../widgets/language_selector.dart';
 import '../widgets/manga_detail_shimmer.dart';
 
 /// Resolves a library [Failure] to a localized error message.
@@ -70,13 +71,30 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(mangaChaptersProvider.notifier).loadChapters(widget.manga.id);
+    Future.microtask(() async {
+      final notifier = ref.read(mangaChaptersProvider.notifier);
       final prefsState = ref.read(preferencesProvider);
+
+      // Show shimmer immediately so the user doesn't see a false empty state
+      // while preferences load (P2 Codex finding).
+      notifier.setLoading(widget.manga.id);
+
+      // Await preferences if not yet loaded so the correct default language
+      // is used for the initial chapters request (P2 Codex finding #4).
       if (!_preferencesRequested && prefsState.preferences == null) {
         _preferencesRequested = true;
-        ref.read(preferencesProvider.notifier).loadPreferences();
+        await ref.read(preferencesProvider.notifier).loadPreferences();
       }
+
+      // Guard: if the user left this page while preferences were loading,
+      // don't continue with a disposed widget (P2 Codex finding).
+      if (!context.mounted) return;
+
+      final updatedPrefs = ref.read(preferencesProvider);
+      final defaultLang = updatedPrefs.preferences?.defaultLanguage ?? 'en';
+
+      // Single call: gets available languages, matched language, and chapters.
+      await notifier.loadLanguages(widget.manga.id, preferredLang: defaultLang);
     });
     // Sync reading progress when chapters change — lives here, not in build().
     _mangaChaptersSub = ref.listenManual<MangaChaptersState>(
@@ -184,6 +202,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     child: _ChaptersHeader(
                       count: state.chapters.length,
                       progress: progress,
+                      mangaId: widget.manga.id,
                     ),
                   ),
                 ),
@@ -221,9 +240,25 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             ),
                             const SizedBox(height: 16),
                             FilledButton(
-                              onPressed: () => ref
-                                  .read(mangaChaptersProvider.notifier)
-                                  .loadChapters(widget.manga.id),
+                              onPressed: () {
+                                // Use the last selected language (user may have
+                                // switched manually). On first load failure
+                                // selectedLanguage is still 'en', so fall back
+                                // to the user's preference from settings.
+                                final lang = state.selectedLanguage != 'en'
+                                    ? state.selectedLanguage
+                                    : (ref
+                                            .read(preferencesProvider)
+                                            .preferences
+                                            ?.defaultLanguage ??
+                                        'en');
+                                ref
+                                    .read(mangaChaptersProvider.notifier)
+                                    .loadLanguages(
+                                      widget.manga.id,
+                                      preferredLang: lang,
+                                    );
+                              },
                               child: Text(context.l10n.retryAction),
                             ),
                           ],
@@ -433,16 +468,16 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
         );
         return;
       }
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-        return;
-      }
 
-      if (!context.mounted) return;
-      AppFeedback.showWarning(
-        context,
-        title: context.l10n.externalChapterTitle,
-      );
+      // ponytail: skip canLaunchUrl — on modern Android it often returns false
+      // even when a browser can handle the URL. Just launch directly.
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        AppFeedback.showWarning(
+          context,
+          title: context.l10n.externalChapterTitle,
+        );
+      }
     } on Exception catch (e, st) {
       debugPrint(
         '[ExternalLink] Failed to launch URL: $e\n$st',
@@ -758,8 +793,13 @@ class _CtaButton extends StatelessWidget {
 class _ChaptersHeader extends ConsumerWidget {
   final int count;
   final MangaReadingProgress progress;
+  final String mangaId;
 
-  const _ChaptersHeader({required this.count, required this.progress});
+  const _ChaptersHeader({
+    required this.count,
+    required this.progress,
+    required this.mangaId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -768,72 +808,87 @@ class _ChaptersHeader extends ConsumerWidget {
         : count;
     final state = ref.watch(mangaChaptersProvider);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text(
-              context.l10n.chaptersTitle,
-              style: const TextStyle(
-                fontFamily: AppTypography.fontFamily,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.onSurface,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  context.l10n.chaptersTitle,
+                  style: const TextStyle(
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.libraryProgressValue(
+                    progress.readChaptersCount,
+                    total,
+                  ),
+                  style: const TextStyle(
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              context.l10n.libraryProgressValue(
-                progress.readChaptersCount,
-                total,
-              ),
-              style: const TextStyle(
-                fontFamily: AppTypography.fontFamily,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(
+                    state.sortDescending
+                        ? Icons.arrow_downward
+                        : Icons.arrow_upward,
+                    color: const Color(0xFF889391),
+                    size: 20,
+                  ),
+                  onPressed: () => ref
+                      .read(mangaChaptersProvider.notifier)
+                      .setSortDescending(value: !state.sortDescending),
+                  tooltip: state.sortDescending
+                      ? context.l10n.chaptersSortDesc
+                      : context.l10n.chaptersSortAsc,
+                  visualDensity: VisualDensity.compact,
+                ),
+                IconButton(
+                  icon: Icon(
+                    state.filterUnreadOnly
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: const Color(0xFF889391),
+                    size: 20,
+                  ),
+                  onPressed: () => ref
+                      .read(mangaChaptersProvider.notifier)
+                      .setFilterUnreadOnly(value: !state.filterUnreadOnly),
+                  tooltip: state.filterUnreadOnly
+                      ? context.l10n.chaptersFilterUnread
+                      : context.l10n.chaptersFilterAll,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
             ),
           ],
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(
-                state.sortDescending
-                    ? Icons.arrow_downward
-                    : Icons.arrow_upward,
-                color: const Color(0xFF889391),
-                size: 20,
-              ),
-              onPressed: () => ref
-                  .read(mangaChaptersProvider.notifier)
-                  .setSortDescending(value: !state.sortDescending),
-              tooltip: state.sortDescending
-                  ? context.l10n.chaptersSortDesc
-                  : context.l10n.chaptersSortAsc,
-              visualDensity: VisualDensity.compact,
-            ),
-            IconButton(
-              icon: Icon(
-                state.filterUnreadOnly
-                    ? Icons.visibility_off
-                    : Icons.visibility,
-                color: const Color(0xFF889391),
-                size: 20,
-              ),
-              onPressed: () => ref
-                  .read(mangaChaptersProvider.notifier)
-                  .setFilterUnreadOnly(value: !state.filterUnreadOnly),
-              tooltip: state.filterUnreadOnly
-                  ? context.l10n.chaptersFilterUnread
-                  : context.l10n.chaptersFilterAll,
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
+        LanguageSelector(
+          availableLanguages: state.availableLanguages,
+          selectedLanguage: state.selectedLanguage,
+          isLoading: state.isLanguageLoading,
+          onLanguageChanged: (lang) {
+            ref
+                .read(mangaChaptersProvider.notifier)
+                .loadChapters(mangaId, language: lang);
+          },
         ),
       ],
     );

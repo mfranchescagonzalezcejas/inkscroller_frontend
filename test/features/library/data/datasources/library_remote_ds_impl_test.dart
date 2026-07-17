@@ -183,6 +183,140 @@ void main() {
         );
       },
     );
+
+    test('sends lang=es query parameter when language is supplied', () async {
+      when(
+        () => dio.get<List<dynamic>>(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: <Map<String, dynamic>>[
+            <String, dynamic>{
+              'id': 'c1',
+              'title': 'Capítulo 1',
+              'readable': true,
+              'external': false,
+            },
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/chapters/manga/1'),
+        ),
+      );
+
+      await dataSource.getMangaChapters('1', language: 'es');
+
+      verify(
+        () => dio.get<List<dynamic>>(
+          '${ApiEndpoints.chaptersByManga}/1',
+          queryParameters: <String, dynamic>{'lang': 'es'},
+        ),
+      ).called(1);
+    });
+
+    test('does not send lang query parameter when language is null', () async {
+      when(
+        () => dio.get<List<dynamic>>(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: <Map<String, dynamic>>[
+            <String, dynamic>{
+              'id': 'c1',
+              'title': 'Chapter 1',
+              'readable': true,
+              'external': false,
+            },
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/chapters/manga/1'),
+        ),
+      );
+
+      await dataSource.getMangaChapters('1');
+
+      verify(
+        () => dio.get<List<dynamic>>(
+          '${ApiEndpoints.chaptersByManga}/1',
+          queryParameters: <String, dynamic>{},
+        ),
+      ).called(1);
+    });
+  });
+
+  // ── getMangaLanguages ───────────────────────────────────────────────────
+
+  group('getMangaLanguages', () {
+    test('parses available languages from the response', () async {
+      when(
+        () => dio.get<List<dynamic>>(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: <String>['en', 'es'],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/chapters/manga/1/languages'),
+        ),
+      );
+
+      final result = await dataSource.getMangaLanguages('1');
+
+      expect(result, <String>['en', 'es']);
+      verify(
+        () => dio.get<List<dynamic>>(
+          '${ApiEndpoints.chaptersLanguagesBase}/1/languages',
+        ),
+      ).called(1);
+    });
+
+    test('returns [en] fallback when response is empty', () async {
+      when(
+        () => dio.get<List<dynamic>>(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenAnswer(
+        (_) async => Response<List<dynamic>>(
+          data: <dynamic>[],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/chapters/manga/1/languages'),
+        ),
+      );
+
+      final result = await dataSource.getMangaLanguages('1');
+
+      expect(result, <String>[]);
+    });
+
+    test('throws NetworkException on Dio connection error', () async {
+      when(
+        () => dio.get<List<dynamic>>(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenThrow(
+        DioException(
+          type: DioExceptionType.connectionError,
+          requestOptions: RequestOptions(path: '/chapters/manga/1/languages'),
+        ),
+      );
+
+      expect(
+        () => dataSource.getMangaLanguages('1'),
+        throwsA(
+          isA<NetworkException>().having(
+            (e) => e.message,
+            'message',
+            'network/no-connection',
+          ),
+        ),
+      );
+    });
   });
 
   // ── getChapterPages ─────────────────────────────────────────────────────

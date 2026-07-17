@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/chapter.dart';
+import '../entities/chapters_with_languages.dart';
 import '../entities/manga.dart';
 import '../entities/manga_tags.dart';
 import '../entities/search_result.dart';
@@ -29,7 +30,24 @@ abstract class LibraryRepository {
   Future<Either<Failure, Manga>> getMangaDetail(String mangaId);
 
   /// Returns all chapters available for the manga identified by [mangaId].
-  Future<Either<Failure, List<Chapter>>> getMangaChapters(String mangaId);
+  ///
+  /// [language] filters the chapters to the given language code (e.g. "es").
+  Future<Either<Failure, List<Chapter>>> getMangaChapters(
+    String mangaId, {
+    String? language,
+  });
+
+  /// Returns the list of available chapter language codes for the manga
+  /// identified by [mangaId].
+  Future<Either<Failure, List<String>>> getMangaLanguages(String mangaId);
+
+  /// Fetches available languages and chapters for the preferred language in
+  /// a single call. Replaces the initial `getMangaLanguages` + `getMangaChapters`
+  /// round trip.
+  Future<Either<Failure, ChaptersWithLanguages>> getMangaChaptersWithLanguages(
+    String mangaId, {
+    String? preferredLang,
+  });
 
   /// Returns the ordered list of page image URLs for the given [chapterId].
   ///

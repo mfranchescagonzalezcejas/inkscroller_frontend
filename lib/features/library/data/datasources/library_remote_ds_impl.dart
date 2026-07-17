@@ -4,6 +4,7 @@ import 'package:inkscroller_flutter/core/error/exceptions.dart';
 import 'package:inkscroller_flutter/features/library/data/models/chapter_model.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_capabilities.dart';
+import '../models/manga_languages_response.dart';
 import '../models/manga_model.dart';
 import '../models/search_result_model.dart';
 import 'library_remote_ds.dart';
@@ -16,6 +17,10 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   final Dio dio;
 
   const LibraryRemoteDataSourceImpl(this.dio);
+
+  /// Builds the full path for the manga languages endpoint.
+  String _languagesPath(String mangaId) =>
+      '${ApiEndpoints.chaptersLanguagesBase}/$mangaId/languages';
 
   @override
   Future<MangaCapabilities> getMangaCapabilities() async {
@@ -101,11 +106,19 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   // LISTA DE CAPÍTULOS (metadata)
   // ─────────────────────────────
   /// Fetches the chapter list for [mangaId] from `/chapters/manga/{id}`.
+  ///
+  /// When [language] is provided, the request includes `lang=<language>`.
   @override
-  Future<List<ChapterModel>> getMangaChapters(String mangaId) async {
+  Future<List<ChapterModel>> getMangaChapters(
+    String mangaId, {
+    String? language,
+  }) async {
     try {
       final response = await dio.get<List<dynamic>>(
         '${ApiEndpoints.chaptersByManga}/$mangaId',
+        queryParameters: {
+          if (language != null) 'lang': language,
+        },
       );
 
       final data = response.data;
@@ -116,6 +129,55 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           .whereType<Map<String, dynamic>>()
           .map(ChapterModel.fromJson)
           .toList();
+    } on DioException catch (error) {
+      throw _mapDioException(error);
+    } on AppException {
+      rethrow;
+    } on Exception catch (error) {
+      throw UnexpectedException(message: error.toString());
+    }
+  }
+
+  // ─────────────────────────────
+  // IDIOMAS DISPONIBLES
+  // ─────────────────────────────
+  /// Fetches the available chapter language codes for [mangaId].
+  ///
+  /// Returns the raw list from `/chapters/manga/{id}/languages`, defaulting to
+  /// `['en']` when the backend returns an empty body.
+  @override
+  Future<List<String>> getMangaLanguages(String mangaId) async {
+    try {
+      final response = await dio.get<List<dynamic>>(
+        _languagesPath(mangaId),
+      );
+      return response.data?.cast<String>() ?? <String>['en'];
+    } on DioException catch (error) {
+      throw _mapDioException(error);
+    } on AppException {
+      rethrow;
+    } on Exception catch (error) {
+      throw UnexpectedException(message: error.toString());
+    }
+  }
+
+  @override
+  Future<MangaLanguagesResponse> getMangaChaptersWithLanguages(
+    String mangaId, {
+    String? preferredLang,
+  }) async {
+    try {
+      final response = await dio.get<Map<String, dynamic>>(
+        _languagesPath(mangaId),
+        queryParameters: {
+          if (preferredLang != null) 'preferred_lang': preferredLang,
+        },
+      );
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException(message: 'server/empty-response');
+      }
+      return MangaLanguagesResponse.fromJson(data);
     } on DioException catch (error) {
       throw _mapDioException(error);
     } on AppException {

@@ -34,7 +34,9 @@ import '../../features/library/domain/repositories/reading_progress_repository.d
 import '../../features/library/domain/repositories/user_library_repository.dart';
 import '../../features/library/domain/usecases/get_chapter_pages.dart';
 import '../../features/library/domain/usecases/get_manga_chapters.dart';
+import '../../features/library/domain/usecases/get_manga_chapters_with_languages.dart';
 import '../../features/library/domain/usecases/get_manga_detail.dart';
+import '../../features/library/domain/usecases/get_manga_languages.dart';
 import '../../features/library/domain/usecases/get_manga_list.dart';
 import '../../features/library/domain/usecases/get_per_title_override.dart';
 import '../../features/library/domain/usecases/remove_per_title_override.dart';
@@ -155,6 +157,12 @@ Future<void> initDI() async {
   _registerIfAbsent<GetMangaList>(() => GetMangaList(sl()));
   _registerIfAbsent<GetMangaDetail>(() => GetMangaDetail(sl()));
   _registerIfAbsent<GetMangaChapters>(() => GetMangaChapters(sl()));
+  _registerIfAbsent<GetMangaChaptersWithLanguages>(
+    () => GetMangaChaptersWithLanguages(sl<LibraryRepository>()),
+  );
+  _registerIfAbsent<GetMangaLanguages>(
+    () => GetMangaLanguages(sl<LibraryRepository>()),
+  );
   _registerIfAbsent<GetChapterPages>(
     () => GetChapterPages(sl<LibraryRepository>()),
   );
