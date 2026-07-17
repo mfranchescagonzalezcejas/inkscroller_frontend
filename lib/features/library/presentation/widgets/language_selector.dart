@@ -67,6 +67,8 @@ String languageDisplayName(String code) {
 
 /// Dropdown that lets the reader choose which language to display chapters in.
 ///
+/// When there is only one available language, renders it as a plain label
+/// instead of a dropdown — no need to select when there's no choice.
 /// Shows a loading indicator while [isLoading] is true. Emits the selected
 /// language code via [onLanguageChanged].
 class LanguageSelector extends ConsumerWidget {
@@ -96,47 +98,66 @@ class LanguageSelector extends ConsumerWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: isLoading
-                ? DropdownButtonFormField<String>(
-                    disabledHint: const Text('Cargando…'),
-                    items: const [],
-                    onChanged: null,
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      border: OutlineInputBorder(),
-                      labelText: 'Idioma',
-                    ),
-                  )
-                : DropdownButtonFormField<String>(
-                    initialValue: availableLanguages.contains(selectedLanguage)
-                        ? selectedLanguage
-                        : availableLanguages.first,
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      border: OutlineInputBorder(),
-                      labelText: 'Idioma',
-                    ),
-                    items: availableLanguages.map((code) {
-                      return DropdownMenuItem<String>(
-                        value: code,
-                        child: Text(languageDisplayName(code)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) onLanguageChanged(value);
-                    },
-                  ),
+            child: _buildContent(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (isLoading) {
+      return DropdownButtonFormField<String>(
+        disabledHint: const Text('Cargando…'),
+        items: const [],
+        onChanged: null,
+        decoration: const InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+          border: OutlineInputBorder(),
+          labelText: 'Idioma',
+        ),
+      );
+    }
+
+    // Single language: show as plain text, no dropdown needed.
+    if (availableLanguages.length == 1) {
+      return Text(
+        languageDisplayName(availableLanguages.first),
+        style: const TextStyle(
+          fontSize: 14,
+          color: AppColors.onSurfaceVariant,
+          fontWeight: FontWeight.w500,
+        ),
+      );
+    }
+
+    // Multiple languages: show dropdown.
+    return DropdownButtonFormField<String>(
+      initialValue: availableLanguages.contains(selectedLanguage)
+          ? selectedLanguage
+          : availableLanguages.first,
+      decoration: const InputDecoration(
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
+        ),
+        border: OutlineInputBorder(),
+        labelText: 'Idioma',
+      ),
+      items: availableLanguages.map((code) {
+        return DropdownMenuItem<String>(
+          value: code,
+          child: Text(languageDisplayName(code)),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) onLanguageChanged(value);
+      },
     );
   }
 }

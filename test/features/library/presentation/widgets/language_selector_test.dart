@@ -30,6 +30,43 @@ void main() {
       expect(find.text('Japonés'), findsOneWidget);
     });
 
+    testWidgets('shows plain text label when only one language available', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['it'],
+              selectedLanguage: 'it',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Italiano'), findsOneWidget);
+      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+    });
+
+    testWidgets('shows dropdown when multiple languages available', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['en', 'es'],
+              selectedLanguage: 'en',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    });
+
     testWidgets('shows disabled dropdown with loading text when isLoading is true', (
       tester,
     ) async {
