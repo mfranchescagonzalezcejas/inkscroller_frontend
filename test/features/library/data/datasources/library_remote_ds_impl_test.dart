@@ -269,7 +269,7 @@ void main() {
       expect(result, <String>['en', 'es']);
       verify(
         () => dio.get<List<dynamic>>(
-          '${ApiEndpoints.chaptersLanguages}/1/languages',
+          '${ApiEndpoints.chaptersLanguagesBase}/1/languages',
         ),
       ).called(1);
     });

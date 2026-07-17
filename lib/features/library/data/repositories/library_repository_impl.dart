@@ -166,13 +166,17 @@ class LibraryRepositoryImpl implements LibraryRepository {
       );
       // Also seed under the preferred language key so offline fallback
       // matches when the backend matched a variant (e.g. es → es-la).
+      // Only alias for real variants, not unrelated fallback languages.
       if (preferredLang != null &&
           preferredLang != response.matchedLanguage) {
-        await _cacheMangaChapters(
-          mangaId,
-          response.chapters,
-          language: preferredLang,
-        );
+        final isVariant = response.matchedLanguage.startsWith('$preferredLang-');
+        if (isVariant) {
+          await _cacheMangaChapters(
+            mangaId,
+            response.chapters,
+            language: preferredLang,
+          );
+        }
       }
       return Right(
         ChaptersWithLanguages(
@@ -182,11 +186,19 @@ class LibraryRepositoryImpl implements LibraryRepository {
         ),
       );
     } on AppException catch (error) {
-      final cached = await _getCachedMangaChapters(
+      // Try language-scoped cache first, then fall back to legacy unscoped
+      // cache for users upgrading from a previous version (P2 Codex).
+      var cached = await _getCachedMangaChapters(
         mangaId,
         maxAge: mangaChaptersCacheTtl,
         language: preferredLang,
       );
+      if (cached == null && preferredLang != null) {
+        cached = await _getCachedMangaChapters(
+          mangaId,
+          maxAge: mangaChaptersCacheTtl,
+        );
+      }
       if (cached != null) {
         final cachedLang = preferredLang ?? 'en';
         return Right(

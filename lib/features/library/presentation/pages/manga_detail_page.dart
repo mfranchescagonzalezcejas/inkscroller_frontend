@@ -240,12 +240,16 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             ),
                             const SizedBox(height: 16),
                             FilledButton(
-                              onPressed: () => ref
-                                  .read(mangaChaptersProvider.notifier)
-                                  .loadLanguages(
-                                    widget.manga.id,
-                                    preferredLang: state.selectedLanguage,
-                                  ),
+                              onPressed: () {
+                                final prefs = ref.read(preferencesProvider);
+                                final lang = prefs.preferences?.defaultLanguage ?? 'en';
+                                ref
+                                    .read(mangaChaptersProvider.notifier)
+                                    .loadLanguages(
+                                      widget.manga.id,
+                                      preferredLang: lang,
+                                    );
+                              },
                               child: Text(context.l10n.retryAction),
                             ),
                           ],

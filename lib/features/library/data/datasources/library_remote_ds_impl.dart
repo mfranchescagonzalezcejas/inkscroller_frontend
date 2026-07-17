@@ -18,6 +18,10 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
 
   const LibraryRemoteDataSourceImpl(this.dio);
 
+  /// Builds the full path for the manga languages endpoint.
+  String _languagesPath(String mangaId) =>
+      '${ApiEndpoints.chaptersLanguagesBase}/$mangaId/languages';
+
   @override
   Future<MangaCapabilities> getMangaCapabilities() async {
     try {
@@ -145,7 +149,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   Future<List<String>> getMangaLanguages(String mangaId) async {
     try {
       final response = await dio.get<List<dynamic>>(
-        '${ApiEndpoints.chaptersLanguages}/$mangaId/languages',
+        _languagesPath(mangaId),
       );
       return response.data?.cast<String>() ?? <String>['en'];
     } on DioException catch (error) {
@@ -164,7 +168,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   }) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
-        '${ApiEndpoints.chaptersLanguages}/$mangaId/languages',
+        _languagesPath(mangaId),
         queryParameters: {
           if (preferredLang != null) 'preferred_lang': preferredLang,
         },

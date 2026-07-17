@@ -334,7 +334,10 @@ void main() {
     getMangaChaptersWithLanguages = _MockGetMangaChaptersWithLanguages();
     getMangaLanguages = _MockGetMangaLanguages();
 
-    when(() => getMangaChaptersWithLanguages('monster')).thenAnswer(
+    when(() => getMangaChaptersWithLanguages(
+      'monster',
+      preferredLang: any(named: 'preferredLang'),
+    )).thenAnswer(
       (_) async => Right<Failure, ChaptersWithLanguages>(
         ChaptersWithLanguages(
           availableLanguages: ['en'],
