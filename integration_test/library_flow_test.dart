@@ -18,6 +18,7 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/chapter.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/chapters_with_languages.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_reading_progress.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
@@ -30,6 +31,7 @@ import 'package:inkscroller_flutter/features/library/domain/repositories/reading
 import 'package:inkscroller_flutter/features/library/domain/repositories/user_library_repository.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/repositories/preferences_repository.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_chapters.dart';
+import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_chapters_with_languages.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_languages.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_list.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_per_title_override.dart';
