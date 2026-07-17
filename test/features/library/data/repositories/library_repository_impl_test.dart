@@ -70,7 +70,7 @@ void main() {
       () => localDataSource.cacheMangaDetail(any(), any()),
     ).thenAnswer((_) async {});
     when(
-      () => localDataSource.cacheMangaChapters(any(), any()),
+      () => localDataSource.cacheMangaChapters(any(), any(), language: any(named: 'language')),
     ).thenAnswer((_) async {});
     when(
       () => localDataSource.getCachedMangaList(
@@ -93,6 +93,7 @@ void main() {
       () => localDataSource.getCachedMangaChapters(
         any(),
         maxAge: any(named: 'maxAge'),
+        language: any(named: 'language'),
       ),
     ).thenAnswer((_) async => null);
   });
@@ -481,9 +482,17 @@ void main() {
 
   test('getMangaChapters forwards language to datasource', () async {
     when(
-      () => remoteDataSource.getMangaChapters(
+      () => remoteDataSource.getMangaChapters('manga-1', language: 'es'),
+    ).thenAnswer(
+      (_) async => <ChapterModel>[
+        ChapterModel(id: 'chapter-1', readable: true, external: false),
+      ],
+    );
+    when(
+      () => localDataSource.getCachedMangaChapters(
         'manga-1',
-        language: 'es',
+        maxAge: any(named: 'maxAge'),
+        language: any(named: 'language'),
       ),
     ).thenAnswer(
       (_) async => <ChapterModel>[
@@ -517,6 +526,7 @@ void main() {
       () => localDataSource.getCachedMangaChapters(
         'manga-1',
         maxAge: any(named: 'maxAge'),
+        language: any(named: 'language'),
       ),
     ).thenAnswer((_) async => null);
 

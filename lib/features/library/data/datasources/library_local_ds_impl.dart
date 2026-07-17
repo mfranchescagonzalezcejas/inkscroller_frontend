@@ -100,11 +100,12 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
   Future<List<ChapterModel>?> getCachedMangaChapters(
     String mangaId, {
     required Duration maxAge,
+    String? language,
   }) async {
-    final Map<String, dynamic>? payload = _readPayload(
-      'library.manga_chapters.$mangaId',
-      maxAge: maxAge,
-    );
+    final cacheKey = language != null
+        ? 'library.manga_chapters.$mangaId:$language'
+        : 'library.manga_chapters.$mangaId';
+    final Map<String, dynamic>? payload = _readPayload(cacheKey, maxAge: maxAge);
 
     final List<dynamic>? rawItems = payload?['items'] as List<dynamic>?;
     if (rawItems == null) return null;
@@ -116,9 +117,16 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
   }
 
   @override
-  Future<void> cacheMangaChapters(String mangaId, List<ChapterModel> chapters) {
+  Future<void> cacheMangaChapters(
+    String mangaId,
+    List<ChapterModel> chapters, {
+    String? language,
+  }) {
+    final cacheKey = language != null
+        ? 'library.manga_chapters.$mangaId:$language'
+        : 'library.manga_chapters.$mangaId';
     return _writePayload(
-      'library.manga_chapters.$mangaId',
+      cacheKey,
       <String, dynamic>{
         'items': chapters.map((chapter) => chapter.toJson()).toList(),
       },

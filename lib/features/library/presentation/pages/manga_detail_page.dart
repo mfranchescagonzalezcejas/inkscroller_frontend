@@ -71,18 +71,22 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
       final notifier = ref.read(mangaChaptersProvider.notifier);
       final prefsState = ref.read(preferencesProvider);
-      final defaultLang = prefsState.preferences?.defaultLanguage ?? 'en';
 
-      // Single call: gets available languages, matched language, and chapters.
-      notifier.loadLanguages(widget.manga.id, preferredLang: defaultLang);
-
+      // Await preferences if not yet loaded so the correct default language
+      // is used for the initial chapters request (P2 Codex finding #4).
       if (!_preferencesRequested && prefsState.preferences == null) {
         _preferencesRequested = true;
-        ref.read(preferencesProvider.notifier).loadPreferences();
+        await ref.read(preferencesProvider.notifier).loadPreferences();
       }
+
+      final updatedPrefs = ref.read(preferencesProvider);
+      final defaultLang = updatedPrefs.preferences?.defaultLanguage ?? 'en';
+
+      // Single call: gets available languages, matched language, and chapters.
+      await notifier.loadLanguages(widget.manga.id, preferredLang: defaultLang);
     });
     // Sync reading progress when chapters change — lives here, not in build().
     _mangaChaptersSub = ref.listenManual<MangaChaptersState>(
@@ -446,7 +450,13 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
       // ponytail: skip canLaunchUrl — on modern Android it often returns false
       // even when a browser can handle the URL. Just launch directly.
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        AppFeedback.showWarning(
+          context,
+          title: context.l10n.externalChapterTitle,
+        );
+      }
     } on Exception catch (e, st) {
       debugPrint(
         '[ExternalLink] Failed to launch URL: $e\n$st',

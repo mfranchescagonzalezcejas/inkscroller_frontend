@@ -109,6 +109,8 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   /// [preferredLang] is the user's default language preference. The backend
   /// selects the best match (e.g. `es-la` when `es` is not available).
   Future<void> loadLanguages(String mangaId, {String? preferredLang}) async {
+    final requestKey = '$mangaId:languages';
+
     // Clear previous manga's chapters immediately so stale data is never
     // visible when navigating between different manga.
     state = state.copyWith(
@@ -117,15 +119,23 @@ class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
       isLanguageLoading: true,
       clearFailure: true,
     );
+
+    _lastRequestKey = requestKey;
     final result = await getMangaChaptersWithLanguages(
       mangaId,
       preferredLang: preferredLang,
     );
+
+    // Guard: discard stale response if user navigated to another manga
+    // while this request was in-flight.
+    if (_lastRequestKey != requestKey) return;
+
     result.fold(
-      (_) {
+      (failure) {
         state = state.copyWith(
           isLanguageLoading: false,
           isLoading: false,
+          failure: failure,
           availableLanguages: const ['en'],
         );
       },

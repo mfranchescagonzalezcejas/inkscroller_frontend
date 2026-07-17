@@ -169,7 +169,10 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           if (preferredLang != null) 'preferred_lang': preferredLang,
         },
       );
-      final data = response.data ?? <String, dynamic>{};
+      final data = response.data;
+      if (data == null) {
+        throw const ServerException(message: 'server/empty-response');
+      }
       return MangaLanguagesResponse.fromJson(data);
     } on DioException catch (error) {
       throw _mapDioException(error);

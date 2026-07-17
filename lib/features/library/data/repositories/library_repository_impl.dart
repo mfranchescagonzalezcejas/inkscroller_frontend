@@ -118,12 +118,13 @@ class LibraryRepositoryImpl implements LibraryRepository {
         mangaId,
         language: language,
       );
-      await _cacheMangaChapters(mangaId, chapters);
+      await _cacheMangaChapters(mangaId, chapters, language: language);
       return Right(chapters.map((e) => e.toEntity()).toList());
     } on AppException catch (error) {
       final cached = await _getCachedMangaChapters(
         mangaId,
         maxAge: mangaChaptersCacheTtl,
+        language: language,
       );
       if (cached != null) {
         return Right(cached.map((e) => e.toEntity()).toList());
@@ -157,6 +158,12 @@ class LibraryRepositoryImpl implements LibraryRepository {
         mangaId,
         preferredLang: preferredLang,
       );
+      // Seed offline cache with the matched-language chapters.
+      await _cacheMangaChapters(
+        mangaId,
+        response.chapters,
+        language: response.matchedLanguage,
+      );
       return Right(
         ChaptersWithLanguages(
           availableLanguages: response.availableLanguages,
@@ -165,6 +172,20 @@ class LibraryRepositoryImpl implements LibraryRepository {
         ),
       );
     } on AppException catch (error) {
+      final cached = await _getCachedMangaChapters(
+        mangaId,
+        maxAge: mangaChaptersCacheTtl,
+        language: preferredLang,
+      );
+      if (cached != null) {
+        return Right(
+          ChaptersWithLanguages(
+            availableLanguages: const ['en'],
+            matchedLanguage: preferredLang ?? 'en',
+            chapters: cached.map((e) => e.toEntity()).toList(),
+          ),
+        );
+      }
       return Left(_mapExceptionToFailure(error));
     } on Exception catch (error) {
       return Left(UnexpectedFailure(message: error.toString()));
@@ -306,10 +327,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   Future<void> _cacheMangaChapters(
     String mangaId,
-    List<ChapterModel> chapters,
-  ) async {
+    List<ChapterModel> chapters, {
+    String? language,
+  }) async {
     try {
-      await localDataSource.cacheMangaChapters(mangaId, chapters);
+      await localDataSource.cacheMangaChapters(mangaId, chapters, language: language);
     } on CacheException {
       // Cache writes are best-effort only.
     }
@@ -356,11 +378,13 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<List<ChapterModel>?> _getCachedMangaChapters(
     String mangaId, {
     required Duration maxAge,
+    String? language,
   }) async {
     try {
       return await localDataSource.getCachedMangaChapters(
         mangaId,
         maxAge: maxAge,
+        language: language,
       );
     } on CacheException {
       return null;
