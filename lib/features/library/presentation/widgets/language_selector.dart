@@ -97,10 +97,19 @@ class LanguageSelector extends ConsumerWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                ? DropdownButtonFormField<String>(
+                    disabledHint: const Text('Cargando…'),
+                    items: const [],
+                    onChanged: null,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(),
+                      labelText: 'Idioma',
+                    ),
                   )
                 : DropdownButtonFormField<String>(
                     initialValue: availableLanguages.contains(selectedLanguage)

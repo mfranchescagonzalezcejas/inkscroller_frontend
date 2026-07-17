@@ -30,7 +30,7 @@ void main() {
       expect(find.text('Japonés'), findsOneWidget);
     });
 
-    testWidgets('shows loading indicator when isLoading is true', (
+    testWidgets('shows disabled dropdown with loading text when isLoading is true', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -46,8 +46,8 @@ void main() {
         ),
       );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+      expect(find.text('Cargando…'), findsOneWidget);
+      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
     });
 
     testWidgets('calls onLanguageChanged when a language is selected', (
@@ -125,7 +125,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+      // Shows loading placeholder instead of language options
+      expect(find.text('Cargando…'), findsOneWidget);
+      expect(find.text('Inglés'), findsNothing);
+      expect(find.text('Español'), findsNothing);
     });
   });
 }
