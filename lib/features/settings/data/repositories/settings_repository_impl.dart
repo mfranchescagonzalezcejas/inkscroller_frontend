@@ -25,7 +25,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     } on AppException catch (error) {
       return Left(_mapExceptionToFailure(error));
     } on Exception catch (_) {
-      return Left(
+      return const Left(
         UnexpectedFailure(
           message: 'An unexpected error occurred while deleting the account.',
         ),

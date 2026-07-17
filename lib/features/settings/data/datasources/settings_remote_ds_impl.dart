@@ -20,7 +20,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
     } on DioException catch (error) {
       throw _mapDioException(error);
     } on Exception catch (_) {
-      throw UnexpectedException(
+      throw const UnexpectedException(
         message: 'An unexpected error occurred while deleting the account.',
       );
     }
