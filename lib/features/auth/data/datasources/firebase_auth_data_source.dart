@@ -44,7 +44,10 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
 
   @override
   Stream<AppUser?> get authStateChanges {
-    return _firebaseAuth.authStateChanges().map(_mapUser);
+    // Use userChanges() instead of authStateChanges() so listeners receive
+    // the updated Firebase user after profile mutations like updateDisplayName()
+    // without requiring an explicit reload or re-auth.
+    return _firebaseAuth.userChanges().map(_mapUser);
   }
 
   @override

@@ -756,8 +756,8 @@ class _AvatarSection extends StatelessWidget {
       );
     }
 
+    final preferredName = _resolvePreferredName(profile);
     final initials = _getInitials(profile);
-    final name = profile?.username;
     final email = profile?.email ?? '';
 
     return Padding(
@@ -789,9 +789,9 @@ class _AvatarSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          if (name != null && name.isNotEmpty) ...<Widget>[
+          if (preferredName != null) ...<Widget>[
             Text(
-              name,
+              preferredName,
               style: const TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 20,
@@ -815,11 +815,23 @@ class _AvatarSection extends StatelessWidget {
     );
   }
 
+  /// Resolves the display name: non-blank username → non-blank displayName → null.
+  String? _resolvePreferredName(UserProfile? profile) {
+    if (profile == null) return null;
+    if (profile.username != null && profile.username!.trim().isNotEmpty) {
+      return profile.username!.trim();
+    }
+    if (profile.displayName != null && profile.displayName!.trim().isNotEmpty) {
+      return profile.displayName!.trim();
+    }
+    return null;
+  }
+
   String _getInitials(UserProfile? profile) {
-    // Prefer username → displayName → email for avatar initials.
-    final name = profile?.username ?? profile?.displayName;
-    if (name != null && name.trim().isNotEmpty) {
-      final parts = name.trim().split(' ');
+    // Prefer username (non-blank) → displayName (non-blank) → email for avatar initials.
+    final name = _resolvePreferredName(profile);
+    if (name != null && name.isNotEmpty) {
+      final parts = name.split(' ');
       if (parts.length >= 2) {
         return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
       }

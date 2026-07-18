@@ -313,17 +313,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           birthDate: birthDate,
         );
 
-        // Non-blocking Firebase Auth displayName sync — best-effort,
-        // failure must not block the sign-up flow.
-        unawaited(
-          _authRepository
-              ?.updateDisplayName(username)
-              .catchError((Object e) {
-            if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
-            return const Right<Failure, void>(null);
-          }),
-        );
-
         if (kDebugMode) debugPrint('[AUTH] signUp: sending verification email');
         final verificationResult = await _sendEmailVerification();
         if (kDebugMode) debugPrint('[AUTH] signUp: verification email result received');
@@ -337,7 +326,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
             );
             return failure.message;
           },
-          (_) async => null,
+          (_) async {
+            // Best-effort Firebase Auth displayName sync — only when
+            // backend profile metadata persisted successfully.
+            unawaited(
+              _authRepository
+                  ?.updateDisplayName(username)
+                  .catchError((Object e) {
+                if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
+                return const Right<Failure, void>(null);
+              }),
+            );
+            return null;
+          },
         );
 
         final verificationSent = verificationResult.fold(
@@ -393,12 +394,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
           registrationInProgress: false,
         );
       },
-      (_) => state = state.copyWith(
-        isLoading: false,
-        clearError: true,
-        profileCompletionPending: false,
-        registrationInProgress: false,
-      ),
+      (_) {
+        // Best-effort Firebase Auth displayName sync — only when
+        // backend profile metadata persisted successfully.
+        unawaited(
+          _authRepository
+              ?.updateDisplayName(username)
+              .catchError((Object e) {
+            if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
+            return const Right<Failure, void>(null);
+          }),
+        );
+        state = state.copyWith(
+          isLoading: false,
+          clearError: true,
+          profileCompletionPending: false,
+          registrationInProgress: false,
+        );
+      },
     );
   }
 

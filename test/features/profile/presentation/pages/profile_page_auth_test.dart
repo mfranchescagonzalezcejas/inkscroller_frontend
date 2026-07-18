@@ -202,17 +202,17 @@ void main() {
       profile: UserProfile(
         firebaseUid: 'uid-123',
         email: 'alice@example.com',
-        username: 'alice',
+        username: 'zoe',
+        displayName: 'Bob',
         createdAt: DateTime(2024),
       ),
     ));
     await tester.pumpAndSettle();
 
-    // RED: Header should show username — currently shows nothing (displayName is null).
-    // After GREEN: header Text (fontSize 20) should contain 'alice'.
-    // For now, verify the name appears in the widget tree (pref row has it too).
-    expect(find.text('alice'), findsAtLeastNWidgets(1));
-    // Email should still be shown below
+    // Header shows username (preferred over displayName).
+    // The username also appears in the account-section pref row.
+    expect(find.text('zoe'), findsAtLeastNWidgets(1));
+    // Email still shown below
     expect(find.text('alice@example.com'), findsOneWidget);
   });
 
@@ -221,14 +221,35 @@ void main() {
       profile: UserProfile(
         firebaseUid: 'uid-123',
         email: 'alice@example.com',
-        username: 'alice',
+        username: 'zoe',
+        displayName: 'Bob',
         createdAt: DateTime(2024),
       ),
     ));
     await tester.pumpAndSettle();
 
-    // Initials should be 'A' from username (or displayName or email)
-    expect(find.text('A'), findsOneWidget);
+    // Initial is 'Z' from username 'zoe', not 'B' from displayName or 'A' from email
+    expect(find.text('Z'), findsOneWidget);
+  });
+
+  testWidgets(
+      'avatar section falls back to displayName when username is blank',
+      (tester) async {
+    await tester.pumpWidget(buildTestWidget(
+      profile: UserProfile(
+        firebaseUid: 'uid-123',
+        email: 'alice@example.com',
+        username: '',
+        displayName: 'Bob',
+        createdAt: DateTime(2024),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Header shows displayName when username is blank
+    expect(find.text('Bob'), findsOneWidget);
+    // Initial is 'B' from displayName
+    expect(find.text('B'), findsOneWidget);
   });
 
   testWidgets(
@@ -243,7 +264,9 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // Email should be shown as the only info
+    // No header name shown (no username or displayName)
     expect(find.text('alice@example.com'), findsOneWidget);
+    // Initial is 'A' from email
+    expect(find.text('A'), findsOneWidget);
   });
 }
