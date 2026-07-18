@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -65,11 +66,16 @@ class ReadingProgressRepositoryImpl implements ReadingProgressRepository {
       jsonEncode(model.toJson()),
     );
 
-    // Then push to backend when authenticated.
+    // Fire-and-forget remote sync: local save never blocks on the network.
+    // Consecutive rapid updates for the same manga each push their own
+    // snapshot; the backend receives the last-written value which is the
+    // most recent state.
     if (_canSyncRemote) {
-      await _remoteDataSource!.updateProgress(
-        progress.mangaId,
-        progress.readChaptersCount,
+      unawaited(
+        _remoteDataSource!.updateProgress(
+          progress.mangaId,
+          progress.readChaptersCount,
+        ),
       );
     }
   }

@@ -51,7 +51,7 @@ void main() {
       'malId': 512,
     };
 
-    // MalId is not in the existing fromJson yet — this will fail until 1.2
+    // malId is now supported in MangaModel.fromJson (added in feat/jikan-reading-progress)
     final model = MangaModel.fromJson(json);
 
     expect(model.malId, 512);

@@ -17,13 +17,17 @@ class ReadingProgressSection extends ConsumerWidget {
     required this.mangaId,
     required this.readCount,
     required this.totalCount,
-    required this.onJumpToChapter,
+    this.onJumpToChapter,
   });
 
   final String mangaId;
   final int readCount;
   final int totalCount;
-  final ValueChanged<int> onJumpToChapter;
+
+  /// Called after a successful jump so the parent can scroll to the target
+  /// batch. `null` means the jump dialog still updates progress but no
+  /// scrolling happens.
+  final ValueChanged<int>? onJumpToChapter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -112,7 +116,7 @@ class ReadingProgressSection extends ConsumerWidget {
                     totalChaptersCount: effectiveTotal,
                   );
                   if (chapter != null) {
-                    onJumpToChapter(chapter);
+                    onJumpToChapter?.call(chapter);
                   }
                 },
                 tooltip: context.l10n.jumpToChapter,

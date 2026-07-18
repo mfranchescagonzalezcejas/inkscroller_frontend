@@ -152,7 +152,6 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool showTracking = hasMalId && hasTotal;
     final bool showBatches = showTracking && hasMdChapters;
     final bool showNothing = !showTracking && !hasMdChapters;
-    final bool hasAnyChapters = hasMdChapters || hasTotal;
     final bool useBatchList =
         showBatches && progress.totalChaptersCount > progress.batchSize;
 
@@ -175,7 +174,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                 SliverToBoxAdapter(child: _TitleArea(manga: widget.manga)),
 
                 // ── CTA button ────────────────────────────────────
-                if (hasAnyChapters)
+                // Only show when there are readable MangaDex chapters.
+                // Solo-tracking state (hasTotal but no MD chapters) hides the CTA.
+                if (hasMdChapters)
                   SliverToBoxAdapter(
                     child: _CtaButton(
                       label: context.l10n.readNow.toUpperCase(),
@@ -217,10 +218,6 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                       mangaId: widget.manga.id,
                       readCount: progress.readChaptersCount,
                       totalCount: progress.totalChaptersCount,
-                      onJumpToChapter: (chapterNumber) {
-                        // Scroll to the batch containing this chapter
-                        // Handled by ChapterBatchList's ScrollController
-                      },
                     ),
                   ),
 
@@ -313,7 +310,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     child: ChapterBatchList(
                       mangaId: widget.manga.id,
                       batches: computeChapterBatches(
-                        chapters: state.chapters,
+                        chapters: displayChapters,
                         totalChaptersCount: progress.totalChaptersCount,
                         batchSize: progress.batchSize,
                       ),
@@ -327,7 +324,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     ),
                   ),
                   // ── Extra chapters without numbers (extras, oneshots) ──
-                  if (state.chapters.any((ch) => ch.number == null))
+                  if (displayChapters.any((ch) => ch.number == null))
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
@@ -345,7 +342,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final extras = state.chapters
+                        final extras = displayChapters
                             .where((ch) => ch.number == null)
                             .toList();
                         final chapter = extras[index];
@@ -371,7 +368,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                           },
                         );
                       },
-                      childCount: state.chapters
+                      childCount: displayChapters
                           .where((ch) => ch.number == null)
                           .length,
                     ),
