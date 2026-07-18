@@ -52,4 +52,9 @@ abstract class AuthRepository {
   ///
   /// Returns [Right(null)] on success or [Left(Failure)] on failure.
   Future<Either<Failure, void>> sendPasswordReset({required String email});
+
+  /// Updates the Firebase Auth display name to [displayName].
+  ///
+  /// Returns [Right(null)] on success or [Left(Failure)] on failure.
+  Future<Either<Failure, void>> updateDisplayName(String displayName);
 }

@@ -31,6 +31,9 @@ abstract class FirebaseAuthDataSource {
 
   /// Sends a password reset email to [email].
   Future<void> sendPasswordResetEmail({required String email});
+
+  /// Updates the Firebase Auth [User.displayName] to [displayName].
+  Future<void> updateDisplayName(String displayName);
 }
 
 /// Concrete implementation wrapping [FirebaseAuth].
@@ -168,6 +171,11 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
     } on FirebaseAuthException catch (e) {
       throw _mapFirebaseException(e);
     }
+  }
+
+  @override
+  Future<void> updateDisplayName(String displayName) async {
+    await _firebaseAuth.currentUser?.updateDisplayName(displayName);
   }
 
   // --- Mapping helpers --------------------------------------------------------

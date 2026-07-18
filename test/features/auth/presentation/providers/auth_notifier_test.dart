@@ -16,10 +16,13 @@ import 'package:inkscroller_flutter/features/profile/domain/entities/user_profil
 import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:inkscroller_flutter/features/auth/domain/repositories/auth_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Fakes / mocks
 // ---------------------------------------------------------------------------
+
+class _MockAuthRepository extends Mock implements AuthRepository {}
 
 class _MockSignIn extends Mock implements SignIn {}
 
@@ -63,6 +66,7 @@ AuthNotifier _makeNotifier({
   required ReloadUser reloadUser,
   required GetUserProfile getUserProfile,
   required UpdateUserProfile updateUserProfile,
+  AuthRepository? authRepository,
 }) {
   return AuthNotifier(
     signIn: signIn,
@@ -74,6 +78,7 @@ AuthNotifier _makeNotifier({
     reloadUser: reloadUser,
     getUserProfile: getUserProfile,
     updateUserProfile: updateUserProfile,
+    authRepository: authRepository,
   );
 }
 
@@ -557,6 +562,130 @@ void main() {
 
       notifier.clearPasswordResetSent();
       expect(notifier.state.passwordResetSent, isFalse);
+    });
+  });
+
+  // ── signUp ──────────────────────────────────────────────────────────────
+
+  group('signUp', () {
+    test('calls updateDisplayName after successful profile update', () async {
+      final mockAuthRepo = _MockAuthRepository();
+      when(
+        () => mockSignUp(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+      when(
+        () => mockUpdateUserProfile(
+          username: any(named: 'username'),
+          birthDate: any(named: 'birthDate'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, UserProfile>(
+          UserProfile(
+            firebaseUid: 'uid-123',
+            email: 'alice@example.com',
+            username: 'alice',
+            createdAt: DateTime(2024),
+          ),
+        ),
+      );
+      when(
+        () => mockSendEmailVerification(),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => mockAuthRepo.updateDisplayName(any()),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
+        reloadUser: mockReloadUser,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
+        authRepository: mockAuthRepo,
+      );
+
+      await notifier.signUp(
+        email: 'alice@example.com',
+        password: 's3cr3t',
+        username: 'alice',
+        birthDate: DateTime(2000),
+      );
+
+      // Non-blocking — may need microtask to flush
+      await Future<void>.delayed(Duration.zero);
+
+      verify(() => mockAuthRepo.updateDisplayName('alice')).called(1);
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.error, isNull);
+    });
+
+    test('signUp succeeds even if updateDisplayName throws', () async {
+      final mockAuthRepo = _MockAuthRepository();
+      when(
+        () => mockSignUp(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => const Right<Failure, AppUser>(_kUser));
+      when(
+        () => mockUpdateUserProfile(
+          username: any(named: 'username'),
+          birthDate: any(named: 'birthDate'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, UserProfile>(
+          UserProfile(
+            firebaseUid: 'uid-123',
+            email: 'alice@example.com',
+            username: 'alice',
+            createdAt: DateTime(2024),
+          ),
+        ),
+      );
+      when(
+        () => mockSendEmailVerification(),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+      when(
+        () => mockAuthRepo.updateDisplayName(any()),
+      ).thenAnswer(
+        (_) async => const Left<Failure, void>(
+          ServerFailure(message: 'firebase error'),
+        ),
+      );
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
+        reloadUser: mockReloadUser,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
+        authRepository: mockAuthRepo,
+      );
+
+      await notifier.signUp(
+        email: 'alice@example.com',
+        password: 's3cr3t',
+        username: 'alice',
+        birthDate: DateTime(2000),
+      );
+
+      await Future<void>.delayed(Duration.zero);
+
+      // signUp still succeeds — updateDisplayName failure is non-blocking
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.error, isNull);
+      verify(() => mockAuthRepo.updateDisplayName('alice')).called(1);
     });
   });
 }

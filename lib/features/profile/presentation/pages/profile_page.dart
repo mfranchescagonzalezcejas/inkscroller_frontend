@@ -757,7 +757,7 @@ class _AvatarSection extends StatelessWidget {
     }
 
     final initials = _getInitials(profile);
-    final name = profile?.displayName;
+    final name = profile?.username;
     final email = profile?.email ?? '';
 
     return Padding(
@@ -816,7 +816,8 @@ class _AvatarSection extends StatelessWidget {
   }
 
   String _getInitials(UserProfile? profile) {
-    final name = profile?.displayName;
+    // Prefer username → displayName → email for avatar initials.
+    final name = profile?.username ?? profile?.displayName;
     if (name != null && name.trim().isNotEmpty) {
       final parts = name.trim().split(' ');
       if (parts.length >= 2) {

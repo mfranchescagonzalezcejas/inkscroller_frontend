@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/app_user.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/get_auth_state.dart';
 import '../../domain/usecases/reload_user.dart';
 import '../../domain/usecases/send_email_verification.dart';
@@ -84,6 +86,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final GetUserProfile _getUserProfile;
   final UpdateUserProfile _updateUserProfile;
   final ProfileMetadataFailureReporter _profileMetadataFailureReporter;
+  final AuthRepository? _authRepository;
 
   StreamSubscription<AppUser?>? _authSubscription;
   String? _profileCompletionCheckUserId;
@@ -102,6 +105,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required UpdateUserProfile updateUserProfile,
     ProfileMetadataFailureReporter profileMetadataFailureReporter =
         _ignoreProfileMetadataFailure,
+    AuthRepository? authRepository,
   }) : _signIn = signIn,
        _signUp = signUp,
        _signOut = signOut,
@@ -112,6 +116,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
        _getUserProfile = getUserProfile,
        _updateUserProfile = updateUserProfile,
        _profileMetadataFailureReporter = profileMetadataFailureReporter,
+       _authRepository = authRepository,
        super(const AuthState()) {
     _listenToAuthState();
   }
@@ -306,6 +311,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final profileResult = await _updateUserProfile(
           username: username,
           birthDate: birthDate,
+        );
+
+        // Non-blocking Firebase Auth displayName sync — best-effort,
+        // failure must not block the sign-up flow.
+        unawaited(
+          _authRepository
+              ?.updateDisplayName(username)
+              .catchError((Object e) {
+            if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
+            return const Right<Failure, void>(null);
+          }),
         );
 
         if (kDebugMode) debugPrint('[AUTH] signUp: sending verification email');
