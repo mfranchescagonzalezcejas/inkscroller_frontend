@@ -59,7 +59,8 @@ class ReadingProgressNotifier
   ///
   /// When [chapters] is provided, readChapterIds is rebuilt so only MangaDex
   /// chapters with number ≤ [count] are marked — chapters above are removed.
-  /// When [count] is 0, the entire reading progress is reset to defaults.
+  /// When [count] is 0, manuallyMarkedCount and readChapterIds are reset but
+  /// totalChaptersCount is preserved so the tracking section stays visible.
   Future<void> setManuallyMarkedCountTo(
     String mangaId,
     int count, {
@@ -67,11 +68,16 @@ class ReadingProgressNotifier
   }) async {
     final current = progressFor(mangaId);
 
-    // count = 0 means reset everything
+    // count = 0 resets manual progress but preserves totalChaptersCount
+    // so the tracking section and batches stay visible.
     if (count <= 0) {
       debugPrint('[ProgressNotifier] setManuallyMarkedCountTo: '
-          '$mangaId RESET count=0');
-      final reset = MangaReadingProgress(mangaId: mangaId);
+          '$mangaId RESET count=0 '
+          'preserving total=${current.totalChaptersCount}');
+      final reset = current.copyWith(
+        manuallyMarkedCount: 0,
+        readChapterIds: const <String>{},
+      );
       if (reset == current) return;
       await _save(reset);
       return;
@@ -79,16 +85,21 @@ class ReadingProgressNotifier
 
     final int effectiveCount = count;
 
-    // Rebuild readChapterIds from scratch: keep only MD chapters with number ≤ count
+    // Rebuild readChapterIds from scratch, deduplicating by chapter number.
+    // MangaDex often returns multiple entries for the same number (different
+    // scanlators). We only keep one ID per chapter number to avoid phantom
+    // checkmarks and inflated batch counters.
     Set<String>? nextReadIds;
     if (chapters != null && chapters.isNotEmpty) {
-      nextReadIds = <String>{};
+      final Map<int, String> bestByNumber = <int, String>{};
       for (final chapter in chapters) {
         final num? n = chapter.number;
         if (n != null && n.toInt() <= effectiveCount) {
-          nextReadIds.add(chapter.id);
+          // Prefer the first occurrence for each chapter number
+          bestByNumber.putIfAbsent(n.toInt(), () => chapter.id);
         }
       }
+      nextReadIds = bestByNumber.values.toSet();
     }
 
     debugPrint('[ProgressNotifier] setManuallyMarkedCountTo: '

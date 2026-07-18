@@ -49,11 +49,13 @@ List<ChapterBatch> computeChapterBatches({
   required int batchSize,
 }) {
   final effectiveTotal = math.max(totalChaptersCount, chapters.length);
+  // Deduplicate by chapter number (first occurrence wins) to match
+  // the readChapterIds dedup in ReadingProgressNotifier.
   final Map<int, Chapter> byNumber = <int, Chapter>{};
   for (final chapter in chapters) {
     final num? n = chapter.number;
     if (n != null) {
-      byNumber[n.toInt()] = chapter;
+      byNumber.putIfAbsent(n.toInt(), () => chapter);
     }
   }
 
