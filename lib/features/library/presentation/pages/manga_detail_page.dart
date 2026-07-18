@@ -224,6 +224,14 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                       mangaId: widget.manga.id,
                       readCount: progress.readChaptersCount,
                       totalCount: progress.totalChaptersCount,
+                      onJumpToChapter: (chapterNumber) {
+                        ref
+                            .read(readingProgressProvider.notifier)
+                            .setManuallyMarkedCountTo(
+                              widget.manga.id,
+                              chapterNumber,
+                            );
+                      },
                     ),
                   ),
 
