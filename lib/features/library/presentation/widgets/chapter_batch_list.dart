@@ -154,18 +154,31 @@ class _PlaceholderTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final progress = ref.watch(
+      readingProgressProvider.select(
+        (value) => value[mangaId],
+      ),
+    );
+    final int manualCount = progress?.manuallyMarkedCount ?? 0;
+    final bool isChecked = manualCount >= chapterNumber;
+
     return ListTile(
       leading: IconButton(
-        icon: const Icon(
-          Icons.radio_button_unchecked,
+        icon: Icon(
+          isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
           size: 22,
-          color: AppColors.onSurfaceVariant,
+          color: isChecked
+              ? AppColors.primary
+              : AppColors.onSurfaceVariant,
         ),
         onPressed: () {
-          ref.read(readingProgressProvider.notifier).updateManuallyMarkedCount(
-                mangaId,
-                1,
-              );
+          // Mark as read up to this chapter number
+          final delta = chapterNumber - manualCount;
+          if (delta > 0) {
+            ref
+                .read(readingProgressProvider.notifier)
+                .updateManuallyMarkedCount(mangaId, delta);
+          }
         },
         tooltip: context.l10n.placeholderMarkRead,
         visualDensity: VisualDensity.compact,

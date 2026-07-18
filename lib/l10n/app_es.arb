@@ -387,5 +387,6 @@
   "placeholderMarkRead": "Marcar como leído",
   "placeholderUnmark": "Marcar como no leído",
   "noJikanData": "No hay datos externos disponibles",
-  "noChaptersNoTracking": "No hay capítulos disponibles"
+  "noChaptersNoTracking": "No hay capítulos disponibles",
+  "extrasTitle": "Extras"
 }

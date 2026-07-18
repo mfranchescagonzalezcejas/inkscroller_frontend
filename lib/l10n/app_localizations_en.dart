@@ -849,4 +849,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noChaptersNoTracking => 'No chapters available';
+
+  @override
+  String get extrasTitle => 'Extras';
 }

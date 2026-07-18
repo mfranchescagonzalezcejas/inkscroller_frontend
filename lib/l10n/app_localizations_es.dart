@@ -856,4 +856,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noChaptersNoTracking => 'No hay capítulos disponibles';
+
+  @override
+  String get extrasTitle => 'Extras';
 }

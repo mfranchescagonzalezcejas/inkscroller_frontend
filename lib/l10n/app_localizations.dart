@@ -1615,6 +1615,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No chapters available'**
   String get noChaptersNoTracking;
+
+  /// No description provided for @extrasTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extras'**
+  String get extrasTitle;
 }
 
 class _AppLocalizationsDelegate
