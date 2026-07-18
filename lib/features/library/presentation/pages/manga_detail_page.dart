@@ -146,6 +146,15 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     );
 
     // ── 4-state determination ──────────────────────────────────────
+    debugPrint('[DetailPage] build $hashCode '
+        'mangaId=${widget.manga.id} '
+        'malId=${widget.manga.malId} '
+        'totalChaptersCount=${progress.totalChaptersCount} '
+        'readChapterIds.len=${progress.readChapterIds.length} '
+        'manuallyMarkedCount=${progress.manuallyMarkedCount} '
+        'readChaptersCount=${progress.readChaptersCount} '
+        'state.chapters=${state.chapters.length} '
+        'totalChaptersCount=${progress.totalChaptersCount}');
     // Tracking shows progress readChapters / totalChapters even without
     // Jikan data — totalChaptersCount is derived from max chapter number
     // in the MangaDex list or Jikan total.

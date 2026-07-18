@@ -25,6 +25,14 @@ class ReadingProgressNotifier
 
   Future<void> _load() async {
     state = await _repository.getAll();
+    debugPrint('[ProgressNotifier] _load: ${state.length} mangas loaded');
+    for (final entry in state.entries) {
+      debugPrint('[ProgressNotifier]   ${entry.key}: '
+          'readChapterIds=${entry.value.readChapterIds.length} '
+          'manual=${entry.value.manuallyMarkedCount} '
+          'total=${entry.value.totalChaptersCount} '
+          'effectiveRead=${entry.value.readChaptersCount}');
+    }
   }
 
   MangaReadingProgress progressFor(String mangaId) {
@@ -39,6 +47,10 @@ class ReadingProgressNotifier
     final nextCount = math.max(0, current.manuallyMarkedCount + delta);
     final next = current.copyWith(manuallyMarkedCount: nextCount);
     if (next == current) return;
+    debugPrint('[ProgressNotifier] updateManuallyMarkedCount: '
+        '$mangaId delta=$delta '
+        '${current.manuallyMarkedCount} → $nextCount '
+        'readChapterIds.len=${current.readChapterIds.length}');
     await _save(next);
   }
 
@@ -57,15 +69,24 @@ class ReadingProgressNotifier
     final nextCount = count < floor ? floor : count;
 
     Set<String>? nextReadIds;
+    int chaptersAdded = 0;
     if (chapters != null && chapters.isNotEmpty) {
       nextReadIds = Set<String>.of(current.readChapterIds);
       for (final chapter in chapters) {
         final num? n = chapter.number;
         if (n != null && n.toInt() <= count) {
-          nextReadIds.add(chapter.id);
+          if (nextReadIds.add(chapter.id)) {
+            chaptersAdded++;
+          }
         }
       }
     }
+
+    debugPrint('[ProgressNotifier] setManuallyMarkedCountTo: '
+        '$mangaId count=$count '
+        'floor=$floor nextCount=$nextCount '
+        'MDchaptersAdded=$chaptersAdded '
+        'readChapterIds.len=${nextReadIds?.length ?? current.readChapterIds.length}');
 
     final next = current.copyWith(
       manuallyMarkedCount: nextCount,
@@ -114,6 +135,13 @@ class ReadingProgressNotifier
     if (backendTotal != null && backendTotal > nextTotal) {
       nextTotal = backendTotal;
     }
+
+    debugPrint('[ProgressNotifier] syncChapters: $mangaId '
+        'maxChapterNumber=$maxChapterNumber '
+        'chapters.length=${chapters.length} '
+        'backendTotal=$backendTotal '
+        'current.total=${current.totalChaptersCount} '
+        'nextTotal=$nextTotal');
 
     final next = current.copyWith(totalChaptersCount: nextTotal);
     if (next == current) return;
@@ -208,6 +236,11 @@ class ReadingProgressNotifier
   }
 
   Future<void> _save(MangaReadingProgress progress) async {
+    debugPrint('[ProgressNotifier] _save: ${progress.mangaId} '
+        'readChapterIds=${progress.readChapterIds.length} '
+        'manual=${progress.manuallyMarkedCount} '
+        'total=${progress.totalChaptersCount} '
+        'effectiveRead=${progress.readChaptersCount}');
     await _repository.save(progress);
     state = <String, MangaReadingProgress>{
       ...state,

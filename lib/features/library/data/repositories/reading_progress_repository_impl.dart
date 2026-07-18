@@ -48,6 +48,10 @@ class ReadingProgressRepositoryImpl implements ReadingProgressRepository {
             jsonDecode(raw) as Map<String, dynamic>;
         final MangaReadingProgress progress =
             MangaReadingProgressModel.fromJson(json).toEntity();
+        debugPrint('[ProgressRepo] loaded $key: '
+            'readChapterIds=${progress.readChapterIds.length} '
+            'manual=${progress.manuallyMarkedCount} '
+            'total=${progress.totalChaptersCount}');
         progressByManga[progress.mangaId] = progress;
       } on Object {
         await _prefs.remove(key);
@@ -61,6 +65,11 @@ class ReadingProgressRepositoryImpl implements ReadingProgressRepository {
   Future<void> save(MangaReadingProgress progress) async {
     // Always persist locally first.
     final MangaReadingProgressModel model = progress.toModel();
+    debugPrint('[ProgressRepo] save: '
+        '${progress.mangaId} '
+        'readChapterIds=${progress.readChapterIds.length} '
+        'manual=${progress.manuallyMarkedCount} '
+        'total=${progress.totalChaptersCount}');
     await _prefs.setString(
       '$_prefix${progress.mangaId}',
       jsonEncode(model.toJson()),
