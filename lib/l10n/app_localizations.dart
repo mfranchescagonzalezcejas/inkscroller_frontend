@@ -1448,6 +1448,12 @@ abstract class AppLocalizations {
   /// **'All'**
   String get profileContentRatingAll;
 
+  /// No description provided for @profileBirthDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile with a birth date to change your username.'**
+  String get profileBirthDateRequired;
+
   /// No description provided for @chaptersSortAsc.
   ///
   /// In en, this message translates to:
@@ -1489,6 +1495,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No chapters match the current filter'**
   String get chaptersFilteredOut;
+
+  /// No description provided for @authForgotPasswordLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get authForgotPasswordLink;
+
+  /// No description provided for @authForgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get authForgotPasswordTitle;
+
+  /// No description provided for @authForgotPasswordSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset email'**
+  String get authForgotPasswordSend;
+
+  /// No description provided for @authResetPasswordSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent. Check your inbox.'**
+  String get authResetPasswordSent;
+
+  /// No description provided for @authResetPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get authResetPasswordButton;
+
+  /// No description provided for @authChangeUsernameOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Change username'**
+  String get authChangeUsernameOption;
+
+  /// No description provided for @authChangeUsernameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change username'**
+  String get authChangeUsernameTitle;
+
+  /// No description provided for @authChangeUsernameSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get authChangeUsernameSave;
+
+  /// No description provided for @authChangeUsernameSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Username updated successfully'**
+  String get authChangeUsernameSuccess;
 }
 
 class _AppLocalizationsDelegate

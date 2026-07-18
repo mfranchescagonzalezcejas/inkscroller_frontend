@@ -7,6 +7,7 @@ import '../../domain/entities/app_user.dart';
 import '../../domain/usecases/get_auth_state.dart';
 import '../../domain/usecases/reload_user.dart';
 import '../../domain/usecases/send_email_verification.dart';
+import '../../domain/usecases/send_password_reset.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up.dart';
@@ -78,6 +79,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignOut _signOut;
   final GetAuthState _getAuthState;
   final SendEmailVerification _sendEmailVerification;
+  final SendPasswordReset _sendPasswordReset;
   final ReloadUser _reloadUser;
   final GetUserProfile _getUserProfile;
   final UpdateUserProfile _updateUserProfile;
@@ -94,6 +96,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required SignOut signOut,
     required GetAuthState getAuthState,
     required SendEmailVerification sendEmailVerification,
+    required SendPasswordReset sendPasswordReset,
     required ReloadUser reloadUser,
     required GetUserProfile getUserProfile,
     required UpdateUserProfile updateUserProfile,
@@ -104,6 +107,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
        _signOut = signOut,
        _getAuthState = getAuthState,
        _sendEmailVerification = sendEmailVerification,
+       _sendPasswordReset = sendPasswordReset,
        _reloadUser = reloadUser,
        _getUserProfile = getUserProfile,
        _updateUserProfile = updateUserProfile,
@@ -125,9 +129,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
           clearUser: user == null,
           clearError: true,
           isLoading: state.registrationInProgress && state.isLoading,
-          // Preserve emailVerificationSent across auth state changes so the
-          // login page still shows the verification banner after signOut.
+          // Preserve verification/reset sent flags across auth state changes so
+          // the login page still shows the banner after signOut.
           emailVerificationSent: state.emailVerificationSent,
+          passwordResetSent: state.passwordResetSent,
         );
         _checkProfileCompletionIfNeeded(user);
       },
@@ -400,6 +405,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         profileCompletionPending: false,
         registrationInProgress: false,
         clearLastVerificationSentAt: true,
+        clearPasswordResetSent: true,
       ),
     );
   }
@@ -428,6 +434,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       },
     );
+  }
+
+  /// Sends a password reset email to [email].
+  Future<void> resetPassword(String email) async {
+    if (kDebugMode) debugPrint('[AUTH] resetPassword');
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _sendPasswordReset(email: email);
+
+    result.fold(
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] resetPassword FAILED: ${failure.message}');
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (_) {
+        if (kDebugMode) debugPrint('[AUTH] resetPassword SUCCESS');
+        state = state.copyWith(
+          isLoading: false,
+          passwordResetSent: true,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  /// Clears the password reset sent flag.
+  void clearPasswordResetSent() {
+    state = state.copyWith(clearPasswordResetSent: true);
   }
 
   /// Reloads the current user and checks if email is verified.

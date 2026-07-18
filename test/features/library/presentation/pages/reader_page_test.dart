@@ -17,6 +17,7 @@ import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart'
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/send_email_verification.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_password_reset.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
@@ -63,6 +64,8 @@ class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
 class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
 
+class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
+
 class _MockReloadUser extends Mock implements ReloadUser {}
 
 class _FakeUrlLauncher extends UrlLauncherPlatform {
@@ -101,6 +104,7 @@ AuthNotifier _makeStubAuthNotifier() {
     signOut: _MockSignOut(),
     getAuthState: getAuthState,
     sendEmailVerification: _MockSendEmailVerification(),
+    sendPasswordReset: _MockSendPasswordReset(),
     reloadUser: _MockReloadUser(),
     getUserProfile: _MockGetUserProfile(),
     updateUserProfile: _MockUpdateUserProfile(),

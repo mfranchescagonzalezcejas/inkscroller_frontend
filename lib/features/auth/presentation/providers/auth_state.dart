@@ -25,6 +25,9 @@ class AuthState {
   /// True after a verification email has been sent to the user.
   final bool emailVerificationSent;
 
+  /// True after a password reset email has been sent successfully.
+  final bool passwordResetSent;
+
   /// [DateTime.now().millisecondsSinceEpoch] when the last verification email
   /// was sent. Used to enforce a 60-second cooldown on the resend button.
   final int? lastVerificationSentAt;
@@ -45,6 +48,7 @@ class AuthState {
     this.profileCompletionPending = false,
     this.registrationInProgress = false,
     this.emailVerificationSent = false,
+    this.passwordResetSent = false,
     this.lastVerificationSentAt,
   });
 
@@ -64,10 +68,12 @@ class AuthState {
     bool? profileCompletionPending,
     bool? registrationInProgress,
     bool? emailVerificationSent,
+    bool? passwordResetSent,
     int? lastVerificationSentAt,
     bool clearUser = false,
     bool clearError = false,
     bool clearLastVerificationSentAt = false,
+    bool clearPasswordResetSent = false,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -82,6 +88,8 @@ class AuthState {
       emailVerificationSent:
           emailVerificationSent ??
               (!clearUser && this.emailVerificationSent),
+      passwordResetSent:
+          passwordResetSent ?? (!clearPasswordResetSent && this.passwordResetSent),
       lastVerificationSentAt:
           clearLastVerificationSentAt
               ? null

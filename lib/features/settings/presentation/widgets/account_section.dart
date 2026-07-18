@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/design_tokens.dart' show AppColors;
+import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../auth/presentation/auth_error_text.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/delete_account_dialog.dart';
 
@@ -43,6 +45,12 @@ class AccountSection extends ConsumerWidget {
                 value: email,
               ),
               const Divider(height: 1, color: AppColors.outlineVariant),
+              _ActionRow(
+                icon: Icons.lock_reset_outlined,
+                label: l10n.authResetPasswordButton,
+                onTap: () => _resetPassword(context, ref, email),
+              ),
+              const Divider(height: 1, color: AppColors.outlineVariant),
               _DangerButton(
                 key: const Key('deleteAccountButton'),
                 label: l10n.deleteAccountTitle,
@@ -72,6 +80,28 @@ class AccountSection extends ConsumerWidget {
         });
       }
     });
+  }
+
+  Future<void> _resetPassword(
+    BuildContext context,
+    WidgetRef ref,
+    String email,
+  ) async {
+    await ref.read(authProvider.notifier).resetPassword(email);
+    if (!context.mounted) return;
+    final state = ref.read(authProvider);
+    if (state.error != null) {
+      AppFeedback.showError(
+        context,
+        title: authErrorText(context, state.error),
+      );
+    } else if (state.passwordResetSent) {
+      AppFeedback.showSuccess(
+        context,
+        title: context.l10n.authResetPasswordSent,
+      );
+      ref.read(authProvider.notifier).clearPasswordResetSent();
+    }
   }
 }
 
@@ -187,6 +217,54 @@ class _DangerButton extends StatelessWidget {
                 color: AppColors.danger,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.cardHighest,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 20, color: AppColors.primary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: 14,
+                  color: AppColors.onSurface,
+                ),
+              ),
+            ),
+            const Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
           ],
         ),
       ),

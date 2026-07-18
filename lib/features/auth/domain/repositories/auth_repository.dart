@@ -47,4 +47,9 @@ abstract class AuthRepository {
 
   /// Reloads the current Firebase user and returns the updated [AppUser].
   Future<Either<Failure, AppUser>> reloadUser();
+
+  /// Sends a password reset email to [email].
+  ///
+  /// Returns [Right(null)] on success or [Left(Failure)] on failure.
+  Future<Either<Failure, void>> sendPasswordReset({required String email});
 }

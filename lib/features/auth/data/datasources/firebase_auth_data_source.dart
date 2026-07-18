@@ -28,6 +28,9 @@ abstract class FirebaseAuthDataSource {
 
   /// Reloads the current Firebase user and returns the updated [AppUser].
   Future<AppUser> reloadUser();
+
+  /// Sends a password reset email to [email].
+  Future<void> sendPasswordResetEmail({required String email});
 }
 
 /// Concrete implementation wrapping [FirebaseAuth].
@@ -153,6 +156,15 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
         );
       }
       return _mapUserStrict(refreshed);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
       throw _mapFirebaseException(e);
     }

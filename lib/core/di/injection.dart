@@ -10,6 +10,7 @@ import '../../features/auth/domain/usecases/get_auth_state.dart';
 import '../../features/auth/domain/usecases/get_id_token.dart';
 import '../../features/auth/domain/usecases/reload_user.dart';
 import '../../features/auth/domain/usecases/send_email_verification.dart';
+import '../../features/auth/domain/usecases/send_password_reset.dart';
 import '../../features/auth/domain/usecases/sign_in.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/sign_up.dart';
@@ -110,6 +111,9 @@ Future<void> initDI() async {
   _registerIfAbsent<GetIdToken>(() => GetIdToken(sl<AuthRepository>()));
   _registerIfAbsent<SendEmailVerification>(
     () => SendEmailVerification(sl<AuthRepository>()),
+  );
+  _registerIfAbsent<SendPasswordReset>(
+    () => SendPasswordReset(sl<AuthRepository>()),
   );
   _registerIfAbsent<ReloadUser>(
     () => ReloadUser(sl<AuthRepository>()),

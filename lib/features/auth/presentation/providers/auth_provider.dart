@@ -6,6 +6,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../domain/usecases/get_auth_state.dart';
 import '../../domain/usecases/reload_user.dart';
 import '../../domain/usecases/send_email_verification.dart';
+import '../../domain/usecases/send_password_reset.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up.dart';
@@ -25,6 +26,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     signOut: sl<SignOut>(),
     getAuthState: sl<GetAuthState>(),
     sendEmailVerification: sl<SendEmailVerification>(),
+    sendPasswordReset: sl<SendPasswordReset>(),
     reloadUser: sl<ReloadUser>(),
     getUserProfile: sl<GetUserProfile>(),
     updateUserProfile: sl<UpdateUserProfile>(),

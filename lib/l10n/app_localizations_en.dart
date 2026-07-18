@@ -765,6 +765,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileContentRatingAll => 'All';
 
   @override
+  String get profileBirthDateRequired =>
+      'Complete your profile with a birth date to change your username.';
+
+  @override
   String get chaptersSortAsc => 'Number ↑';
 
   @override
@@ -784,4 +788,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chaptersFilteredOut => 'No chapters match the current filter';
+
+  @override
+  String get authForgotPasswordLink => 'Forgot your password?';
+
+  @override
+  String get authForgotPasswordTitle => 'Reset your password';
+
+  @override
+  String get authForgotPasswordSend => 'Send reset email';
+
+  @override
+  String get authResetPasswordSent =>
+      'Password reset email sent. Check your inbox.';
+
+  @override
+  String get authResetPasswordButton => 'Reset password';
+
+  @override
+  String get authChangeUsernameOption => 'Change username';
+
+  @override
+  String get authChangeUsernameTitle => 'Change username';
+
+  @override
+  String get authChangeUsernameSave => 'Save';
+
+  @override
+  String get authChangeUsernameSuccess => 'Username updated successfully';
 }
