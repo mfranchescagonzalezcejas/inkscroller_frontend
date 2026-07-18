@@ -133,18 +133,96 @@ void main() {
     expect(prefs.getString('cached_user_reading_preferences'), isNull);
   });
 
-  // ── clearCache ────────────────────────────────────────────────────────────
+  // ── guest-scoped keys ─────────────────────────────────────────────────────
 
-  test('clearCache removes both preferences and timestamp', () async {
+  test('guest savePreferences writes to guest_-prefixed keys', () async {
+    await dataSource.savePreferences(samplePrefs, isGuest: true);
+
+    // Guest data lives under guest_-prefixed keys, not the normal keys.
+    expect(prefs.getString('cached_user_reading_preferences'), isNull);
+    expect(prefs.getInt('cached_preferences_timestamp'), isNull);
+    expect(prefs.getString('guest_cached_user_reading_preferences'), isNotNull);
+    expect(prefs.getInt('guest_cached_preferences_timestamp'), isNotNull);
+  });
+
+  test('guest getCachedPreferences reads from guest_-prefixed keys', () async {
+    // Seed guest key with data.
+    await dataSource.savePreferences(samplePrefs, isGuest: true);
+
+    final result = await dataSource.getCachedPreferences(isGuest: true);
+
+    expect(result, isNotNull);
+    expect(result!.defaultReaderMode, ReaderMode.paged);
+    expect(result.defaultLanguage, 'es');
+  });
+
+  test('guest and authenticated keys are independent', () async {
+    final guestPrefs = UserReadingPreferences(
+      defaultReaderMode: ReaderMode.vertical,
+      defaultLanguage: 'ja',
+      updatedAt: DateTime(2026, 7),
+    );
+
+    await dataSource.savePreferences(guestPrefs, isGuest: true);
     await dataSource.savePreferences(samplePrefs);
 
-    // Verify data exists.
+    final guestResult = await dataSource.getCachedPreferences(isGuest: true);
+    final authResult = await dataSource.getCachedPreferences();
+
+    expect(guestResult!.defaultReaderMode, ReaderMode.vertical);
+    expect(authResult!.defaultReaderMode, ReaderMode.paged);
+  });
+
+  test('guest getCachedPreferences returns defaults on cache miss', () async {
+    final result = await dataSource.getCachedPreferences(isGuest: true);
+
+    expect(result, isNotNull);
+    expect(result!.defaultReaderMode, ReaderMode.vertical);
+    expect(result.defaultLanguage, isNotEmpty);
+    expect(result.contentRatingFilter, ContentRating.safe);
+    expect(
+      result.demographicFilter,
+      const <MangaDemographic>[MangaDemographic.shounen, MangaDemographic.shoujo],
+    );
+  });
+
+  test('clearCache with isGuest removes guest_-prefixed keys only', () async {
+    await dataSource.savePreferences(samplePrefs, isGuest: true);
+    await dataSource.savePreferences(samplePrefs);
+    expect(
+      prefs.getString('guest_cached_user_reading_preferences'),
+      isNotNull,
+    );
     expect(prefs.getString('cached_user_reading_preferences'), isNotNull);
-    expect(prefs.getInt('cached_preferences_timestamp'), isNotNull);
+
+    await dataSource.clearCache(isGuest: true);
+
+    // Guest keys removed.
+    expect(
+      prefs.getString('guest_cached_user_reading_preferences'),
+      isNull,
+    );
+    expect(
+      prefs.getInt('guest_cached_preferences_timestamp'),
+      isNull,
+    );
+    // Authenticated keys untouched.
+    expect(prefs.getString('cached_user_reading_preferences'), isNotNull);
+  });
+
+  test('clearCache removes authenticated keys without affecting guest keys',
+      () async {
+    await dataSource.savePreferences(samplePrefs);
+    await dataSource.savePreferences(samplePrefs, isGuest: true);
 
     await dataSource.clearCache();
 
     expect(prefs.getString('cached_user_reading_preferences'), isNull);
     expect(prefs.getInt('cached_preferences_timestamp'), isNull);
+    // Guest keys untouched.
+    expect(
+      prefs.getString('guest_cached_user_reading_preferences'),
+      isNotNull,
+    );
   });
 }

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -20,14 +21,31 @@ import '../datasources/preferences_remote_ds.dart';
 class PreferencesRepositoryImpl implements PreferencesRepository {
   final PreferencesRemoteDataSource remoteDataSource;
   final PreferencesLocalDataSource localDataSource;
+  final FirebaseAuth firebaseAuth;
 
   const PreferencesRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.firebaseAuth,
   });
+
+  /// True when the user is null or unverified — both should be local-only.
+  /// The backend returns 403 for unverified users on /users/me/* endpoints.
+  bool get _isLocalOnly {
+    final user = firebaseAuth.currentUser;
+    return user == null || !user.emailVerified;
+  }
 
   @override
   Future<Either<Failure, UserReadingPreferences>> getPreferences() async {
+    final localOnly = _isLocalOnly;
+
+    if (localOnly) {
+      final cached = await localDataSource.getCachedPreferences(isGuest: true);
+      if (cached != null) return Right(cached);
+      return const Left(CacheFailure(message: 'No guest preferences'));
+    }
+
     // Try remote first for fresh data.
     final remoteResult = await _getFromRemote();
 
@@ -64,8 +82,10 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     String? contentRatingFilter,
     List<String>? demographicFilter,
   }) async {
+    final localOnly = _isLocalOnly;
+
     // Read current cached preferences to preserve fields we're not updating.
-    final cached = await localDataSource.getCachedPreferences();
+    final cached = await localDataSource.getCachedPreferences(isGuest: localOnly);
 
     // Determine effective values: new value > cached value > default.
     final effectiveReaderMode = ReaderMode.values.byName(
@@ -94,7 +114,11 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     );
 
     // Optimistic write: persist to local immediately.
-    await localDataSource.savePreferences(optimistic);
+    await localDataSource.savePreferences(optimistic, isGuest: localOnly);
+
+    if (localOnly) {
+      return Right(optimistic);
+    }
 
     // Attempt remote sync in background. If it succeeds, update local with
     // the server's response (authoritative timestamp). If it fails, local

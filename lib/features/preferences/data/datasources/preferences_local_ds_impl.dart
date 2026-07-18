@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,21 +21,32 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
 
   static const String _prefsKey = 'cached_user_reading_preferences';
   static const String _timestampKey = 'cached_preferences_timestamp';
+  static const String _guestPrefix = 'guest_';
+
+  String _keyFor(String base, bool isGuest) =>
+      isGuest ? '$_guestPrefix$base' : base;
 
   @override
-  Future<UserReadingPreferences?> getCachedPreferences() async {
-    final timestamp = prefs.getInt(_timestampKey);
-    if (timestamp == null) return null;
-
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final age = now - timestamp;
-    if (age > AppConstants.mangaDetailCacheTtlMinutes * 60 * 1000) {
-      await clearCache();
-      return null;
+  Future<UserReadingPreferences?> getCachedPreferences({
+    bool isGuest = false,
+  }) async {
+    final timestamp = prefs.getInt(_keyFor(_timestampKey, isGuest));
+    if (timestamp == null) {
+      return isGuest ? _guestDefaults() : null;
     }
 
-    final json = prefs.getString(_prefsKey);
-    if (json == null) return null;
+    // Guest preferences never expire — they persist until explicitly cleared.
+    if (!isGuest) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final age = now - timestamp;
+      if (age > AppConstants.mangaDetailCacheTtlMinutes * 60 * 1000) {
+        await clearCache();
+        return null;
+      }
+    }
+
+    final json = prefs.getString(_keyFor(_prefsKey, isGuest));
+    if (json == null) return isGuest ? _guestDefaults() : null;
 
     try {
       final data = jsonDecode(json) as Map<String, dynamic>;
@@ -59,13 +71,16 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
         updatedAt: DateTime.parse(data['updatedAt'] as String),
       );
     } on Object {
-      await clearCache();
-      return null;
+      await clearCache(isGuest: isGuest);
+      return isGuest ? _guestDefaults() : null;
     }
   }
 
   @override
-  Future<void> savePreferences(UserReadingPreferences preferences) async {
+  Future<void> savePreferences(
+    UserReadingPreferences preferences, {
+    bool isGuest = false,
+  }) async {
     final json = jsonEncode({
       'defaultReaderMode': preferences.defaultReaderMode.name,
       'defaultLanguage': preferences.defaultLanguage,
@@ -78,13 +93,40 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       'updatedAt': preferences.updatedAt.toIso8601String(),
     });
 
-    await prefs.setString(_prefsKey, json);
-    await prefs.setInt(_timestampKey, DateTime.now().millisecondsSinceEpoch);
+    await prefs.setString(_keyFor(_prefsKey, isGuest), json);
+    await prefs.setInt(
+      _keyFor(_timestampKey, isGuest),
+      DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   @override
-  Future<void> clearCache() async {
-    await prefs.remove(_prefsKey);
-    await prefs.remove(_timestampKey);
+  Future<void> clearCache({bool isGuest = false}) async {
+    final key = _keyFor(_prefsKey, isGuest);
+    final tsKey = _keyFor(_timestampKey, isGuest);
+    await prefs.remove(key);
+    await prefs.remove(tsKey);
+  }
+
+  /// Maps a platform locale string to a supported reading language code.
+  /// Defaults to 'en' when the locale is unrecognised.
+  String _normalizeLanguage(String raw) {
+    final code = raw.split('_').first.split('-').first.toLowerCase();
+    const supported = {'en', 'es', 'pt', 'fr', 'de', 'it', 'ja', 'ko', 'zh'};
+    return supported.contains(code) ? code : 'en';
+  }
+
+  /// Returns device-locale defaults for a first-time guest load.
+  UserReadingPreferences _guestDefaults() {
+    return UserReadingPreferences(
+      defaultReaderMode: ReaderMode.vertical,
+      defaultLanguage: _normalizeLanguage(Platform.localeName),
+      contentRatingFilter: ContentRating.safe,
+      demographicFilter: const [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ],
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
   }
 }

@@ -62,13 +62,13 @@ void main() {
 
     // ── Guest on protected routes ───────────────────────────────────────────
 
-    test('P0-F7: guest is redirected to /login when accessing /profile', () {
+    test('guest can access /profile without redirect', () {
       expect(
         resolveAuthRedirect(
           currentUser: null,
           matchedLocation: AppRoutes.profile,
         ),
-        AppRoutes.login,
+        isNull,
       );
     });
 

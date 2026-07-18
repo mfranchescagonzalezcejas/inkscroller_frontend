@@ -220,6 +220,7 @@ Future<void> initDI() async {
     () => PreferencesRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      firebaseAuth: sl<FirebaseAuth>(),
     ),
   );
 

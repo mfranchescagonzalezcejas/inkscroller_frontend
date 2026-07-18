@@ -65,6 +65,23 @@ class PreferencesNotifier extends StateNotifier<PreferencesState> {
     state = state.copyWith(clearError: true);
   }
 
+  /// Syncs current guest preferences to the remote backend.
+  ///
+  /// Called when auth transitions from guest → verified. Pushes the local
+  /// guest preferences to the server using a guest-wins merge strategy.
+  Future<void> syncGuestPreferencesToRemote() async {
+    final prefs = state.preferences;
+    if (prefs == null) return;
+
+    await updatePreferences(
+      defaultReaderMode: prefs.defaultReaderMode.name,
+      defaultLanguage: prefs.defaultLanguage,
+      contentRatingFilter: prefs.contentRatingFilter?.wireValue,
+      demographicFilter:
+          prefs.demographicFilter?.map((d) => d.toJson()).toList(),
+    );
+  }
+
   /// Clears all cached preferences — called when the user signs out.
   void clearPreferences() {
     state = const PreferencesState();

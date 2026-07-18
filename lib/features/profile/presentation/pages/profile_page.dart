@@ -76,27 +76,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final contentRatingResolution = ref.watch(contentRatingResolutionProvider);
     final demographicResolution = ref.watch(demographicResolutionProvider);
 
-    // Skip data loading for unverified users — the backend returns 403.
-    final shouldLoad = authState.user != null && authState.needsEmailVerification == false;
+    // Skip profile loading for unverified users — the backend returns 403.
+    // But always load preferences (guests need them too).
+    final isGuest = authState.user == null;
+    final shouldLoadProfile =
+        authState.user != null && authState.needsEmailVerification == false;
+    final shouldLoadPreferences = !preferencesState.isLoading &&
+        preferencesState.preferences == null;
 
-    if (shouldLoad && !_profileRequested) {
+    if (shouldLoadProfile && !_profileRequested) {
       _profileRequested = true;
       Future<void>.microtask(
         () => ref.read(userProfileProvider.notifier).loadProfile(),
       );
     }
 
-    if (shouldLoad &&
-        !_preferencesRequested &&
-        !preferencesState.isLoading &&
-        preferencesState.preferences == null) {
+    if (shouldLoadPreferences && !_preferencesRequested) {
       _preferencesRequested = true;
       Future<void>.microtask(
         () => ref.read(preferencesProvider.notifier).loadPreferences(),
       );
     }
 
-    if (authState.user == null) {
+    if (isGuest) {
       _profileRequested = false;
       _preferencesRequested = false;
       _selectedReaderMode = null;
@@ -129,8 +131,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ),
       body: SafeArea(
-        child: authState.user == null
-            ? _buildGuestView(context)
+        child: isGuest
+            ? _buildGuestView(
+                context,
+                preferencesState,
+              )
             : _buildAuthenticatedView(
                 context,
                 authState,
@@ -143,10 +148,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildGuestView(BuildContext context) {
+  Widget _buildGuestView(
+    BuildContext context,
+    PreferencesState preferencesState,
+  ) {
+    final prefs = preferencesState.preferences;
+    final appLocale = ref.watch(appLocaleProvider);
+    final effectiveReaderMode =
+        _selectedReaderMode ?? prefs?.defaultReaderMode ?? ReaderMode.vertical;
+    final effectiveReadingLanguage =
+        _selectedReadingLanguage ?? prefs?.defaultLanguage ?? AppConstants.defaultLanguage;
+    final effectiveAppLanguage =
+        appLocale?.languageCode ?? Localizations.localeOf(context).languageCode;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
       children: <Widget>[
+        // ── Guest header ──────────────────────────────────────────────────
         Container(
           decoration: BoxDecoration(
             color: AppColors.card,
@@ -176,23 +194,75 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.voidLowest,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: () => context.go(AppRoutes.login),
-                  child: Text(context.l10n.profileGuestCta),
-                ),
-              ),
             ],
+          ),
+        ),
+
+        // ── Preferences section ───────────────────────────────────────────
+        const SizedBox(height: 20),
+        _SectionLabel(label: context.l10n.profileReadingPreferencesSection),
+        const SizedBox(height: 8),
+        _PrefCard(
+          children: <Widget>[
+            _PrefRow(
+              icon: Icons.menu_book_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profileReadingModeTitle,
+              value: effectiveReaderMode == ReaderMode.vertical
+                  ? context.l10n.profileReadingModeVertical
+                  : context.l10n.profileReadingModePaged,
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showReaderModeDialog(
+                      context,
+                      effectiveReaderMode,
+                      prefs,
+                    ),
+            ),
+            _PrefRow(
+              icon: Icons.translate_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profilePreferredAppLanguageTitle,
+              value:
+                  _languageLabels[effectiveAppLanguage] ??
+                  effectiveAppLanguage.toUpperCase(),
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showAppLanguageDialog(context, effectiveAppLanguage),
+            ),
+            _PrefRow(
+              icon: Icons.language_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profilePreferredReadingLanguageTitle,
+              value:
+                  _languageLabels[effectiveReadingLanguage] ??
+                  effectiveReadingLanguage.toUpperCase(),
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showReadingLanguageDialog(
+                      context,
+                      effectiveReadingLanguage,
+                      prefs,
+                    ),
+            ),
+          ],
+        ),
+
+        // ── Sign In button ────────────────────────────────────────────────
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.voidLowest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            onPressed: () => context.go(AppRoutes.login),
+            child: Text(context.l10n.authSignInButton),
           ),
         ),
       ],
