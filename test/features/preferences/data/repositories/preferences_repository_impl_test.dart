@@ -236,9 +236,6 @@ void main() {
     when(() => localDataSource.getCachedPreferences())
         .thenAnswer((_) async => localPrefs);
     when(
-      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async {});
-    when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
