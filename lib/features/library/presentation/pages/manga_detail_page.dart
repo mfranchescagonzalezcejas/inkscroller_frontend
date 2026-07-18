@@ -152,8 +152,14 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool showTracking = hasMalId && hasTotal;
     final bool showBatches = showTracking && hasMdChapters;
     final bool showNothing = !showTracking && !hasMdChapters;
+    // Batch mode is disabled when the unread-only filter is active: the
+    // filter hides read chapters, but batches always show the full range
+    // (with placeholders). The flat list hides read chapters entirely.
+    final bool isFilteringUnread = state.filterUnreadOnly;
     final bool useBatchList =
-        showBatches && progress.totalChaptersCount > progress.batchSize;
+        showBatches &&
+        progress.totalChaptersCount > progress.batchSize &&
+        !isFilteringUnread;
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
@@ -309,6 +315,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   SliverToBoxAdapter(
                     child: ChapterBatchList(
                       mangaId: widget.manga.id,
+                      descending: state.sortDescending,
                       batches: computeChapterBatches(
                         chapters: displayChapters,
                         totalChaptersCount: progress.totalChaptersCount,

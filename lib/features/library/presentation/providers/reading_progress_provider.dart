@@ -42,6 +42,17 @@ class ReadingProgressNotifier
     await _save(next);
   }
 
+  /// Sets [MangaReadingProgress.manuallyMarkedCount] to an exact [count],
+  /// clamped so it never drops below [MangaReadingProgress.readChapterIds.length].
+  Future<void> setManuallyMarkedCountTo(String mangaId, int count) async {
+    final current = progressFor(mangaId);
+    final floor = current.readChapterIds.length;
+    final nextCount = count < floor ? floor : count;
+    final next = current.copyWith(manuallyMarkedCount: nextCount);
+    if (next == current) return;
+    await _save(next);
+  }
+
   /// Sets the batch size for the batching UI on this manga.
   Future<void> setBatchSize(String mangaId, int batchSize) async {
     final current = progressFor(mangaId);

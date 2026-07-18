@@ -21,12 +21,14 @@ class ChapterBatchList extends ConsumerWidget {
     required this.mangaId,
     required this.batches,
     required this.onChapterTap,
+    this.descending = false,
     this.scrollController,
   });
 
   final String mangaId;
   final List<ChapterBatch> batches;
   final void Function(Chapter chapter) onChapterTap;
+  final bool descending;
   final ScrollController? scrollController;
 
   @override
@@ -37,13 +39,15 @@ class ChapterBatchList extends ConsumerWidget {
       ),
     );
 
+    final displayBatches = descending ? batches.reversed.toList() : batches;
+
     return ListView.builder(
       controller: scrollController,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: batches.length,
+      itemCount: displayBatches.length,
       itemBuilder: (context, batchIndex) {
-        final batch = batches[batchIndex];
+        final batch = displayBatches[batchIndex];
         return _BatchExpansionTile(
           batch: batch,
           progress: progress,
@@ -172,12 +176,19 @@ class _PlaceholderTile extends ConsumerWidget {
               : AppColors.onSurfaceVariant,
         ),
         onPressed: () {
-          // Mark as read up to this chapter number
-          final delta = chapterNumber - manualCount;
-          if (delta > 0) {
+          if (isChecked) {
+            // Unmark: set count just below this chapter number
             ref
                 .read(readingProgressProvider.notifier)
-                .updateManuallyMarkedCount(mangaId, delta);
+                .setManuallyMarkedCountTo(mangaId, chapterNumber - 1);
+          } else {
+            // Mark: ensure count reaches this chapter number
+            final delta = chapterNumber - manualCount;
+            if (delta > 0) {
+              ref
+                  .read(readingProgressProvider.notifier)
+                  .updateManuallyMarkedCount(mangaId, delta);
+            }
           }
         },
         tooltip: context.l10n.placeholderMarkRead,
