@@ -86,7 +86,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   int _searchQueryVersion = 0;
 
   /// Maximum age for a cache entry to be considered fresh.
-  static const Duration _cacheTtl = Duration(minutes: 5);
+  static const Duration _cacheTtl = Duration(minutes: AppConstants.tabCacheTtlMinutes);
 
   /// Shared cache for genre tabs — static so sibling [LibraryNotifier]
   /// instances (Home and Explore) reuse each other's cached pages instead
