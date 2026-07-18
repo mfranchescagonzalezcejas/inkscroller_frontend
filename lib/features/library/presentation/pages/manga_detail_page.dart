@@ -1,3 +1,6 @@
+import 'dart:ui' as ui;
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,11 +9,10 @@ import 'package:inkscroller_flutter/core/network/connectivity_status_provider.da
 import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/core/widgets/offline_banner.dart';
-import 'package:inkscroller_flutter/features/library/presentation/widgets/cover_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart'
-    show AppColors, AppSpacing, AppTypography;
+    show AppColors, AppTypography;
 import '../../../../core/error/failures.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
@@ -172,8 +174,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
-      appBar: _DetailTopBar(manga: widget.manga),
-      body: Column(
+      body: Stack(
+        children: <Widget>[
+          Column(
         children: <Widget>[
           if (isOffline) const OfflineBanner(),
           Expanded(
@@ -188,43 +191,23 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                 // ── Title + Meta ──────────────────────────────────
                 SliverToBoxAdapter(child: _TitleArea(manga: widget.manga)),
 
-                // ── CTA button ────────────────────────────────────
-                // Only show when there are readable MangaDex chapters.
-                // Solo-tracking state (hasTotal but no MD chapters) hides the CTA.
-                if (hasMdChapters)
+                // ── Description section ───────────────────────────
+                if (widget.manga.description != null &&
+                    widget.manga.description!.isNotEmpty)
                   SliverToBoxAdapter(
-                    child: _CtaButton(
-                      label: context.l10n.readNow.toUpperCase(),
-                      onTap: () {
-                        // Prefer the first visible chapter so the CTA honors
-                        // the user's active sort/filter. Fall back to the
-                        // unfiltered list only when the filter leaves nothing
-                        // visible — this avoids a silent no-op when, e.g.,
-                        // the unread-only filter hides every chapter because
-                        // the user is fully caught up.
-                        final first = displayChapters.isNotEmpty
-                            ? displayChapters.first
-                            : state.chapters.firstOrNull;
-                        if (first != null) {
-                          context.push(
-                            AppRoutes.readerPath(
-                              mangaId: widget.manga.id,
-                              chapterId: first.id,
-                            ),
-                            extra: first,
-                          );
-                        }
-                      },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                      child: Text(
+                        widget.manga.description!,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 14,
+                          height: 1.5,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   ),
-
-                // ── Per-title reader mode override ────────────────
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
-                    child: _ReaderModeOverride(),
-                  ),
-                ),
 
                 // ── Reading progress section (tracking states) ────
                 if (showTracking)
@@ -251,7 +234,6 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                       child: _ChaptersHeader(
-                        count: state.chapters.length,
                         progress: progress,
                         mangaId: widget.manga.id,
                         showLanguageSelector: hasMdChapters,
@@ -334,9 +316,10 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     child: ChapterBatchList(
                       mangaId: widget.manga.id,
                       descending: state.sortDescending,
+                      hiddenChapterIds: state.filterUnreadOnly
+                          ? progress.readChapterIds
+                          : null,
                       batches: computeChapterBatches(
-                        // Use full chapter list for correct batch positioning.
-                        // Read/unread filter is visual via ChapterTile isRead.
                         chapters: state.chapters,
                         totalChaptersCount: progress.totalChaptersCount,
                         batchSize: progress.batchSize,
@@ -440,14 +423,18 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     }, childCount: displayChapters.length),
                   ),
 
-                // safe bottom padding for floating nav
                 const SliverToBoxAdapter(child: SizedBox(height: 120)),
               ],
             ),
           ),
         ],
       ),
-    );
+
+      // ── Floating top buttons ──────────────────────────────
+      _FloatingTopButtons(manga: widget.manga),
+    ],
+  ),
+);
   }
 
   Future<void> _handleChapterTap(
@@ -615,15 +602,12 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
   }
 }
 
-// ── TopBar ────────────────────────────────────────────────────────────────────
+// ── Floating Top Buttons ─────────────────────────────────────────────────────
 
-class _DetailTopBar extends ConsumerWidget implements PreferredSizeWidget {
+class _FloatingTopButtons extends ConsumerWidget {
   final Manga manga;
 
-  const _DetailTopBar({required this.manga});
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  const _FloatingTopButtons({required this.manga});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -633,110 +617,232 @@ class _DetailTopBar extends ConsumerWidget implements PreferredSizeWidget {
       ),
     );
 
-    return AppBar(
-      backgroundColor: AppColors.stage,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      leading: IconButton(
-        onPressed: () => context.pop(),
-        icon: const Icon(
-          Icons.arrow_back,
-          color: AppColors.onSurface,
-          size: 24,
-        ),
-      ),
-      title: Text(
-        manga.title,
-        style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.onSurface,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      actions: <Widget>[
-        IconButton(
-          onPressed: () async {
-            final bool nowInLibrary = await ref
-                .read(userLibraryProvider.notifier)
-                .toggle(manga);
-            if (!context.mounted) {
-              return;
-            }
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 4,
+      left: 0,
+      right: 0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            // Back button
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: Material(
+                color: AppColors.voidLowest.withValues(alpha: 0.6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => context.pop(),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: AppColors.onSurface,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+            // Bookmark toggle
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: Material(
+                color: AppColors.voidLowest.withValues(alpha: 0.6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    final bool nowInLibrary = await ref
+                        .read(userLibraryProvider.notifier)
+                        .toggle(manga);
+                    if (!context.mounted) return;
 
-            if (nowInLibrary) {
-              AppFeedback.showSuccess(
-                context,
-                title: context.l10n.libraryItemAdded(manga.title),
-              );
-            } else {
-              AppFeedback.showInfo(
-                context,
-                title: context.l10n.libraryItemRemoved(manga.title),
-              );
-            }
-          },
-          icon: Icon(
-            isInLibrary ? Icons.bookmark : Icons.bookmark_border,
-            color: AppColors.onSurface,
-            size: 24,
-          ),
+                    if (nowInLibrary) {
+                      AppFeedback.showSuccess(
+                        context,
+                        title: context.l10n.libraryItemAdded(manga.title),
+                      );
+                    } else {
+                      AppFeedback.showInfo(
+                        context,
+                        title: context.l10n.libraryItemRemoved(manga.title),
+                      );
+                    }
+                  },
+                  child: Icon(
+                    isInLibrary ? Icons.bookmark : Icons.bookmark_border,
+                    color: AppColors.onSurface,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
+  }
+}
+
+// ── Cover Aspect Ratio Classification ─────────────────────────────────────────
+
+/// Classifies an image by its width/height ratio.
+enum _CoverRatio {
+  portrait,
+  landscape,
+  square;
+
+  static _CoverRatio fromSize(Size size) {
+    final ratio = size.width / size.height;
+    if (ratio > 1.15) return landscape;
+    if (ratio < 0.85) return portrait;
+    return square;
   }
 }
 
 // ── Cover Section ─────────────────────────────────────────────────────────────
 
-class _CoverSection extends StatelessWidget {
+class _CoverSection extends StatefulWidget {
   final Manga manga;
 
   const _CoverSection({required this.manga});
 
   @override
+  State<_CoverSection> createState() => _CoverSectionState();
+}
+
+class _CoverSectionState extends State<_CoverSection> {
+  _CoverRatio _ratio = _CoverRatio.square;
+  ImageStream? _imageStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageListener = ImageStreamListener(_onImageInfo, onError: _onImageError);
+    // Resuelve la imagen ANTES del primer frame. Si está en cache,
+    // _onImageInfo se llama síncrono y _ratio queda seteado para el build.
+    _resolveImage();
+  }
+
+  @override
+  void dispose() {
+    _imageStream?.removeListener(_imageListener);
+    super.dispose();
+  }
+
+  late final ImageStreamListener _imageListener;
+
+  void _onImageInfo(ImageInfo info, bool sync) {
+    final size = Size(
+      info.image.width.toDouble(),
+      info.image.height.toDouble(),
+    );
+    final detected = _CoverRatio.fromSize(size);
+    if (detected != _ratio && mounted) {
+      setState(() => _ratio = detected);
+    }
+  }
+
+  void _onImageError(Object error, StackTrace? stack) {
+    // Silently keep the neutral default on error.
+  }
+
+  void _resolveImage() {
+    final url = widget.manga.coverUrl;
+    if (url == null) return;
+
+    _imageStream?.removeListener(_imageListener);
+    final provider = CachedNetworkImageProvider(url);
+    _imageStream = provider.resolve(ImageConfiguration.empty);
+    _imageStream!.addListener(_imageListener);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 250,
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    // Pick width based on aspect ratio so each format shines.
+    final double coverWidth = switch (_ratio) {
+      _CoverRatio.portrait => (screenWidth * 0.55).clamp(220, 320),
+      _CoverRatio.landscape => (screenWidth * 0.90).clamp(300, 420),
+      _CoverRatio.square => (screenWidth * 0.70).clamp(260, 360),
+    };
+
+    // Pick height based on aspect ratio so each format shines.
+    final double coverHeight = switch (_ratio) {
+      _CoverRatio.portrait => (screenHeight * 0.60),
+      _CoverRatio.landscape => (screenHeight * 0.45),
+      _CoverRatio.square => (screenHeight * 0.60),
+    };
+
+    // ConstrainedBox outside ClipRRect: the cap limits the box, but
+    // ClipRRect wraps the image at its RENDERED size, so corner-radius
+    // clips actual image pixels — not letterbox.
+    final Widget coverImage = ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: coverHeight),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: CachedNetworkImage(
+          imageUrl: widget.manga.coverUrl ?? '',
+          fit: BoxFit.contain,
+          placeholder: (_, __) => const ColoredBox(
+            color: AppColors.card,
+            child: Center(child: Icon(Icons.image, color: AppColors.outline)),
+          ),
+          errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
+        ),
+      ),
+    );
+
+    return Hero(
+      tag: 'cover-${widget.manga.id}',
+      child: SizedBox(
+      height: coverHeight,
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          // Radial gradient background
+          // Blurred cover as background
+          if (widget.manga.coverUrl != null)
+            Positioned.fill(
+              child: ClipRRect(
+                child: ImageFiltered(
+                  imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                  child: CachedNetworkImage(
+                    imageUrl: widget.manga.coverUrl!,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+          // Dark gradient overlay over the blur
           Positioned.fill(
             child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                   colors: <Color>[
-                    Color(0x330F766E), // teal tint centre
-                    Color(0xFF080F10), // void edge
+                    Colors.black.withValues(alpha: 0.6),
+                    AppColors.voidLowest.withValues(alpha: 0.85),
+                    AppColors.voidLowest,
                   ],
                 ),
               ),
             ),
           ),
-          // Cover image with glow shadow
-          Container(
-            width: 140,
-            height: 195,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const <BoxShadow>[
-                BoxShadow(
-                  color: Color(0x660F766E),
-                  blurRadius: 40,
-                  offset: Offset(0, 12),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: CoverImage(url: manga.coverUrl),
-            ),
-          ),
+          // Cover image — natural aspect ratio, rounded corners.
+          SizedBox(width: coverWidth, child: coverImage),
         ],
       ),
+    ),
     );
   }
 }
@@ -828,10 +934,11 @@ class _TitleArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String? scoreStr = manga.score?.toStringAsFixed(1);
-    final String meta = <String>[
+    final List<String> metaParts = <String>[
       if (scoreStr != null) '★ $scoreStr',
-      if (manga.rank != null) '${manga.rank} readers',
-    ].join('  ·  ');
+      if (manga.status != null) _displayStatus(manga.status!),
+      if (manga.demographic != null) manga.demographic!.toUpperCase(),
+    ];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -847,10 +954,10 @@ class _TitleArea extends StatelessWidget {
               color: AppColors.onSurface,
             ),
           ),
-          if (meta.isNotEmpty) ...<Widget>[
+          if (metaParts.isNotEmpty) ...<Widget>[
             const SizedBox(height: 8),
             Text(
-              meta,
+              metaParts.join('  ·  '),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: AppTypography.fontFamily,
@@ -863,65 +970,32 @@ class _TitleArea extends StatelessWidget {
       ),
     );
   }
-}
 
-// ── CTA Button ───────────────────────────────────────────────────────────────
-
-class _CtaButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _CtaButton({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: const LinearGradient(
-              colors: <Color>[Color(0xFF0F766E), Color(0xFF1E40AF)],
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Icon(Icons.play_arrow, color: Colors.white, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: AppTypography.fontFamily,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  String _displayStatus(String status) {
+    // Convert API status (e.g. "FINISHED", "ONGOING", "HIATUS") to display form
+    switch (status.toUpperCase()) {
+      case 'FINISHED':
+        return 'Finalizado';
+      case 'ONGOING':
+        return 'En emisión';
+      case 'HIATUS':
+        return 'En pausa';
+      case 'CANCELLED':
+        return 'Cancelado';
+      default:
+        return status;
+    }
   }
 }
 
 // ── Chapters Header ──────────────────────────────────────────────────────────
 
 class _ChaptersHeader extends ConsumerWidget {
-  final int count;
   final MangaReadingProgress progress;
   final String mangaId;
   final bool showLanguageSelector;
 
   const _ChaptersHeader({
-    required this.count,
     required this.progress,
     required this.mangaId,
     this.showLanguageSelector = true,
@@ -929,9 +1003,6 @@ class _ChaptersHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final int total = progress.hasKnownTotal
-        ? progress.totalChaptersCount
-        : count;
     final state = ref.watch(mangaChaptersProvider);
 
     return Column(
@@ -950,19 +1021,6 @@ class _ChaptersHeader extends ConsumerWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppColors.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  context.l10n.libraryProgressValue(
-                    progress.readChaptersCount,
-                    total,
-                  ),
-                  style: const TextStyle(
-                    fontFamily: AppTypography.fontFamily,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
                   ),
                 ),
               ],
@@ -1006,29 +1064,36 @@ class _ChaptersHeader extends ConsumerWidget {
             ),
           ],
         ),
-        if (showLanguageSelector)
-          LanguageSelector(
-            availableLanguages: state.availableLanguages,
-            selectedLanguage: state.selectedLanguage,
-            isLoading: state.isLanguageLoading,
-            onLanguageChanged: (lang) {
-              ref
-                  .read(mangaChaptersProvider.notifier)
-                  .loadChapters(mangaId, language: lang);
-            },
-          ),
+        const SizedBox(height: 8),
+        // Language + Reader mode inline
+        Row(
+          children: <Widget>[
+            if (showLanguageSelector)
+              Expanded(
+                child: LanguageSelector(
+                  availableLanguages: state.availableLanguages,
+                  selectedLanguage: state.selectedLanguage,
+                  isLoading: state.isLanguageLoading,
+                  onLanguageChanged: (lang) {
+                    ref
+                        .read(mangaChaptersProvider.notifier)
+                        .loadChapters(mangaId, language: lang);
+                  },
+                ),
+              ),
+            const SizedBox(width: 8),
+            const _CompactReaderModeToggle(),
+          ],
+        ),
       ],
     );
   }
 }
 
-// ── Chapter Tile (pen design) ────────────────────────────────────────────────
-// (see chapter_tile.dart — updated separately)
-
-// ── Reader Mode Override ──────────────────────────────────────────────────────
-
-class _ReaderModeOverride extends ConsumerWidget {
-  const _ReaderModeOverride();
+/// Compact reader mode toggle — chip-style PopupMenuButton instead of a full
+/// DropdownButtonFormField, placed inline next to the language selector.
+class _CompactReaderModeToggle extends ConsumerWidget {
+  const _CompactReaderModeToggle();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1041,75 +1106,68 @@ class _ReaderModeOverride extends ConsumerWidget {
     final globalMode = prefsState.preferences?.defaultReaderMode;
     final rawOverride = overrideState?.preferredReaderMode;
 
-    if (globalMode != null) {
-      final hasOverride = rawOverride != null && rawOverride != globalMode;
-      final otherMode = globalMode == ReaderMode.vertical
-          ? ReaderMode.paged
-          : ReaderMode.vertical;
-      final otherLabel = globalMode == ReaderMode.vertical
-          ? 'Paginado'
-          : 'Vertical';
-      final globalLabel =
-          'Tu preferencia: ${globalMode == ReaderMode.vertical ? "Vertical" : "Paginado"}';
+    final ReaderMode currentMode = rawOverride ?? globalMode ?? ReaderMode.vertical;
+    final String currentLabel = currentMode == ReaderMode.vertical ? 'Vertical' : 'Paginado';
 
-      final items = <DropdownMenuItem<ReaderMode?>>[
-        DropdownMenuItem<ReaderMode?>(child: Text(globalLabel)),
-        DropdownMenuItem<ReaderMode>(value: otherMode, child: Text(otherLabel)),
-      ];
-
-      return _buildDropdown(
-        items: items,
-        value: hasOverride ? rawOverride : null,
-        notifier: notifier,
-      );
-    }
-
-    const items = <DropdownMenuItem<ReaderMode?>>[
-      DropdownMenuItem<ReaderMode?>(child: Text('Predeterminado (Vertical)')),
-      DropdownMenuItem<ReaderMode>(
-        value: ReaderMode.vertical,
-        child: Text('Vertical'),
-      ),
-      DropdownMenuItem<ReaderMode>(
-        value: ReaderMode.paged,
-        child: Text('Paginado'),
-      ),
-    ];
-
-    return _buildDropdown(items: items, value: rawOverride, notifier: notifier);
-  }
-
-  Widget _buildDropdown({
-    required List<DropdownMenuItem<ReaderMode?>> items,
-    required ReaderMode? value,
-    required PerTitleOverrideNotifier notifier,
-  }) {
-    return Row(
-      children: <Widget>[
-        const Icon(
-          Icons.bookmark_border,
-          size: 20,
-          color: AppColors.onSurfaceVariant,
+    return PopupMenuButton<ReaderMode>(
+      initialValue: currentMode,
+      onSelected: (mode) {
+        if (mode == globalMode) {
+          notifier.clearOverride();
+        } else {
+          notifier.setMode(mode);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(8),
         ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: DropdownButtonFormField<ReaderMode?>(
-            initialValue: value,
-            decoration: const InputDecoration(
-              labelText: 'Modo de lectura para este título',
-              helperText: 'Anula tu preferencia global solo para este manga',
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Icon(Icons.menu_book_outlined, size: 16, color: AppColors.onSurfaceVariant),
+            const SizedBox(width: 4),
+            Text(
+              currentLabel,
+              style: const TextStyle(
+                fontFamily: AppTypography.fontFamily,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.onSurfaceVariant,
+              ),
             ),
-            items: items,
-            onChanged: (newValue) {
-              if (newValue == null) {
-                notifier.clearOverride();
-              } else {
-                notifier.setMode(newValue);
-              }
-            },
-          ),
+            const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.onSurfaceVariant),
+          ],
         ),
-      ],
+      ),
+      itemBuilder: (context) {
+        final items = <PopupMenuItem<ReaderMode>>[
+          const PopupMenuItem(
+            value: ReaderMode.vertical,
+            child: Text('Vertical', style: TextStyle(fontSize: 13)),
+          ),
+          const PopupMenuItem(
+            value: ReaderMode.paged,
+            child: Text('Paginado', style: TextStyle(fontSize: 13)),
+          ),
+        ];
+        if (globalMode != null && rawOverride != null) {
+          items.insert(
+            0,
+            PopupMenuItem(
+              value: globalMode,
+              child: Text('Usar global (${globalMode == ReaderMode.vertical ? "Vertical" : "Paginado"})',
+                  style: const TextStyle(fontSize: 13, color: AppColors.primary)),
+            ),
+          );
+        }
+        return items;
+      },
     );
   }
 }
+
+// ── Chapter Tile (pen design) ────────────────────────────────────────────────
+// (see chapter_tile.dart — updated separately)

@@ -17,6 +17,18 @@ class ChapterBatch {
   final int start;
   final int end;
   final List<ChapterBatchItem> items;
+
+  /// Returns a copy omitting [ReadableChapterBatchItem]s whose chapter ID
+  /// is in [hiddenIds]. Placeholders are kept as-is.
+  ChapterBatch copyWithFilteredItems(Set<String> hiddenIds) {
+    final filtered = items.where((item) {
+      return switch (item) {
+        ReadableChapterBatchItem(:final chapter) => !hiddenIds.contains(chapter.id),
+        PlaceholderChapterBatchItem() => true,
+      };
+    }).toList();
+    return ChapterBatch(start: start, end: end, items: filtered);
+  }
 }
 
 /// A single item inside a [ChapterBatch] — either a real readable chapter

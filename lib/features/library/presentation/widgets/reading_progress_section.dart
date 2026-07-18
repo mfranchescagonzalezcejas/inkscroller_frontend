@@ -77,11 +77,12 @@ class ReadingProgressSection extends ConsumerWidget {
               ),
               const Spacer(),
 
-              // Batch size selector
-              _BatchSizeSelector(
-                mangaId: mangaId,
-                currentSize: batchSize,
-              ),
+              // Batch size selector — only when enough chapters to batch
+              if (effectiveTotal > _BatchSizeSelector.minSize)
+                _BatchSizeSelector(
+                  mangaId: mangaId,
+                  currentSize: batchSize,
+                ),
 
               // Jump button
               IconButton(
@@ -115,6 +116,9 @@ class _BatchSizeSelector extends ConsumerWidget {
 
   final String mangaId;
   final int currentSize;
+
+  /// Minimum total chapters to show the batch-size dropdown.
+  static const int minSize = 10;
 
   static const List<int> _sizes = <int>[10, 25, 50, 100];
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/design/design_tokens.dart' show AppColors, AppSpacing;
+import '../../../../core/design/design_tokens.dart' show AppColors, AppSpacing, AppTypography;
 
 /// Maps ISO 639-1 language codes to user-facing Spanish names.
 ///
@@ -194,28 +194,39 @@ class LanguageSelector extends ConsumerWidget {
     }
 
     // Multiple languages: show dropdown.
-    return DropdownButtonFormField<String>(
-      initialValue: availableLanguages.contains(selectedLanguage)
-          ? selectedLanguage
-          : availableLanguages.first,
-      decoration: const InputDecoration(
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
-        ),
-        border: OutlineInputBorder(),
-        labelText: 'Idioma',
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(8),
       ),
-      items: availableLanguages.map((code) {
-        return DropdownMenuItem<String>(
-          value: code,
-          child: Text(languageDisplayName(code)),
-        );
-      }).toList(),
-      onChanged: (value) {
-        if (value != null) onLanguageChanged(value);
-      },
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: availableLanguages.contains(selectedLanguage)
+              ? selectedLanguage
+              : availableLanguages.first,
+          isDense: true,
+          dropdownColor: const Color(0xFF1A2122),
+          style: const TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.onSurfaceVariant,
+          ),
+          items: availableLanguages.map((code) {
+            return DropdownMenuItem<String>(
+              value: code,
+              child: Text(
+                languageDisplayName(code),
+                style: const TextStyle(fontSize: 12),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) onLanguageChanged(value);
+          },
+        ),
+      ),
     );
   }
 }

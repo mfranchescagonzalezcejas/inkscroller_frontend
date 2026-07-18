@@ -23,6 +23,7 @@ class ChapterBatchList extends ConsumerWidget {
     required this.onChapterTap,
     this.descending = false,
     this.scrollController,
+    this.hiddenChapterIds,
   });
 
   final String mangaId;
@@ -30,6 +31,10 @@ class ChapterBatchList extends ConsumerWidget {
   final void Function(Chapter chapter) onChapterTap;
   final bool descending;
   final ScrollController? scrollController;
+
+  /// When set, readable items whose [Chapter.id] is in this set are omitted.
+  /// Used to implement the "hide read chapters" filter in batch mode.
+  final Set<String>? hiddenChapterIds;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,13 +46,38 @@ class ChapterBatchList extends ConsumerWidget {
 
     final displayBatches = descending ? batches.reversed.toList() : batches;
 
+    // When hiddenChapterIds is set, omit read items from each batch and
+    // skip batches that end up empty.
+    final visibleBatches = hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty
+        ? displayBatches
+            .map((b) => b.copyWithFilteredItems(hiddenChapterIds!))
+            .where((b) => b.items.isNotEmpty)
+            .toList()
+        : displayBatches;
+
+    if (visibleBatches.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            context.l10n.chaptersFilteredOut,
+            style: const TextStyle(
+              fontFamily: AppTypography.fontFamily,
+              fontSize: 14,
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       controller: scrollController,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: displayBatches.length,
+      itemCount: visibleBatches.length,
       itemBuilder: (context, batchIndex) {
-        final batch = displayBatches[batchIndex];
+        final batch = visibleBatches[batchIndex];
         return _BatchExpansionTile(
           batch: batch,
           progress: progress,
