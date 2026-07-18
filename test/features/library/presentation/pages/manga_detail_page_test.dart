@@ -596,9 +596,10 @@ void main() {
         await pumpPage(tester, manga: manga, notifier: notifier);
         await tester.pumpAndSettle();
 
-        // No tracking section (no malId)
-        expect(find.byType(ReadingProgressSection), findsNothing);
-        // Flat chapter list should be visible
+        // Tracking section shows for any manga with synced chapters,
+        // regardless of malId (totalChaptersCount > 0 from syncChapters).
+        expect(find.byType(ReadingProgressSection), findsOneWidget);
+        // Flat chapter list should be visible (batchSize 25 > 1 chapter)
         expect(find.byType(ChapterTile), findsOneWidget);
       },
     );

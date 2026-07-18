@@ -146,20 +146,20 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     );
 
     // ── 4-state determination ──────────────────────────────────────
-    final bool hasMalId = widget.manga.malId != null;
+    // Tracking shows progress readChapters / totalChapters even without
+    // Jikan data — totalChaptersCount is derived from max chapter number
+    // in the MangaDex list or Jikan total.
     final bool hasTotal = progress.totalChaptersCount > 0;
     final bool hasMdChapters = state.chapters.isNotEmpty;
-    final bool showTracking = hasMalId && hasTotal;
+    final bool showTracking = hasTotal;
     final bool showBatches = showTracking && hasMdChapters;
     final bool showNothing = !showTracking && !hasMdChapters;
-    // Batch mode is disabled when the unread-only filter is active: the
-    // filter hides read chapters, but batches always show the full range
-    // (with placeholders). The flat list hides read chapters entirely.
-    final bool isFilteringUnread = state.filterUnreadOnly;
+    // Batch mode uses the full chapter list (state.chapters) for correct
+    // positioning. The read/unread filter is visual only — ChapterTile
+    // already shows isRead state via its checkbox. In flat list mode
+    // (when batches are off), displayChapters filters read chapters out.
     final bool useBatchList =
-        showBatches &&
-        progress.totalChaptersCount > progress.batchSize &&
-        !isFilteringUnread;
+        showBatches && progress.totalChaptersCount > progress.batchSize;
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
@@ -317,7 +317,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                       mangaId: widget.manga.id,
                       descending: state.sortDescending,
                       batches: computeChapterBatches(
-                        chapters: displayChapters,
+                        // Use full chapter list for correct batch positioning.
+                        // Read/unread filter is visual via ChapterTile isRead.
+                        chapters: state.chapters,
                         totalChaptersCount: progress.totalChaptersCount,
                         batchSize: progress.batchSize,
                       ),
@@ -331,7 +333,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                     ),
                   ),
                   // ── Extra chapters without numbers (extras, oneshots) ──
-                  if (displayChapters.any((ch) => ch.number == null))
+                  if (state.chapters.any((ch) => ch.number == null))
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
@@ -349,7 +351,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final extras = displayChapters
+                        final extras = state.chapters
                             .where((ch) => ch.number == null)
                             .toList();
                         final chapter = extras[index];
@@ -375,7 +377,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                           },
                         );
                       },
-                      childCount: displayChapters
+                      childCount: state.chapters
                           .where((ch) => ch.number == null)
                           .length,
                     ),
