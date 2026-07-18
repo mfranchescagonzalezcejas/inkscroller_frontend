@@ -44,11 +44,33 @@ class ReadingProgressNotifier
 
   /// Sets [MangaReadingProgress.manuallyMarkedCount] to an exact [count],
   /// clamped so it never drops below [MangaReadingProgress.readChapterIds.length].
-  Future<void> setManuallyMarkedCountTo(String mangaId, int count) async {
+  ///
+  /// When [chapters] is provided, all MangaDex chapters with a number ≤ [count]
+  /// are also added to [readChapterIds] so their visual checkmarks appear.
+  Future<void> setManuallyMarkedCountTo(
+    String mangaId,
+    int count, {
+    List<Chapter>? chapters,
+  }) async {
     final current = progressFor(mangaId);
     final floor = current.readChapterIds.length;
     final nextCount = count < floor ? floor : count;
-    final next = current.copyWith(manuallyMarkedCount: nextCount);
+
+    Set<String>? nextReadIds;
+    if (chapters != null && chapters.isNotEmpty) {
+      nextReadIds = Set<String>.of(current.readChapterIds);
+      for (final chapter in chapters) {
+        final num? n = chapter.number;
+        if (n != null && n.toInt() <= count) {
+          nextReadIds.add(chapter.id);
+        }
+      }
+    }
+
+    final next = current.copyWith(
+      manuallyMarkedCount: nextCount,
+      readChapterIds: nextReadIds,
+    );
     if (next == current) return;
     await _save(next);
   }

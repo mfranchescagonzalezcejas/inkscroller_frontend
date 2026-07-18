@@ -230,6 +230,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             .setManuallyMarkedCountTo(
                               widget.manga.id,
                               chapterNumber,
+                              chapters: state.chapters,
                             );
                       },
                     ),
