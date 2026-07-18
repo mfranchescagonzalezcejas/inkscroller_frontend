@@ -51,7 +51,11 @@ class ChapterTile extends StatelessWidget {
         visualDensity: VisualDensity.compact,
       ),
       title: Text(label),
-      subtitle: chapter.title != null ? Text(chapter.title!) : null,
+      // Avoid showing a subtitle that duplicates the auto-generated label
+      // (e.g. a chapter with number=1 and title="Capítulo 1" in Spanish locale).
+      subtitle: (chapter.title != null && chapter.title != label)
+          ? Text(chapter.title!)
+          : null,
       trailing: trailing,
       enabled: chapter.readable || chapter.external,
       onTap: onTap,

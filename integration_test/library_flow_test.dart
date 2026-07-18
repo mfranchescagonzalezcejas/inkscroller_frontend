@@ -350,7 +350,7 @@ void main() {
             Chapter(
               id: 'chapter-1',
               number: 1,
-              title: 'Capítulo 1',
+              title: 'Chapter One',
               readable: true,
               external: false,
             ),
