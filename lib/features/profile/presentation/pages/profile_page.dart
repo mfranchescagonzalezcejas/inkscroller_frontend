@@ -100,6 +100,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (isGuest) {
       _profileRequested = false;
+      _preferencesRequested = false;
       _selectedReaderMode = null;
       _selectedReadingLanguage = null;
       _selectedDemographics = null;
@@ -156,7 +157,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final effectiveReaderMode =
         _selectedReaderMode ?? prefs?.defaultReaderMode ?? ReaderMode.vertical;
     final effectiveReadingLanguage =
-        _selectedReadingLanguage ?? prefs?.defaultLanguage ?? 'en';
+        _selectedReadingLanguage ?? prefs?.defaultLanguage ?? AppConstants.defaultLanguage;
     final effectiveAppLanguage =
         appLocale?.languageCode ?? Localizations.localeOf(context).languageCode;
 

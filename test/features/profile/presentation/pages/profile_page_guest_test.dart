@@ -50,7 +50,6 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 class _MockGetPreferences extends Mock implements GetPreferences {}
 class _MockUpdatePreferences extends Mock implements UpdatePreferences {}
-class _MockSharedPreferences extends Mock implements SharedPreferences {}
 
 // ── Fakes ──────────────────────────────────────────────────────────────────
 
@@ -96,8 +95,12 @@ void main() {
   late _FakeAuthNotifier authNotifier;
   late _FakePrefsNotifier prefsNotifier;
   late _FakeProfileNotifier profileNotifier;
+  late SharedPreferences sharedPreferences;
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    sharedPreferences = await SharedPreferences.getInstance();
+
     final getAuthState = _MockGetAuthState();
     when(() => getAuthState()).thenAnswer((_) => const Stream.empty());
 
@@ -135,7 +138,7 @@ void main() {
           ),
         ),
         appLocaleProvider.overrideWith(
-          (_) => AppLocaleNotifier(sharedPreferences: _MockSharedPreferences()),
+          (_) => AppLocaleNotifier(sharedPreferences: sharedPreferences),
         ),
         demographicResolutionProvider.overrideWith(
           (_) => const DemographicResolution(
@@ -189,11 +192,11 @@ void main() {
     expect(find.text('Demographic'), findsNothing);
   });
 
-  testWidgets('guest view shows Sign In button', (tester) async {
+  testWidgets('guest view shows localized Sign In button', (tester) async {
     await tester.pumpWidget(buildTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Sign in'), findsWidgets);
+    expect(find.text('Sign in'), findsOneWidget);
   });
 
 
