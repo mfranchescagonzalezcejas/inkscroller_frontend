@@ -16,6 +16,7 @@ class MangaModel {
   final List<String> authors;
   final int? readChaptersCount;
   final int? totalChaptersCount;
+  final int? malId;
 
   const MangaModel({
     required this.id,
@@ -31,6 +32,7 @@ class MangaModel {
     this.authors = const [],
     this.readChaptersCount,
     this.totalChaptersCount,
+    this.malId,
   });
 
   /// Deserializes a [MangaModel] from the JSON map returned by the API.
@@ -59,6 +61,7 @@ class MangaModel {
         'chaptersTotal',
         'total_chapters_count',
       ]),
+      malId: (json['malId'] as num?)?.toInt(),
     );
   }
 
@@ -78,6 +81,7 @@ class MangaModel {
       'authors': authors,
       'readChaptersCount': readChaptersCount,
       'totalChaptersCount': totalChaptersCount,
+      'malId': malId,
     };
   }
 

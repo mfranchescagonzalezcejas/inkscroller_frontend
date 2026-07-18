@@ -47,6 +47,9 @@ class Manga {
   final int? readChaptersCount;
   final int? totalChaptersCount;
 
+  /// MyAnimeList ID, or `null` when the backend does not provide one.
+  final int? malId;
+
   Manga({
     required this.id,
     required this.title,
@@ -62,6 +65,7 @@ class Manga {
     this.authors = const [],
     this.readChaptersCount,
     this.totalChaptersCount,
+    this.malId,
   });
 
   /// Returns display name for the demographic.

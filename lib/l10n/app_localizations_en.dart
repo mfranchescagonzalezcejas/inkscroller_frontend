@@ -816,4 +816,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authChangeUsernameSuccess => 'Username updated successfully';
+
+  @override
+  String get readingProgressTitle => 'Reading Progress';
+
+  @override
+  String get manualMarkIncrease => 'Mark one more as read';
+
+  @override
+  String get manualMarkDecrease => 'Unmark one chapter';
+
+  @override
+  String get batchSizeLabel => 'Batch size';
+
+  @override
+  String get jumpToChapter => 'Jump to chapter';
+
+  @override
+  String get jumpToChapterHint => 'Chapter number';
+
+  @override
+  String get jumpToChapterInvalid => 'Enter a valid chapter number';
+
+  @override
+  String get placeholderMarkRead => 'Mark as read';
+
+  @override
+  String get placeholderUnmark => 'Mark as unread';
+
+  @override
+  String get noJikanData => 'No external data available';
+
+  @override
+  String get noChaptersNoTracking => 'No chapters available';
 }

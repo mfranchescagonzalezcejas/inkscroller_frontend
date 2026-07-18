@@ -1549,6 +1549,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Username updated successfully'**
   String get authChangeUsernameSuccess;
+
+  /// No description provided for @readingProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Progress'**
+  String get readingProgressTitle;
+
+  /// No description provided for @manualMarkIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark one more as read'**
+  String get manualMarkIncrease;
+
+  /// No description provided for @manualMarkDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmark one chapter'**
+  String get manualMarkDecrease;
+
+  /// No description provided for @batchSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch size'**
+  String get batchSizeLabel;
+
+  /// No description provided for @jumpToChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to chapter'**
+  String get jumpToChapter;
+
+  /// No description provided for @jumpToChapterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter number'**
+  String get jumpToChapterHint;
+
+  /// No description provided for @jumpToChapterInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid chapter number'**
+  String get jumpToChapterInvalid;
+
+  /// No description provided for @placeholderMarkRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get placeholderMarkRead;
+
+  /// No description provided for @placeholderUnmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as unread'**
+  String get placeholderUnmark;
+
+  /// No description provided for @noJikanData.
+  ///
+  /// In en, this message translates to:
+  /// **'No external data available'**
+  String get noJikanData;
+
+  /// No description provided for @noChaptersNoTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'No chapters available'**
+  String get noChaptersNoTracking;
 }
 
 class _AppLocalizationsDelegate

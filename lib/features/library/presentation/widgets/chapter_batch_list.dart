@@ -1,0 +1,192 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:inkscroller_flutter/core/design/design_tokens.dart'
+    show AppColors, AppTypography;
+import 'package:inkscroller_flutter/core/l10n/l10n.dart';
+
+import '../../domain/chapter_progress_utils.dart';
+import '../../domain/entities/chapter.dart';
+import '../../domain/entities/chapter_batch.dart';
+import '../../domain/entities/manga_reading_progress.dart';
+import '../providers/reading_progress_provider.dart';
+import '../widgets/chapter_tile.dart';
+
+/// A batch-organized chapter list that groups chapters into expandable batches.
+///
+/// Each batch shows a header with its range (e.g. "Chapters 1–25") and can
+/// be expanded to reveal the chapters inside.
+class ChapterBatchList extends ConsumerWidget {
+  const ChapterBatchList({
+    super.key,
+    required this.mangaId,
+    required this.batches,
+    required this.onChapterTap,
+    this.scrollController,
+  });
+
+  final String mangaId;
+  final List<ChapterBatch> batches;
+  final void Function(Chapter chapter) onChapterTap;
+  final ScrollController? scrollController;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progress = ref.watch(
+      readingProgressProvider.select(
+        (value) => value[mangaId],
+      ),
+    );
+
+    return ListView.builder(
+      controller: scrollController,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: batches.length,
+      itemBuilder: (context, batchIndex) {
+        final batch = batches[batchIndex];
+        return _BatchExpansionTile(
+          batch: batch,
+          progress: progress,
+          mangaId: mangaId,
+          onChapterTap: onChapterTap,
+        );
+      },
+    );
+  }
+}
+
+class _BatchExpansionTile extends ConsumerStatefulWidget {
+  const _BatchExpansionTile({
+    required this.batch,
+    required this.progress,
+    required this.mangaId,
+    required this.onChapterTap,
+  });
+
+  final ChapterBatch batch;
+  final MangaReadingProgress? progress;
+  final String mangaId;
+  final void Function(Chapter chapter) onChapterTap;
+
+  @override
+  ConsumerState<_BatchExpansionTile> createState() =>
+      _BatchExpansionTileState();
+}
+
+class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final batch = widget.batch;
+    final readCount = batch.items.where((item) {
+      if (item is ReadableChapterBatchItem) {
+        return widget.progress?.isChapterRead(item.chapter.id) ?? false;
+      }
+      return false;
+    }).length;
+
+    return Column(
+      children: <Widget>[
+        ListTile(
+          title: Text(
+            context.l10n.chapterLabel(
+              '${formatChapterNumber(batch.start.toDouble())}–${formatChapterNumber(batch.end.toDouble())}',
+            ),
+            style: const TextStyle(
+              fontFamily: AppTypography.fontFamily,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.onSurface,
+            ),
+          ),
+          subtitle: Text(
+            '$readCount / ${batch.items.length}',
+            style: const TextStyle(
+              fontFamily: AppTypography.fontFamily,
+              fontSize: 11,
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          trailing: Icon(
+            _expanded ? Icons.expand_less : Icons.expand_more,
+            color: AppColors.onSurfaceVariant,
+          ),
+          onTap: () => setState(() => _expanded = !_expanded),
+        ),
+        if (_expanded)
+          ...batch.items.map((item) {
+            return switch (item) {
+              ReadableChapterBatchItem() => ChapterTile(
+                  chapter: item.chapter,
+                  isRead:
+                      widget.progress?.isChapterRead(item.chapter.id) ?? false,
+                  onTap: () => widget.onChapterTap(item.chapter),
+                  onToggleRead: () {
+                    ref
+                        .read(readingProgressProvider.notifier)
+                        .toggleChapter(
+                          mangaId: widget.mangaId,
+                          chapterId: item.chapter.id,
+                          totalChaptersCount: batch.end,
+                        );
+                  },
+                ),
+              PlaceholderChapterBatchItem() => _PlaceholderTile(
+                  chapterNumber: item.chapterNumber,
+                  mangaId: widget.mangaId,
+                ),
+            };
+          }),
+      ],
+    );
+  }
+}
+
+class _PlaceholderTile extends ConsumerWidget {
+  const _PlaceholderTile({
+    required this.chapterNumber,
+    required this.mangaId,
+  });
+
+  final int chapterNumber;
+  final String mangaId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      leading: IconButton(
+        icon: const Icon(
+          Icons.radio_button_unchecked,
+          size: 22,
+          color: AppColors.onSurfaceVariant,
+        ),
+        onPressed: () {
+          ref.read(readingProgressProvider.notifier).updateManuallyMarkedCount(
+                mangaId,
+                1,
+              );
+        },
+        tooltip: context.l10n.placeholderMarkRead,
+        visualDensity: VisualDensity.compact,
+      ),
+      title: Text(
+        context.l10n.chapterLabel(formatChapterNumber(chapterNumber.toDouble())),
+        style: const TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: 14,
+          color: AppColors.onSurfaceVariant,
+        ),
+      ),
+      subtitle: const Text(
+        '—', // Placeholder indicator
+        style: TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: 11,
+          color: AppColors.outline,
+        ),
+      ),
+      enabled: false,
+    );
+  }
+}

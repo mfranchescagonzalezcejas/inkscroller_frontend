@@ -3,7 +3,7 @@ import 'package:inkscroller_flutter/features/library/data/mappers/manga_mapper.d
 import 'package:inkscroller_flutter/features/library/data/models/manga_model.dart';
 
 void main() {
-  test('MangaModelMapper.toEntity maps all fields', () {
+  test('MangaModelMapper.toEntity maps all fields including malId', () {
     const model = MangaModel(
       id: 'manga-1',
       title: 'Monster',
@@ -15,6 +15,7 @@ void main() {
       score: 8.9,
       rank: 42,
       authors: <String>['Naoki Urasawa'],
+      malId: 1333,
     );
 
     final entity = model.toEntity();
@@ -29,5 +30,53 @@ void main() {
     expect(entity.score, model.score);
     expect(entity.rank, model.rank);
     expect(entity.authors, model.authors);
+    expect(entity.malId, 1333);
+  });
+
+  test('MangaModelMapper.toEntity maps null malId', () {
+    const model = MangaModel(
+      id: 'manga-2',
+      title: 'Berserk',
+    );
+
+    final entity = model.toEntity();
+
+    expect(entity.malId, isNull);
+  });
+
+  test('MangaModel.fromJson parses malId', () {
+    final json = <String, dynamic>{
+      'id': 'manga-3',
+      'title': 'Vagabond',
+      'malId': 512,
+    };
+
+    // MalId is not in the existing fromJson yet — this will fail until 1.2
+    final model = MangaModel.fromJson(json);
+
+    expect(model.malId, 512);
+  });
+
+  test('MangaModel.fromJson defaults malId to null when absent', () {
+    final json = <String, dynamic>{
+      'id': 'manga-4',
+      'title': 'Vinland',
+    };
+
+    final model = MangaModel.fromJson(json);
+
+    expect(model.malId, isNull);
+  });
+
+  test('MangaModel.toJson includes malId', () {
+    const model = MangaModel(
+      id: 'manga-5',
+      title: 'OPM',
+      malId: 21087,
+    );
+
+    final json = model.toJson();
+
+    expect(json['malId'], 21087);
   });
 }
