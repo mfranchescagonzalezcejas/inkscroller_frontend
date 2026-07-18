@@ -50,6 +50,11 @@ void main() {
     firebaseAuth = _MockFirebaseAuth();
     // Default: authenticated user (guest tests override this).
     when(() => firebaseAuth.currentUser).thenReturn(_FakeUser());
+    // Default stubs for authenticated path (no isGuest param).
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => null);
+    when(() => localDataSource.savePreferences(any()))
+        .thenAnswer((_) async {});
     repository = PreferencesRepositoryImpl(
       remoteDataSource: remoteDataSource,
       localDataSource: localDataSource,
@@ -77,12 +82,6 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenAnswer((_) async => remoteModel);
-    when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => null);
-    when(
-      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async {});
 
     final result = await repository.getPreferences();
 
@@ -96,9 +95,8 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenThrow(const NetworkException(message: 'offline'));
-    when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => localPrefs);
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => localPrefs);
 
     final result = await repository.getPreferences();
 
@@ -112,9 +110,7 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenThrow(const NetworkException(message: 'offline'));
-    when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => null);
+    // getCachedPreferences returns null from setUp stub.
 
     final result = await repository.getPreferences();
 
@@ -134,9 +130,8 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenAnswer((_) async => olderRemoteModel);
-    when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => localPrefs);
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => localPrefs);
     when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
@@ -149,10 +144,8 @@ void main() {
 
     expect(result, isA<Right<Failure, UserReadingPreferences>>());
     final prefs = (result as Right<Failure, UserReadingPreferences>).value;
-    // Local is newer, so it should be kept.
     expect(prefs.defaultReaderMode, ReaderMode.paged);
     expect(prefs.defaultLanguage, 'es');
-    // Verify push-to-remote was attempted.
     verify(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: 'paged',
@@ -166,12 +159,6 @@ void main() {
 
   test('writes to local first then syncs remote on success', () async {
     when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => null);
-    when(
-      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async {});
-    when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
@@ -184,17 +171,10 @@ void main() {
     );
 
     expect(result, isA<Right<Failure, UserReadingPreferences>>());
-    // Local should be written at least once (optimistic + remote response).
     verify(() => localDataSource.savePreferences(any())).called(2);
   });
 
   test('returns optimistic data when remote fails during update', () async {
-    when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => null);
-    when(
-      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async {});
     when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
@@ -208,13 +188,11 @@ void main() {
       defaultLanguage: 'es',
     );
 
-    // Should still return Right with optimistic data.
     expect(result, isA<Right<Failure, UserReadingPreferences>>());
     final prefs =
         (result as Right<Failure, UserReadingPreferences>).value;
     expect(prefs.defaultReaderMode, ReaderMode.paged);
     expect(prefs.defaultLanguage, 'es');
-    // Local was written optimistically.
     verify(() => localDataSource.savePreferences(any())).called(1);
   });
 
@@ -227,12 +205,6 @@ void main() {
       updatedAt: '2026-07-01T00:00:00.000',
     );
 
-    when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => null);
-    when(
-      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async {});
     when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
@@ -261,9 +233,8 @@ void main() {
   });
 
   test('preserves cached fields not being updated', () async {
-    when(
-      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
-    ).thenAnswer((_) async => localPrefs);
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => localPrefs);
     when(
       () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async {});
