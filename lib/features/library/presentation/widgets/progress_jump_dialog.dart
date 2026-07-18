@@ -39,7 +39,7 @@ class _ProgressJumpDialogBodyState extends State<_ProgressJumpDialogBody> {
       return;
     }
     final number = int.tryParse(text);
-    if (number == null || number < 1 || number > widget.totalChaptersCount) {
+    if (number == null || number < 0 || number > widget.totalChaptersCount) {
       setState(() => _error = context.l10n.jumpToChapterInvalid);
       return;
     }

@@ -55,42 +55,50 @@ class ReadingProgressNotifier
     await _save(next);
   }
 
-  /// Sets [MangaReadingProgress.manuallyMarkedCount] to an exact [count],
-  /// clamped so it never drops below [MangaReadingProgress.readChapterIds.length].
+  /// Sets [MangaReadingProgress.manuallyMarkedCount] to an exact [count].
   ///
-  /// When [chapters] is provided, all MangaDex chapters with a number ≤ [count]
-  /// are also added to [readChapterIds] so their visual checkmarks appear.
+  /// When [chapters] is provided, readChapterIds is rebuilt so only MangaDex
+  /// chapters with number ≤ [count] are marked — chapters above are removed.
+  /// When [count] is 0, the entire reading progress is reset to defaults.
   Future<void> setManuallyMarkedCountTo(
     String mangaId,
     int count, {
     List<Chapter>? chapters,
   }) async {
     final current = progressFor(mangaId);
-    final floor = current.readChapterIds.length;
-    final nextCount = count < floor ? floor : count;
 
+    // count = 0 means reset everything
+    if (count <= 0) {
+      debugPrint('[ProgressNotifier] setManuallyMarkedCountTo: '
+          '$mangaId RESET count=0');
+      final reset = MangaReadingProgress(mangaId: mangaId);
+      if (reset == current) return;
+      await _save(reset);
+      return;
+    }
+
+    final int effectiveCount = count;
+
+    // Rebuild readChapterIds from scratch: keep only MD chapters with number ≤ count
     Set<String>? nextReadIds;
-    int chaptersAdded = 0;
     if (chapters != null && chapters.isNotEmpty) {
-      nextReadIds = Set<String>.of(current.readChapterIds);
+      nextReadIds = <String>{};
       for (final chapter in chapters) {
         final num? n = chapter.number;
-        if (n != null && n.toInt() <= count) {
-          if (nextReadIds.add(chapter.id)) {
-            chaptersAdded++;
-          }
+        if (n != null && n.toInt() <= effectiveCount) {
+          nextReadIds.add(chapter.id);
         }
       }
     }
 
     debugPrint('[ProgressNotifier] setManuallyMarkedCountTo: '
-        '$mangaId count=$count '
-        'floor=$floor nextCount=$nextCount '
-        'MDchaptersAdded=$chaptersAdded '
-        'readChapterIds.len=${nextReadIds?.length ?? current.readChapterIds.length}');
+        '$mangaId count=$effectiveCount '
+        'readChapterIds.len=${nextReadIds?.length ?? current.readChapterIds.length} '
+        'prevManual=${current.manuallyMarkedCount} '
+        'newManual=$effectiveCount');
 
     final next = current.copyWith(
-      manuallyMarkedCount: nextCount,
+      manuallyMarkedCount: effectiveCount,
       readChapterIds: nextReadIds,
     );
     if (next == current) return;
