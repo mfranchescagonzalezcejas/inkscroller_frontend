@@ -11,6 +11,7 @@ import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart'
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/pages/login_page.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:inkscroller_flutter/features/auth/presentation/widgets/auth_form_widgets.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/profile/domain/usecases/get_user_profile.dart';
 import 'package:inkscroller_flutter/features/profile/domain/usecases/update_user_profile.dart';
@@ -96,9 +97,12 @@ void main() {
       await tester.tap(find.byKey(const Key('forgotPasswordLink')));
       await tester.pumpAndSettle();
 
-      // The email field in the bottom sheet should be pre-filled.
-      final emailFields = find.byType(TextFormField);
-      expect(emailFields, findsWidgets);
+      // The email field in the bottom sheet should be pre-filled with the
+      // value entered in the login form.
+      final authField = tester.widget<AuthField>(
+        find.byKey(const Key('forgotPasswordEmailField')),
+      );
+      expect(authField.controller.text, 'alice@example.com');
     });
   });
 }

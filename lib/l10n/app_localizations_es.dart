@@ -771,6 +771,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileContentRatingAll => 'Todo';
 
   @override
+  String get profileBirthDateRequired =>
+      'Completa tu perfil con una fecha de nacimiento para cambiar tu nombre de usuario.';
+
+  @override
   String get chaptersSortAsc => 'Número ↑';
 
   @override

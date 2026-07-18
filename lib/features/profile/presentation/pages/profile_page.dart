@@ -6,6 +6,7 @@ import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/design/design_tokens.dart'
     show AppColors, AppTypography;
+import '../../../../core/design/app_spacing.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/l10n/app_locale_provider.dart';
@@ -252,7 +253,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               iconColor: AppColors.primary,
               title: context.l10n.authChangeUsernameOption,
               value: profile?.username ?? '',
-              onTap: () => _showChangeUsernameDialog(context, ref, profile),
+              onTap: () {
+                if (profile?.birthDate == null) {
+                  AppFeedback.showError(
+                    context,
+                    title: context.l10n.profileBirthDateRequired,
+                  );
+                  return;
+                }
+                _showChangeUsernameDialog(context, ref, profile!);
+              },
             ),
           ],
         ),
@@ -521,16 +531,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Future<void> _showChangeUsernameDialog(
     BuildContext context,
     WidgetRef ref,
-    UserProfile? profile,
+    UserProfile profile,
   ) async {
-    final controller = TextEditingController(text: profile?.username ?? '');
+    final controller = TextEditingController(text: profile.username);
     final formKey = GlobalKey<FormState>();
 
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        ),
         title: Text(
           context.l10n.authChangeUsernameTitle,
           style: const TextStyle(
@@ -556,11 +568,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 color: AppColors.onSurfaceVariant,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
                 borderSide: const BorderSide(color: AppColors.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
                 borderSide: const BorderSide(color: AppColors.primary),
               ),
             ),
@@ -606,7 +618,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (saved != true || !context.mounted) return;
 
     final newUsername = controller.text.trim();
-    final birthDate = profile?.birthDate ?? DateTime(2000);
+    // ponytail: birthDate is guaranteed non-null by the guard before opening
+    // the dialog — if it were null the user gets a profile-completion prompt
+    // instead.
+    final birthDate = profile.birthDate!;
     await ref
         .read(userProfileProvider.notifier)
         .updateProfile(username: newUsername, birthDate: birthDate);

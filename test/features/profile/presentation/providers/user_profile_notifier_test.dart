@@ -11,6 +11,10 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
+/// Shared test birth date used across profile-update scenarios.
+final _kTestBirthDate = DateTime(2000);
+
+/// Unit tests for [UserProfileNotifier].
 void main() {
   late GetUserProfile getUserProfile;
   late UpdateUserProfile mockUpdateUserProfile;
@@ -111,7 +115,7 @@ void main() {
 
       await notifier.updateProfile(
         username: 'newname',
-        birthDate: DateTime(2000),
+        birthDate: _kTestBirthDate,
       );
 
       expect(notifier.state.isLoading, isFalse);
@@ -131,7 +135,7 @@ void main() {
 
       await notifier.updateProfile(
         username: 'taken',
-        birthDate: DateTime(2000),
+        birthDate: _kTestBirthDate,
       );
 
       expect(notifier.state.isLoading, isFalse);
@@ -150,7 +154,7 @@ void main() {
 
       await notifier.updateProfile(
         username: 'newname',
-        birthDate: DateTime(2000),
+        birthDate: _kTestBirthDate,
       );
 
       expect(notifier.state.isLoading, isFalse);

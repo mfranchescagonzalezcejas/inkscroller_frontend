@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockAuthRepository extends Mock implements AuthRepository {}
 
+/// Unit tests for [SendPasswordReset] use case.
 void main() {
   late AuthRepository repository;
   late SendPasswordReset useCase;

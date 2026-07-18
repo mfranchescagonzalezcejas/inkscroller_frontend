@@ -360,6 +360,7 @@
   "profileContentRatingSafe": "Seguro",
   "profileContentRatingSuggestive": "Seguro + Sugestivo",
   "profileContentRatingAll": "Todo",
+  "profileBirthDateRequired": "Completa tu perfil con una fecha de nacimiento para cambiar tu nombre de usuario.",
   "chaptersSortAsc": "Número ↑",
   "chaptersSortDesc": "Número ↓",
   "chaptersFilterAll": "Todos los capítulos",

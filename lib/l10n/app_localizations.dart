@@ -1448,6 +1448,12 @@ abstract class AppLocalizations {
   /// **'All'**
   String get profileContentRatingAll;
 
+  /// No description provided for @profileBirthDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile with a birth date to change your username.'**
+  String get profileBirthDateRequired;
+
   /// No description provided for @chaptersSortAsc.
   ///
   /// In en, this message translates to:

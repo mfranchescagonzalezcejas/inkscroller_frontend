@@ -46,91 +46,98 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         );
   }
 
-  void _showForgotPasswordSheet(BuildContext context) {
+  Future<void> _showForgotPasswordSheet(BuildContext context) async {
     final emailController = TextEditingController(
       text: _emailController.text.trim(),
     );
     final formKey = GlobalKey<FormState>();
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            24,
-            24,
-            24,
-            MediaQuery.of(sheetContext).viewInsets.bottom + 24,
-          ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  context.l10n.authForgotPasswordTitle,
-                  style: const TextStyle(
-                    fontFamily: AppTypography.fontFamily,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.onSurface,
+    try {
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: AppColors.card,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (sheetContext) {
+          return Padding(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              24,
+              24,
+              MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    context.l10n.authForgotPasswordTitle,
+                    style: const TextStyle(
+                      fontFamily: AppTypography.fontFamily,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                 AuthField(
+                  key: const Key('forgotPasswordEmailField'),
                   controller: emailController,
                   label: context.l10n.authEmailLabel,
-                  icon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n.authEmailRequired;
-                    }
-                    if (!value.contains('@')) {
-                      return context.l10n.authEmailInvalid;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return context.l10n.authEmailRequired;
+                      }
+                      if (!value.contains('@')) {
+                        return context.l10n.authEmailInvalid;
+                      }
+                      return null;
+                    },
+                  ),
+                const SizedBox(height: AppSpacing.lg),
                 AuthGradientButton(
-                  isLoading: false,
-                  onPressed: () async {
-                    if (!(formKey.currentState?.validate() ?? false)) return;
-                    final email = emailController.text.trim();
-                    Navigator.of(sheetContext).pop();
-                    await ref
-                        .read(authProvider.notifier)
-                        .resetPassword(email);
-                    if (!context.mounted) return;
-                    final state = ref.read(authProvider);
-                    if (state.error != null) {
-                      AppFeedback.showError(
-                        context,
-                        title: authErrorText(context, state.error),
-                      );
-                    } else if (state.passwordResetSent) {
-                      AppFeedback.showSuccess(
-                        context,
-                        title: context.l10n.authResetPasswordSent,
-                      );
-                      ref.read(authProvider.notifier).clearPasswordResetSent();
-                    }
-                  },
-                  label: context.l10n.authForgotPasswordSend,
-                ),
-              ],
+                    isLoading: false,
+                    onPressed: () async {
+                      if (!(formKey.currentState?.validate() ?? false)) return;
+                      final email = emailController.text.trim();
+                      Navigator.of(sheetContext).pop();
+                      await ref
+                          .read(authProvider.notifier)
+                          .resetPassword(email);
+                      if (!context.mounted) return;
+                      final state = ref.read(authProvider);
+                      if (state.error != null) {
+                        AppFeedback.showError(
+                          context,
+                          title: authErrorText(context, state.error),
+                        );
+                      } else if (state.passwordResetSent) {
+                        AppFeedback.showSuccess(
+                          context,
+                          title: context.l10n.authResetPasswordSent,
+                        );
+                        ref
+                            .read(authProvider.notifier)
+                            .clearPasswordResetSent();
+                      }
+                    },
+                    label: context.l10n.authForgotPasswordSend,
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    } finally {
+      emailController.dispose();
+    }
   }
 
   @override
