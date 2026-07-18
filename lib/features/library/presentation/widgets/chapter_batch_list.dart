@@ -83,9 +83,13 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
   @override
   Widget build(BuildContext context) {
     final batch = widget.batch;
+    final manualCount = widget.progress?.manuallyMarkedCount ?? 0;
     final readCount = batch.items.where((item) {
       if (item is ReadableChapterBatchItem) {
         return widget.progress?.isChapterRead(item.chapter.id) ?? false;
+      }
+      if (item is PlaceholderChapterBatchItem) {
+        return manualCount >= item.chapterNumber;
       }
       return false;
     }).length;
