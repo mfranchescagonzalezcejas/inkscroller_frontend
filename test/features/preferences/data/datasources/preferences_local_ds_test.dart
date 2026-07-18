@@ -186,15 +186,18 @@ void main() {
     );
   });
 
-  test('clearCache removes guest_-prefixed keys too', () async {
+  test('clearCache with isGuest removes guest_-prefixed keys only', () async {
     await dataSource.savePreferences(samplePrefs, isGuest: true);
+    await dataSource.savePreferences(samplePrefs);
     expect(
       prefs.getString('guest_cached_user_reading_preferences'),
       isNotNull,
     );
+    expect(prefs.getString('cached_user_reading_preferences'), isNotNull);
 
-    await dataSource.clearCache();
+    await dataSource.clearCache(isGuest: true);
 
+    // Guest keys removed.
     expect(
       prefs.getString('guest_cached_user_reading_preferences'),
       isNull,
@@ -203,20 +206,23 @@ void main() {
       prefs.getInt('guest_cached_preferences_timestamp'),
       isNull,
     );
+    // Authenticated keys untouched.
+    expect(prefs.getString('cached_user_reading_preferences'), isNotNull);
   });
 
-  // ── clearCache ────────────────────────────────────────────────────────────
-
-  test('clearCache removes both preferences and timestamp', () async {
+  test('clearCache removes authenticated keys without affecting guest keys',
+      () async {
     await dataSource.savePreferences(samplePrefs);
-
-    // Verify data exists.
-    expect(prefs.getString('cached_user_reading_preferences'), isNotNull);
-    expect(prefs.getInt('cached_preferences_timestamp'), isNotNull);
+    await dataSource.savePreferences(samplePrefs, isGuest: true);
 
     await dataSource.clearCache();
 
     expect(prefs.getString('cached_user_reading_preferences'), isNull);
     expect(prefs.getInt('cached_preferences_timestamp'), isNull);
+    // Guest keys untouched.
+    expect(
+      prefs.getString('guest_cached_user_reading_preferences'),
+      isNotNull,
+    );
   });
 }

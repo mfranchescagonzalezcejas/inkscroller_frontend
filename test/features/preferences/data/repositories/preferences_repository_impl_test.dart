@@ -20,6 +20,11 @@ class _FakeUser extends Fake implements User {
   bool get emailVerified => true;
 }
 
+class _FakeUnverifiedUser extends Fake implements User {
+  @override
+  bool get emailVerified => false;
+}
+
 class _MockRemoteDataSource extends Mock implements PreferencesRemoteDataSource {}
 
 class _MockLocalDataSource extends Mock implements PreferencesLocalDataSource {}
@@ -326,6 +331,51 @@ void main() {
       ),
     );
     // Guest key used for local write.
+    verify(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).called(1);
+  });
+
+  // ── unverified user path (treated as local-only) ───────────────────────────
+
+  test(
+      'getPreferences skips remote and reads guest key when user is unverified',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(_FakeUnverifiedUser());
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => localPrefs);
+
+    final result = await repository.getPreferences();
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    verifyNever(() => remoteDataSource.getPreferences());
+    verify(() => localDataSource.getCachedPreferences(isGuest: true)).called(1);
+  });
+
+  test(
+      'updatePreferences skips remote and writes to guest key when user is unverified',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(_FakeUnverifiedUser());
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => null);
+    when(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).thenAnswer((_) async {});
+
+    final result = await repository.updatePreferences(
+      defaultReaderMode: 'vertical',
+    );
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    verifyNever(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
+      ),
+    );
     verify(
       () => localDataSource.savePreferences(any(), isGuest: true),
     ).called(1);

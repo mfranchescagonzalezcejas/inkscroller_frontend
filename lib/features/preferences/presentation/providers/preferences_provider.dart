@@ -27,11 +27,13 @@ final preferencesProvider =
             return;
           }
 
-          // Sync guest preferences when transitioning from guest → verified.
-          final wasGuest = previous?.user == null;
+          // Sync local-only preferences when transitioning to verified.
+          // Both null (guest) and unverified users are treated as local-only.
+          final wasLocalOnly = previous?.user == null ||
+              (previous?.needsEmailVerification ?? false);
           final isVerified = authState.user != null &&
               authState.needsEmailVerification == false;
-          if (wasGuest && isVerified) {
+          if (wasLocalOnly && isVerified) {
             notifier.syncGuestPreferencesToRemote();
           }
         });

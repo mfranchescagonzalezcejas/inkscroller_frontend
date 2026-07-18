@@ -14,6 +14,10 @@ abstract class PreferencesLocalDataSource {
   /// When [isGuest] is true, writes to guest-scoped storage keys.
   Future<void> savePreferences(UserReadingPreferences preferences, {bool isGuest = false});
 
-  /// Clears all locally cached preferences.
-  Future<void> clearCache();
+  /// Clears cached preferences for the given scope.
+  ///
+  /// When [isGuest] is true, clears only guest-scoped keys.
+  /// When [isGuest] is false (default), clears only authenticated keys.
+  /// When both scopes need clearing, call twice with different [isGuest] values.
+  Future<void> clearCache({bool isGuest = false});
 }

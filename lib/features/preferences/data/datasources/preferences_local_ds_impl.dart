@@ -35,11 +35,14 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       return isGuest ? _guestDefaults() : null;
     }
 
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final age = now - timestamp;
-    if (age > AppConstants.mangaDetailCacheTtlMinutes * 60 * 1000) {
-      await clearCache();
-      return null;
+    // Guest preferences never expire — they persist until explicitly cleared.
+    if (!isGuest) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final age = now - timestamp;
+      if (age > AppConstants.mangaDetailCacheTtlMinutes * 60 * 1000) {
+        await clearCache();
+        return null;
+      }
     }
 
     final json = prefs.getString(_keyFor(_prefsKey, isGuest));
@@ -68,8 +71,8 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
         updatedAt: DateTime.parse(data['updatedAt'] as String),
       );
     } on Object {
-      await clearCache();
-      return null;
+      await clearCache(isGuest: isGuest);
+      return isGuest ? _guestDefaults() : null;
     }
   }
 
@@ -98,18 +101,26 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   }
 
   @override
-  Future<void> clearCache() async {
-    await prefs.remove(_prefsKey);
-    await prefs.remove(_timestampKey);
-    await prefs.remove('$_guestPrefix$_prefsKey');
-    await prefs.remove('$_guestPrefix$_timestampKey');
+  Future<void> clearCache({bool isGuest = false}) async {
+    final key = _keyFor(_prefsKey, isGuest);
+    final tsKey = _keyFor(_timestampKey, isGuest);
+    await prefs.remove(key);
+    await prefs.remove(tsKey);
+  }
+
+  /// Maps a platform locale string to a supported reading language code.
+  /// Defaults to 'en' when the locale is unrecognised.
+  String _normalizeLanguage(String raw) {
+    final code = raw.split('_').first.split('-').first.toLowerCase();
+    const supported = {'en', 'es', 'pt', 'fr', 'de', 'it', 'ja', 'ko', 'zh'};
+    return supported.contains(code) ? code : 'en';
   }
 
   /// Returns device-locale defaults for a first-time guest load.
   UserReadingPreferences _guestDefaults() {
     return UserReadingPreferences(
       defaultReaderMode: ReaderMode.vertical,
-      defaultLanguage: Platform.localeName.split('_').first,
+      defaultLanguage: _normalizeLanguage(Platform.localeName),
       contentRatingFilter: ContentRating.safe,
       demographicFilter: const [
         MangaDemographic.shounen,

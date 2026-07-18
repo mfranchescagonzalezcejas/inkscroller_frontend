@@ -29,13 +29,18 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     required this.firebaseAuth,
   });
 
-  bool get _isGuest => firebaseAuth.currentUser == null;
+  /// True when the user is null or unverified — both should be local-only.
+  /// The backend returns 403 for unverified users on /users/me/* endpoints.
+  bool get _isLocalOnly {
+    final user = firebaseAuth.currentUser;
+    return user == null || !user.emailVerified;
+  }
 
   @override
   Future<Either<Failure, UserReadingPreferences>> getPreferences() async {
-    final guest = _isGuest;
+    final localOnly = _isLocalOnly;
 
-    if (guest) {
+    if (localOnly) {
       final cached = await localDataSource.getCachedPreferences(isGuest: true);
       if (cached != null) return Right(cached);
       return const Left(CacheFailure(message: 'No guest preferences'));
@@ -77,10 +82,10 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     String? contentRatingFilter,
     List<String>? demographicFilter,
   }) async {
-    final guest = _isGuest;
+    final localOnly = _isLocalOnly;
 
     // Read current cached preferences to preserve fields we're not updating.
-    final cached = await localDataSource.getCachedPreferences(isGuest: guest);
+    final cached = await localDataSource.getCachedPreferences(isGuest: localOnly);
 
     // Determine effective values: new value > cached value > default.
     final effectiveReaderMode = ReaderMode.values.byName(
@@ -109,9 +114,9 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     );
 
     // Optimistic write: persist to local immediately.
-    await localDataSource.savePreferences(optimistic, isGuest: guest);
+    await localDataSource.savePreferences(optimistic, isGuest: localOnly);
 
-    if (guest) {
+    if (localOnly) {
       return Right(optimistic);
     }
 

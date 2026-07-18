@@ -261,7 +261,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             onPressed: () => context.go(AppRoutes.login),
-            child: const Text('Sign In'),
+            child: Text(context.l10n.authSignInButton),
           ),
         ),
       ],
