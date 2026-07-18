@@ -178,7 +178,11 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
 
   @override
   Future<void> updateDisplayName(String displayName) async {
-    await _firebaseAuth.currentUser?.updateDisplayName(displayName);
+    try {
+      await _firebaseAuth.currentUser?.updateDisplayName(displayName);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
   }
 
   // --- Mapping helpers --------------------------------------------------------

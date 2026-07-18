@@ -92,6 +92,9 @@ class _FakeProfileNotifier extends UserProfileNotifier {
         );
 }
 
+/// Widget tests for [ProfilePage] covering the authenticated _AvatarSection
+/// rendering: username header, initials priority, blank-username fallback, and
+/// email-only fallback.
 void main() {
   late _FakeAuthNotifier authNotifier;
   late _FakePrefsNotifier prefsNotifier;

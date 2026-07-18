@@ -9,6 +9,8 @@ import 'package:mocktail/mocktail.dart';
 class _MockFirebaseAuthDataSource extends Mock
     implements FirebaseAuthDataSource {}
 
+/// Tests for [AuthRepositoryImpl.updateDisplayName] covering success and
+/// exception-to-failure mapping paths.
 void main() {
   late _MockFirebaseAuthDataSource mockDataSource;
   late AuthRepositoryImpl repository;
