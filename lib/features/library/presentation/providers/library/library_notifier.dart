@@ -279,7 +279,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
           _tabCacheOffset[key] = _offset;
         },
       );
-    } catch (_) {
+    } on Exception catch (_) {
       // Surface unexpected errors as failure while keeping stale grid.
       if (capturedVersion == _loadVersion) {
         state = state.copyWith(isLoadingMore: false);
@@ -344,7 +344,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
             _tabCacheOffset[key] = mangas.length;
           },
         );
-      } catch (_) {
+      } on Exception catch (_) {
         // Fire-and-forget: errors silently ignored.
       }
     }

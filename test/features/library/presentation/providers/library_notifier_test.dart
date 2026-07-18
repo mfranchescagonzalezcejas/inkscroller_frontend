@@ -1300,7 +1300,6 @@ void main() {
       final notifier = LibraryNotifier(
         getMangaList,
         searchManga,
-        enablePreload: false,
       );
       await Future<void>.delayed(Duration.zero);
       clearInteractions(getMangaList);
@@ -1379,7 +1378,6 @@ void main() {
       final notifier = LibraryNotifier(
         getMangaList,
         searchManga,
-        enablePreload: false,
       );
       await Future<void>.delayed(Duration.zero);
 
@@ -1814,7 +1812,6 @@ void main() {
       final notifier = LibraryNotifier(
         getMangaList,
         searchManga,
-        enablePreload: false,
       );
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(const Duration(milliseconds: 100));
