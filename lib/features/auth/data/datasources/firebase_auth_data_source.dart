@@ -31,6 +31,9 @@ abstract class FirebaseAuthDataSource {
 
   /// Sends a password reset email to [email].
   Future<void> sendPasswordResetEmail({required String email});
+
+  /// Updates the Firebase Auth [User.displayName] to [displayName].
+  Future<void> updateDisplayName(String displayName);
 }
 
 /// Concrete implementation wrapping [FirebaseAuth].
@@ -41,7 +44,10 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
 
   @override
   Stream<AppUser?> get authStateChanges {
-    return _firebaseAuth.authStateChanges().map(_mapUser);
+    // Use userChanges() instead of authStateChanges() so listeners receive
+    // the updated Firebase user after profile mutations like updateDisplayName()
+    // without requiring an explicit reload or re-auth.
+    return _firebaseAuth.userChanges().map(_mapUser);
   }
 
   @override
@@ -165,6 +171,15 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> updateDisplayName(String displayName) async {
+    try {
+      await _firebaseAuth.currentUser?.updateDisplayName(displayName);
     } on FirebaseAuthException catch (e) {
       throw _mapFirebaseException(e);
     }

@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/app_user.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/get_auth_state.dart';
 import '../../domain/usecases/reload_user.dart';
 import '../../domain/usecases/send_email_verification.dart';
@@ -84,6 +86,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final GetUserProfile _getUserProfile;
   final UpdateUserProfile _updateUserProfile;
   final ProfileMetadataFailureReporter _profileMetadataFailureReporter;
+  final AuthRepository? _authRepository;
 
   StreamSubscription<AppUser?>? _authSubscription;
   String? _profileCompletionCheckUserId;
@@ -102,6 +105,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required UpdateUserProfile updateUserProfile,
     ProfileMetadataFailureReporter profileMetadataFailureReporter =
         _ignoreProfileMetadataFailure,
+    AuthRepository? authRepository,
   }) : _signIn = signIn,
        _signUp = signUp,
        _signOut = signOut,
@@ -112,6 +116,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
        _getUserProfile = getUserProfile,
        _updateUserProfile = updateUserProfile,
        _profileMetadataFailureReporter = profileMetadataFailureReporter,
+       _authRepository = authRepository,
        super(const AuthState()) {
     _listenToAuthState();
   }
@@ -321,7 +326,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
             );
             return failure.message;
           },
-          (_) async => null,
+          (_) async {
+            // Best-effort Firebase Auth displayName sync — only when
+            // backend profile metadata persisted successfully.
+            unawaited(
+              _authRepository
+                  ?.updateDisplayName(username)
+                  .catchError((Object e) {
+                if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
+                return const Right<Failure, void>(null);
+              }),
+            );
+            return null;
+          },
         );
 
         final verificationSent = verificationResult.fold(
@@ -377,12 +394,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
           registrationInProgress: false,
         );
       },
-      (_) => state = state.copyWith(
-        isLoading: false,
-        clearError: true,
-        profileCompletionPending: false,
-        registrationInProgress: false,
-      ),
+      (_) {
+        // Best-effort Firebase Auth displayName sync — only when
+        // backend profile metadata persisted successfully.
+        unawaited(
+          _authRepository
+              ?.updateDisplayName(username)
+              .catchError((Object e) {
+            if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
+            return const Right<Failure, void>(null);
+          }),
+        );
+        state = state.copyWith(
+          isLoading: false,
+          clearError: true,
+          profileCompletionPending: false,
+          registrationInProgress: false,
+        );
+      },
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import 'user_profile_notifier.dart';
 import 'user_profile_state.dart';
 
@@ -10,5 +11,6 @@ final userProfileProvider =
       (ref) => UserProfileNotifier(
         getUserProfile: sl(),
         updateUserProfile: sl(),
+        authRepository: sl<AuthRepository>(),
       ),
     );
