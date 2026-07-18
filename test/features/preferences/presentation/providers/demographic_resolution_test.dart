@@ -18,6 +18,22 @@ void main() {
       ]);
       expect(resolution.allowedOptions, MangaDemographic.values);
     });
+
+    test('isEditable is true when allowedOptions has more than one value', () {
+      const resolution = DemographicResolution(
+        effectiveFilter: [MangaDemographic.shounen],
+        allowedOptions: MangaDemographic.values,
+      );
+      expect(resolution.isEditable, isTrue);
+    });
+
+    test('isEditable is false when allowedOptions has one value', () {
+      const resolution = DemographicResolution(
+        effectiveFilter: [MangaDemographic.shounen],
+        allowedOptions: [MangaDemographic.shounen],
+      );
+      expect(resolution.isEditable, isFalse);
+    });
   });
 
   // ── DemographicResolution.resolve (pure function) ──────────────────────

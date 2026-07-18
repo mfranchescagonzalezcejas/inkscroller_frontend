@@ -10,6 +10,7 @@ import 'preferences_state.dart';
 ///
 /// Automatically clears cached preferences when the user signs out so that
 /// guest sessions do not inherit stale preferences from a previous user.
+/// Syncs guest preferences to the backend when the user verifies their email.
 final preferencesProvider =
     StateNotifierProvider<PreferencesNotifier, PreferencesState>(
       (ref) {
@@ -18,10 +19,20 @@ final preferencesProvider =
           updatePreferences: sl(),
         );
 
-        // Listen to auth state changes and reset preferences on logout.
-        ref.listen<AuthState>(authProvider, (_, authState) {
+        // Listen to auth state changes.
+        ref.listen<AuthState>(authProvider, (previous, authState) {
+          // Clear preferences on logout.
           if (authState.user == null) {
             notifier.clearPreferences();
+            return;
+          }
+
+          // Sync guest preferences when transitioning from guest → verified.
+          final wasGuest = previous?.user == null;
+          final isVerified = authState.user != null &&
+              authState.needsEmailVerification == false;
+          if (wasGuest && isVerified) {
+            notifier.syncGuestPreferencesToRemote();
           }
         });
 

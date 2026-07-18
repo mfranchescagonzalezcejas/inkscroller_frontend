@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,11 +21,19 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
 
   static const String _prefsKey = 'cached_user_reading_preferences';
   static const String _timestampKey = 'cached_preferences_timestamp';
+  static const String _guestPrefix = 'guest_';
+
+  String _keyFor(String base, bool isGuest) =>
+      isGuest ? '$_guestPrefix$base' : base;
 
   @override
-  Future<UserReadingPreferences?> getCachedPreferences() async {
-    final timestamp = prefs.getInt(_timestampKey);
-    if (timestamp == null) return null;
+  Future<UserReadingPreferences?> getCachedPreferences({
+    bool isGuest = false,
+  }) async {
+    final timestamp = prefs.getInt(_keyFor(_timestampKey, isGuest));
+    if (timestamp == null) {
+      return isGuest ? _guestDefaults() : null;
+    }
 
     final now = DateTime.now().millisecondsSinceEpoch;
     final age = now - timestamp;
@@ -33,8 +42,8 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       return null;
     }
 
-    final json = prefs.getString(_prefsKey);
-    if (json == null) return null;
+    final json = prefs.getString(_keyFor(_prefsKey, isGuest));
+    if (json == null) return isGuest ? _guestDefaults() : null;
 
     try {
       final data = jsonDecode(json) as Map<String, dynamic>;
@@ -65,7 +74,10 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   }
 
   @override
-  Future<void> savePreferences(UserReadingPreferences preferences) async {
+  Future<void> savePreferences(
+    UserReadingPreferences preferences, {
+    bool isGuest = false,
+  }) async {
     final json = jsonEncode({
       'defaultReaderMode': preferences.defaultReaderMode.name,
       'defaultLanguage': preferences.defaultLanguage,
@@ -78,13 +90,32 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       'updatedAt': preferences.updatedAt.toIso8601String(),
     });
 
-    await prefs.setString(_prefsKey, json);
-    await prefs.setInt(_timestampKey, DateTime.now().millisecondsSinceEpoch);
+    await prefs.setString(_keyFor(_prefsKey, isGuest), json);
+    await prefs.setInt(
+      _keyFor(_timestampKey, isGuest),
+      DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   @override
   Future<void> clearCache() async {
     await prefs.remove(_prefsKey);
     await prefs.remove(_timestampKey);
+    await prefs.remove('$_guestPrefix$_prefsKey');
+    await prefs.remove('$_guestPrefix$_timestampKey');
+  }
+
+  /// Returns device-locale defaults for a first-time guest load.
+  UserReadingPreferences _guestDefaults() {
+    return UserReadingPreferences(
+      defaultReaderMode: ReaderMode.vertical,
+      defaultLanguage: Platform.localeName.split('_').first,
+      contentRatingFilter: ContentRating.safe,
+      demographicFilter: const [
+        MangaDemographic.shounen,
+        MangaDemographic.shoujo,
+      ],
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
   }
 }

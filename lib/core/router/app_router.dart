@@ -25,7 +25,7 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 /// Routes that require an authenticated user.
 ///
 /// Guests landing on any of these paths are redirected to `/login`.
-const _protectedRoutes = <String>[AppRoutes.profile];
+const _protectedRoutes = <String>[];
 
 /// Routes reserved for unauthenticated users.
 ///

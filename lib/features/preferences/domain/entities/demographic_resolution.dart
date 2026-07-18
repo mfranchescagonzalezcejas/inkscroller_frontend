@@ -24,6 +24,9 @@ class DemographicResolution {
   /// Stable string key for value equality comparisons.
   String get stableKey => effectiveFilter.map((d) => d.toJson()).join(',');
 
+  /// Whether the user can modify this demographic selection.
+  bool get isEditable => allowedOptions.length > 1;
+
   const DemographicResolution({
     required this.effectiveFilter,
     required this.allowedOptions,

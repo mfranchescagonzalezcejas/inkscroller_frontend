@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/exceptions.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
@@ -12,6 +13,13 @@ import 'package:inkscroller_flutter/features/preferences/domain/entities/user_re
 import 'package:inkscroller_flutter/features/preferences/domain/repositories/preferences_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
+class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class _FakeUser extends Fake implements User {
+  @override
+  bool get emailVerified => true;
+}
+
 class _MockRemoteDataSource extends Mock implements PreferencesRemoteDataSource {}
 
 class _MockLocalDataSource extends Mock implements PreferencesLocalDataSource {}
@@ -19,6 +27,7 @@ class _MockLocalDataSource extends Mock implements PreferencesLocalDataSource {}
 void main() {
   late PreferencesRemoteDataSource remoteDataSource;
   late PreferencesLocalDataSource localDataSource;
+  late FirebaseAuth firebaseAuth;
   late PreferencesRepository repository;
 
   setUpAll(() {
@@ -27,14 +36,19 @@ void main() {
       defaultLanguage: 'en',
       updatedAt: DateTime.now(),
     ));
+    registerFallbackValue(false);
   });
 
   setUp(() {
     remoteDataSource = _MockRemoteDataSource();
     localDataSource = _MockLocalDataSource();
+    firebaseAuth = _MockFirebaseAuth();
+    // Default: authenticated user (guest tests override this).
+    when(() => firebaseAuth.currentUser).thenReturn(_FakeUser());
     repository = PreferencesRepositoryImpl(
       remoteDataSource: remoteDataSource,
       localDataSource: localDataSource,
+      firebaseAuth: firebaseAuth,
     );
   });
 
@@ -59,10 +73,10 @@ void main() {
       () => remoteDataSource.getPreferences(),
     ).thenAnswer((_) async => remoteModel);
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => null);
     when(
-      () => localDataSource.savePreferences(any()),
+      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async {});
 
     final result = await repository.getPreferences();
@@ -78,7 +92,7 @@ void main() {
       () => remoteDataSource.getPreferences(),
     ).thenThrow(const NetworkException(message: 'offline'));
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => localPrefs);
 
     final result = await repository.getPreferences();
@@ -94,7 +108,7 @@ void main() {
       () => remoteDataSource.getPreferences(),
     ).thenThrow(const NetworkException(message: 'offline'));
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => null);
 
     final result = await repository.getPreferences();
@@ -116,7 +130,7 @@ void main() {
       () => remoteDataSource.getPreferences(),
     ).thenAnswer((_) async => olderRemoteModel);
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => localPrefs);
     when(
       () => remoteDataSource.updatePreferences(
@@ -147,10 +161,10 @@ void main() {
 
   test('writes to local first then syncs remote on success', () async {
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => null);
     when(
-      () => localDataSource.savePreferences(any()),
+      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async {});
     when(
       () => remoteDataSource.updatePreferences(
@@ -171,10 +185,10 @@ void main() {
 
   test('returns optimistic data when remote fails during update', () async {
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => null);
     when(
-      () => localDataSource.savePreferences(any()),
+      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async {});
     when(
       () => remoteDataSource.updatePreferences(
@@ -209,10 +223,10 @@ void main() {
     );
 
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => null);
     when(
-      () => localDataSource.savePreferences(any()),
+      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async {});
     when(
       () => remoteDataSource.updatePreferences(
@@ -243,10 +257,10 @@ void main() {
 
   test('preserves cached fields not being updated', () async {
     when(
-      () => localDataSource.getCachedPreferences(),
+      () => localDataSource.getCachedPreferences(isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async => localPrefs);
     when(
-      () => localDataSource.savePreferences(any()),
+      () => localDataSource.savePreferences(any(), isGuest: any(named: 'isGuest')),
     ).thenAnswer((_) async {});
     when(
       () => remoteDataSource.updatePreferences(
@@ -266,5 +280,54 @@ void main() {
     expect(prefs.defaultReaderMode, ReaderMode.vertical);
     // Language should be preserved from cache.
     expect(prefs.defaultLanguage, 'es');
+  });
+
+  // ── guest path ────────────────────────────────────────────────────────────
+
+  test('getPreferences skips remote and reads guest key when currentUser is null',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(null);
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => localPrefs);
+
+    final result = await repository.getPreferences();
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    final prefs = (result as Right<Failure, UserReadingPreferences>).value;
+    expect(prefs.defaultReaderMode, ReaderMode.paged);
+    // Zero remote calls.
+    verifyNever(() => remoteDataSource.getPreferences());
+    // Guest key used.
+    verify(() => localDataSource.getCachedPreferences(isGuest: true)).called(1);
+  });
+
+  test('updatePreferences skips remote and writes to guest key when currentUser is null',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(null);
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => null);
+    when(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).thenAnswer((_) async {});
+
+    final result = await repository.updatePreferences(
+      defaultReaderMode: 'vertical',
+    );
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    // Zero remote calls.
+    verifyNever(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
+      ),
+    );
+    // Guest key used for local write.
+    verify(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).called(1);
   });
 }
