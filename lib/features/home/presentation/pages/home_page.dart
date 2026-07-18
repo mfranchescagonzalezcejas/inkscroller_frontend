@@ -656,11 +656,16 @@ class _GenreTabsSection extends ConsumerStatefulWidget {
   ConsumerState<_GenreTabsSection> createState() => _GenreTabsSectionState();
 }
 
-class _GenreTabsSectionState extends ConsumerState<_GenreTabsSection> {
+class _GenreTabsSectionState extends ConsumerState<_GenreTabsSection>
+    with AutomaticKeepAliveClientMixin {
   int _selectedTabIndex = 0; // 0=All, 1=Popular, 2=Romance, 3=Action
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     // Watch library provider for server-filtered manga list
     final libraryState = ref.watch(libraryProvider);
     final libraryMangas = libraryState.mangas;
