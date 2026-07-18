@@ -24,6 +24,7 @@ final libraryProvider =
       initialDemographics: demographicResolution.effectiveFilter
           .map((d) => d.toJson())
           .toList(),
+      enablePreload: true,
     );
 
     // Listen for content rating changes and trigger a refresh.

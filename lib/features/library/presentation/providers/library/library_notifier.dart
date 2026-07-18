@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../../core/constants/app_constants.dart';
 import '../../../domain/entities/manga_tags.dart';
@@ -24,6 +25,20 @@ String _cacheKey(
       ':d:${canonicalDemographicsKey(demographics)}';
 }
 
+/// Wraps [LibraryState] with a [cachedAt] timestamp for TTL-based expiration.
+///
+/// Private to this file — not exported. Prevents `cachedAt` from leaking into
+/// [LibraryState] equality/hashCode, which would trigger spurious consumer rebuilds.
+class _CachedEntry {
+  final LibraryState state;
+  final DateTime cachedAt;
+
+  const _CachedEntry(this.state, this.cachedAt);
+
+  /// Returns `true` when the entry is still within the freshness window.
+  bool isFresh(Duration ttl) => cachedAt.add(ttl).isAfter(DateTime.now());
+}
+
 /// Manages paginated manga list state with search, debounce, and deduplication.
 ///
 /// Calls [GetMangaList] and [SearchManga] use cases and emits immutable
@@ -34,9 +49,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     this._searchManga, {
     String? initialContentRating,
     List<String>? initialDemographics,
+    bool enablePreload = false,
   })  : _mode = LibraryMode.normal,
         _contentRating = initialContentRating,
         _demographics = initialDemographics,
+        _enablePreload = enablePreload,
         super(LibraryState.initial()) {
     loadInitial(
       contentRating: initialContentRating,
@@ -46,6 +63,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
   final GetMangaList _getMangaList;
   final SearchManga _searchManga;
+  final bool _enablePreload;
 
   LibraryMode _mode;
   String? _genre;
@@ -67,14 +85,21 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   int _totalResults = 0;
   int _searchQueryVersion = 0;
 
+  /// Maximum age for a cache entry to be considered fresh.
+  static const Duration _cacheTtl = Duration(minutes: AppConstants.tabCacheTtlMinutes);
+
   /// Shared cache for genre tabs — static so sibling [LibraryNotifier]
   /// instances (Home and Explore) reuse each other's cached pages instead
   /// of fetching the same data twice.
-  static final Map<String, LibraryState> _tabCache = {};
+  static final Map<String, _CachedEntry> _tabCache = {};
 
   /// Offset per cache key, kept alongside [id://_tabCache] so pagination
   /// resumes correctly when a sibling notifier reuses cached state.
   static final Map<String, int> _tabCacheOffset = {};
+
+  /// Cache keys written by this notifier instance. Used by [resetExplore] to
+  /// evict only this instance's entries, leaving sibling (Home) tabs intact.
+  final Set<String> _myCacheKeys = {};
 
   /// Clears the shared cache so a subsequent [loadInitial] fetches fresh data.
   /// Exposed for testing — call in [setUp] to isolate test cases.
@@ -83,11 +108,39 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     _tabCacheOffset.clear();
   }
 
+  /// Seeds a cache entry with an explicit [cachedAt] timestamp for testing
+  /// stale-while-revalidate and TTL boundary scenarios.
+  ///
+  /// The cache key is computed internally via [_cacheKey] so tests control
+  /// staleness without depending on private key-format internals.
+  @visibleForTesting
+  static void seedCacheEntry({
+    required LibraryMode mode,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
+    required LibraryState state,
+    required DateTime cachedAt,
+  }) {
+    final key = _cacheKey(
+      mode,
+      genre,
+      contentRating: contentRating,
+      demographics: demographics,
+    );
+    _tabCache[key] = _CachedEntry(state, cachedAt);
+  }
+
   @override
   void dispose() {
     _searchDebounce?.cancel();
     super.dispose();
   }
+
+  /// Returns a stale-state copy that preserves the grid while signaling a
+  /// background refresh is in progress.
+  LibraryState _produceStaleState(LibraryState stale) =>
+      stale.copyWith(isLoadingMore: true);
 
   Future<void> loadInitial({
     LibraryMode mode = LibraryMode.normal,
@@ -103,11 +156,12 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       demographics: effectiveDemographics,
     );
 
-    // Return cached result immediately if available.
-    if (_tabCache.containsKey(key)) {
-      _loadVersion++; // Invalidate any in-flight stale requests.
-      final cached = _tabCache[key]!;
-      state = cached.copyWith(isLoadingMore: false);
+    final entry = _tabCache[key];
+
+    // --- Path 1: Cache hit + fresh → serve instantly, no network ---
+    if (entry != null && entry.isFresh(_cacheTtl)) {
+      _loadVersion++;
+      state = entry.state.copyWith(isLoadingMore: false);
       _mode = mode;
       _genre = genre;
       _contentRating = contentRating;
@@ -116,6 +170,23 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       return;
     }
 
+    // --- Path 2: Cache hit + stale → show stale grid, refresh in background ---
+    if (entry != null && !entry.isFresh(_cacheTtl)) {
+      _loadVersion++;
+      final capturedVersion = _loadVersion;
+      state = _produceStaleState(entry.state);
+      _mode = mode;
+      _genre = genre;
+      _contentRating = contentRating;
+      _demographics = effectiveDemographics;
+      _offset = _tabCacheOffset[key] ?? 0;
+
+      // Non-blocking background fetch.
+      unawaited(_staleRefresh(key, mode, genre, contentRating, effectiveDemographics, capturedVersion));
+      return;
+    }
+
+    // --- Path 3: Cache miss → shimmer, fetch synchronously ---
     _loadVersion++;
     final capturedVersion = _loadVersion;
     state = state.copyWith(isLoading: true, isLoadingMore: false, clearFailure: true);
@@ -157,10 +228,126 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
           clearFailure: true,
         );
         state = newState;
-        _tabCache[key] = newState;
+        _tabCache[key] = _CachedEntry(newState, DateTime.now());
         _tabCacheOffset[key] = _offset;
+        _myCacheKeys.add(key);
+
+        if (_enablePreload) {
+          _preloadAdjacentTabs(capturedVersion);
+        }
       },
     );
+  }
+
+  /// Background refresh for a stale cache entry. Guarded by [capturedVersion]
+  /// so rapid tab switches discard stale responses.
+  Future<void> _staleRefresh(
+    String key,
+    LibraryMode mode,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
+    int capturedVersion,
+  ) async {
+    try {
+      final result = await _getMangaList(
+        limit: _limit,
+        offset: 0,
+        order: mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
+        genre: genre,
+        contentRating: contentRating,
+        demographics: demographics?.map(MangaDemographic.fromJson).toList(),
+      );
+
+      if (capturedVersion != _loadVersion) return;
+
+      result.fold(
+        (failure) {
+          // Keep stale data visible; surface failure.
+          state = state.copyWith(isLoadingMore: false, failure: failure);
+        },
+        (mangas) {
+          _offset = mangas.length;
+          final freshState = state.copyWith(
+            mangas: dedupeMangas(mangas),
+            isLoadingMore: false,
+            hasMore: mode == LibraryMode.normal && mangas.length == _limit,
+            clearFailure: true,
+          );
+          state = freshState;
+          _tabCache[key] = _CachedEntry(freshState, DateTime.now());
+          _tabCacheOffset[key] = _offset;
+        },
+      );
+    } on Exception catch (_) {
+      // Surface unexpected errors as failure while keeping stale grid.
+      if (capturedVersion == _loadVersion) {
+        state = state.copyWith(isLoadingMore: false);
+      }
+    }
+  }
+
+  /// Fire-and-forget preload of the 3 adjacent genre tabs after Home's
+  /// [loadInitial] succeeds. Writes to `_tabCache` only — never mutates
+  /// instance state or `_myCacheKeys`.
+  Future<void> _preloadAdjacentTabs(int capturedVersion) async {
+    if (capturedVersion != _loadVersion) return;
+
+    const adjacent = <({LibraryMode mode, String? genre})>[
+      (mode: LibraryMode.popular, genre: null),
+      (mode: LibraryMode.normal, genre: 'romance'),
+      (mode: LibraryMode.normal, genre: 'action'),
+    ];
+
+    for (final target in adjacent) {
+      if (capturedVersion != _loadVersion) return;
+
+      final key = _cacheKey(
+        target.mode,
+        target.genre,
+        contentRating: _contentRating,
+        demographics: _demographics,
+      );
+
+      final existing = _tabCache[key];
+      if (existing != null && existing.isFresh(_cacheTtl)) continue;
+
+      try {
+        final result = await _getMangaList(
+          limit: _limit,
+          offset: 0,
+          order: target.mode == LibraryMode.popular
+              ? {'followedCount': 'desc'}
+              : null,
+          genre: target.genre,
+          contentRating: _contentRating,
+          demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
+        );
+
+        if (capturedVersion != _loadVersion) return;
+
+        result.fold(
+          (_) {},
+          (mangas) {
+            if (capturedVersion != _loadVersion) return;
+            _tabCache[key] = _CachedEntry(
+              LibraryState(
+                mangas: dedupeMangas(mangas),
+                isLoading: false,
+                isLoadingMore: false,
+                hasMore: mangas.length == _limit,
+                query: '',
+                isSearching: false,
+              ),
+              DateTime.now(),
+            );
+            _tabCacheOffset[key] = mangas.length;
+          },
+        );
+      } on Exception catch (_) {
+        // Fire-and-forget: errors silently ignored.
+      }
+    }
   }
 
   Future<void> loadMore() async {
@@ -264,6 +451,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     );
     _tabCache.remove(key);
     _tabCacheOffset.remove(key);
+    _myCacheKeys.remove(key);
     return loadInitial(
       mode: _mode,
       genre: _genre,
@@ -286,8 +474,8 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   /// Resets Explore to its initial catalogue state.
   ///
   /// Cancels any pending search, invalidates in-flight responses, clears the
-  /// active query, search cursors, genre filter, tab cache, and reloads the
-  /// initial catalogue.
+  /// active query, search cursors, genre filter, and evicts only the cache
+  /// entries written by this notifier instance (leaving Home tabs intact).
   Future<void> resetExplore() async {
     _searchDebounce?.cancel();
     _searchQueryVersion++;
@@ -297,8 +485,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     _offset = 0;
     _genre = null;
     _mode = LibraryMode.normal;
-    _tabCache.clear();
-    _tabCacheOffset.clear();
+    for (final key in _myCacheKeys) {
+      _tabCache.remove(key);
+      _tabCacheOffset.remove(key);
+    }
+    _myCacheKeys.clear();
     state = LibraryState.initial();
     await loadInitial(
       contentRating: _contentRating,

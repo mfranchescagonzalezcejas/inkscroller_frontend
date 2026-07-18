@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
@@ -7,6 +9,7 @@ import 'package:inkscroller_flutter/features/library/domain/entities/search_resu
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_list.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/search_manga.dart';
 import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_notifier.dart';
+import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_state.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockGetMangaList extends Mock implements GetMangaList {}
@@ -1157,6 +1160,673 @@ void main() {
       expect(notifier.state.query, '');
       expect(notifier.state.mangas, hasLength(1));
       expect(notifier.state.mangas.first.id, 'cat');
+    });
+  });
+
+  group('cache TTL', () {
+    test('fresh cache hit skips network call', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifier = LibraryNotifier(getMangaList, searchManga);
+      await Future<void>.delayed(Duration.zero);
+
+      // First load hits the network and caches.
+      expect(notifier.state.mangas, hasLength(2));
+
+      // Reset mock tracking — only care about calls AFTER this point.
+      clearInteractions(getMangaList);
+
+      // Second load with same key — should serve from cache, no extra call.
+      await notifier.loadInitial();
+      await Future<void>.delayed(Duration.zero);
+
+      // No network call — fresh cache hit.
+      verifyNever(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      );
+
+      expect(notifier.state.mangas, hasLength(2));
+    });
+
+    test('cache miss triggers network fetch', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifier = LibraryNotifier(getMangaList, searchManga);
+      await Future<void>.delayed(Duration.zero);
+
+      // Constructor load is a cache miss → network call.
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.mangas, hasLength(2));
+
+      // Different key (genre=action) → another cache miss → network call.
+      await notifier.setGenre('action');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(notifier.state.mangas, isNotEmpty);
+      verify(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: 'action',
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).called(1);
+    });
+
+    test('stale cache hit shows LoadingMore and refreshes in background', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+      );
+      await Future<void>.delayed(Duration.zero);
+      clearInteractions(getMangaList);
+
+      // Seed a stale entry for the "romance" genre key (6 min old).
+      final staleMangas = <Manga>[
+        Manga(id: 'old-1', title: 'Stale One'),
+        Manga(id: 'old-2', title: 'Stale Two'),
+      ];
+      LibraryNotifier.seedCacheEntry(
+        mode: LibraryMode.normal,
+        genre: 'romance',
+        state: LibraryState(
+          mangas: staleMangas,
+          isLoading: false,
+          isLoadingMore: false,
+          hasMore: true,
+          query: '',
+          isSearching: false,
+        ),
+        cachedAt: DateTime.now().subtract(const Duration(minutes: 6)),
+      );
+
+      // Do NOT await — stale path sets state synchronously before _staleRefresh.
+      final genreFuture = notifier.setGenre('romance');
+
+      expect(notifier.state.isLoadingMore, isTrue);
+      expect(notifier.state.mangas, hasLength(2));
+      expect(notifier.state.mangas[0].id, 'old-1');
+
+      // Now await so _staleRefresh runs to completion.
+      await genreFuture;
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      // Background refresh fired via the original stub.
+      verify(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: 'romance',
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).called(1);
+    });
+
+    test('stale cache hit keeps grid visible when bg refresh fails', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      // Seed a stale entry for the "action" genre (6 min old).
+      final staleMangas = <Manga>[
+        Manga(id: 'keep-1', title: 'Keep One'),
+      ];
+      LibraryNotifier.seedCacheEntry(
+        mode: LibraryMode.normal,
+        genre: 'action',
+        state: LibraryState(
+          mangas: staleMangas,
+          isLoading: false,
+          isLoadingMore: false,
+          hasMore: true,
+          query: '',
+          isSearching: false,
+        ),
+        cachedAt: DateTime.now().subtract(const Duration(minutes: 6)),
+      );
+
+      // Stale bg refresh will fail.
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: 'action',
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Left<Failure, List<Manga>>(
+          NetworkFailure(message: 'still offline'),
+        ),
+      );
+
+      // Do NOT await — stale path sets state synchronously.
+      final genreFuture = notifier.setGenre('action');
+
+      expect(notifier.state.isLoadingMore, isTrue);
+      expect(notifier.state.mangas, hasLength(1));
+      expect(notifier.state.mangas[0].id, 'keep-1');
+      expect(notifier.state.failure, isNull);
+
+      // Now await so the stale refresh runs and fails.
+      await genreFuture;
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      // Grid preserved, failure surfaced.
+      expect(notifier.state.isLoadingMore, isFalse);
+      expect(notifier.state.mangas, hasLength(1));
+      expect(notifier.state.mangas[0].id, 'keep-1');
+      expect(notifier.state.failure, isA<NetworkFailure>());
+    });
+  });
+
+  group('resetExplore scoping', () {
+    test('two notifiers: resetExplore on one leaves other keys in cache', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifierA = LibraryNotifier(getMangaList, searchManga);
+      await Future<void>.delayed(Duration.zero);
+
+      // Switch to a genre tab so notifierA has a key in _myCacheKeys.
+      await notifierA.setGenre('romance');
+      await Future<void>.delayed(Duration.zero);
+
+      // Now switching back to All should be a fresh cache hit.
+      clearInteractions(getMangaList);
+      await notifierA.loadInitial();
+      await Future<void>.delayed(Duration.zero);
+
+      // All served from cache — no network call.
+      verifyNever(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      );
+
+      // Create notifierB, let it load, then resetExplore it.
+      final notifierB = LibraryNotifier(getMangaList, searchManga);
+      await Future<void>.delayed(Duration.zero);
+      await notifierB.resetExplore();
+      await Future<void>.delayed(Duration.zero);
+
+      // notifierA's keys should survive notifierB's resetExplore.
+      clearInteractions(getMangaList);
+      await notifierA.loadInitial();
+      await Future<void>.delayed(Duration.zero);
+
+      verifyNever(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      );
+    });
+  });
+
+  group('refresh removes from _myCacheKeys', () {
+    test('refresh evicts key from instance cache set', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifier = LibraryNotifier(getMangaList, searchManga);
+      await Future<void>.delayed(Duration.zero);
+
+      // Initial load wrote to cache and _myCacheKeys.
+      // Now refresh — should evict the key from both cache AND _myCacheKeys.
+      clearInteractions(getMangaList);
+      await notifier.refresh();
+      await Future<void>.delayed(Duration.zero);
+
+      // After refresh, the key is removed from _myCacheKeys, so resetExplore
+      // should NOT try to remove it again (no-op on next resetExplore).
+      verify(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).called(1);
+    });
+  });
+
+  group('preload', () {
+    test('preloads adjacent tabs after successful Home loadInitial', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      // ignore: unused_local_variable
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+        enablePreload: true,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      // Let preload fire-and-forget complete.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Preload fires for 3 adjacent tabs (popular, romance, action).
+      // Constructor already called getMangaList once (for 'All' tab).
+      // Preload adds 3 more calls.
+      verify(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).called(4); // 1 constructor + 3 preload
+    });
+
+    test('preload skips fresh entries', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+        enablePreload: true,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      // Preload fires for 3 tabs.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Reset tracking — only care about calls AFTER this point.
+      clearInteractions(getMangaList);
+
+      // Switch to Romance tab — should hit preload cache, no new call.
+      await notifier.setGenre('romance');
+      await Future<void>.delayed(Duration.zero);
+
+      // No additional network call for 'romance' since preload populated it.
+      verifyNever(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: 'romance',
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      );
+    });
+
+    test('preload respects _loadVersion guard — discards on version bump', () async {
+      int romanceCallCount = 0;
+      final romanceCompleter = Completer<Either<Failure, List<Manga>>>();
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: 'romance',
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer((_) async {
+        romanceCallCount++;
+        if (romanceCallCount <= 1) {
+          return romanceCompleter.future;
+        }
+        return Right<Failure, List<Manga>>(mangas);
+      });
+
+      // Stub all other getMangaList calls to return immediately.
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+        enablePreload: true,
+      );
+
+      // Wait for constructor + popular preload to complete.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // The first romance preload is still pending in the Completer.
+      // Bump _loadVersion by calling loadInitial with different params.
+      clearInteractions(getMangaList);
+      await notifier.setGenre('action');
+      await Future<void>.delayed(Duration.zero);
+
+      // Now complete the first romance preload — should be discarded because
+      // the constructor's capturedVersion < current _loadVersion.
+      romanceCompleter.complete(
+        Right<Failure, List<Manga>>([
+          Manga(id: 'preloaded', title: 'Should Be Discarded'),
+        ]),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      // Override the romance cache entry with a stale one so the upcoming
+      // setGenre('romance') must go to the network.
+      LibraryNotifier.seedCacheEntry(
+        mode: LibraryMode.normal,
+        genre: 'romance',
+        state: LibraryState(
+          mangas: <Manga>[Manga(id: 'stale', title: 'Stale Romance')],
+          isLoading: false,
+          isLoadingMore: false,
+          hasMore: true,
+          query: '',
+          isSearching: false,
+        ),
+        cachedAt: DateTime.now().subtract(const Duration(minutes: 6)),
+      );
+
+      // Switching to romance — stale entry forces network fetch.
+      clearInteractions(getMangaList);
+      await notifier.setGenre('romance');
+      await Future<void>.delayed(Duration.zero);
+
+      // The first preload was discarded (never updated cache), stale-seeded
+      // entry forces a real network call.
+      verify(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: 'romance',
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).called(1);
+    });
+
+    test('preload does NOT fire when enablePreload is false', () async {
+      when(
+        () => getMangaList(
+          limit: 20,
+          offset: any(named: 'offset'),
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => Right<Failure, List<Manga>>(mangas),
+      );
+      when(
+        () => searchManga(
+          any(),
+          limit: any(named: 'limit'),
+          offset: any(named: 'offset'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, SearchResult>(
+          SearchResult(mangas: [], limit: 20, offset: 0, total: 0),
+        ),
+      );
+
+      // ignore: unused_local_variable
+      final notifier = LibraryNotifier(
+        getMangaList,
+        searchManga,
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Only 1 network call (constructor) — no preload.
+      verify(
+        () => getMangaList(
+          limit: 20,
+          offset: 0,
+          order: any(named: 'order'),
+          genre: any(named: 'genre'),
+          contentRating: any(named: 'contentRating'),
+          demographics: any(named: 'demographics'),
+        ),
+      ).called(1);
     });
   });
 }
