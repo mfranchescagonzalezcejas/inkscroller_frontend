@@ -7,8 +7,11 @@ import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 import '../providers/reading_progress_provider.dart';
 import 'progress_jump_dialog.dart';
 
-/// Displays the current reading progress with +/- manual-mark controls,
-/// a batch-size selector, and a jump-to-chapter button.
+/// Displays the current reading progress with a progress bar, count label,
+/// batch-size selector, and a jump-to-chapter button.
+///
+/// Progress updates only happen via individual chapter toggle in the batch
+/// list below — the +/- manual controls are intentionally omitted.
 ///
 /// Intended to sit above the chapter list on [MangaDetailPage].
 class ReadingProgressSection extends ConsumerWidget {
@@ -59,7 +62,7 @@ class ReadingProgressSection extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
 
-          // Controls row: read count, +/-, batch size, jump
+          // Controls row: read count, batch size, jump
           Row(
             children: <Widget>[
               // Read count label
@@ -73,32 +76,6 @@ class ReadingProgressSection extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-
-              // Decrease button
-              IconButton(
-                icon: const Icon(Icons.remove_circle_outline, size: 20),
-                color: AppColors.onSurfaceVariant,
-                onPressed: () {
-                  ref
-                      .read(readingProgressProvider.notifier)
-                      .updateManuallyMarkedCount(mangaId, -1);
-                },
-                tooltip: context.l10n.manualMarkDecrease,
-                visualDensity: VisualDensity.compact,
-              ),
-
-              // Increase button
-              IconButton(
-                icon: const Icon(Icons.add_circle_outline, size: 20),
-                color: AppColors.onSurfaceVariant,
-                onPressed: () {
-                  ref
-                      .read(readingProgressProvider.notifier)
-                      .updateManuallyMarkedCount(mangaId, 1);
-                },
-                tooltip: context.l10n.manualMarkIncrease,
-                visualDensity: VisualDensity.compact,
-              ),
 
               // Batch size selector
               _BatchSizeSelector(
