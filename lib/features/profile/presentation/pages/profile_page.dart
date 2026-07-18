@@ -241,6 +241,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ],
 
+        // ── Account section ─────────────────────────────────────────────
+        const SizedBox(height: 20),
+        _SectionLabel(label: context.l10n.accountSectionLabel.toUpperCase()),
+        const SizedBox(height: 8),
+        _PrefCard(
+          children: <Widget>[
+            _PrefRow(
+              icon: Icons.person_outline,
+              iconColor: AppColors.primary,
+              title: context.l10n.authChangeUsernameOption,
+              value: profile?.username ?? '',
+              onTap: () => _showChangeUsernameDialog(context, ref, profile),
+            ),
+          ],
+        ),
+
         // ── Preferences section ───────────────────────────────────────────
         _SectionLabel(label: context.l10n.profileReadingPreferencesSection),
         const SizedBox(height: 8),
@@ -500,6 +516,110 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ContentRating.suggestive => context.l10n.profileContentRatingSuggestive,
       ContentRating.all => context.l10n.profileContentRatingAll,
     };
+  }
+
+  Future<void> _showChangeUsernameDialog(
+    BuildContext context,
+    WidgetRef ref,
+    UserProfile? profile,
+  ) async {
+    final controller = TextEditingController(text: profile?.username ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          context.l10n.authChangeUsernameTitle,
+          style: const TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.onSurface,
+          ),
+        ),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Plus Jakarta Sans',
+              fontSize: 14,
+              color: AppColors.onSurface,
+            ),
+            decoration: InputDecoration(
+              labelText: context.l10n.authUsernameLabel,
+              labelStyle: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                color: AppColors.onSurfaceVariant,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.outlineVariant),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.primary),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return context.l10n.authUsernameRequired;
+              }
+              final trimmed = value.trim();
+              if (trimmed.length < 3 || trimmed.length > 30) {
+                return context.l10n.authUsernameInvalid;
+              }
+              if (!RegExp(r'^[a-z0-9_-]+$').hasMatch(trimmed)) {
+                return context.l10n.authUsernameInvalid;
+              }
+              return null;
+            },
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              context.l10n.dialogCancel,
+              style: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState?.validate() ?? false) {
+                Navigator.of(ctx).pop(true);
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(context.l10n.authChangeUsernameSave),
+          ),
+        ],
+      ),
+    );
+
+    if (saved != true || !context.mounted) return;
+
+    final newUsername = controller.text.trim();
+    final birthDate = profile?.birthDate ?? DateTime(2000);
+    await ref
+        .read(userProfileProvider.notifier)
+        .updateProfile(username: newUsername, birthDate: birthDate);
+    if (!context.mounted) return;
+    final profileState = ref.read(userProfileProvider);
+    if (profileState.error != null) {
+      AppFeedback.showError(context, title: profileState.error!);
+    } else {
+      AppFeedback.showSuccess(
+        context,
+        title: context.l10n.authChangeUsernameSuccess,
+      );
+    }
   }
 
   Future<void> _showContentRatingDialog(

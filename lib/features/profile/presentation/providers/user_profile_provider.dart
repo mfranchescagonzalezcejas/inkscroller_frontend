@@ -7,5 +7,8 @@ import 'user_profile_state.dart';
 /// Riverpod bridge for the user profile module.
 final userProfileProvider =
     StateNotifierProvider<UserProfileNotifier, UserProfileState>(
-      (ref) => UserProfileNotifier(getUserProfile: sl()),
+      (ref) => UserProfileNotifier(
+        getUserProfile: sl(),
+        updateUserProfile: sl(),
+      ),
     );

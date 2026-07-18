@@ -366,5 +366,14 @@
   "chaptersFilterUnread": "Unread only",
   "markAsRead": "Mark as read",
   "markAsUnread": "Mark as unread",
-  "chaptersFilteredOut": "No chapters match the current filter"
+  "chaptersFilteredOut": "No chapters match the current filter",
+  "authForgotPasswordLink": "Forgot your password?",
+  "authForgotPasswordTitle": "Reset your password",
+  "authForgotPasswordSend": "Send reset email",
+  "authResetPasswordSent": "Password reset email sent. Check your inbox.",
+  "authResetPasswordButton": "Reset password",
+  "authChangeUsernameOption": "Change username",
+  "authChangeUsernameTitle": "Change username",
+  "authChangeUsernameSave": "Save",
+  "authChangeUsernameSuccess": "Username updated successfully"
 }

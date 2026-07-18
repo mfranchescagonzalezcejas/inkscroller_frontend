@@ -366,5 +366,14 @@
   "chaptersFilterUnread": "Solo no leídos",
   "markAsRead": "Marcar como leído",
   "markAsUnread": "Marcar como no leído",
-  "chaptersFilteredOut": "Ningún capítulo coincide con el filtro"
+  "chaptersFilteredOut": "Ningún capítulo coincide con el filtro",
+  "authForgotPasswordLink": "¿Olvidaste tu contraseña?",
+  "authForgotPasswordTitle": "Restablecer contraseña",
+  "authForgotPasswordSend": "Enviar email de recuperación",
+  "authResetPasswordSent": "Email de recuperación enviado. Revisa tu bandeja de entrada.",
+  "authResetPasswordButton": "Restablecer contraseña",
+  "authChangeUsernameOption": "Cambiar nombre de usuario",
+  "authChangeUsernameTitle": "Cambiar nombre de usuario",
+  "authChangeUsernameSave": "Guardar",
+  "authChangeUsernameSuccess": "Nombre de usuario actualizado con éxito"
 }

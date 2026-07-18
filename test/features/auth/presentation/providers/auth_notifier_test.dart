@@ -7,6 +7,7 @@ import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart'
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/send_email_verification.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_password_reset.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
@@ -34,6 +35,8 @@ class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
 class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
 
+class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
+
 class _MockReloadUser extends Mock implements ReloadUser {}
 
 // ---------------------------------------------------------------------------
@@ -56,6 +59,7 @@ AuthNotifier _makeNotifier({
   required SignOut signOut,
   required GetAuthState getAuthState,
   required SendEmailVerification sendEmailVerification,
+  required SendPasswordReset sendPasswordReset,
   required ReloadUser reloadUser,
   required GetUserProfile getUserProfile,
   required UpdateUserProfile updateUserProfile,
@@ -66,6 +70,7 @@ AuthNotifier _makeNotifier({
     signOut: signOut,
     getAuthState: getAuthState,
     sendEmailVerification: sendEmailVerification,
+    sendPasswordReset: sendPasswordReset,
     reloadUser: reloadUser,
     getUserProfile: getUserProfile,
     updateUserProfile: updateUserProfile,
@@ -80,6 +85,7 @@ void main() {
   late _MockGetUserProfile mockGetUserProfile;
   late _MockUpdateUserProfile mockUpdateUserProfile;
   late _MockSendEmailVerification mockSendEmailVerification;
+  late _MockSendPasswordReset mockSendPasswordReset;
   late _MockReloadUser mockReloadUser;
 
   setUp(() {
@@ -90,6 +96,7 @@ void main() {
     mockGetUserProfile = _MockGetUserProfile();
     mockUpdateUserProfile = _MockUpdateUserProfile();
     mockSendEmailVerification = _MockSendEmailVerification();
+    mockSendPasswordReset = _MockSendPasswordReset();
     mockReloadUser = _MockReloadUser();
 
     // Default: auth state stream never emits — keeps notifier initial state clean.
@@ -136,6 +143,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -168,6 +176,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -197,6 +206,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -226,6 +236,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -255,6 +266,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -288,6 +300,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -313,6 +326,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -340,6 +354,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -379,6 +394,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -408,6 +424,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -445,6 +462,7 @@ void main() {
         signOut: mockSignOut,
         getAuthState: mockGetAuthState,
         sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
         reloadUser: mockReloadUser,
         getUserProfile: mockGetUserProfile,
         updateUserProfile: mockUpdateUserProfile,
@@ -459,6 +477,86 @@ void main() {
       expect(notifier.state.isLoading, isFalse);
 
       await streamController.close();
+    });
+  });
+
+  // ── resetPassword ───────────────────────────────────────────────────────
+
+  group('resetPassword', () {
+    test('sets passwordResetSent true on success', () async {
+      when(
+        () => mockSendPasswordReset(email: any(named: 'email')),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
+        reloadUser: mockReloadUser,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
+      );
+
+      await notifier.resetPassword('alice@example.com');
+
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.passwordResetSent, isTrue);
+      expect(notifier.state.error, isNull);
+    });
+
+    test('stores error message on failure', () async {
+      when(
+        () => mockSendPasswordReset(email: any(named: 'email')),
+      ).thenAnswer(
+        (_) async => const Left<Failure, void>(
+          ServerFailure(message: 'auth/too-many-requests'),
+        ),
+      );
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
+        reloadUser: mockReloadUser,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
+      );
+
+      await notifier.resetPassword('alice@example.com');
+
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.passwordResetSent, isFalse);
+      expect(notifier.state.error, 'auth/too-many-requests');
+    });
+
+    test('clearPasswordResetSent resets the flag', () async {
+      when(
+        () => mockSendPasswordReset(email: any(named: 'email')),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+      final notifier = _makeNotifier(
+        signIn: mockSignIn,
+        signUp: mockSignUp,
+        signOut: mockSignOut,
+        getAuthState: mockGetAuthState,
+        sendEmailVerification: mockSendEmailVerification,
+        sendPasswordReset: mockSendPasswordReset,
+        reloadUser: mockReloadUser,
+        getUserProfile: mockGetUserProfile,
+        updateUserProfile: mockUpdateUserProfile,
+      );
+
+      await notifier.resetPassword('alice@example.com');
+      expect(notifier.state.passwordResetSent, isTrue);
+
+      notifier.clearPasswordResetSent();
+      expect(notifier.state.passwordResetSent, isFalse);
     });
   });
 }

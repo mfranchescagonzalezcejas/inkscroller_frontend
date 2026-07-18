@@ -100,6 +100,18 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> sendPasswordReset({required String email}) async {
+    try {
+      await _dataSource.sendPasswordResetEmail(email: email);
+      return const Right(null);
+    } on AppException catch (e) {
+      return Left(_mapToFailure(e));
+    } on Exception catch (e) {
+      return Left(UnexpectedFailure(message: e.toString()));
+    }
+  }
+
   Failure _mapToFailure(AppException exception) {
     return switch (exception) {
       ServerException() => ServerFailure(

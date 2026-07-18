@@ -790,4 +790,33 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chaptersFilteredOut => 'Ningún capítulo coincide con el filtro';
+
+  @override
+  String get authForgotPasswordLink => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get authForgotPasswordTitle => 'Restablecer contraseña';
+
+  @override
+  String get authForgotPasswordSend => 'Enviar email de recuperación';
+
+  @override
+  String get authResetPasswordSent =>
+      'Email de recuperación enviado. Revisa tu bandeja de entrada.';
+
+  @override
+  String get authResetPasswordButton => 'Restablecer contraseña';
+
+  @override
+  String get authChangeUsernameOption => 'Cambiar nombre de usuario';
+
+  @override
+  String get authChangeUsernameTitle => 'Cambiar nombre de usuario';
+
+  @override
+  String get authChangeUsernameSave => 'Guardar';
+
+  @override
+  String get authChangeUsernameSuccess =>
+      'Nombre de usuario actualizado con éxito';
 }
