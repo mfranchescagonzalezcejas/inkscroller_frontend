@@ -263,9 +263,16 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
                           color: AppColors.cardHigh,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          typeLabel,
-                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              typeLabel == 'Manhwa' ? Icons.auto_stories : Icons.menu_book,
+                              size: 10, color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(typeLabel, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                          ],
                         ),
                       ),
                     if (demoLabel != null)
@@ -275,9 +282,19 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
                           color: AppColors.cardHigh,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          demoLabel,
-                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              demoLabel == 'Shounen' ? Icons.flash_on :
+                              demoLabel == 'Shoujo' ? Icons.favorite :
+                              demoLabel == 'Seinen' ? Icons.explore :
+                              Icons.auto_awesome,
+                              size: 10, color: AppColors.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(demoLabel, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+                          ],
                         ),
                       ),
                   ],
@@ -400,7 +417,7 @@ class _PortraitContent extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
           ],
         ),
