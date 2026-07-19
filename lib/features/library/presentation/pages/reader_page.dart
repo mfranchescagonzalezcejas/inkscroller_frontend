@@ -11,6 +11,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../domain/entities/chapter.dart';
 import '../../domain/entities/reader_mode.dart';
+import '../../domain/entities/reading_preferences.dart';
 import '../providers/per_title_override_provider.dart';
 import '../providers/reader/reader_provider.dart';
 import '../providers/reader/reader_ui_provider.dart';
@@ -169,27 +170,28 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                   _FloatingIconButton(
                     icon: Icons.tune_outlined,
                     onTap: () async {
-                      await showReaderSettings(
+                      final selected = await showReaderSettings(
                         context,
                         chapterId: widget.chapterId,
                         mangaId: widget.mangaId,
                         initialMode: state.readerMode,
                       );
-                      if (!context.mounted) return;
-                      final preferences = ref.read(preferencesProvider);
-                      final globalReaderMode =
-                          preferences.preferences?.defaultReaderMode;
-                      final titleOverride = widget.mangaId != null
-                          ? ref.read(
-                              perTitleOverrideProvider(widget.mangaId!),
-                            )
-                          : null;
-                      ref
-                          .read(readerProvider(widget.chapterId).notifier)
-                          .reapplyReaderMode(
-                            globalReaderMode: globalReaderMode,
-                            titleOverride: titleOverride,
-                          );
+                      if (selected != null && context.mounted) {
+                        ref
+                            .read(readerProvider(widget.chapterId).notifier)
+                            .reapplyReaderMode(
+                              globalReaderMode: ref
+                                  .read(preferencesProvider)
+                                  .preferences
+                                  ?.defaultReaderMode,
+                              titleOverride: widget.mangaId != null
+                                  ? PerTitleOverride(
+                                      mangaId: widget.mangaId!,
+                                      preferredReaderMode: selected,
+                                    )
+                                  : null,
+                            );
+                      }
                     },
                   ),
                 ],
