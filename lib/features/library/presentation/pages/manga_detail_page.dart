@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
@@ -173,21 +172,22 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool useBatchList =
         showBatches && progress.totalChaptersCount > progress.batchSize;
 
-    // Estimate blur background height so it extends behind the cover content.
-    // This runs outside the scroll view so there's no constraint cap.
-    final double maxCoverHeight = MediaQuery.of(context).size.height * 0.60;
-    final double descExtra = (widget.manga.description?.isNotEmpty ?? false) ? 200.0 : 0.0;
-    final double blurHeight = maxCoverHeight + 200.0 + descExtra;
+    // Cover section height (estimated from content). Used both for the blur
+    // background and as the top padding so the scrollable chapters start below
+    // the fixed cover content (yellow lines are impossible because there's no
+    // SliverToBoxAdapter constraint).
+    final double maxCvrHeight = MediaQuery.of(context).size.height * 0.60;
+    final double hasDesc = (widget.manga.description?.isNotEmpty ?? false) ? 200.0 : 0.0;
+    final double coverSectionHeight = maxCvrHeight + 200.0 + hasDesc;
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
       body: Stack(
         children: <Widget>[
-          // ── Blur + gradient fill behind the cover content ──────────
-          // Positioned with fixed height so it's independent of scroll constraints.
+          // ── Blur + gradient fill behind the cover content ──────
           Positioned(
             top: 0, left: 0, right: 0,
-            height: blurHeight,
+            height: coverSectionHeight,
             child: Stack(
               children: <Widget>[
                 if (widget.manga.coverUrl != null)
@@ -221,18 +221,21 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
               ],
             ),
           ),
-          // ── Scrollable content ─────────────────────────────────────
+          // ── Cover content (FIXED at top, not in scroll view) ──
+          Positioned(
+            top: 0, left: 0, right: 0,
+            child: _CoverSection(manga: widget.manga),
+          ),
+          // ── Scrollable chapters below the fixed cover ──────────
           Column(
             children: <Widget>[
               if (isOffline) const OfflineBanner(),
               Expanded(
                 child: CustomScrollView(
                   slivers: <Widget>[
-                    // ── Cover section (cover, tags, title, score, desc) ─
-                    // Uses _SliverUnconstrained so the content height is not
-                    // capped by remainingPaintExtent (which caused yellow lines).
-                    _SliverUnconstrained(
-                      child: _CoverSection(manga: widget.manga),
+                    // Push scroll content below the fixed cover
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: coverSectionHeight),
                     ),
 
                     // ── Reading progress section (tracking states) ────
@@ -843,17 +846,7 @@ class _CoverSectionState extends State<_CoverSection> {
     // ── Score badge row ──────────────────────────────────────
     final String? scoreStr = widget.manga.score?.toStringAsFixed(1);
 
-    // Estimate content height so the blur (rendered by the parent Stack)
-    // has enough vertical extent. We use maxCoverHeight + content estimate.
-    final double maxCoverHeight = MediaQuery.of(context).size.height * 0.60;
-    final double descExtra = (widget.manga.description?.isNotEmpty ?? false) ? 200.0 : 0.0;
-    final double sectionHeight = maxCoverHeight + 200.0 + descExtra;
-
-    return Hero(
-      tag: 'cover-${widget.manga.id}',
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: sectionHeight),
-        child: Column(
+    return Column(
         mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
@@ -938,41 +931,6 @@ class _CoverSectionState extends State<_CoverSection> {
               // Bottom breathing room before the next sliver
               const SizedBox(height: 24),
             ],
-          ),
-        ),
-    );
-  }
-}
-
-// ── Unconstrained Sliver ──────────────────────────────────────────────────────
-/// A sliver that lays out its child with unbounded main-axis extent.
-/// Unlike [SliverToBoxAdapter] (which caps at [remainingPaintExtent]), this
-/// lets the child determine its own height — useful when the child contains
-/// content taller than the viewport.
-class _SliverUnconstrained extends SingleChildRenderObjectWidget {
-  const _SliverUnconstrained({super.child});
-
-  @override
-  RenderSliverUnconstrained createRenderObject(BuildContext context) =>
-      RenderSliverUnconstrained();
-}
-
-class RenderSliverUnconstrained extends RenderSliverSingleBoxAdapter {
-  @override
-  void performLayout() {
-    if (child == null) {
-      geometry = SliverGeometry.zero;
-      return;
-    }
-    child!.layout(
-      constraints.asBoxConstraints(maxExtent: double.infinity),
-      parentUsesSize: true,
-    );
-    final double childExtent = child!.size.height;
-    geometry = SliverGeometry(
-      scrollExtent: childExtent,
-      paintExtent: childExtent.clamp(0.0, constraints.remainingPaintExtent),
-      maxPaintExtent: childExtent,
     );
   }
 }
