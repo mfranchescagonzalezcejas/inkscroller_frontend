@@ -225,41 +225,54 @@ class _HeroSlide extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Cover + text row
+                // Cover (left) + text (right)
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Stack(
-                        clipBehavior: Clip.none,
+                      // Left column: cover + buttons below it
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          _AdaptiveHeroCover(coverUrl: manga.coverUrl),
-                          if (manga.score != null)
-                            Positioned(
-                              top: 4,
-                              right: 4,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: AppColors.cardHigh,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      manga.score!.toStringAsFixed(1),
-                                      style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              _AdaptiveHeroCover(coverUrl: manga.coverUrl),
+                              if (manga.score != null)
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cardHigh,
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                  ],
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          manga.score!.toStringAsFixed(1),
+                                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          _HeroActions(
+                            manga: manga,
+                            inLibrary: inLibrary,
+                            onDetail: openDetail,
+                          ),
                         ],
                       ),
                       const SizedBox(width: 16),
+                      // Right column: title + description
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,16 +300,6 @@ class _HeroSlide extends ConsumerWidget {
                       ),
                     ],
                   ),
-                ),
-
-                // 8px gap between cover and buttons
-                const SizedBox(height: 8),
-
-                // Actions row
-                _HeroActions(
-                  manga: manga,
-                  inLibrary: inLibrary,
-                  onDetail: openDetail,
                 ),
               ],
             ),
