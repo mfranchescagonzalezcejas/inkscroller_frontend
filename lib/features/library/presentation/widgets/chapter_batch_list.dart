@@ -197,6 +197,7 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
               PlaceholderChapterBatchItem() => _PlaceholderTile(
                   chapterNumber: item.chapterNumber,
                   mangaId: widget.mangaId,
+                  allChapters: widget.allChapters,
                 ),
             };
           }),
@@ -209,10 +210,15 @@ class _PlaceholderTile extends ConsumerWidget {
   const _PlaceholderTile({
     required this.chapterNumber,
     required this.mangaId,
+    this.allChapters,
   });
 
   final int chapterNumber;
   final String mangaId;
+
+  /// Full chapter list so marking a placeholder also cascades to readable
+  /// chapters with the same number range via [setManuallyMarkedCountTo].
+  final List<Chapter>? allChapters;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -235,18 +241,19 @@ class _PlaceholderTile extends ConsumerWidget {
         ),
         onPressed: () {
           if (isChecked) {
-            // Unmark: set count just below this chapter number
             ref
                 .read(readingProgressProvider.notifier)
-                .setManuallyMarkedCountTo(mangaId, chapterNumber - 1);
+                .setManuallyMarkedCountTo(
+                  mangaId, chapterNumber - 1,
+                  chapters: allChapters,
+                );
           } else {
-            // Mark: ensure count reaches this chapter number
-            final delta = chapterNumber - manualCount;
-            if (delta > 0) {
-              ref
-                  .read(readingProgressProvider.notifier)
-                  .updateManuallyMarkedCount(mangaId, delta);
-            }
+            ref
+                .read(readingProgressProvider.notifier)
+                .setManuallyMarkedCountTo(
+                  mangaId, chapterNumber,
+                  chapters: allChapters,
+                );
           }
         },
         tooltip: context.l10n.placeholderMarkRead,

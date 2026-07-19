@@ -213,11 +213,21 @@ class ReadingProgressNotifier
       ...chaptersToMark.map((chapter) => chapter.id),
     };
 
+    // Sync manual count so placeholders below the target also show as read.
+    int nextManual = current.manuallyMarkedCount;
+    for (final c in chaptersToMark) {
+      final n = c.number;
+      if (n != null && n.toInt() > nextManual) {
+        nextManual = n.toInt();
+      }
+    }
+
     final int nextTotal = current.totalChaptersCount > chapters.length
         ? current.totalChaptersCount
         : chapters.length;
 
     if (nextReadIds.length == current.readChapterIds.length &&
+        nextManual <= current.manuallyMarkedCount &&
         (nextTotal <= current.totalChaptersCount)) {
       return null;
     }
@@ -225,6 +235,7 @@ class ReadingProgressNotifier
     final previous = current;
     final next = current.copyWith(
       readChapterIds: nextReadIds,
+      manuallyMarkedCount: nextManual,
       totalChaptersCount: nextTotal,
       updatedAt: DateTime.now().toUtc(),
     );
@@ -237,6 +248,10 @@ class ReadingProgressNotifier
   /// When [chapters] is provided and the chapter is being marked as read (not
   /// yet read), cascades the mark to all chapters up to [chapterId] — matching
   /// the same behavior as tapping the row body. Unmarking is always single.
+  ///
+  /// Also syncs [manuallyMarkedCount]: when marking, if the marked chapters'
+  /// max number exceeds the current manual count, the count is bumped so
+  /// tracker-only placeholders below that number also show as read.
   Future<void> toggleChapter({
     required String mangaId,
     required String chapterId,
@@ -245,6 +260,7 @@ class ReadingProgressNotifier
   }) async {
     final current = progressFor(mangaId);
     final Set<String> nextReadIds = current.readChapterIds.toSet();
+    int nextManual = current.manuallyMarkedCount;
 
     if (current.isChapterRead(chapterId)) {
       // Unmark: just the tapped chapter.
@@ -253,6 +269,14 @@ class ReadingProgressNotifier
       // Mark with cascade: all chapters up to the target, like markThrough.
       final List<Chapter> toMark = chaptersUpToTarget(chapters, chapterId);
       nextReadIds.addAll(toMark.map((c) => c.id));
+      // Sync manual count: if any marked chapter has a number higher than
+      // the current manual count, bump it so placeholders are in sync.
+      for (final c in toMark) {
+        final n = c.number;
+        if (n != null && n.toInt() > nextManual) {
+          nextManual = n.toInt();
+        }
+      }
     } else {
       // Mark single (fallback when no chapters list is available).
       nextReadIds.add(chapterId);
@@ -263,6 +287,7 @@ class ReadingProgressNotifier
         : totalChaptersCount;
     final next = current.copyWith(
       readChapterIds: nextReadIds,
+      manuallyMarkedCount: nextManual,
       totalChaptersCount: nextTotal,
       updatedAt: DateTime.now().toUtc(),
     );
