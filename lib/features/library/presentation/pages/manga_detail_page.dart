@@ -154,7 +154,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool hasTotal = progress.totalChaptersCount > 0;
     final bool hasMdChapters = state.chapters.isNotEmpty;
     final bool showTracking = hasTotal;
-    final bool showBatches = showTracking && hasMdChapters;
+    // Show batches whenever there's a total, even without MangaDex chapters.
+    // computeChapterBatches fills the gap with PlaceholderChapterBatchItem.
+    final bool showBatches = showTracking;
     final bool showNothing = !showTracking && !hasMdChapters;
     // Batch mode uses the full chapter list (state.chapters) for correct
     // positioning. The read/unread filter is visual only — ChapterTile
