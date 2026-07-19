@@ -7,8 +7,6 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/widgets/app_top_bar.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../constants/home_layout.dart';
 import '../providers/home_provider.dart';
 import '../providers/home_latest_chapters_provider.dart';
@@ -75,8 +73,6 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final libraryState = ref.watch(libraryProvider);
     final homeState = ref.watch(homeProvider);
-    final authState = ref.watch(authProvider);
-
     ref.listen<HomeState>(homeProvider, (_, next) {
       if (next.featured.isNotEmpty) _precacheMangaCovers(context, next);
     });
@@ -90,7 +86,6 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
-      appBar: AppTopBar(authState: authState),
       body: libraryState.isLoading && libraryState.mangas.isEmpty
           ? const LibraryShimmer()
           : Stack(

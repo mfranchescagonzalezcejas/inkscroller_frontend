@@ -6,10 +6,8 @@ import 'package:inkscroller_flutter/core/design/design_tokens.dart';
 import 'package:inkscroller_flutter/core/feedback/app_feedback.dart';
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
-import 'package:inkscroller_flutter/core/widgets/app_top_bar.dart';
 import 'package:inkscroller_flutter/core/widgets/catalog_tab_bar.dart';
 import 'package:inkscroller_flutter/core/widgets/offline_banner.dart';
-import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_entry.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_status.dart';
 import 'package:inkscroller_flutter/features/library/presentation/constants/library_ui_constants.dart';
@@ -43,7 +41,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
         .maybeWhen(data: (isOnline) => !isOnline, orElse: () => false);
@@ -68,7 +65,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
-      appBar: AppTopBar(authState: authState),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
