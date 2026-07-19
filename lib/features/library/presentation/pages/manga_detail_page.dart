@@ -829,8 +829,12 @@ class _CoverSectionState extends State<_CoverSection> {
               ),
             ),
           ),
-          // ── Content column — non-positioned → Stack sizes to fit ──
-          Column(
+          // ── Content column — UnconstrainedBox removes the viewport height
+          // cap so the Column can be as tall as its content needs.
+          UnconstrainedBox(
+            alignment: Alignment.topCenter,
+            constrainedAxis: Axis.horizontal,
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
@@ -915,6 +919,7 @@ class _CoverSectionState extends State<_CoverSection> {
               // Bottom breathing room before the next sliver
               const SizedBox(height: 24),
             ],
+          ),
           ),
         ],
       ),
