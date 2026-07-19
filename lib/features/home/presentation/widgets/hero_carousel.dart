@@ -225,46 +225,39 @@ class _HeroSlide extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Cover + text row — expands to fill vertical space
+                // Cover + text row
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: SizedBox(
-                          width: 150,
-                          height: 250,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Positioned.fill(child: _HeroCover(coverUrl: manga.coverUrl)),
-                              if (manga.score != null)
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.cardHigh,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          manga.score!.toStringAsFixed(1),
-                                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _AdaptiveHeroCover(coverUrl: manga.coverUrl),
+                          if (manga.score != null)
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.cardHigh,
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                            ],
-                          ),
-                        ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      manga.score!.toStringAsFixed(1),
+                                      style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -295,20 +288,18 @@ class _HeroSlide extends ConsumerWidget {
                     ],
                   ),
                 ),
+
+                // 8px gap between cover and buttons
+                const SizedBox(height: 8),
+
+                // Actions row
+                _HeroActions(
+                  manga: manga,
+                  inLibrary: inLibrary,
+                  onDetail: openDetail,
+                ),
               ],
             ),
-          ),
-        ),
-
-        // ── Actions at bottom ─────────────────────────────────────
-        Positioned(
-          left: 20,
-          right: 20,
-          bottom: 48,
-          child: _HeroActions(
-            manga: manga,
-            inLibrary: inLibrary,
-            onDetail: openDetail,
           ),
         ),
       ],
@@ -449,17 +440,81 @@ class _HeroActions extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HeroCover
+// AdaptiveHeroCover — detects image aspect ratio and sizes like manga_detail
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _HeroCover extends StatelessWidget {
-  const _HeroCover({required this.coverUrl});
+// Copy of manga_detail's ratio detection (can't import private enum)
+enum _CoverRatio { portrait, landscape, square }
+
+_CoverRatio _ratioFromSize(Size size) {
+  final ratio = size.width / size.height;
+  if (ratio > 1.15) return _CoverRatio.landscape;
+  if (ratio < 0.85) return _CoverRatio.portrait;
+  return _CoverRatio.square;
+}
+
+class _AdaptiveHeroCover extends StatefulWidget {
+  const _AdaptiveHeroCover({required this.coverUrl});
 
   final String? coverUrl;
 
   @override
+  State<_AdaptiveHeroCover> createState() => _AdaptiveHeroCoverState();
+}
+
+class _AdaptiveHeroCoverState extends State<_AdaptiveHeroCover> {
+  _CoverRatio _ratio = _CoverRatio.portrait;
+  ImageStream? _imageStream;
+  double _imageAspectRatio = 2 / 3; // default portrait
+  late final ImageStreamListener _listener;
+
+  @override
+  void initState() {
+    super.initState();
+    _listener = ImageStreamListener(_onImage, onError: (_, __) {});
+    _resolve();
+  }
+
+  @override
+  void didUpdateWidget(_AdaptiveHeroCover old) {
+    super.didUpdateWidget(old);
+    if (old.coverUrl != widget.coverUrl) {
+      _imageStream?.removeListener(_listener);
+      _resolve();
+    }
+  }
+
+  @override
+  void dispose() {
+    _imageStream?.removeListener(_listener);
+    super.dispose();
+  }
+
+  void _resolve() {
+    final url = widget.coverUrl;
+    if (url == null || url.isEmpty) return;
+    _imageStream?.removeListener(_listener);
+    final provider = CachedNetworkImageProvider(url);
+    _imageStream = provider.resolve(ImageConfiguration.empty);
+    _imageStream!.addListener(_listener);
+  }
+
+  void _onImage(ImageInfo info, bool sync) {
+    final size = Size(info.image.width.toDouble(), info.image.height.toDouble());
+    final detected = _ratioFromSize(size);
+    final aspect = size.width / size.height;
+    if (!mounted) return;
+    if (detected != _ratio || aspect != _imageAspectRatio) {
+      setState(() {
+        _ratio = detected;
+        _imageAspectRatio = aspect;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (coverUrl == null || coverUrl!.isEmpty) {
+    if (widget.coverUrl == null || widget.coverUrl!.isEmpty) {
       return const ColoredBox(
         color: AppColors.card,
         child: Center(
@@ -467,19 +522,35 @@ class _HeroCover extends StatelessWidget {
         ),
       );
     }
-    return CachedNetworkImage(
-      imageUrl: coverUrl!,
-      fit: BoxFit.contain,
-      placeholder: (_, __) => const ColoredBox(color: AppColors.card),
-      errorWidget: (_, __, ___) => const ColoredBox(
-        color: AppColors.card,
-        child: Center(
-          child: Icon(Icons.image_not_supported, color: AppColors.outline),
+
+    // Dimensions per ratio (same logic as manga_detail, scaled for hero)
+    final double coverWidth = switch (_ratio) {
+      _CoverRatio.portrait => 150.0,
+      _CoverRatio.landscape => 200.0,
+      _CoverRatio.square => 170.0,
+    };
+    final double coverHeight = coverWidth / _imageAspectRatio;
+
+    return SizedBox(
+      width: coverWidth,
+      height: coverHeight.clamp(120, 280),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: CachedNetworkImage(
+          imageUrl: widget.coverUrl!,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => const ColoredBox(color: AppColors.card),
+          errorWidget: (_, __, ___) => const ColoredBox(
+            color: AppColors.card,
+            child: Center(
+              child: Icon(Icons.image_not_supported, color: AppColors.outline),
+            ),
+          ),
+          fadeInDuration: const Duration(milliseconds: 300),
+          memCacheWidth: 400,
+          filterQuality: FilterQuality.medium,
         ),
       ),
-      fadeInDuration: const Duration(milliseconds: 300),
-      memCacheWidth: 300,
-      filterQuality: FilterQuality.medium,
     );
   }
 }
