@@ -62,12 +62,13 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
             itemBuilder: (_, i) => _HeroSlide(manga: slides[i]),
           ),
 
-          // Bottom gradient — blends hero into home background
+          // Bottom gradient + solid buffer — blends hero into home background
+          // The extended solid area prevents white lines during overscroll.
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
-            height: 48,
+            bottom: -40,
+            height: 100,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -76,7 +77,9 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
                   colors: [
                     AppColors.voidLowest.withValues(alpha: 0),
                     AppColors.voidLowest,
+                    AppColors.voidLowest,
                   ],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
@@ -190,7 +193,7 @@ class _HeroSlide extends ConsumerWidget {
         SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 60),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 60),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,

@@ -47,9 +47,11 @@ class DiscoverSection extends ConsumerWidget {
 
         const SizedBox(height: 12),
 
-        // ── Manga row ───────────────────────────────────────────────
+        // ── Manga row — same MangaTile sizing as Explore ──────────────
         SizedBox(
-          height: HomeLayout.mangaCardRowHeight,
+          height: HomeLayout.discoverRowHeight,
+
+
           child: libraryState.isLoading && mangas.isEmpty
               ? const HomeShimmer.cardRow()
               : mangas.isEmpty

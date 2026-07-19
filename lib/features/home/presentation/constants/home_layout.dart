@@ -14,6 +14,10 @@ class HomeLayout {
   /// Width of a single manga card tile.
   static const double mangaCardWidth = 130;
 
+  /// Row height for the Discover manga row — matches how MangaTile
+  /// naturally sizes in Explore's MasonryGridView.
+  static const double discoverRowHeight = 240;
+
   // Continue Reading card dimensions
   /// Width of a Continue Reading card tile.
   static const double continueReadingCardWidth = 120;
