@@ -209,6 +209,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     result.fold(
       (failure) {
         if (capturedVersion != _loadVersion) return;
+        if (!mounted) return;
         state = state.copyWith(
           isLoading: false,
           mangas: const [],
@@ -219,6 +220,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       },
       (mangas) {
         if (capturedVersion != _loadVersion) return;
+        if (!mounted) return;
         _offset += mangas.length;
 
         final newState = state.copyWith(

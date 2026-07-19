@@ -38,10 +38,15 @@ final homeDiscoverProvider =
   notifier.loadInitial();
   // Preload Popular, Romance, and Action in background so the user
   // sees instant content when tapping those tabs.
-  Future<void>.microtask(() {
-    notifier.loadInitial(mode: LibraryMode.popular);
-    notifier.setGenre('romance');
-    notifier.setGenre('action');
+  // Run outside microtask so disposal of the notifier doesn't cause
+  // unhandled exceptions — the mounted guard inside loadInitial handles it.
+  Future<void>.microtask(() async {
+    // Each call writes to _tabCache and is guarded by mounted + version.
+    await notifier.loadInitial(mode: LibraryMode.popular);
+    if (!notifier.mounted) return;
+    await notifier.setGenre('romance');
+    if (!notifier.mounted) return;
+    await notifier.setGenre('action');
   });
   return notifier;
 });
