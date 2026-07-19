@@ -63,7 +63,7 @@ void main() {
 
     testWidgets('renders empty SizedBox when mangas is empty', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(mangas: [], title: 'Shounen', isLoading: false),
+        buildTestWidget(mangas: [], title: 'Shounen'),
       );
 
       expect(find.byType(DemographicMangaRow), findsOneWidget);
@@ -75,7 +75,6 @@ void main() {
         buildTestWidget(
           mangas: [mangaA, mangaB],
           title: 'Trending',
-          isLoading: false,
         ),
       );
 
@@ -89,7 +88,6 @@ void main() {
         buildTestWidget(
           mangas: [mangaA],
           title: 'Popular',
-          isLoading: false,
         ),
       );
 

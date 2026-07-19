@@ -69,7 +69,6 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final libraryState = ref.watch(libraryProvider);
-    final homeState = ref.watch(homeProvider);
     ref.listen<HomeState>(homeProvider, (_, next) {
       if (next.featured.isNotEmpty) _precacheMangaCovers(context, next);
     });
