@@ -726,15 +726,24 @@ class _CoverSectionState extends State<_CoverSection> {
   }
 
   late final ImageStreamListener _imageListener;
+  double _imageAspectRatio = 1;
 
   void _onImageInfo(ImageInfo info, bool sync) {
     final size = Size(
       info.image.width.toDouble(),
       info.image.height.toDouble(),
     );
+
     final detected = _CoverRatio.fromSize(size);
-    if (detected != _ratio && mounted) {
-      setState(() => _ratio = detected);
+    final aspectRatio = size.width / size.height;
+
+    if (!mounted) return;
+
+    if (detected != _ratio || aspectRatio != _imageAspectRatio) {
+      setState(() {
+        _ratio = detected;
+        _imageAspectRatio = aspectRatio;
+      });
     }
   }
 
@@ -770,6 +779,18 @@ class _CoverSectionState extends State<_CoverSection> {
       _CoverRatio.landscape => (screenHeight * 0.45),
       _CoverRatio.square => (screenHeight * 0.60),
     };
+
+    final double naturalHeight = coverWidth / _imageAspectRatio;
+
+    final double coverHeight = naturalHeight.clamp(
+      0.0,
+      maxHeight,
+    );
+
+    final double renderedCoverWidth =
+    naturalHeight > maxHeight
+        ? maxHeight * _imageAspectRatio
+        : coverWidth;
 
     // Max top so tall portrait covers don't tower.
     final double topPadding = switch (_ratio) {
@@ -813,21 +834,35 @@ class _CoverSectionState extends State<_CoverSection> {
       );
     }
 
-    final Widget coverImage = ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
+    final Widget coverImage = SizedBox(
+      width: renderedCoverWidth,
+      height: coverHeight,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Stack(
+          fit: StackFit.expand,
           children: <Widget>[
             CachedNetworkImage(
               imageUrl: widget.manga.coverUrl ?? '',
-              fit: BoxFit.contain,
-              alignment: Alignment.topCenter,
+              fit: BoxFit.cover,
               placeholder: (_, __) => const ColoredBox(
                 color: AppColors.card,
-                child: Center(child: Icon(Icons.image, color: AppColors.outline)),
+                child: Center(
+                  child: Icon(
+                    Icons.image,
+                    color: AppColors.outline,
+                  ),
+                ),
               ),
-              errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
+              errorWidget: (_, __, ___) => const ColoredBox(
+                color: AppColors.card,
+                child: Center(
+                  child: Icon(
+                    Icons.broken_image,
+                    color: AppColors.outline,
+                  ),
+                ),
+              ),
             ),
             if (scoreBadge != null) scoreBadge,
           ],
