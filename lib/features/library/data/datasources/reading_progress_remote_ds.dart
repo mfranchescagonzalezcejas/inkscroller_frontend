@@ -1,4 +1,5 @@
 /// Remote data source for reading progress sync with the backend.
+// ignore: one_member_abstracts
 abstract class ReadingProgressRemoteDataSource {
   /// Pushes [chaptersRead] for [mangaId] to the backend.
   ///
