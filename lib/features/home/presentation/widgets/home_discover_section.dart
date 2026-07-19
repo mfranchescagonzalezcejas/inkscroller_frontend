@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/catalog_tab_bar.dart';
+import '../../../library/presentation/constants/library_ui_constants.dart';
 import '../../../library/presentation/widgets/manga_tile.dart';
 import '../providers/home_discover_provider.dart';
-import '../constants/home_layout.dart';
 import 'home_section_header.dart';
 import 'home_shimmer.dart';
 
@@ -47,26 +47,35 @@ class DiscoverSection extends ConsumerWidget {
 
         const SizedBox(height: 12),
 
-        // ── Manga row — same MangaTile sizing as Explore ──────────────
-        SizedBox(
-          height: HomeLayout.discoverRowHeight,
-
-
-          child: libraryState.isLoading && mangas.isEmpty
-              ? const HomeShimmer.cardRow()
-              : mangas.isEmpty
-                  ? const SizedBox.shrink()
-                  : ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: mangas.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemBuilder: (_, i) => SizedBox(
-                        width: HomeLayout.mangaCardWidth,
-                        child: MangaTile(manga: mangas[i]),
-                      ),
-                    ),
-        ),
+        // ── Manga row — MangaTile width matches Explore's column size ──
+        libraryState.isLoading && mangas.isEmpty
+            ? const HomeShimmer.cardRow()
+            : mangas.isEmpty
+                ? const SizedBox.shrink()
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.maxWidth;
+                      final crossAxisCount = width >= 600 ? 3 : 2;
+                      final tileWidth = (width -
+                              LibraryUiConstants.horizontalPadding * 2 -
+                              LibraryUiConstants.gridCrossSpacing * (crossAxisCount - 1)) /
+                          crossAxisCount;
+                      final rowHeight = tileWidth * 1.5 + 40;
+                      return SizedBox(
+                        height: rowHeight.clamp(200, 320),
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: mangas.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 12),
+                          itemBuilder: (_, i) => SizedBox(
+                            width: tileWidth,
+                            child: MangaTile(manga: mangas[i]),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
       ],
     );
   }

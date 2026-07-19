@@ -62,7 +62,7 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     }
 
     return SizedBox(
-      height: 400,
+      height: 410,
       child: Stack(
         children: [
           PageView.builder(
