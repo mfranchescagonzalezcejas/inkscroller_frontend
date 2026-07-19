@@ -817,8 +817,46 @@ class _CoverSectionState extends State<_CoverSection> {
                 padding: EdgeInsetsGeometry.only(
                   top: topPadding,
                   bottom: 16,
-                ), //const EdgeInsets.symmetric(vertical: 16),
-                child: SizedBox(width: coverWidth, child: coverImage),
+                ),
+                child: SizedBox(
+                  width: coverWidth,
+                  child: Stack(
+                    children: <Widget>[
+                      coverImage,
+                      // Score badge (same style as MangaTile)
+                      if (scoreStr != null)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardHigh,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const Icon(Icons.star,
+                                    size: 12, color: AppColors.primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  scoreStr,
+                                  style: const TextStyle(
+                                    fontFamily: AppTypography.fontFamily,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
 
               // Tags row
@@ -852,28 +890,6 @@ class _CoverSectionState extends State<_CoverSection> {
                   ),
                 ),
               ),
-
-              // Score (same star icon as MangaTile)
-              if (scoreStr != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Icon(Icons.star, size: 16, color: AppColors.primary),
-                    const SizedBox(width: 4),
-                    Text(
-                      scoreStr,
-                      style: const TextStyle(
-                        fontFamily: AppTypography.fontFamily,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
 
               // Description — unlimited, adapts to text length
               if (widget.manga.description != null &&
