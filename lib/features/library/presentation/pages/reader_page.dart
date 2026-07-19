@@ -168,11 +168,28 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                   ),
                   _FloatingIconButton(
                     icon: Icons.tune_outlined,
-                    onTap: () => showReaderSettings(
-                      context,
-                      chapterId: widget.chapterId,
-                      mangaId: widget.mangaId,
-                    ),
+                    onTap: () async {
+                      await showReaderSettings(
+                        context,
+                        chapterId: widget.chapterId,
+                        mangaId: widget.mangaId,
+                      );
+                      if (!context.mounted) return;
+                      final preferences = ref.read(preferencesProvider);
+                      final globalReaderMode =
+                          preferences.preferences?.defaultReaderMode;
+                      final titleOverride = widget.mangaId != null
+                          ? ref.read(
+                              perTitleOverrideProvider(widget.mangaId!),
+                            )
+                          : null;
+                      ref
+                          .read(readerProvider(widget.chapterId).notifier)
+                          .reapplyReaderMode(
+                            globalReaderMode: globalReaderMode,
+                            titleOverride: titleOverride,
+                          );
+                    },
                   ),
                 ],
               ),
