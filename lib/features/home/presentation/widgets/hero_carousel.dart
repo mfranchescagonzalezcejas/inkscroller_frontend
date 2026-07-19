@@ -462,52 +462,51 @@ class _LandscapeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Cover with score badge
-          Center(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                _AdaptiveHeroCover(coverUrl: manga.coverUrl),
-                if (manga.score != null)
-                  Positioned(
-                    top: 4, right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: AppColors.cardHigh, borderRadius: BorderRadius.circular(6)),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
-                          const SizedBox(width: 2),
-                          Text(manga.score!.toStringAsFixed(1), style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold)),
-                        ],
-                      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Cover
+        Center(
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              _AdaptiveHeroCover(coverUrl: manga.coverUrl),
+              if (manga.score != null)
+                Positioned(
+                  top: 4, right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: AppColors.cardHigh, borderRadius: BorderRadius.circular(6)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                        const SizedBox(width: 2),
+                        Text(manga.score!.toStringAsFixed(1), style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold)),
+                      ],
                     ),
                   ),
-              ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Title
+        Text(manga.title, maxLines: 2, overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.onSurface)),
+        // Description — fills remaining space
+        if (manga.description != null && manga.description!.trim().isNotEmpty)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: SingleChildScrollView(
+                child: Text(manga.description!, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35)),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          // Title
-          Text(manga.title, maxLines: 3, overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface)),
-          // Description
-          if (manga.description != null && manga.description!.trim().isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(manga.description!, maxLines: 4, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35)),
-            ),
-          const SizedBox(height: 12),
-          // Buttons
-          _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
-        ],
-      ),
+        const SizedBox(height: 8),
+        _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
+      ],
     );
   }
 }
