@@ -185,11 +185,11 @@
   "profileCacheSettingsSubtitle": "Limpiar datos locales",
   "profileAppInfoTitle": "Información de la app",
   "profileAppInfoSubtitle": "Versión, licencias, créditos",
-  "profileGuestTitle": "Estás usando la app como invitada.",
+  "profileGuestTitle": "Estás usando la app como invitado/a.",
   "profileGuestSubtitle": "Inicia sesión o crea una cuenta para ver tu perfil y gestionar tus preferencias.",
   "profileGuestCta": "Iniciar sesión o crear cuenta",
   "profileSignOutAction": "Cerrar sesión",
-  "profileSignOutSnackBar": "Sesión cerrada. Sigues en modo invitada.",
+  "profileSignOutSnackBar": "Sesión cerrada. Sigues en modo invitado/a.",
   "profileServerConnectionError": "No se pudo conectar con el servidor.",
   "profileVersionLabel": "Versión {version} (Build {buildNumber})",
   "@profileVersionLabel": {
@@ -204,7 +204,7 @@
   "authPasswordLabel": "Contraseña",
   "authSignInButton": "Iniciar sesión",
   "authNoAccount": "¿No tienes cuenta? Crear una",
-  "authContinueAsGuest": "Continuar como invitada",
+  "authContinueAsGuest": "Continuar como invitado/a",
   "authEmailRequired": "Ingresa tu email.",
   "authEmailInvalid": "Ingresa un email válido.",
   "authPasswordRequired": "Ingresa tu contraseña.",
@@ -388,5 +388,14 @@
   "placeholderUnmark": "Marcar como no leído",
   "noJikanData": "No hay datos externos disponibles",
   "noChaptersNoTracking": "No hay capítulos disponibles",
-  "extrasTitle": "Extras"
+  "extrasTitle": "Extras",
+  "homeHeroEmpty": "Todavía no hay mangas destacados.",
+  "homeHeroError": "No se pudieron cargar los mangas destacados.",
+  "homeExploreCta": "Explorar todo →",
+  "homeContinueReading": "Continuar leyendo",
+  "homeDiscover": "Descubre",
+  "homeRecommended": "Recomendado para ti",
+  "homeTrendingLabel": "TENDENCIA",
+  "homeViewAll": "Ver todo",
+  "homeChapterError": "No se pudieron cargar los capítulos."
 }

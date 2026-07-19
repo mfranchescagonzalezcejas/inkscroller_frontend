@@ -388,5 +388,14 @@
   "placeholderUnmark": "Mark as unread",
   "noJikanData": "No external data available",
   "noChaptersNoTracking": "No chapters available",
-  "extrasTitle": "Extras"
+  "extrasTitle": "Extras",
+  "homeHeroEmpty": "No featured manga yet.",
+  "homeHeroError": "Could not load featured manga.",
+  "homeExploreCta": "Explore all →",
+  "homeContinueReading": "Continue reading",
+  "homeDiscover": "Discover",
+  "homeRecommended": "Recommended for you",
+  "homeTrendingLabel": "TRENDING",
+  "homeViewAll": "View all",
+  "homeChapterError": "Could not load chapters."
 }

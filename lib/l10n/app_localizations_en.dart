@@ -852,4 +852,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get extrasTitle => 'Extras';
+
+  @override
+  String get homeHeroEmpty => 'No featured manga yet.';
+
+  @override
+  String get homeHeroError => 'Could not load featured manga.';
+
+  @override
+  String get homeExploreCta => 'Explore all →';
+
+  @override
+  String get homeContinueReading => 'Continue reading';
+
+  @override
+  String get homeDiscover => 'Discover';
+
+  @override
+  String get homeRecommended => 'Recommended for you';
+
+  @override
+  String get homeTrendingLabel => 'TRENDING';
+
+  @override
+  String get homeViewAll => 'View all';
+
+  @override
+  String get homeChapterError => 'Could not load chapters.';
 }

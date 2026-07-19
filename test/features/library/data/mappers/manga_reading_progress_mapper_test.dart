@@ -5,12 +5,13 @@ import 'package:inkscroller_flutter/features/library/domain/entities/manga_readi
 
 void main() {
   test('maps model to domain entity with new fields', () {
-    const MangaReadingProgressModel model = MangaReadingProgressModel(
+    final MangaReadingProgressModel model = MangaReadingProgressModel(
       mangaId: 'manga-1',
-      readChapterIds: <String>{'c-1', 'c-2'},
+      readChapterIds: const <String>{'c-1', 'c-2'},
       totalChaptersCount: 20,
       manuallyMarkedCount: 42,
       batchSize: 50,
+      updatedAt: DateTime.utc(2026, 7, 19, 12),
     );
 
     final MangaReadingProgress entity = model.toEntity();
@@ -20,15 +21,17 @@ void main() {
     expect(entity.totalChaptersCount, model.totalChaptersCount);
     expect(entity.manuallyMarkedCount, 42);
     expect(entity.batchSize, 50);
+    expect(entity.updatedAt, model.updatedAt);
   });
 
   test('maps domain entity to model with new fields', () {
-    const MangaReadingProgress entity = MangaReadingProgress(
+    final MangaReadingProgress entity = MangaReadingProgress(
       mangaId: 'manga-1',
-      readChapterIds: <String>{'c-1', 'c-2'},
+      readChapterIds: const <String>{'c-1', 'c-2'},
       totalChaptersCount: 20,
       manuallyMarkedCount: 10,
       batchSize: 100,
+      updatedAt: DateTime.utc(2026, 7, 19, 12),
     );
 
     final MangaReadingProgressModel model = entity.toModel();
@@ -38,18 +41,21 @@ void main() {
     expect(model.totalChaptersCount, entity.totalChaptersCount);
     expect(model.manuallyMarkedCount, 10);
     expect(model.batchSize, 100);
+    expect(model.updatedAt, entity.updatedAt);
   });
 
-  test('readChaptersCount returns max of readChapterIds.length and manuallyMarkedCount',
-      () {
-    const MangaReadingProgress progress = MangaReadingProgress(
-      mangaId: 'manga-1',
-      readChapterIds: <String>{'c-1', 'c-2', 'c-3'},
-      manuallyMarkedCount: 25,
-    );
+  test(
+    'readChaptersCount returns max of readChapterIds.length and manuallyMarkedCount',
+    () {
+      const MangaReadingProgress progress = MangaReadingProgress(
+        mangaId: 'manga-1',
+        readChapterIds: <String>{'c-1', 'c-2', 'c-3'},
+        manuallyMarkedCount: 25,
+      );
 
-    expect(progress.readChaptersCount, 25);
-  });
+      expect(progress.readChaptersCount, 25);
+    },
+  );
 
   test('readChaptersCount returns readChapterIds.length when larger', () {
     const MangaReadingProgress progress = MangaReadingProgress(

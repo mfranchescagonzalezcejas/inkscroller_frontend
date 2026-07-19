@@ -355,7 +355,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileAppInfoSubtitle => 'Versión, licencias, créditos';
 
   @override
-  String get profileGuestTitle => 'Estás usando la app como invitada.';
+  String get profileGuestTitle => 'Estás usando la app como invitado/a.';
 
   @override
   String get profileGuestSubtitle =>
@@ -369,7 +369,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileSignOutSnackBar =>
-      'Sesión cerrada. Sigues en modo invitada.';
+      'Sesión cerrada. Sigues en modo invitado/a.';
 
   @override
   String get profileServerConnectionError =>
@@ -399,7 +399,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authNoAccount => '¿No tienes cuenta? Crear una';
 
   @override
-  String get authContinueAsGuest => 'Continuar como invitada';
+  String get authContinueAsGuest => 'Continuar como invitado/a';
 
   @override
   String get authEmailRequired => 'Ingresa tu email.';
@@ -860,4 +860,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get extrasTitle => 'Extras';
+
+  @override
+  String get homeHeroEmpty => 'Todavía no hay mangas destacados.';
+
+  @override
+  String get homeHeroError => 'No se pudieron cargar los mangas destacados.';
+
+  @override
+  String get homeExploreCta => 'Explorar todo →';
+
+  @override
+  String get homeContinueReading => 'Continuar leyendo';
+
+  @override
+  String get homeDiscover => 'Descubre';
+
+  @override
+  String get homeRecommended => 'Recomendado para ti';
+
+  @override
+  String get homeTrendingLabel => 'TENDENCIA';
+
+  @override
+  String get homeViewAll => 'Ver todo';
+
+  @override
+  String get homeChapterError => 'No se pudieron cargar los capítulos.';
 }

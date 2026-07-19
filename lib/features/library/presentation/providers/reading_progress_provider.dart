@@ -19,20 +19,26 @@ class ReadingProgressNotifier
     extends StateNotifier<Map<String, MangaReadingProgress>> {
   ReadingProgressNotifier(this._repository)
     : super(const <String, MangaReadingProgress>{}) {
-    _load();
+    _initialized = _load();
   }
 
   final ReadingProgressRepository _repository;
+  late final Future<void> _initialized;
+
+  /// Future that completes once the initial load from persistence finishes.
+  Future<void> get initialized => _initialized;
 
   Future<void> _load() async {
     state = await _repository.getAll();
     debugPrint('[ProgressNotifier] _load: ${state.length} mangas loaded');
     for (final entry in state.entries) {
-      debugPrint('[ProgressNotifier]   ${entry.key}: '
-          'readChapterIds=${entry.value.readChapterIds.length} '
-          'manual=${entry.value.manuallyMarkedCount} '
-          'total=${entry.value.totalChaptersCount} '
-          'effectiveRead=${entry.value.readChaptersCount}');
+      debugPrint(
+        '[ProgressNotifier]   ${entry.key}: '
+        'readChapterIds=${entry.value.readChapterIds.length} '
+        'manual=${entry.value.manuallyMarkedCount} '
+        'total=${entry.value.totalChaptersCount} '
+        'effectiveRead=${entry.value.readChaptersCount}',
+      );
     }
   }
 
@@ -46,15 +52,20 @@ class ReadingProgressNotifier
   Future<void> updateManuallyMarkedCount(String mangaId, int delta) async {
     final current = progressFor(mangaId);
     final nextCount = math.max(0, current.manuallyMarkedCount + delta);
-    final next = current.copyWith(manuallyMarkedCount: nextCount);
+    final next = current.copyWith(
+      manuallyMarkedCount: nextCount,
+      updatedAt: DateTime.now().toUtc(),
+    );
     if (next == current) return;
     // Optimistic update: state changes immediately so rapid calls see the
     // latest count. The _save call below also re-applies state on completion.
     state = <String, MangaReadingProgress>{...state, mangaId: next};
-    debugPrint('[ProgressNotifier] updateManuallyMarkedCount: '
-        '$mangaId delta=$delta '
-        '${current.manuallyMarkedCount} → $nextCount '
-        'readChapterIds.len=${current.readChapterIds.length}');
+    debugPrint(
+      '[ProgressNotifier] updateManuallyMarkedCount: '
+      '$mangaId delta=$delta '
+      '${current.manuallyMarkedCount} → $nextCount '
+      'readChapterIds.len=${current.readChapterIds.length}',
+    );
     await _repository.save(next);
   }
 
@@ -74,12 +85,15 @@ class ReadingProgressNotifier
     // count = 0 resets manual progress but preserves totalChaptersCount
     // so the tracking section and batches stay visible.
     if (count <= 0) {
-      debugPrint('[ProgressNotifier] setManuallyMarkedCountTo: '
-          '$mangaId RESET count=0 '
-          'preserving total=${current.totalChaptersCount}');
+      debugPrint(
+        '[ProgressNotifier] setManuallyMarkedCountTo: '
+        '$mangaId RESET count=0 '
+        'preserving total=${current.totalChaptersCount}',
+      );
       final reset = current.copyWith(
         manuallyMarkedCount: 0,
         readChapterIds: const <String>{},
+        updatedAt: DateTime.now().toUtc(),
       );
       if (reset == current) return;
       state = <String, MangaReadingProgress>{...state, mangaId: reset};
@@ -106,15 +120,18 @@ class ReadingProgressNotifier
       nextReadIds = bestByNumber.values.toSet();
     }
 
-    debugPrint('[ProgressNotifier] setManuallyMarkedCountTo: '
-        '$mangaId count=$effectiveCount '
-        'readChapterIds.len=${nextReadIds?.length ?? current.readChapterIds.length} '
-        'prevManual=${current.manuallyMarkedCount} '
-        'newManual=$effectiveCount');
+    debugPrint(
+      '[ProgressNotifier] setManuallyMarkedCountTo: '
+      '$mangaId count=$effectiveCount '
+      'readChapterIds.len=${nextReadIds?.length ?? current.readChapterIds.length} '
+      'prevManual=${current.manuallyMarkedCount} '
+      'newManual=$effectiveCount',
+    );
 
     final next = current.copyWith(
       manuallyMarkedCount: effectiveCount,
       readChapterIds: nextReadIds,
+      updatedAt: DateTime.now().toUtc(),
     );
     if (next == current) return;
     state = <String, MangaReadingProgress>{...state, mangaId: next};
@@ -162,12 +179,14 @@ class ReadingProgressNotifier
       nextTotal = backendTotal;
     }
 
-    debugPrint('[ProgressNotifier] syncChapters: $mangaId '
-        'maxChapterNumber=$maxChapterNumber '
-        'chapters.length=${chapters.length} '
-        'backendTotal=$backendTotal '
-        'current.total=${current.totalChaptersCount} '
-        'nextTotal=$nextTotal');
+    debugPrint(
+      '[ProgressNotifier] syncChapters: $mangaId '
+      'maxChapterNumber=$maxChapterNumber '
+      'chapters.length=${chapters.length} '
+      'backendTotal=$backendTotal '
+      'current.total=${current.totalChaptersCount} '
+      'nextTotal=$nextTotal',
+    );
 
     final next = current.copyWith(totalChaptersCount: nextTotal);
     if (next == current) return;
@@ -207,6 +226,7 @@ class ReadingProgressNotifier
     final next = current.copyWith(
       readChapterIds: nextReadIds,
       totalChaptersCount: nextTotal,
+      updatedAt: DateTime.now().toUtc(),
     );
     await _save(next);
     return previous;
@@ -234,14 +254,12 @@ class ReadingProgressNotifier
     final next = current.copyWith(
       readChapterIds: nextReadIds,
       totalChaptersCount: nextTotal,
+      updatedAt: DateTime.now().toUtc(),
     );
 
     // Optimistic update — set state immediately so rapid toggles don't
     // both snapshot the same readChapterIds set before the first persists.
-    state = <String, MangaReadingProgress>{
-      ...state,
-      next.mangaId: next,
-    };
+    state = <String, MangaReadingProgress>{...state, next.mangaId: next};
     await _repository.save(next);
   }
 
@@ -262,11 +280,13 @@ class ReadingProgressNotifier
   }
 
   Future<void> _save(MangaReadingProgress progress) async {
-    debugPrint('[ProgressNotifier] _save: ${progress.mangaId} '
-        'readChapterIds=${progress.readChapterIds.length} '
-        'manual=${progress.manuallyMarkedCount} '
-        'total=${progress.totalChaptersCount} '
-        'effectiveRead=${progress.readChaptersCount}');
+    debugPrint(
+      '[ProgressNotifier] _save: ${progress.mangaId} '
+      'readChapterIds=${progress.readChapterIds.length} '
+      'manual=${progress.manuallyMarkedCount} '
+      'total=${progress.totalChaptersCount} '
+      'effectiveRead=${progress.readChaptersCount}',
+    );
     await _repository.save(progress);
     state = <String, MangaReadingProgress>{
       ...state,

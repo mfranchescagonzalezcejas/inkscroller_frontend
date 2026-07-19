@@ -8,7 +8,8 @@ class MangaReadingProgress {
     this.totalChaptersCount = 0,
     this.manuallyMarkedCount = 0,
     this.batchSize = 25,
-  });
+    DateTime? updatedAt,
+  }) : _updatedAt = updatedAt;
 
   final String mangaId;
   final Set<String> readChapterIds;
@@ -19,6 +20,14 @@ class MangaReadingProgress {
 
   /// Number of chapters per batch in the batching UI.
   final int batchSize;
+
+  /// Last time this progress record changed in a user-facing way.
+  ///
+  /// Defaults to the epoch so legacy records without a timestamp sort last.
+  DateTime get updatedAt =>
+      _updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+
+  final DateTime? _updatedAt;
 
   /// Returns the effective read count — the larger of the MangaDex set size
   /// and the self-reported manual count.
@@ -34,6 +43,7 @@ class MangaReadingProgress {
     int? totalChaptersCount,
     int? manuallyMarkedCount,
     int? batchSize,
+    DateTime? updatedAt,
   }) {
     return MangaReadingProgress(
       mangaId: mangaId,
@@ -41,6 +51,7 @@ class MangaReadingProgress {
       totalChaptersCount: totalChaptersCount ?? this.totalChaptersCount,
       manuallyMarkedCount: manuallyMarkedCount ?? this.manuallyMarkedCount,
       batchSize: batchSize ?? this.batchSize,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

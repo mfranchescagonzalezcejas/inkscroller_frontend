@@ -13,4 +13,5 @@ class HomeLayout {
 
   /// Width of a single manga card tile.
   static const double mangaCardWidth = 130;
+
 }
