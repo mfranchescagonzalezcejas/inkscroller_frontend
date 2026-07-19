@@ -203,12 +203,9 @@ class _HeroSlide extends ConsumerWidget {
                     const _TrendingBadge(),
                     if (meta.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.floating,
+                          color: AppColors.cardHigh,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -216,8 +213,8 @@ class _HeroSlide extends ConsumerWidget {
                           style: const TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -281,11 +278,11 @@ class _HeroSlide extends ConsumerWidget {
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    manga.description!,
-                                    maxLines: 100,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35),
+                                  child: SingleChildScrollView(
+                                    child: Text(
+                                      manga.description!,
+                                      style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35),
+                                    ),
                                   ),
                                 ),
                               ),
