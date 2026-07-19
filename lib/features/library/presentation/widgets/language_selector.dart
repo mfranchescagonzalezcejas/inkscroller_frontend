@@ -142,6 +142,7 @@ class LanguageSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = Localizations.localeOf(context);
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Row(
@@ -153,27 +154,27 @@ class LanguageSelector extends ConsumerWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: _buildContent(),
+            child: _buildContent(locale),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(Locale locale) {
     if (isLoading) {
       return DropdownButtonFormField<String>(
-        disabledHint: const Text('Cargando…'),
+        disabledHint: Text(languageDisplayName(selectedLanguage, locale)),
         items: const [],
         onChanged: null,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           isDense: true,
-          contentPadding: EdgeInsets.symmetric(
+          contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 8,
           ),
-          border: OutlineInputBorder(),
-          labelText: 'Idioma',
+          border: const OutlineInputBorder(),
+          labelText: languageDisplayName(selectedLanguage, locale),
         ),
       );
     }
@@ -184,7 +185,7 @@ class LanguageSelector extends ConsumerWidget {
     // Single language: show as plain text, no dropdown needed.
     if (availableLanguages.length == 1) {
       return Text(
-        languageDisplayName(availableLanguages.first),
+        languageDisplayName(availableLanguages.first, locale),
         style: const TextStyle(
           fontSize: 14,
           color: AppColors.onSurfaceVariant,
@@ -217,7 +218,7 @@ class LanguageSelector extends ConsumerWidget {
             return DropdownMenuItem<String>(
               value: code,
               child: Text(
-                languageDisplayName(code),
+                languageDisplayName(code, locale),
                 style: const TextStyle(fontSize: 12),
               ),
             );

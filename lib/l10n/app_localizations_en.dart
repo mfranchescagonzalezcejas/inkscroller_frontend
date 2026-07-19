@@ -747,7 +747,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutCreditJikanDescription => 'Additional metadata (MAL)';
 
   @override
-  String get aboutCreditCloudRunDescription => 'Backend infrastructure';
+  String get aboutCreditInfrastructureDescription => 'Backend infrastructure';
 
   @override
   String get aboutCreditFirebaseDescription => 'User authentication';

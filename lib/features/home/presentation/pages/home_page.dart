@@ -370,7 +370,7 @@ class _HeroSection extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.star, color: AppColors.primary, size: 14),
+        const Icon(Icons.star, color: AppColors.scoreGold, size: 14),
         const SizedBox(width: 4),
         Text(
           scoreLabel,
@@ -378,7 +378,7 @@ class _HeroSection extends ConsumerWidget {
             fontFamily: AppTypography.fontFamily,
             fontSize: 13,
             fontWeight: FontWeight.w400,
-            color: AppColors.primary,
+            color: AppColors.scoreGold,
           ),
         ),
       ],
@@ -394,10 +394,7 @@ class _HeroSection extends ConsumerWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF0F766E), Color(0xFF1E40AF)],
-            transform: GradientRotation(315 * 3.14159 / 180), // 315° in radians
-          ),
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.center,
@@ -407,7 +404,7 @@ class _HeroSection extends ConsumerWidget {
             fontFamily: AppTypography.fontFamily,
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.voidLowest,
           ),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
@@ -594,7 +591,7 @@ class _TrendingMangaCard extends StatelessWidget {
                     Icon(
                       Icons.star,
                       color: manga.score != null
-                          ? AppColors.primary
+                          ? AppColors.scoreGold
                           : AppColors.onSurfaceVariant,
                       size: 12,
                     ),
@@ -606,7 +603,7 @@ class _TrendingMangaCard extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: manga.score != null
-                            ? AppColors.primary
+                            ? AppColors.scoreGold
                             : AppColors.onSurfaceVariant,
                       ),
                     ),

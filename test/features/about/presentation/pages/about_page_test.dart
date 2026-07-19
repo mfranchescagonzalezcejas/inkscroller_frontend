@@ -176,7 +176,7 @@ void main() {
       // Each credit appears as a name+description pair.
       expectText(tester, 'MangaDex API');
       expectText(tester, 'Jikan API');
-      expectText(tester, 'Google Cloud Run');
+      expectText(tester, 'Railway');
       expectText(tester, 'Firebase Auth');
     });
 

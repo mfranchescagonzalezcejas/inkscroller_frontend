@@ -190,9 +190,9 @@ class _CreditsSection extends StatelessWidget {
               const Divider(color: AppColors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.cloud_outlined,
-                name: 'Google Cloud Run',
-                description: l10n.aboutCreditCloudRunDescription,
-                url: 'cloud.google.com',
+                name: 'Railway',
+                description: l10n.aboutCreditInfrastructureDescription,
+                url: 'railway.app',
               ),
               const Divider(color: AppColors.outlineVariant, height: 1),
               _CreditRow(

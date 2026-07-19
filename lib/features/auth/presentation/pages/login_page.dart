@@ -165,22 +165,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 64),
 
                 // ── Wordmark ──────────────────────────────────────────────────
-                ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: AppColors.brandGradient,
-                  ).createShader(bounds),
-                  child: const Text(
-                    AppConstants.appName,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: AppTypography.fontFamily,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
-                    ),
+                const Text(
+                  AppConstants.appName,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: 36,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onSurface,
+                    letterSpacing: -0.5,
                   ),
                 ),
 
