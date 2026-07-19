@@ -9,6 +9,7 @@ import '../../../auth/presentation/providers/auth_state.dart';
 import '../../domain/entities/manga.dart';
 import '../../domain/entities/user_library_entry.dart';
 import '../../domain/entities/user_library_status.dart';
+import '../../../preferences/domain/usecases/get_preferences.dart';
 import '../../domain/usecases/get_manga_detail.dart';
 import '../../domain/repositories/user_library_repository.dart';
 import 'reading_progress_provider.dart';
@@ -120,6 +121,13 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   Future<void> _enrichMissingMetadata() async {
     if (!sl.isRegistered<GetMangaDetail>()) return;
     final getDetail = sl<GetMangaDetail>();
+    // Resolve the user's language so the API returns localized titles.
+    final lang = sl.isRegistered<GetPreferences>()
+        ? (await sl<GetPreferences>()()).fold(
+            (_) => 'en',
+            (p) => p.defaultLanguage,
+          )
+        : 'en';
     // Snapshot the keys so state mutations in the loop don't affect iteration.
     final ids = state.keys.toList();
     final Map<String, UserLibraryEntry> updates = <String, UserLibraryEntry>{};
@@ -130,7 +138,7 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
       final m = entry.manga;
       if (m.type != null && m.demographic != null) continue;
 
-      final result = await getDetail(m.id);
+      final result = await getDetail(m.id, language: lang);
       result.fold((_) {}, (full) {
         if (full.type == null && full.demographic == null) return;
 

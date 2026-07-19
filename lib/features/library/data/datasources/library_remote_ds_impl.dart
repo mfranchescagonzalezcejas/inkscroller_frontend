@@ -81,11 +81,15 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   // DETALLE DE MANGA
   // ─────────────────────────────
   /// Fetches the full detail for the manga with the given [mangaId] from `/manga/{id}`.
+  /// [language] requests localized title/description (e.g. "es").
   @override
-  Future<MangaModel> getMangaDetail(String mangaId) async {
+  Future<MangaModel> getMangaDetail(String mangaId, {String? language}) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
         '${ApiEndpoints.manga}/$mangaId',
+        queryParameters: {
+          if (language != null) 'language': language,
+        },
       );
 
       final data = response.data;

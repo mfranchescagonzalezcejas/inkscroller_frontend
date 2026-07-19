@@ -27,7 +27,10 @@ abstract class LibraryRepository {
   });
 
   /// Fetches the full detail of a single manga by its [mangaId].
-  Future<Either<Failure, Manga>> getMangaDetail(String mangaId);
+  Future<Either<Failure, Manga>> getMangaDetail(
+    String mangaId, {
+    String? language,
+  });
 
   /// Returns all chapters available for the manga identified by [mangaId].
   ///
