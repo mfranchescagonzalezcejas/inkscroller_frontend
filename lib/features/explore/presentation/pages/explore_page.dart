@@ -166,7 +166,7 @@ class _ExploreHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, AppSpacing.lg, 20, AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

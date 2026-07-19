@@ -112,14 +112,7 @@ class AuthGradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: onPressed != null
-            ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: AppColors.brandGradient,
-              )
-            : null,
-        color: onPressed == null ? AppColors.card : null,
+        color: onPressed != null ? AppColors.primary : AppColors.card,
         borderRadius: BorderRadius.circular(AppLayout.authButtonRadius),
       ),
       child: Material(
@@ -150,7 +143,7 @@ class AuthGradientButton extends StatelessWidget {
                           fontFamily: AppTypography.fontFamily,
                           fontSize: AppTypography.labelLg,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.voidLowest,
                           letterSpacing: 0.3,
                         ),
                       ),

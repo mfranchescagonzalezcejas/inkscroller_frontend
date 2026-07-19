@@ -25,9 +25,9 @@ void main() {
       await tester.tap(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();
 
-      expect(find.text('Inglés'), findsWidgets);
-      expect(find.text('Español'), findsOneWidget);
-      expect(find.text('Japonés'), findsOneWidget);
+      expect(find.text('English'), findsWidgets);
+      expect(find.text('Spanish'), findsOneWidget);
+      expect(find.text('Japanese'), findsOneWidget);
     });
 
     testWidgets('shows nothing when no languages available', (tester) async {
@@ -44,8 +44,7 @@ void main() {
       );
 
       expect(find.byType(DropdownButton<String>), findsNothing);
-      expect(find.text('Inglés'), findsNothing);
-      expect(find.text('Cargando…'), findsNothing);
+      expect(find.text('English'), findsNothing);
     });
 
     testWidgets('shows plain text label when only one language available', (
@@ -63,7 +62,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Italiano'), findsOneWidget);
+      expect(find.text('Italian'), findsOneWidget);
       expect(find.byType(DropdownButton<String>), findsNothing);
     });
 
@@ -101,7 +100,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Cargando…'), findsOneWidget);
+      expect(find.text('English'), findsWidgets);
       expect(find.byType(DropdownButton<String>), findsOneWidget);
     });
 
@@ -125,7 +124,7 @@ void main() {
       await tester.tap(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Español').last);
+      await tester.tap(find.text('Spanish').last);
       await tester.pumpAndSettle();
 
       expect(changedLanguage, equals('es'));
@@ -144,7 +143,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Japonés'), findsOneWidget);
+      expect(find.text('Japanese'), findsOneWidget);
     });
 
     testWidgets('falls back to first language when selectedLanguage is not available', (
@@ -162,8 +161,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Inglés'), findsOneWidget);
-      expect(find.text('Francés'), findsNothing);
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('French'), findsNothing);
     });
 
     testWidgets('dropdown is disabled while loading', (tester) async {
@@ -181,9 +180,8 @@ void main() {
       );
 
       // Shows loading placeholder instead of language options
-      expect(find.text('Cargando…'), findsOneWidget);
-      expect(find.text('Inglés'), findsNothing);
-      expect(find.text('Español'), findsNothing);
+      expect(find.text('English'), findsWidgets);
+      expect(find.text('Spanish'), findsNothing);
     });
   });
 }

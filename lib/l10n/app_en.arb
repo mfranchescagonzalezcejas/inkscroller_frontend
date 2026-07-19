@@ -354,7 +354,7 @@
   "aboutCreditsTitle": "CREDITS AND APIs",
   "aboutCreditMangadexDescription": "Catalog, chapters, and covers",
   "aboutCreditJikanDescription": "Additional metadata (MAL)",
-  "aboutCreditCloudRunDescription": "Backend infrastructure",
+  "aboutCreditInfrastructureDescription": "Backend infrastructure",
   "aboutCreditFirebaseDescription": "User authentication",
   "profileContentRatingTitle": "Content rating",
   "profileContentRatingSafe": "Safe",

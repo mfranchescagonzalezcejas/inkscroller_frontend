@@ -1412,11 +1412,11 @@ abstract class AppLocalizations {
   /// **'Additional metadata (MAL)'**
   String get aboutCreditJikanDescription;
 
-  /// No description provided for @aboutCreditCloudRunDescription.
+  /// No description provided for @aboutCreditInfrastructureDescription.
   ///
   /// In en, this message translates to:
   /// **'Backend infrastructure'**
-  String get aboutCreditCloudRunDescription;
+  String get aboutCreditInfrastructureDescription;
 
   /// No description provided for @aboutCreditFirebaseDescription.
   ///

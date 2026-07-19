@@ -806,7 +806,7 @@ class _CoverSectionState extends State<_CoverSection> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Icon(Icons.star, size: 12, color: AppColors.primary),
+              const Icon(Icons.star, size: 12, color: AppColors.scoreGold),
               const SizedBox(width: 4),
               Text(
                 scoreStr,
@@ -814,7 +814,7 @@ class _CoverSectionState extends State<_CoverSection> {
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
+                  color: AppColors.scoreGold,
                 ),
               ),
             ],

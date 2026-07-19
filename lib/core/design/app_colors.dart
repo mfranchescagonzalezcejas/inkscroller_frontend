@@ -63,6 +63,9 @@ class AppColors {
   /// Primary translation for light-mode action/selection states.
   static const Color primaryLight = Color(0xFF2FAFA3);
 
+  /// Gold — Star ratings and score badges
+  static const Color scoreGold = Color(0xFFFFC107);
+
   /// Pressed/active depth token for light mode.
   static const Color primaryDeepLight = Color(0xFF0F766E);
 
