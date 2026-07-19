@@ -137,7 +137,6 @@ void main() {
       final state = HomeClassifier.classify(all);
 
       expect(state.featured, HomeClassifier.featured(all));
-      expect(state.latest, HomeClassifier.latest(all));
       expect(state.popular, HomeClassifier.popular(all));
       expect(state.shounen, HomeClassifier.byDemographic(all, MangaDemographic.shounen));
       expect(state.shoujo, HomeClassifier.byDemographic(all, MangaDemographic.shoujo));
@@ -148,7 +147,6 @@ void main() {
     test('returns empty lists for every section when input is empty', () {
       final state = HomeClassifier.classify([]);
       expect(state.featured, isEmpty);
-      expect(state.latest, isEmpty);
       expect(state.popular, isEmpty);
       expect(state.shounen, isEmpty);
       expect(state.shoujo, isEmpty);

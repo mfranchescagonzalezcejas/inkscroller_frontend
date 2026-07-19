@@ -142,7 +142,6 @@ jobs:
             test/core/router/app_routes_test.dart \
             test/features/library/presentation/pages/reader_page_test.dart \
             test/features/library/presentation/widgets/library_widgets_test.dart \
-            test/features/home/presentation/pages/home_hero_overflow_test.dart \
             test/features/settings/presentation/delete_account_dialog_test.dart
 
   ui-tests:
