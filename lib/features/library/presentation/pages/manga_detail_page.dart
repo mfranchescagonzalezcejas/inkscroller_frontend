@@ -221,27 +221,20 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
               ],
             ),
           ),
-          // ── Cover content (FIXED at top, not in scroll view) ──
-          Positioned(
-            top: 0, left: 0, right: 0,
-            child: _CoverSection(manga: widget.manga),
-          ),
-          // ── Scrollable chapters below the fixed cover ──────────
+          // ── Everything scrolls in one column ──────────────────
           Column(
             children: <Widget>[
               if (isOffline) const OfflineBanner(),
               Expanded(
-                child: CustomScrollView(
-                  slivers: <Widget>[
-                    // Push scroll content below the fixed cover
-                    SliverToBoxAdapter(
-                      child: SizedBox(height: coverSectionHeight),
-                    ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      // ── Cover + tags + title + score + desc ──
+                      _CoverSection(manga: widget.manga),
 
-                    // ── Reading progress section (tracking states) ────
-                    if (showTracking)
-                      SliverToBoxAdapter(
-                        child: ReadingProgressSection(
+                      // ── Reading progress ──────────────────────
+                      if (showTracking)
+                        ReadingProgressSection(
                           mangaId: widget.manga.id,
                           readCount: progress.readChaptersCount,
                           totalCount: progress.totalChaptersCount,
@@ -255,12 +248,10 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                                 );
                           },
                         ),
-                      ),
 
-                    // ── Chapters section ──────────────────────────────
-                    if (hasMdChapters || hasTotal)
-                      SliverToBoxAdapter(
-                        child: Padding(
+                      // ── Chapters header ───────────────────────
+                      if (hasMdChapters || hasTotal)
+                        Padding(
                           padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                           child: _ChaptersHeader(
                             progress: progress,
@@ -268,16 +259,15 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             showLanguageSelector: hasMdChapters,
                           ),
                         ),
-                      ),
 
-                    if (state.isLoading)
-                      const SliverFillRemaining(
-                        child: Center(child: MangaDetailShimmer()),
-                      )
-                    else if (state.failure != null)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Padding(
+                      // ── Chapter states ────────────────────────
+                      if (state.isLoading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: Center(child: MangaDetailShimmer()),
+                        )
+                      else if (state.failure != null)
+                        Padding(
                           padding: const EdgeInsets.all(24),
                           child: Center(
                             child: Column(
@@ -295,10 +285,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  _libraryErrorText(
-                                    state.failure,
-                                    context.l10n,
-                                  ),
+                                  _libraryErrorText(state.failure, context.l10n),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: AppColors.onSurfaceVariant,
@@ -307,10 +294,6 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                                 const SizedBox(height: 16),
                                 FilledButton(
                                   onPressed: () {
-                                    // Use the last selected language (user may have
-                                    // switched manually). On first load failure
-                                    // selectedLanguage is still 'en', so fall back
-                                    // to the user's preference from settings.
                                     final lang = state.selectedLanguage != 'en'
                                         ? state.selectedLanguage
                                         : (ref
@@ -330,22 +313,19 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                               ],
                             ),
                           ),
-                        ),
-                      )
-                    else if (showNothing)
-                      SliverFillRemaining(
-                        child: Center(
-                          child: Text(
-                            context.l10n.noChaptersAvailable,
-                            style: const TextStyle(
-                              color: AppColors.onSurfaceVariant,
+                        )
+                      else if (showNothing)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: Center(
+                            child: Text(
+                              'No chapters available',
+                              style: TextStyle(color: AppColors.onSurfaceVariant),
                             ),
                           ),
-                        ),
-                      )
-                    else if (useBatchList) ...[
-                      SliverToBoxAdapter(
-                        child: ChapterBatchList(
+                        )
+                      else if (useBatchList) ...[
+                        ChapterBatchList(
                           mangaId: widget.manga.id,
                           descending: state.sortDescending,
                           hiddenChapterIds: state.filterUnreadOnly
@@ -364,11 +344,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             );
                           },
                         ),
-                      ),
-                      // ── Extra chapters without numbers (extras, oneshots) ──
-                      if (state.chapters.any((ch) => ch.number == null))
-                        SliverToBoxAdapter(
-                          child: Padding(
+                        // ── Extra chapters ──────────────────────
+                        if (state.chapters.any((ch) => ch.number == null)) ...[
+                          Padding(
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                             child: Text(
                               context.l10n.extrasTitle,
@@ -380,83 +358,69 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                               ),
                             ),
                           ),
-                        ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final extras = state.chapters
-                                .where((ch) => ch.number == null)
-                                .toList();
-                            final chapter = extras[index];
-                            return ChapterTile(
-                              chapter: chapter,
-                              isRead: progress.isChapterRead(chapter.id),
-                              onTap: () async {
-                                await _handleChapterTap(
-                                  context,
-                                  chapter,
-                                  state.chapters,
-                                );
-                              },
-                              onToggleRead: () {
-                                ref
-                                    .read(readingProgressProvider.notifier)
-                                    .toggleChapter(
-                                      mangaId: widget.manga.id,
-                                      chapterId: chapter.id,
-                                      totalChaptersCount: state.chapters.length,
-                                    );
-                              },
-                            );
-                          },
-                          childCount: state.chapters
+                          ...state.chapters
                               .where((ch) => ch.number == null)
-                              .length,
-                        ),
-                      ),
-                    ] else if (displayChapters.isEmpty)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(
-                          child: Text(
-                            context.l10n.chaptersFilteredOut,
-                            style: const TextStyle(
-                              color: AppColors.onSurfaceVariant,
+                              .map((chapter) => ChapterTile(
+                                chapter: chapter,
+                                isRead: progress.isChapterRead(chapter.id),
+                                onTap: () async {
+                                  await _handleChapterTap(
+                                    context,
+                                    chapter,
+                                    state.chapters,
+                                  );
+                                },
+                                onToggleRead: () {
+                                  ref
+                                      .read(readingProgressProvider.notifier)
+                                      .toggleChapter(
+                                        mangaId: widget.manga.id,
+                                        chapterId: chapter.id,
+                                        totalChaptersCount:
+                                            state.chapters.length,
+                                      );
+                                },
+                              )),
+                        ]
+                      ] else if (displayChapters.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: Center(
+                            child: Text(
+                              'Chapters filtered out',
+                              style: TextStyle(
+                                  color: AppColors.onSurfaceVariant),
                             ),
                           ),
-                        ),
-                      )
-                    else
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final chapter = displayChapters[index];
-                          return ChapterTile(
-                            chapter: chapter,
-                            isRead: progress.isChapterRead(chapter.id),
-                            onTap: () async {
-                              await _handleChapterTap(
-                                context,
-                                chapter,
-                                state.chapters,
-                              );
-                            },
-                            onToggleRead: () {
-                              ref
-                                  .read(readingProgressProvider.notifier)
-                                  .toggleChapter(
-                                    mangaId: widget.manga.id,
-                                    chapterId: chapter.id,
-                                    totalChaptersCount: state.chapters.length,
-                                  );
-                            },
-                          );
-                        }, childCount: displayChapters.length),
-                      ),
+                        )
+                      else
+                        ...displayChapters.map((chapter) => ChapterTile(
+                          chapter: chapter,
+                          isRead: progress.isChapterRead(chapter.id),
+                          onTap: () async {
+                            await _handleChapterTap(
+                              context,
+                              chapter,
+                              state.chapters,
+                            );
+                          },
+                          onToggleRead: () {
+                            ref
+                                .read(readingProgressProvider.notifier)
+                                .toggleChapter(
+                                  mangaId: widget.manga.id,
+                                  chapterId: chapter.id,
+                                  totalChaptersCount: state.chapters.length,
+                                );
+                          },
+                        )),
 
-                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                    // Bottom padding
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
+            ),
             ],
           ),
 
