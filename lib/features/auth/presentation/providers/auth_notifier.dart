@@ -253,7 +253,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 403/email_not_verified on protected API calls. The router redirects
   /// unverified users to the verification page.
   Future<void> signIn({required String email, required String password}) async {
-    if (kDebugMode) debugPrint('[AUTH] signIn: attempting login for $email');
+    if (kDebugMode) {
+      final sanitized = email.length > 3
+          ? '${email.substring(0, 3)}***@${email.split('@').last}'
+          : '***';
+      debugPrint('[AUTH] signIn: attempting login for $sanitized');
+    }
     state = state.copyWith(
       isLoading: true,
       clearError: true,

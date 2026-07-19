@@ -269,7 +269,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
       DioExceptionType.receiveTimeout ||
-      DioExceptionType.connectionError => const NetworkException(
+      DioExceptionType.connectionError ||
+      DioExceptionType.transformTimeout => const NetworkException(
         message: 'network/no-connection',
       ),
       DioExceptionType.badResponse => ServerException(

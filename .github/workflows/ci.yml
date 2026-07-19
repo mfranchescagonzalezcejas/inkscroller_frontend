@@ -181,3 +181,35 @@ jobs:
           fvm flutter test \
             test/features/*/presentation/pages/ \
             test/features/*/presentation/widgets/
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.5'
+          cache: true
+
+      - name: Install FVM
+        run: dart pub global activate fvm
+
+      - name: Add pub cache to PATH
+        run: echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install FVM-pinned SDK
+        run: fvm install
+
+      - name: Install project dependencies
+        run: fvm flutter pub get
+
+      - name: Check for outdated dependencies
+        run: |
+          echo "## Outdated dependencies" >> $GITHUB_STEP_SUMMARY
+          fvm dart pub outdated --no-dev-dependencies || true
+          fvm dart pub outdated --no-dev-dependencies >> $GITHUB_STEP_SUMMARY || true
