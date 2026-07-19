@@ -49,11 +49,12 @@ String _libraryErrorText(Failure? failure, AppLocalizations l10n) {
     'network/unknown' => l10n.libraryErrorNetworkUnknown,
     'server/empty-response' => l10n.libraryErrorEmptyResponse,
     'chapter/external-only' => l10n.libraryErrorExternalChapter,
-    _ => failure is NetworkFailure
-        ? l10n.libraryErrorNetworkNoConnection
-        : failure is ServerFailure
-        ? l10n.libraryErrorServerBadResponse
-        : l10n.libraryErrorNetworkUnknown,
+    _ =>
+      failure is NetworkFailure
+          ? l10n.libraryErrorNetworkNoConnection
+          : failure is ServerFailure
+          ? l10n.libraryErrorServerBadResponse
+          : l10n.libraryErrorNetworkUnknown,
   };
 }
 
@@ -107,11 +108,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
       (prev, next) {
         if (next.chapters.isEmpty) return;
         // Dedup: skip if the set of chapters hasn't actually changed.
-        final prevIds =
-            prev?.chapters.map((c) => c.id).toSet() ?? <String>{};
+        final prevIds = prev?.chapters.map((c) => c.id).toSet() ?? <String>{};
         final nextIds = next.chapters.map((c) => c.id).toSet();
-        if (prevIds.length == nextIds.length &&
-            prevIds.containsAll(nextIds)) {
+        if (prevIds.length == nextIds.length && prevIds.containsAll(nextIds)) {
           return;
         }
         ref
@@ -143,20 +142,21 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final List<Chapter> displayChapters = organizeChapters(
       state.chapters,
       descending: state.sortDescending,
-      readChapterIds:
-          state.filterUnreadOnly ? progress.readChapterIds : null,
+      readChapterIds: state.filterUnreadOnly ? progress.readChapterIds : null,
     );
 
     // ── 4-state determination ──────────────────────────────────────
-    debugPrint('[DetailPage] build $hashCode '
-        'mangaId=${widget.manga.id} '
-        'malId=${widget.manga.malId} '
-        'totalChaptersCount=${progress.totalChaptersCount} '
-        'readChapterIds.len=${progress.readChapterIds.length} '
-        'manuallyMarkedCount=${progress.manuallyMarkedCount} '
-        'readChaptersCount=${progress.readChaptersCount} '
-        'state.chapters=${state.chapters.length} '
-        'totalChaptersCount=${progress.totalChaptersCount}');
+    debugPrint(
+      '[DetailPage] build $hashCode '
+      'mangaId=${widget.manga.id} '
+      'malId=${widget.manga.malId} '
+      'totalChaptersCount=${progress.totalChaptersCount} '
+      'readChapterIds.len=${progress.readChapterIds.length} '
+      'manuallyMarkedCount=${progress.manuallyMarkedCount} '
+      'readChaptersCount=${progress.readChaptersCount} '
+      'state.chapters=${state.chapters.length} '
+      'totalChaptersCount=${progress.totalChaptersCount}',
+    );
     // Tracking shows progress readChapters / totalChapters even without
     // Jikan data — totalChaptersCount is derived from max chapter number
     // in the MangaDex list or Jikan total.
@@ -177,240 +177,243 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
       body: Stack(
         children: <Widget>[
           Column(
-        children: <Widget>[
-          if (isOffline) const OfflineBanner(),
-          Expanded(
-            child: CustomScrollView(
-              slivers: <Widget>[
-                // ── Cover section (includes cover, tags, title, score, desc) ─
-                SliverToBoxAdapter(child: _CoverSection(manga: widget.manga)),
-
-                // ── Reading progress section (tracking states) ────
-                if (showTracking)
-                  SliverToBoxAdapter(
-                    child: ReadingProgressSection(
-                      mangaId: widget.manga.id,
-                      readCount: progress.readChaptersCount,
-                      totalCount: progress.totalChaptersCount,
-                      onJumpToChapter: (chapterNumber) {
-                        ref
-                            .read(readingProgressProvider.notifier)
-                            .setManuallyMarkedCountTo(
-                              widget.manga.id,
-                              chapterNumber,
-                              chapters: state.chapters,
-                            );
-                      },
-                    ),
-                  ),
-
-                // ── Chapters section ──────────────────────────────
-                if (hasMdChapters || hasTotal)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: _ChaptersHeader(
-                        progress: progress,
-                        mangaId: widget.manga.id,
-                        showLanguageSelector: hasMdChapters,
-                      ),
-                    ),
-                  ),
-
-                if (state.isLoading)
-                  const SliverFillRemaining(
-                    child: Center(child: MangaDetailShimmer()),
-                  )
-                else if (state.failure != null)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              context.l10n.failedToLoadChapters,
-                              style: const TextStyle(
-                                fontFamily: AppTypography.fontFamily,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.onSurface,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _libraryErrorText(state.failure, context.l10n),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: AppColors.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            FilledButton(
-                              onPressed: () {
-                                // Use the last selected language (user may have
-                                // switched manually). On first load failure
-                                // selectedLanguage is still 'en', so fall back
-                                // to the user's preference from settings.
-                                final lang = state.selectedLanguage != 'en'
-                                    ? state.selectedLanguage
-                                    : (ref
-                                            .read(preferencesProvider)
-                                            .preferences
-                                            ?.defaultLanguage ??
-                                        'en');
-                                ref
-                                    .read(mangaChaptersProvider.notifier)
-                                    .loadLanguages(
-                                      widget.manga.id,
-                                      preferredLang: lang,
-                                    );
-                              },
-                              child: Text(context.l10n.retryAction),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                else if (showNothing)
-                  SliverFillRemaining(
-                    child: Center(
-                      child: Text(
-                        context.l10n.noChaptersAvailable,
-                        style: const TextStyle(
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  )
-                else if (useBatchList) ...[
-                  SliverToBoxAdapter(
-                    child: ChapterBatchList(
-                      mangaId: widget.manga.id,
-                      descending: state.sortDescending,
-                      hiddenChapterIds: state.filterUnreadOnly
-                          ? progress.readChapterIds
-                          : null,
-                      batches: computeChapterBatches(
-                        chapters: state.chapters,
-                        totalChaptersCount: progress.totalChaptersCount,
-                        batchSize: progress.batchSize,
-                      ),
-                      onChapterTap: (chapter) async {
-                        await _handleChapterTap(
-                          context,
-                          chapter,
-                          state.chapters,
-                        );
-                      },
-                    ),
-                  ),
-                  // ── Extra chapters without numbers (extras, oneshots) ──
-                  if (state.chapters.any((ch) => ch.number == null))
+            children: <Widget>[
+              if (isOffline) const OfflineBanner(),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    // ── Cover section (includes cover, tags, title, score, desc) ─
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-                        child: Text(
-                          context.l10n.extrasTitle,
-                          style: const TextStyle(
-                            fontFamily: AppTypography.fontFamily,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.onSurfaceVariant,
+                      child: _CoverSection(manga: widget.manga),
+                    ),
+
+                    // ── Reading progress section (tracking states) ────
+                    if (showTracking)
+                      SliverToBoxAdapter(
+                        child: ReadingProgressSection(
+                          mangaId: widget.manga.id,
+                          readCount: progress.readChaptersCount,
+                          totalCount: progress.totalChaptersCount,
+                          onJumpToChapter: (chapterNumber) {
+                            ref
+                                .read(readingProgressProvider.notifier)
+                                .setManuallyMarkedCountTo(
+                                  widget.manga.id,
+                                  chapterNumber,
+                                  chapters: state.chapters,
+                                );
+                          },
+                        ),
+                      ),
+
+                    // ── Chapters section ──────────────────────────────
+                    if (hasMdChapters || hasTotal)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                          child: _ChaptersHeader(
+                            progress: progress,
+                            mangaId: widget.manga.id,
+                            showLanguageSelector: hasMdChapters,
                           ),
                         ),
                       ),
-                    ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final extras = state.chapters
-                            .where((ch) => ch.number == null)
-                            .toList();
-                        final chapter = extras[index];
-                        return ChapterTile(
-                          chapter: chapter,
-                          isRead: progress.isChapterRead(chapter.id),
-                          onTap: () async {
+
+                    if (state.isLoading)
+                      const SliverFillRemaining(
+                        child: Center(child: MangaDetailShimmer()),
+                      )
+                    else if (state.failure != null)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  context.l10n.failedToLoadChapters,
+                                  style: const TextStyle(
+                                    fontFamily: AppTypography.fontFamily,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.onSurface,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _libraryErrorText(
+                                    state.failure,
+                                    context.l10n,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton(
+                                  onPressed: () {
+                                    // Use the last selected language (user may have
+                                    // switched manually). On first load failure
+                                    // selectedLanguage is still 'en', so fall back
+                                    // to the user's preference from settings.
+                                    final lang = state.selectedLanguage != 'en'
+                                        ? state.selectedLanguage
+                                        : (ref
+                                                  .read(preferencesProvider)
+                                                  .preferences
+                                                  ?.defaultLanguage ??
+                                              'en');
+                                    ref
+                                        .read(mangaChaptersProvider.notifier)
+                                        .loadLanguages(
+                                          widget.manga.id,
+                                          preferredLang: lang,
+                                        );
+                                  },
+                                  child: Text(context.l10n.retryAction),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (showNothing)
+                      SliverFillRemaining(
+                        child: Center(
+                          child: Text(
+                            context.l10n.noChaptersAvailable,
+                            style: const TextStyle(
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (useBatchList) ...[
+                      SliverToBoxAdapter(
+                        child: ChapterBatchList(
+                          mangaId: widget.manga.id,
+                          descending: state.sortDescending,
+                          hiddenChapterIds: state.filterUnreadOnly
+                              ? progress.readChapterIds
+                              : null,
+                          batches: computeChapterBatches(
+                            chapters: state.chapters,
+                            totalChaptersCount: progress.totalChaptersCount,
+                            batchSize: progress.batchSize,
+                          ),
+                          onChapterTap: (chapter) async {
                             await _handleChapterTap(
                               context,
                               chapter,
                               state.chapters,
                             );
                           },
-                          onToggleRead: () {
-                            ref
-                                .read(readingProgressProvider.notifier)
-                                .toggleChapter(
-                                  mangaId: widget.manga.id,
-                                  chapterId: chapter.id,
-                                  totalChaptersCount:
-                                      state.chapters.length,
-                                );
-                          },
-                        );
-                      },
-                      childCount: state.chapters
-                          .where((ch) => ch.number == null)
-                          .length,
-                    ),
-                  ),
-                ]
-                else if (displayChapters.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Text(
-                        context.l10n.chaptersFilteredOut,
-                        style: const TextStyle(
-                          color: AppColors.onSurfaceVariant,
                         ),
                       ),
-                    ),
-                  )
-                else
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final chapter = displayChapters[index];
-                      return ChapterTile(
-                        chapter: chapter,
-                        isRead: progress.isChapterRead(chapter.id),
-                        onTap: () async {
-                          await _handleChapterTap(
-                            context,
-                            chapter,
-                            state.chapters,
-                          );
-                        },
-                        onToggleRead: () {
-                          ref
-                              .read(readingProgressProvider.notifier)
-                              .toggleChapter(
-                                mangaId: widget.manga.id,
-                                chapterId: chapter.id,
-                                totalChaptersCount: state.chapters.length,
+                      // ── Extra chapters without numbers (extras, oneshots) ──
+                      if (state.chapters.any((ch) => ch.number == null))
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                            child: Text(
+                              context.l10n.extrasTitle,
+                              style: const TextStyle(
+                                fontFamily: AppTypography.fontFamily,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final extras = state.chapters
+                                .where((ch) => ch.number == null)
+                                .toList();
+                            final chapter = extras[index];
+                            return ChapterTile(
+                              chapter: chapter,
+                              isRead: progress.isChapterRead(chapter.id),
+                              onTap: () async {
+                                await _handleChapterTap(
+                                  context,
+                                  chapter,
+                                  state.chapters,
+                                );
+                              },
+                              onToggleRead: () {
+                                ref
+                                    .read(readingProgressProvider.notifier)
+                                    .toggleChapter(
+                                      mangaId: widget.manga.id,
+                                      chapterId: chapter.id,
+                                      totalChaptersCount: state.chapters.length,
+                                    );
+                              },
+                            );
+                          },
+                          childCount: state.chapters
+                              .where((ch) => ch.number == null)
+                              .length,
+                        ),
+                      ),
+                    ] else if (displayChapters.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Text(
+                            context.l10n.chaptersFilteredOut,
+                            style: const TextStyle(
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final chapter = displayChapters[index];
+                          return ChapterTile(
+                            chapter: chapter,
+                            isRead: progress.isChapterRead(chapter.id),
+                            onTap: () async {
+                              await _handleChapterTap(
+                                context,
+                                chapter,
+                                state.chapters,
                               );
-                        },
-                      );
-                    }, childCount: displayChapters.length),
-                  ),
+                            },
+                            onToggleRead: () {
+                              ref
+                                  .read(readingProgressProvider.notifier)
+                                  .toggleChapter(
+                                    mangaId: widget.manga.id,
+                                    chapterId: chapter.id,
+                                    totalChaptersCount: state.chapters.length,
+                                  );
+                            },
+                          );
+                        }, childCount: displayChapters.length),
+                      ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 120)),
-              ],
-            ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                  ],
+                ),
+              ),
+            ],
           ),
+
+          // ── Floating top buttons ──────────────────────────────
+          _FloatingTopButtons(manga: widget.manga),
         ],
       ),
-
-      // ── Floating top buttons ──────────────────────────────
-      _FloatingTopButtons(manga: widget.manga),
-    ],
-  ),
-);
+    );
   }
 
   Future<void> _handleChapterTap(
@@ -454,10 +457,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
     if (chapter.readable) {
       await context.push(
-        AppRoutes.readerPath(
-          mangaId: widget.manga.id,
-          chapterId: chapter.id,
-        ),
+        AppRoutes.readerPath(mangaId: widget.manga.id, chapterId: chapter.id),
         extra: chapter,
       );
     }
@@ -537,10 +537,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final String? externalUrl = chapter.externalUrl;
     if (externalUrl == null || externalUrl.isEmpty) {
       await context.push(
-        AppRoutes.readerPath(
-          mangaId: widget.manga.id,
-          chapterId: chapter.id,
-        ),
+        AppRoutes.readerPath(mangaId: widget.manga.id, chapterId: chapter.id),
         extra: chapter,
       );
       return;
@@ -558,7 +555,10 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
       // ponytail: skip canLaunchUrl — on modern Android it often returns false
       // even when a browser can handle the URL. Just launch directly.
-      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
       if (!launched && context.mounted) {
         AppFeedback.showWarning(
           context,
@@ -566,9 +566,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
         );
       }
     } on Exception catch (e, st) {
-      debugPrint(
-        '[ExternalLink] Failed to launch URL: $e\n$st',
-      );
+      debugPrint('[ExternalLink] Failed to launch URL: $e\n$st');
       if (!context.mounted) return;
       AppFeedback.showWarning(
         context,
@@ -751,11 +749,18 @@ class _CoverSectionState extends State<_CoverSection> {
       _CoverRatio.square => (screenWidth * 0.70).clamp(260, 360),
     };
 
-    // Max cap so tall portrait covers don't tower.
+    // Max height so tall portrait covers don't tower.
     final double maxHeight = switch (_ratio) {
       _CoverRatio.portrait => (screenHeight * 0.60),
       _CoverRatio.landscape => (screenHeight * 0.45),
       _CoverRatio.square => (screenHeight * 0.60),
+    };
+
+    // Max top so tall portrait covers don't tower.
+    final double topPadding = switch (_ratio) {
+      _CoverRatio.portrait => (maxHeight * 0.2),
+      _CoverRatio.landscape => (maxHeight * 0.25),
+      _CoverRatio.square => (maxHeight * 0.2),
     };
 
     // Content below the cover: tags (~60px) + title (~80px) + score (~20px)
@@ -784,7 +789,7 @@ class _CoverSectionState extends State<_CoverSection> {
       if (widget.manga.status != null) widget.manga.status!.toUpperCase(),
       ...widget.manga.genres.take(3).map((g) => g.toUpperCase()),
       if (widget.manga.demographic != null)
-          widget.manga.demographic!.toUpperCase(),
+        widget.manga.demographic!.toUpperCase(),
     ];
 
     // ── Score badge row ──────────────────────────────────────
@@ -828,8 +833,13 @@ class _CoverSectionState extends State<_CoverSection> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SizedBox(width: coverWidth, child: coverImage),
-              const SizedBox(height: 16),
+              Padding(
+                padding: EdgeInsetsGeometry.only(
+                  top: topPadding,
+                  bottom: 16,
+                ), //const EdgeInsets.symmetric(vertical: 16),
+                child: SizedBox(width: coverWidth, child: coverImage),
+              ),
 
               // Tags row
               if (tags.isNotEmpty)
@@ -870,8 +880,7 @@ class _CoverSectionState extends State<_CoverSection> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Icon(Icons.star,
-                        size: 16, color: AppColors.primary),
+                    const Icon(Icons.star, size: 16, color: AppColors.primary),
                     const SizedBox(width: 4),
                     Text(
                       scoreStr,
@@ -1078,8 +1087,11 @@ class _CompactReaderModeToggle extends ConsumerWidget {
     final globalMode = prefsState.preferences?.defaultReaderMode;
     final rawOverride = overrideState?.preferredReaderMode;
 
-    final ReaderMode currentMode = rawOverride ?? globalMode ?? ReaderMode.vertical;
-    final String currentLabel = currentMode == ReaderMode.vertical ? 'Vertical' : 'Paginado';
+    final ReaderMode currentMode =
+        rawOverride ?? globalMode ?? ReaderMode.vertical;
+    final String currentLabel = currentMode == ReaderMode.vertical
+        ? 'Vertical'
+        : 'Paginado';
 
     return PopupMenuButton<ReaderMode>(
       initialValue: currentMode,
@@ -1099,7 +1111,11 @@ class _CompactReaderModeToggle extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Icon(Icons.menu_book_outlined, size: 16, color: AppColors.onSurfaceVariant),
+            const Icon(
+              Icons.menu_book_outlined,
+              size: 16,
+              color: AppColors.onSurfaceVariant,
+            ),
             const SizedBox(width: 4),
             Text(
               currentLabel,
@@ -1110,7 +1126,11 @@ class _CompactReaderModeToggle extends ConsumerWidget {
                 color: AppColors.onSurfaceVariant,
               ),
             ),
-            const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.onSurfaceVariant),
+            const Icon(
+              Icons.arrow_drop_down,
+              size: 16,
+              color: AppColors.onSurfaceVariant,
+            ),
           ],
         ),
       ),
@@ -1130,8 +1150,10 @@ class _CompactReaderModeToggle extends ConsumerWidget {
             0,
             PopupMenuItem(
               value: globalMode,
-              child: Text('Usar global (${globalMode == ReaderMode.vertical ? "Vertical" : "Paginado"})',
-                  style: const TextStyle(fontSize: 13, color: AppColors.primary)),
+              child: Text(
+                'Usar global (${globalMode == ReaderMode.vertical ? "Vertical" : "Paginado"})',
+                style: const TextStyle(fontSize: 13, color: AppColors.primary),
+              ),
             ),
           );
         }
