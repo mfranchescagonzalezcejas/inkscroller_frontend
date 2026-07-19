@@ -182,32 +182,8 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
           Expanded(
             child: CustomScrollView(
               slivers: <Widget>[
-                // ── Cover section ─────────────────────────────────
+                // ── Cover section (includes cover, tags, title, score, desc) ─
                 SliverToBoxAdapter(child: _CoverSection(manga: widget.manga)),
-
-                // ── Tags row ─────────────────────────────────────
-                SliverToBoxAdapter(child: _TagsRow(manga: widget.manga)),
-
-                // ── Title + Meta ──────────────────────────────────
-                SliverToBoxAdapter(child: _TitleArea(manga: widget.manga)),
-
-                // ── Description section ───────────────────────────
-                if (widget.manga.description != null &&
-                    widget.manga.description!.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                      child: Text(
-                        widget.manga.description!,
-                        style: const TextStyle(
-                          fontFamily: AppTypography.fontFamily,
-                          fontSize: 14,
-                          height: 1.5,
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
 
                 // ── Reading progress section (tracking states) ────
                 if (showTracking)
@@ -775,18 +751,20 @@ class _CoverSectionState extends State<_CoverSection> {
       _CoverRatio.square => (screenWidth * 0.70).clamp(260, 360),
     };
 
-    // Pick height based on aspect ratio so each format shines.
-    final double coverHeight = switch (_ratio) {
+    // Max cap so tall portrait covers don't tower.
+    final double maxHeight = switch (_ratio) {
       _CoverRatio.portrait => (screenHeight * 0.60),
       _CoverRatio.landscape => (screenHeight * 0.45),
       _CoverRatio.square => (screenHeight * 0.60),
     };
 
+    // Content below the cover: tags (~60px) + title (~80px) + score (~20px)
+
     // ConstrainedBox outside ClipRRect: the cap limits the box, but
     // ClipRRect wraps the image at its RENDERED size, so corner-radius
     // clips actual image pixels — not letterbox.
     final Widget coverImage = ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: coverHeight),
+      constraints: BoxConstraints(maxHeight: maxHeight),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: CachedNetworkImage(
@@ -801,14 +779,22 @@ class _CoverSectionState extends State<_CoverSection> {
       ),
     );
 
+    // ── Tags ─────────────────────────────────────────────────
+    final List<String> tags = <String>[
+      if (widget.manga.status != null) widget.manga.status!.toUpperCase(),
+      ...widget.manga.genres.take(3).map((g) => g.toUpperCase()),
+      if (widget.manga.demographic != null)
+          widget.manga.demographic!.toUpperCase(),
+    ];
+
+    // ── Score badge row ──────────────────────────────────────
+    final String? scoreStr = widget.manga.score?.toStringAsFixed(1);
+
     return Hero(
       tag: 'cover-${widget.manga.id}',
-      child: SizedBox(
-      height: coverHeight,
       child: Stack(
-        alignment: Alignment.center,
         children: <Widget>[
-          // Blurred cover as background
+          // Blurred cover as background — fills whatever height the content needs
           if (widget.manga.coverUrl != null)
             Positioned.fill(
               child: ClipRRect(
@@ -838,46 +824,96 @@ class _CoverSectionState extends State<_CoverSection> {
               ),
             ),
           ),
-          // Cover image — natural aspect ratio, rounded corners.
-          SizedBox(width: coverWidth, child: coverImage),
+          // ── Content column — non-positioned → Stack sizes to fit ──
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(width: coverWidth, child: coverImage),
+              const SizedBox(height: 16),
+
+              // Tags row
+              if (tags.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: tags.asMap().entries.map((entry) {
+                      final bool isFirst = entry.key == 0;
+                      return _Tag(label: entry.value, isStatus: isFirst);
+                    }).toList(),
+                  ),
+                ),
+
+              const SizedBox(height: 16),
+
+              // Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  widget.manga.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onSurface,
+                  ),
+                ),
+              ),
+
+              // Score (same star icon as MangaTile)
+              if (scoreStr != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Icon(Icons.star,
+                        size: 16, color: AppColors.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      scoreStr,
+                      style: const TextStyle(
+                        fontFamily: AppTypography.fontFamily,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+
+              // Description — unlimited, adapts to text length
+              if (widget.manga.description != null &&
+                  widget.manga.description!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Text(
+                    widget.manga.description!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: AppTypography.fontFamily,
+                      fontSize: 14,
+                      height: 1.5,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+
+              // Bottom breathing room before the next sliver
+              const SizedBox(height: 24),
+            ],
+          ),
         ],
       ),
-    ),
     );
   }
 }
 
-// ── Tags Row ─────────────────────────────────────────────────────────────────
-
-class _TagsRow extends StatelessWidget {
-  final Manga manga;
-
-  const _TagsRow({required this.manga});
-
-  @override
-  Widget build(BuildContext context) {
-    final List<String> tags = <String>[
-      if (manga.status != null) manga.status!.toUpperCase(),
-      ...manga.genres.take(3).map((g) => g.toUpperCase()),
-      if (manga.demographic != null) manga.demographic!.toUpperCase(),
-    ];
-
-    if (tags.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        spacing: 8,
-        runSpacing: 8,
-        children: tags.asMap().entries.map((entry) {
-          final bool isFirst = entry.key == 0;
-          return _Tag(label: entry.value, isStatus: isFirst);
-        }).toList(),
-      ),
-    );
-  }
-}
+// ── Tag Chip ──────────────────────────────────────────────────────────────────
 
 class _Tag extends StatelessWidget {
   final String label;
@@ -921,70 +957,6 @@ class _Tag extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-// ── Title + Meta ──────────────────────────────────────────────────────────────
-
-class _TitleArea extends StatelessWidget {
-  final Manga manga;
-
-  const _TitleArea({required this.manga});
-
-  @override
-  Widget build(BuildContext context) {
-    final String? scoreStr = manga.score?.toStringAsFixed(1);
-    final List<String> metaParts = <String>[
-      if (scoreStr != null) '★ $scoreStr',
-      if (manga.status != null) _displayStatus(manga.status!),
-      if (manga.demographic != null) manga.demographic!.toUpperCase(),
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      child: Column(
-        children: <Widget>[
-          Text(
-            manga.title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: AppTypography.fontFamily,
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              color: AppColors.onSurface,
-            ),
-          ),
-          if (metaParts.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
-            Text(
-              metaParts.join('  ·  '),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: AppTypography.fontFamily,
-                fontSize: 13,
-                color: AppColors.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  String _displayStatus(String status) {
-    // Convert API status (e.g. "FINISHED", "ONGOING", "HIATUS") to display form
-    switch (status.toUpperCase()) {
-      case 'FINISHED':
-        return 'Finalizado';
-      case 'ONGOING':
-        return 'En emisión';
-      case 'HIATUS':
-        return 'En pausa';
-      case 'CANCELLED':
-        return 'Cancelado';
-      default:
-        return status;
-    }
   }
 }
 
