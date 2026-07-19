@@ -172,17 +172,62 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool useBatchList =
         showBatches && progress.totalChaptersCount > progress.batchSize;
 
+    // Estimate blur background height so it extends behind the cover content.
+    // This runs outside the scroll view so there's no constraint cap.
+    final double maxCoverHeight = MediaQuery.of(context).size.height * 0.60;
+    final double descExtra = (widget.manga.description?.isNotEmpty ?? false) ? 200.0 : 0.0;
+    final double blurHeight = maxCoverHeight + 200.0 + descExtra;
+
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
       body: Stack(
         children: <Widget>[
+          // ── Blur + gradient fill behind the cover content ──────────
+          // Positioned with fixed height so it's independent of scroll constraints.
+          Positioned(
+            top: 0, left: 0, right: 0,
+            height: blurHeight,
+            child: Stack(
+              children: <Widget>[
+                if (widget.manga.coverUrl != null)
+                  Positioned.fill(
+                    child: ClipRRect(
+                      child: ImageFiltered(
+                        imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.manga.coverUrl!,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, _, _) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[
+                          Colors.black.withValues(alpha: 0.6),
+                          AppColors.voidLowest.withValues(alpha: 0.85),
+                          AppColors.voidLowest,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // ── Scrollable content ─────────────────────────────────────
           Column(
             children: <Widget>[
               if (isOffline) const OfflineBanner(),
               Expanded(
                 child: CustomScrollView(
                   slivers: <Widget>[
-                    // ── Cover section (includes cover, tags, title, score, desc) ─
+                    // ── Cover section (cover, tags, title, score, desc) ─
                     SliverToBoxAdapter(
                       child: _CoverSection(manga: widget.manga),
                     ),
@@ -795,48 +840,18 @@ class _CoverSectionState extends State<_CoverSection> {
     // ── Score badge row ──────────────────────────────────────
     final String? scoreStr = widget.manga.score?.toStringAsFixed(1);
 
+    // Estimate content height so the blur (rendered by the parent Stack)
+    // has enough vertical extent. We use maxCoverHeight + content estimate.
+    final double maxCoverHeight = MediaQuery.of(context).size.height * 0.60;
+    final double descExtra = (widget.manga.description?.isNotEmpty ?? false) ? 200.0 : 0.0;
+    final double sectionHeight = maxCoverHeight + 200.0 + descExtra;
+
     return Hero(
       tag: 'cover-${widget.manga.id}',
-      child: Stack(
-        children: <Widget>[
-          // Blurred cover as background — fills whatever height the content needs
-          if (widget.manga.coverUrl != null)
-            Positioned.fill(
-              child: ClipRRect(
-                child: ImageFiltered(
-                  imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                  child: CachedNetworkImage(
-                    imageUrl: widget.manga.coverUrl!,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, _, _) => const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-            ),
-          // Dark gradient overlay over the blur
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    Colors.black.withValues(alpha: 0.6),
-                    AppColors.voidLowest.withValues(alpha: 0.85),
-                    AppColors.voidLowest,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // ── Content column — ConstrainedBox removes the height cap so the
-          // Column can be as tall as its content. Crucially, ConstrainedBox
-          // sizes to ITSELF (the measured child), so the Stack auto-expands
-          // and Positioned.fill blur/gradient follow.
-          ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: double.infinity),
-            child: Column(
-            mainAxisSize: MainAxisSize.min,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: sectionHeight),
+        child: Column(
+        mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding: EdgeInsetsGeometry.only(
@@ -921,9 +936,7 @@ class _CoverSectionState extends State<_CoverSection> {
               const SizedBox(height: 24),
             ],
           ),
-          ),
-        ],
-      ),
+        ),
     );
   }
 }
