@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
@@ -228,7 +229,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                 child: CustomScrollView(
                   slivers: <Widget>[
                     // ── Cover section (cover, tags, title, score, desc) ─
-                    SliverToBoxAdapter(
+                    // Uses _SliverUnconstrained so the content height is not
+                    // capped by remainingPaintExtent (which caused yellow lines).
+                    _SliverUnconstrained(
                       child: _CoverSection(manga: widget.manga),
                     ),
 
@@ -937,6 +940,39 @@ class _CoverSectionState extends State<_CoverSection> {
             ],
           ),
         ),
+    );
+  }
+}
+
+// ── Unconstrained Sliver ──────────────────────────────────────────────────────
+/// A sliver that lays out its child with unbounded main-axis extent.
+/// Unlike [SliverToBoxAdapter] (which caps at [remainingPaintExtent]), this
+/// lets the child determine its own height — useful when the child contains
+/// content taller than the viewport.
+class _SliverUnconstrained extends SingleChildRenderObjectWidget {
+  const _SliverUnconstrained({super.child});
+
+  @override
+  RenderSliverUnconstrained createRenderObject(BuildContext context) =>
+      RenderSliverUnconstrained();
+}
+
+class RenderSliverUnconstrained extends RenderSliverSingleBoxAdapter {
+  @override
+  void performLayout() {
+    if (child == null) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+    child!.layout(
+      constraints.asBoxConstraints(maxExtent: double.infinity),
+      parentUsesSize: true,
+    );
+    final double childExtent = child!.size.height;
+    geometry = SliverGeometry(
+      scrollExtent: childExtent,
+      paintExtent: childExtent.clamp(0.0, constraints.remainingPaintExtent),
+      maxPaintExtent: childExtent,
     );
   }
 }
