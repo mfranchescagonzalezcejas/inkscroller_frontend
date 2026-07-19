@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,8 +20,8 @@ const int _heroMaxSlides = 5;
 // HeroCarousel
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Swipeable featured-manga carousel with page indicators, bookmark toggle,
-/// and detail navigation.
+/// Swipeable featured-manga carousel with blurred cover background,
+/// page indicators, bookmark toggle, and detail navigation.
 class HeroCarousel extends ConsumerStatefulWidget {
   const HeroCarousel({super.key});
 
@@ -40,15 +42,14 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
   @override
   Widget build(BuildContext context) {
     final mangas = ref.watch(homeProvider).featured;
-
-    if (mangas.isEmpty) {
-      return const SizedBox(height: 370);
-    }
-
     final slides = mangas.take(_heroMaxSlides).toList();
 
+    if (slides.isEmpty) {
+      return const SizedBox(height: 440);
+    }
+
     return SizedBox(
-      height: 370,
+      height: 440,
       child: Stack(
         children: [
           PageView.builder(
@@ -60,8 +61,30 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
             onPageChanged: (i) => setState(() => _activeIndex = i),
             itemBuilder: (_, i) => _HeroSlide(manga: slides[i]),
           ),
+
+          // Bottom gradient — blends hero into home background
           Positioned(
-            bottom: 16,
+            left: 0,
+            right: 0,
+            bottom: -1,
+            height: 60,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.voidLowest.withValues(alpha: 0),
+                    AppColors.voidLowest,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Page indicators
+          Positioned(
+            bottom: 48,
             left: 0,
             right: 0,
             child: _HeroPageIndicator(
@@ -107,7 +130,7 @@ class _HeroPageIndicator extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HeroSlide
+// HeroSlide — blurred cover + overlay + content
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _HeroSlide extends ConsumerWidget {
@@ -133,84 +156,104 @@ class _HeroSlide extends ConsumerWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Cover image
-        _HeroCover(coverUrl: manga.coverUrl),
+        // ── Blurred cover background (like manga detail) ──────────
+        if (manga.coverUrl != null)
+          Positioned.fill(
+            child: ClipRRect(
+              child: ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: CachedNetworkImage(
+                  imageUrl: manga.coverUrl!,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
 
-        // Top gradient for status-bar contrast
+        // ── Dark gradient overlay ─────────────────────────────────
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
-                end: Alignment.center,
+                end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.voidLowest.withValues(alpha: .6),
-                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.5),
+                  AppColors.voidLowest.withValues(alpha: 0.7),
+                  AppColors.voidLowest.withValues(alpha: 0.85),
                 ],
               ),
             ),
           ),
         ),
 
-        // Bottom metadata area
+        // ── Foreground content ────────────────────────────────────
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Trending badge
+                const _TrendingBadge(),
+                const SizedBox(height: 12),
+
+                // Cover + text row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Cover thumbnail (similar to manga detail)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        width: 100,
+                        height: 150,
+                        child: _HeroCover(coverUrl: manga.coverUrl),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // Text info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            manga.title,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: AppTypography.fontFamily,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          _HeroMetadata(manga: manga, meta: meta),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // ── Actions at bottom (inside hero, above gradient) ───────
         Positioned(
           left: 20,
           right: 20,
-          bottom: 48,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Trending badge
-              const _TrendingBadge(),
-              const SizedBox(height: 12),
-
-              // Title
-              Text(
-                manga.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: AppTypography.fontFamily,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.onSurface,
-                ),
-              ),
-
-              // Description (max 3 lines)
-              if (manga.description != null &&
-                  manga.description!.trim().isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    manga.description!,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: AppTypography.fontFamily,
-                      fontSize: 13,
-                      color: AppColors.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-
-              // Meta row: type · demographic · score
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: _HeroMetadata(manga: manga, meta: meta),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Action row: Ver detalles + Bookmark
-              _HeroActions(
-                manga: manga,
-                inLibrary: inLibrary,
-                onDetail: openDetail,
-              ),
-            ],
+          bottom: 56,
+          child: _HeroActions(
+            manga: manga,
+            inLibrary: inLibrary,
+            onDetail: openDetail,
           ),
         ),
       ],
@@ -273,7 +316,9 @@ class _HeroMetadata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (meta.isNotEmpty)
           Text(
@@ -284,9 +329,8 @@ class _HeroMetadata extends StatelessWidget {
               color: AppColors.onSurfaceVariant,
             ),
           ),
-        if (meta.isNotEmpty && manga.score != null)
-          const SizedBox(width: 8),
-        if (manga.score != null)
+        if (manga.score != null) ...[
+          const SizedBox(height: 2),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -303,15 +347,14 @@ class _HeroMetadata extends StatelessWidget {
               ),
             ],
           ),
-        // ponytail: chapter-count display — entity lacks a dedicated field
-        // so we skip it here. Add when Manga.chapterCount lands.
+        ],
       ],
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HeroActions
+// HeroActions — compact "Ver detalles" + bookmark
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _HeroActions extends ConsumerWidget {
@@ -329,22 +372,23 @@ class _HeroActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
-        // Ver detalles
-        Expanded(
-          child: SizedBox(
-            height: 48,
-            child: Material(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: onDetail,
-                borderRadius: BorderRadius.circular(12),
-                child: const Center(
+        // Ver detalles — compact
+        SizedBox(
+          height: 40,
+          child: Material(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              onTap: onDetail,
+              borderRadius: BorderRadius.circular(10),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Center(
                   child: Text(
                     'Ver detalles',
                     style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.voidLowest,
                     ),
@@ -354,23 +398,23 @@ class _HeroActions extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
 
         // Bookmark
         SizedBox(
-          width: 48,
-          height: 48,
+          width: 40,
+          height: 40,
           child: Material(
             color: AppColors.cardHigh,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               onTap: () => _toggleBookmark(ref, context),
               child: Center(
                 child: Icon(
                   inLibrary ? Icons.bookmark : Icons.bookmark_border,
                   color: AppColors.onSurface,
-                  size: 20,
+                  size: 18,
                 ),
               ),
             ),
@@ -427,7 +471,7 @@ class _HeroCover extends StatelessWidget {
         ),
       ),
       fadeInDuration: const Duration(milliseconds: 300),
-      memCacheWidth: 540,
+      memCacheWidth: 200,
       filterQuality: FilterQuality.medium,
     );
   }
