@@ -6,11 +6,15 @@ class MangaReadingProgressModel {
     required this.mangaId,
     this.readChapterIds = const <String>{},
     this.totalChaptersCount = 0,
+    this.manuallyMarkedCount = 0,
+    this.batchSize = 25,
   });
 
   final String mangaId;
   final Set<String> readChapterIds;
   final int totalChaptersCount;
+  final int manuallyMarkedCount;
+  final int batchSize;
 
   /// Deserializes persisted JSON into a [MangaReadingProgressModel].
   factory MangaReadingProgressModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +25,9 @@ class MangaReadingProgressModel {
               .whereType<String>()
               .toSet(),
       totalChaptersCount: (json['totalChaptersCount'] as num?)?.toInt() ?? 0,
+      manuallyMarkedCount:
+          (json['manuallyMarkedCount'] as num?)?.toInt() ?? 0,
+      batchSize: (json['batchSize'] as num?)?.toInt() ?? 25,
     );
   }
 
@@ -30,6 +37,8 @@ class MangaReadingProgressModel {
       'mangaId': mangaId,
       'readChapterIds': readChapterIds.toList()..sort(),
       'totalChaptersCount': totalChaptersCount,
+      'manuallyMarkedCount': manuallyMarkedCount,
+      'batchSize': batchSize,
     };
   }
 }

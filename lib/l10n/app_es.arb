@@ -376,5 +376,17 @@
   "authChangeUsernameOption": "Cambiar nombre de usuario",
   "authChangeUsernameTitle": "Cambiar nombre de usuario",
   "authChangeUsernameSave": "Guardar",
-  "authChangeUsernameSuccess": "Nombre de usuario actualizado con éxito"
+  "authChangeUsernameSuccess": "Nombre de usuario actualizado con éxito",
+  "readingProgressTitle": "Progreso de lectura",
+  "manualMarkIncrease": "Marcar uno más como leído",
+  "manualMarkDecrease": "Desmarcar un capítulo",
+  "batchSizeLabel": "Tamaño de lote",
+  "jumpToChapter": "Saltar al capítulo",
+  "jumpToChapterHint": "Número de capítulo",
+  "jumpToChapterInvalid": "Ingresa un número de capítulo válido",
+  "placeholderMarkRead": "Marcar como leído",
+  "placeholderUnmark": "Marcar como no leído",
+  "noJikanData": "No hay datos externos disponibles",
+  "noChaptersNoTracking": "No hay capítulos disponibles",
+  "extrasTitle": "Extras"
 }

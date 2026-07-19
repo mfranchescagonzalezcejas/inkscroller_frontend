@@ -42,7 +42,22 @@ List<Chapter> organizeChapters(
   bool descending = false,
   Set<String>? readChapterIds,
 }) {
-  final ordered = orderChaptersForProgress(chapters);
+  // Deduplicate by full chapter number keeping the first occurrence.
+  // MangaDex sometimes returns multiple entries for the same number
+  // (different scanlators, multiple uploads). Uses the full double so
+  // decimal chapters like 12.0 and 12.5 are both retained.
+  final Set<double> seenNumbers = <double>{};
+  final List<Chapter> deduped = <Chapter>[];
+  for (final chapter in chapters) {
+    final num? n = chapter.number;
+    if (n != null) {
+      if (seenNumbers.contains(n.toDouble())) continue;
+      seenNumbers.add(n.toDouble());
+    }
+    deduped.add(chapter);
+  }
+
+  final ordered = orderChaptersForProgress(deduped);
   final List<Chapter> numbered =
       ordered.where((c) => c.number != null).toList();
   final List<Chapter> unnumbered =

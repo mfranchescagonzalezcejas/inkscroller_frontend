@@ -23,6 +23,8 @@ import '../../features/library/data/datasources/library_local_ds.dart';
 import '../../features/library/data/datasources/library_local_ds_impl.dart';
 import '../../features/library/data/datasources/library_remote_ds.dart';
 import '../../features/library/data/datasources/library_remote_ds_impl.dart';
+import '../../features/library/data/datasources/reading_progress_remote_ds.dart';
+import '../../features/library/data/datasources/reading_progress_remote_ds_impl.dart';
 import '../../features/library/data/datasources/user_library_remote_ds.dart';
 import '../../features/library/data/datasources/user_library_remote_ds_impl.dart';
 import '../../features/library/data/repositories/library_repository_impl.dart';
@@ -180,8 +182,16 @@ Future<void> initDI() async {
     () => PerTitleOverrideRepositoryImpl(sl<SharedPreferences>()),
   );
 
+  _registerIfAbsent<ReadingProgressRemoteDataSource>(
+    () => ReadingProgressRemoteDataSourceImpl(dioClient: sl<DioClient>()),
+  );
+
   _registerIfAbsent<ReadingProgressRepository>(
-    () => ReadingProgressRepositoryImpl(sl<SharedPreferences>()),
+    () => ReadingProgressRepositoryImpl(
+      sl<SharedPreferences>(),
+      remoteDataSource: sl<ReadingProgressRemoteDataSource>(),
+      firebaseAuth: sl<FirebaseAuth>(),
+    ),
   );
 
   _registerIfAbsent<UserLibraryRemoteDataSource>(

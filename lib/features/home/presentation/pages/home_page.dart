@@ -510,6 +510,7 @@ class _HomeSection extends StatelessWidget {
         SizedBox(
           height: isTrending ? 220 : HomeLayout.mangaCardRowHeight,
           child: ListView.separated(
+            clipBehavior: Clip.none,
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             itemCount: mangas.length,

@@ -823,4 +823,40 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get authChangeUsernameSuccess =>
       'Nombre de usuario actualizado con éxito';
+
+  @override
+  String get readingProgressTitle => 'Progreso de lectura';
+
+  @override
+  String get manualMarkIncrease => 'Marcar uno más como leído';
+
+  @override
+  String get manualMarkDecrease => 'Desmarcar un capítulo';
+
+  @override
+  String get batchSizeLabel => 'Tamaño de lote';
+
+  @override
+  String get jumpToChapter => 'Saltar al capítulo';
+
+  @override
+  String get jumpToChapterHint => 'Número de capítulo';
+
+  @override
+  String get jumpToChapterInvalid => 'Ingresa un número de capítulo válido';
+
+  @override
+  String get placeholderMarkRead => 'Marcar como leído';
+
+  @override
+  String get placeholderUnmark => 'Marcar como no leído';
+
+  @override
+  String get noJikanData => 'No hay datos externos disponibles';
+
+  @override
+  String get noChaptersNoTracking => 'No hay capítulos disponibles';
+
+  @override
+  String get extrasTitle => 'Extras';
 }
