@@ -49,7 +49,7 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     }
 
     return SizedBox(
-      height: 390,
+      height: 400,
       child: Stack(
         children: [
           PageView.builder(
@@ -197,7 +197,6 @@ class _HeroSlide extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Trending badge
                 const _TrendingBadge(),
                 const SizedBox(height: 12),
 
@@ -205,18 +204,42 @@ class _HeroSlide extends ConsumerWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Cover thumbnail (similar to manga detail)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: SizedBox(
                         width: 100,
                         height: 150,
-                        child: _HeroCover(coverUrl: manga.coverUrl),
+                        child: Stack(
+                          children: [
+                            _HeroCover(coverUrl: manga.coverUrl),
+                            if (manga.score != null)
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.cardHigh,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        manga.score!.toStringAsFixed(1),
+                                        style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
-
-                    // Text info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,15 +247,20 @@ class _HeroSlide extends ConsumerWidget {
                         children: [
                           Text(
                             manga.title,
-                            maxLines: 3,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: AppTypography.fontFamily,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.onSurface,
-                            ),
+                            style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.onSurface),
                           ),
+                          if (manga.description != null && manga.description!.trim().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                manga.description!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35),
+                              ),
+                            ),
                           const SizedBox(height: 4),
                           _HeroMetadata(manga: manga, meta: meta),
                         ],
@@ -245,7 +273,7 @@ class _HeroSlide extends ConsumerWidget {
           ),
         ),
 
-        // ── Actions at bottom (inside hero, above gradient) ───────
+        // ── Actions at bottom ─────────────────────────────────────
         Positioned(
           left: 20,
           right: 20,
@@ -329,25 +357,6 @@ class _HeroMetadata extends StatelessWidget {
               color: AppColors.onSurfaceVariant,
             ),
           ),
-        if (manga.score != null) ...[
-          const SizedBox(height: 2),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.star, size: 14, color: AppColors.scoreGold),
-              const SizedBox(width: 2),
-              Text(
-                manga.score!.toStringAsFixed(1),
-                style: const TextStyle(
-                  fontFamily: AppTypography.fontFamily,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.scoreGold,
-                ),
-              ),
-            ],
-          ),
-        ],
       ],
     );
   }

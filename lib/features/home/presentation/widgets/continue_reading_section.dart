@@ -19,7 +19,7 @@ class ContinueReadingSection extends ConsumerWidget {
     final progress = ref.watch(continueReadingProvider);
     return progress.when(
       loading: () => const Padding(
-        padding: EdgeInsets.only(top: 24),
+        padding: EdgeInsets.only(top: 6),
         child: HomeShimmer.cardRow(),
       ),
       error: (_, __) => const SizedBox.shrink(),
