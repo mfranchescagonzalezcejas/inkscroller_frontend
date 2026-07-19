@@ -139,11 +139,13 @@ class AuthGradientButton extends StatelessWidget {
                       )
                     : Text(
                         label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: AppTypography.labelLg,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.voidLowest,
+                          color: onPressed == null
+                              ? AppColors.onSurfaceVariant
+                              : AppColors.voidLowest,
                           letterSpacing: 0.3,
                         ),
                       ),

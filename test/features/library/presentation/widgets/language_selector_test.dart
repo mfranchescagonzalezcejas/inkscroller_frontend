@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/features/library/presentation/widgets/language_selector.dart';
 
+import '../../../../support/l10n_test_helpers.dart';
+
 void main() {
   group('LanguageSelector', () {
     testWidgets('renders available languages as dropdown items', (
@@ -182,6 +184,33 @@ void main() {
       // Shows loading placeholder instead of language options
       expect(find.text('English'), findsWidgets);
       expect(find.text('Spanish'), findsNothing);
+    });
+
+    testWidgets('renders Spanish language names when locale is es', (
+      tester,
+    ) async {
+      final languages = <String>['en', 'es', 'ja'];
+      String selected = 'en';
+
+      await tester.pumpWidget(
+        wrapWithL10n(
+          Scaffold(
+            body: LanguageSelector(
+              availableLanguages: languages,
+              selectedLanguage: selected,
+              onLanguageChanged: (lang) => selected = lang,
+            ),
+          ),
+          locale: const Locale('es'),
+        ),
+      );
+
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Inglés'), findsWidgets);
+      expect(find.text('Español'), findsOneWidget);
+      expect(find.text('Japonés'), findsOneWidget);
     });
   });
 }
