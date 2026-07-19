@@ -18,6 +18,10 @@ class MangaModel {
   final int? totalChaptersCount;
   final int? malId;
 
+  /// Manga type: "manga", "manhwa", "manhua", or null if unknown.
+  /// Returned by the backend from MangaDex's originalLanguage mapping.
+  final String? type;
+
   const MangaModel({
     required this.id,
     required this.title,
@@ -33,6 +37,7 @@ class MangaModel {
     this.readChaptersCount,
     this.totalChaptersCount,
     this.malId,
+    this.type,
   });
 
   /// Deserializes a [MangaModel] from the JSON map returned by the API.
@@ -63,6 +68,7 @@ class MangaModel {
         'chapters',
       ]),
       malId: (json['malId'] as num?)?.toInt(),
+      type: json['type'] as String?,
     );
   }
 
@@ -83,6 +89,7 @@ class MangaModel {
       'readChaptersCount': readChaptersCount,
       'totalChaptersCount': totalChaptersCount,
       'malId': malId,
+      'type': type,
     };
   }
 

@@ -24,6 +24,7 @@ extension MangaModelMapper on MangaModel {
       readChaptersCount: readChaptersCount,
       totalChaptersCount: totalChaptersCount,
       malId: malId,
+      type: type,
     );
   }
 }
