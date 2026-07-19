@@ -385,7 +385,15 @@ void main() {
       await pumpPage(tester, manga: manga, notifier: notifier);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      // Scroll down to make the language selector visible (cover section is tall)
+      await tester.dragUntilVisible(
+        find.byType(DropdownButton<String>),
+        find.byType(SingleChildScrollView),
+        const Offset(0, -200),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Español').last);
@@ -446,14 +454,16 @@ void main() {
       // If progressOverrides or a custom repo is given, wire it through
       // as a real ReadingProgressNotifier; otherwise use the stub.
       final bool useRealNotifier = progressRepo != null || progressOverrides != null;
-      if (useRealNotifier && progressRepo == null) {
-        progressRepo = _MockReadingProgressRepository();
-        if (progressOverrides != null) {
-          when(() => progressRepo!.getAll()).thenAnswer(
-            (_) async => progressOverrides,
-          );
-          when(() => progressRepo!.save(any())).thenAnswer((_) async {});
-        }
+      final ReadingProgressRepository? effectiveRepo =
+          useRealNotifier && progressRepo == null
+              ? _MockReadingProgressRepository()
+              : progressRepo;
+      if (effectiveRepo != null && effectiveRepo is _MockReadingProgressRepository &&
+          progressOverrides != null && progressRepo == null) {
+        when(() => effectiveRepo.getAll()).thenAnswer(
+          (_) async => progressOverrides,
+        );
+        when(() => effectiveRepo.save(any())).thenAnswer((_) async {});
       }
 
       return tester.pumpWidget(
@@ -469,7 +479,7 @@ void main() {
             ),
             readingProgressProvider.overrideWith(
               (ref) => useRealNotifier
-                  ? ReadingProgressNotifier(progressRepo!)
+                  ? ReadingProgressNotifier(effectiveRepo!)
                   : _makeStubReadingProgressNotifier(),
             ),
             userLibraryProvider.overrideWith(
@@ -595,11 +605,11 @@ void main() {
             preferredLang: any<String>(named: 'preferredLang'),
           ),
         ).thenAnswer(
-          (_) async => Right<Failure, ChaptersWithLanguages>(
+          (_) async => const Right<Failure, ChaptersWithLanguages>(
             ChaptersWithLanguages(
               availableLanguages: ['en'],
               matchedLanguage: 'en',
-              chapters: const <Chapter>[], // empty → no MD chapters
+              chapters: <Chapter>[],
             ),
           ),
         );

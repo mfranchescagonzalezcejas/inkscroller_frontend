@@ -22,7 +22,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.tap(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();
 
       expect(find.text('Inglés'), findsWidgets);
@@ -43,7 +43,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+      expect(find.byType(DropdownButton<String>), findsNothing);
       expect(find.text('Inglés'), findsNothing);
       expect(find.text('Cargando…'), findsNothing);
     });
@@ -64,7 +64,7 @@ void main() {
       );
 
       expect(find.text('Italiano'), findsOneWidget);
-      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+      expect(find.byType(DropdownButton<String>), findsNothing);
     });
 
     testWidgets('shows dropdown when multiple languages available', (
@@ -82,7 +82,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
     });
 
     testWidgets('shows disabled dropdown with loading text when isLoading is true', (
@@ -102,7 +102,7 @@ void main() {
       );
 
       expect(find.text('Cargando…'), findsOneWidget);
-      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
     });
 
     testWidgets('calls onLanguageChanged when a language is selected', (
@@ -122,7 +122,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.tap(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Español').last);
