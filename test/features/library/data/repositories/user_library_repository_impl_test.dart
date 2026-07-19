@@ -22,6 +22,10 @@ class _MemoryRemoteUserLibraryDataSource
     String? title,
     String? coverUrl,
     List<String> authors = const [],
+    String? type,
+    String? demographic,
+    List<String>? genres,
+    String? status,
   }) async {
     addCalls.add(mangaId);
   }

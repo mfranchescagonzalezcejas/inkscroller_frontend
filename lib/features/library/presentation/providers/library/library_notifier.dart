@@ -209,6 +209,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     result.fold(
       (failure) {
         if (capturedVersion != _loadVersion) return;
+        if (!mounted) return;
         state = state.copyWith(
           isLoading: false,
           mangas: const [],
@@ -219,12 +220,13 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       },
       (mangas) {
         if (capturedVersion != _loadVersion) return;
+        if (!mounted) return;
         _offset += mangas.length;
 
         final newState = state.copyWith(
           mangas: dedupeMangas(mangas),
           isLoading: false,
-          hasMore: _mode == LibraryMode.normal && mangas.length == _limit,
+          hasMore: mangas.length == _limit,
           clearFailure: true,
         );
         state = newState;
@@ -271,7 +273,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
           final freshState = state.copyWith(
             mangas: dedupeMangas(mangas),
             isLoadingMore: false,
-            hasMore: mode == LibraryMode.normal && mangas.length == _limit,
+            hasMore: mangas.length == _limit,
             clearFailure: true,
           );
           state = freshState;
@@ -351,7 +353,6 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   Future<void> loadMore() async {
-    if (_mode != LibraryMode.normal) return;
     if (state.isSearching) return;
     if (state.isLoadingMore || !state.hasMore) return;
 
@@ -362,6 +363,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     final result = await _getMangaList(
       limit: _limit,
       offset: _offset,
+      order: _mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
       genre: _genre,
       contentRating: _contentRating,
       demographics: _demographics?.map(MangaDemographic.fromJson).toList(),

@@ -236,8 +236,7 @@
   "dialogConfirm": "OK",
   "dialogCancel": "Cancelar",
   "readerSettingsConfirm": "Confirmar ajustes",
-  "readerDirectionLtr": "LTR",
-  "readerDirectionRtl": "RTL",
+  "readerDirectionPaged": "Paginado",
   "readerDirectionVertical": "Vertical",
   "deleteAccountTitle": "Eliminar cuenta",
   "deleteAccountWarningBody": "Esta acción es permanente e irreversible. Se eliminarán todos tus datos, incluyendo tu perfil, preferencias y progreso de lectura.",
@@ -397,5 +396,27 @@
   "homeRecommended": "Recomendado para ti",
   "homeTrendingLabel": "TENDENCIA",
   "homeViewAll": "Ver todo",
-  "homeChapterError": "No se pudieron cargar los capítulos."
+  "homeChapterError": "No se pudieron cargar los capítulos.",
+
+  "mangaStatusOngoing": "En emisión",
+  "mangaStatusCompleted": "Finalizado",
+  "mangaStatusHiatus": "En pausa",
+  "mangaStatusCancelled": "Cancelado",
+
+  "genreAdventure": "Aventura",
+  "genreComedy": "Comedia",
+  "genreDrama": "Drama",
+  "genreFantasy": "Fantasía",
+  "genreHorror": "Terror",
+  "genreMystery": "Misterio",
+  "genreSciFi": "Ciencia Ficción",
+  "genreSliceOfLife": "Recuentos de la vida",
+  "genreSports": "Deportes",
+  "genreThriller": "Thriller",
+  "genreSupernatural": "Sobrenatural",
+
+  "noChaptersSetTotal": "Establecer total de capítulos",
+  "noChaptersTotalHint": "Seguimiento manual: introduce el total de capítulos",
+  "noChaptersTotalLabel": "Total de capítulos",
+  "noChaptersTotalConfirm": "Guardar"
 }

@@ -130,6 +130,27 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     }
   }
 
+  /// Re-resolves and applies the reader mode after a settings change.
+  ///
+  /// Does NOT reload pages — only updates [ReaderState.readerMode] so the
+  /// reader switches between [VerticalReaderView] and [PagedReaderView]
+  /// without re-fetching the chapter.
+  void reapplyReaderMode({
+    ReaderMode? globalReaderMode,
+    PerTitleOverride? titleOverride,
+  }) {
+    final currentPages = state.pages;
+    if (currentPages.isEmpty) return;
+
+    final readerMode = resolveReaderMode(
+      globalReaderMode: globalReaderMode,
+      titleOverride: titleOverride,
+      contentMetadata: ReaderContentMetadata(pageCount: currentPages.length),
+    );
+
+    state = state.copyWith(readerMode: readerMode);
+  }
+
   /// Downloads and caches [urls] using a worker-pool with [concurrency] slots.
   ///
   /// Workers compete for the next URL via a shared index so all slots stay busy

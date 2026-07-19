@@ -128,6 +128,10 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
           title: entry.manga.title,
           coverUrl: entry.manga.coverUrl,
           authors: entry.manga.authors,
+          type: entry.manga.type,
+          demographic: entry.manga.demographic,
+          genres: entry.manga.genres,
+          status: entry.manga.status,
         );
         await _remoteDataSource.updateLibraryStatus(
           entry.manga.id,
@@ -174,13 +178,57 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
     for (final MapEntry<String, UserLibraryEntry> entry in remote.entries) {
       final UserLibraryEntry? localEntry = merged[entry.key];
 
-      if (localEntry == null ||
-          !localEntry.updatedAt.isAfter(entry.value.updatedAt)) {
+      if (localEntry == null) {
         merged[entry.key] = entry.value;
+      } else if (!localEntry.updatedAt.isAfter(entry.value.updatedAt)) {
+        // Remote is newer or equal — use remote BUT preserve local metadata
+        // enrichment (type, demographic, genres) that the library endpoint
+        // may not return.
+        merged[entry.key] = _withLocalEnrichment(localEntry, entry.value);
       }
+      // else: local is newer → keep local (already in merged from ...local)
     }
 
     return merged;
+  }
+
+  /// Merges richer manga metadata from [local] into [remote] when remote is
+  /// missing fields that local has (e.g. type, demographic after a sync with
+  /// a backend that doesn't return them in the library endpoint).
+  UserLibraryEntry _withLocalEnrichment(
+    UserLibraryEntry local,
+    UserLibraryEntry remote,
+  ) {
+    final Manga lm = local.manga;
+    final Manga rm = remote.manga;
+
+    // If local already has everything remote has, skip.
+    if (lm.type == null && lm.demographic == null && lm.genres.isEmpty) {
+      return remote;
+    }
+
+    return UserLibraryEntry(
+      manga: Manga(
+        id: rm.id,
+        title: rm.title,
+        description: lm.description ?? rm.description,
+        coverUrl: rm.coverUrl,
+        demographic: lm.demographic ?? rm.demographic,
+        status: lm.status ?? rm.status,
+        genres: lm.genres.isNotEmpty ? lm.genres : rm.genres,
+        score: lm.score ?? rm.score,
+        rank: lm.rank ?? rm.rank,
+        type: lm.type ?? rm.type,
+        year: lm.year ?? rm.year,
+        authors: lm.authors.isNotEmpty ? lm.authors : rm.authors,
+        readChaptersCount: rm.readChaptersCount,
+        totalChaptersCount: rm.totalChaptersCount,
+        malId: lm.malId ?? rm.malId,
+      ),
+      isInLibrary: remote.isInLibrary,
+      status: remote.status,
+      updatedAt: remote.updatedAt,
+    );
   }
 
   Future<void> _replaceScopedEntries({

@@ -88,9 +88,15 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
-  Future<Either<Failure, Manga>> getMangaDetail(String mangaId) async {
+  Future<Either<Failure, Manga>> getMangaDetail(
+    String mangaId, {
+    String? language,
+  }) async {
     try {
-      final model = await remoteDataSource.getMangaDetail(mangaId);
+      final model = await remoteDataSource.getMangaDetail(
+        mangaId,
+        language: language,
+      );
       await _cacheMangaDetail(mangaId, model);
       return Right(model.toEntity());
     } on AppException catch (error) {

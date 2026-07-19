@@ -62,7 +62,7 @@ class ReadingProgressSection extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
 
-          // Controls row: read count, batch size, jump
+          // Controls row: read count, set total, batch size, jump
           Row(
             children: <Widget>[
               // Read count label
@@ -74,6 +74,54 @@ class ReadingProgressSection extends ConsumerWidget {
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
                 ),
+              ),
+              // Edit total — override when MangaDex total is wrong
+              IconButton(
+                icon: const Icon(Icons.edit, size: 14),
+                color: AppColors.onSurfaceVariant,
+                onPressed: () async {
+                  final controller = TextEditingController(
+                    text: effectiveTotal.toString(),
+                  );
+                  final newTotal = await showDialog<int>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(context.l10n.noChaptersSetTotal),
+                      content: TextField(
+                        controller: controller,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: context.l10n.noChaptersTotalHint,
+                          labelText: context.l10n.noChaptersTotalLabel,
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: Text(context.l10n.dialogCancel),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            final parsed = int.tryParse(
+                              controller.text.trim(),
+                            );
+                            if (parsed != null && parsed > 0) {
+                              Navigator.of(ctx).pop(parsed);
+                            }
+                          },
+                          child: Text(context.l10n.noChaptersTotalConfirm),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (newTotal != null && newTotal != effectiveTotal) {
+                    await ref
+                        .read(readingProgressProvider.notifier)
+                        .setTotalChaptersCount(mangaId, newTotal);
+                  }
+                },
+                tooltip: context.l10n.noChaptersSetTotal,
+                visualDensity: VisualDensity.compact,
               ),
               const Spacer(),
 
