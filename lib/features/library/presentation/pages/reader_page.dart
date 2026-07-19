@@ -173,6 +173,7 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                         context,
                         chapterId: widget.chapterId,
                         mangaId: widget.mangaId,
+                        initialMode: state.readerMode,
                       );
                       if (!context.mounted) return;
                       final preferences = ref.read(preferencesProvider);

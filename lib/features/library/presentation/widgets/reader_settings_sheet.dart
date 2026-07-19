@@ -22,10 +22,15 @@ class ReaderSettingsSheet extends ConsumerWidget {
   final String chapterId;
   final String? mangaId;
 
+  /// The reader mode currently active when the sheet opened.
+  /// Used to highlight the correct segment even when no per-title override exists.
+  final ReaderMode initialMode;
+
   const ReaderSettingsSheet({
     super.key,
     required this.chapterId,
     this.mangaId,
+    this.initialMode = ReaderMode.vertical,
   });
 
   @override
@@ -35,10 +40,11 @@ class ReaderSettingsSheet extends ConsumerWidget {
         ref.read(readerUiProvider(chapterId).notifier);
 
     // Per-title override determines the active reading direction.
+    // Fall back to the resolved mode passed from the reader page.
     final override = mangaId != null
         ? ref.watch(perTitleOverrideProvider(mangaId!))
         : null;
-    final activeMode = override?.preferredReaderMode ?? ReaderMode.vertical;
+    final activeMode = override?.preferredReaderMode ?? initialMode;
 
     return Container(
       decoration: const BoxDecoration(
@@ -181,6 +187,7 @@ Future<void> showReaderSettings(
   BuildContext context, {
   required String chapterId,
   String? mangaId,
+  ReaderMode initialMode = ReaderMode.vertical,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -189,6 +196,7 @@ Future<void> showReaderSettings(
     builder: (_) => ReaderSettingsSheet(
       chapterId: chapterId,
       mangaId: mangaId,
+      initialMode: initialMode,
     ),
   );
 }
