@@ -246,7 +246,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   child: Column(
                     children: <Widget>[
                       // ── Cover + tags + title + score + desc ──
-                      _CoverSection(manga: widget.manga),
+                      _CoverSection(manga: manga),
 
                       // ── Reading progress ──────────────────────
                       if (showTracking)
@@ -443,7 +443,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
           ),
 
           // ── Floating top buttons ──────────────────────────────
-          _FloatingTopButtons(manga: widget.manga),
+          _FloatingTopButtons(manga: manga),
         ],
       ),
     );
