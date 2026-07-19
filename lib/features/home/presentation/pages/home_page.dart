@@ -47,26 +47,13 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
-      body: Stack(
-        children: <Widget>[
-          RefreshIndicator(
-            color: AppColors.primary,
-            backgroundColor: AppColors.card,
-            onRefresh: () => _refreshHome(ref),
-            child: const _HomeBody(),
-          ),
-          if (isHomeLoading || isDiscoverLoading)
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: LinearProgressIndicator(
-                backgroundColor: Colors.transparent,
-                color: AppColors.primary,
-                minHeight: 2,
-              ),
-            ),
-        ],
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: AppColors.card,
+        onRefresh: () => _refreshHome(ref),
+        child: _HomeBody(
+          isLoading: isHomeLoading || isDiscoverLoading,
+        ),
       ),
     );
   }
@@ -119,7 +106,9 @@ class HomePage extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────
 
 class _HomeBody extends ConsumerWidget {
-  const _HomeBody();
+  final bool isLoading;
+
+  const _HomeBody({this.isLoading = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -134,21 +123,29 @@ class _HomeBody extends ConsumerWidget {
       padding: EdgeInsets.only(
         bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
       ),
-      children: const [
+      children: <Widget>[
+        // Loading bar — shows below top sections when fetching data
+        if (isLoading)
+          const LinearProgressIndicator(
+            backgroundColor: Colors.transparent,
+            color: AppColors.primary,
+            minHeight: 2,
+          ),
+
         // 1. Hero swipeable de tendencias
-        HeroCarousel(),
+        const HeroCarousel(),
 
         // 2. Continue reading
-        ContinueReadingSection(),
+        const ContinueReadingSection(),
 
         // 3. Discover filter + manga row
-        DiscoverSection(),
+        const DiscoverSection(),
 
         // 4. Recommendations
-        RecommendedSection(),
+        const RecommendedSection(),
 
         // 5. Latest chapters
-        LatestChaptersSection(),
+        const LatestChaptersSection(),
       ],
     );
   }
