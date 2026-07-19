@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +9,7 @@ import '../../../auth/presentation/providers/auth_state.dart';
 import '../../domain/entities/manga.dart';
 import '../../domain/entities/user_library_entry.dart';
 import '../../domain/entities/user_library_status.dart';
+import '../../domain/usecases/get_manga_detail.dart';
 import '../../domain/repositories/user_library_repository.dart';
 import 'reading_progress_provider.dart';
 
@@ -100,11 +103,52 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     } finally {
       _onSyncEnd?.call();
     }
+    // Fire-and-forget: backfill missing type/demographic without blocking UI.
+    unawaited(_enrichMissingMetadata());
   }
 
   /// Public hydration for explicit refresh from UI.
   Future<void> hydrate(String userId) async {
     state = await _repository.hydrate(userId);
+    // Fire-and-forget enrichment so the UI shows data immediately.
+    unawaited(_enrichMissingMetadata());
+  }
+
+  /// Fetches full manga detail for library entries missing type or demographic.
+  /// Runs as fire-and-forget after hydration so the UI gets complete metadata
+  /// without blocking the refresh.
+  Future<void> _enrichMissingMetadata() async {
+    if (!sl.isRegistered<GetMangaDetail>()) return;
+    final getDetail = sl<GetMangaDetail>();
+    for (final entry in state.values) {
+      final m = entry.manga;
+      if (m.type != null && m.demographic != null) continue;
+
+      final result = await getDetail(m.id);
+      result.fold((_) {}, (full) {
+        // Only update if the API actually returned richer data.
+        if (full.type == null && full.demographic == null) return;
+
+        final enriched = UserLibraryEntry(
+          manga: Manga(
+            id: m.id, title: m.title,
+            description: full.description ?? m.description,
+            coverUrl: m.coverUrl, demographic: full.demographic ?? m.demographic,
+            status: full.status ?? m.status,
+            genres: full.genres.isNotEmpty ? full.genres : m.genres,
+            score: full.score ?? m.score, rank: full.rank ?? m.rank,
+            type: full.type ?? m.type, year: full.year ?? m.year,
+            authors: full.authors.isNotEmpty ? full.authors : m.authors,
+            readChaptersCount: m.readChaptersCount,
+            totalChaptersCount: m.totalChaptersCount, malId: full.malId ?? m.malId,
+          ),
+          isInLibrary: entry.isInLibrary,
+          status: entry.status,
+          updatedAt: entry.updatedAt,
+        );
+        state = <String, UserLibraryEntry>{...state, m.id: enriched};
+      });
+    }
   }
 
   UserLibraryEntry? entryFor(String mangaId) {

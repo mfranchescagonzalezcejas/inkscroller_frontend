@@ -9,7 +9,6 @@ import 'package:inkscroller_flutter/core/network/connectivity_status_provider.da
 import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/core/widgets/offline_banner.dart';
-import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart'
@@ -19,7 +18,6 @@ import '../../../../core/feedback/app_feedback.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../domain/chapter_progress_utils.dart';
 import '../../domain/entities/chapter.dart';
-import '../../domain/usecases/get_manga_detail.dart';
 import '../../domain/entities/chapter_batch.dart';
 import '../../domain/entities/manga.dart';
 import '../../domain/entities/manga_reading_progress.dart';
@@ -77,43 +75,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
   bool _preferencesRequested = false;
   late final ProviderSubscription _mangaChaptersSub;
 
-  /// Enriched manga metadata fetched from the API when the passed-in [Manga]
-  /// is missing fields (e.g. type after coming from library cache).
-  Manga? _enrichedManga;
-
   @override
   void initState() {
     super.initState();
-
-    // Enrich manga metadata if the passed-in entity is missing fields that
-    // the API provides (library cache may not have type/demographic).
-    Future.microtask(() async {
-      if ((widget.manga.type == null || widget.manga.demographic == null) &&
-          GetIt.instance.isRegistered<GetMangaDetail>()) {
-        debugPrint(
-          '[MangaDetail] enriching metadata for ${widget.manga.id} '
-          '(type=${widget.manga.type}, demo=${widget.manga.demographic})',
-        );
-        final result = await GetIt.instance<GetMangaDetail>()(
-          widget.manga.id,
-        );
-        if (!mounted) return;
-        result.fold(
-          (failure) => debugPrint(
-            '[MangaDetail] enrichment failed: $failure',
-          ),
-          (fullManga) {
-            debugPrint(
-              '[MangaDetail] enriched: type=${fullManga.type} '
-              'demo=${fullManga.demographic}',
-            );
-            if (fullManga.type != null || fullManga.demographic != null) {
-              setState(() => _enrichedManga = fullManga);
-            }
-          },
-        );
-      }
-    });
 
     Future.microtask(() async {
       final notifier = ref.read(mangaChaptersProvider.notifier);
@@ -166,14 +130,12 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Use API-enriched manga when the passed-in entity is missing metadata.
-    final manga = _enrichedManga ?? widget.manga;
     final state = ref.watch(mangaChaptersProvider);
     final progress = ref.watch(
       readingProgressProvider.select(
         (value) =>
-            value[manga.id] ??
-            MangaReadingProgress(mangaId: manga.id),
+            value[widget.manga.id] ??
+            MangaReadingProgress(mangaId: widget.manga.id),
       ),
     );
     final bool isOffline = ref
@@ -206,7 +168,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     // the fixed cover content (yellow lines are impossible because there's no
     // SliverToBoxAdapter constraint).
     final double maxCvrHeight = MediaQuery.of(context).size.height * 0.60;
-    final double hasDesc = (manga.description?.isNotEmpty ?? false) ? 200.0 : 0.0;
+    final double hasDesc = (widget.manga.description?.isNotEmpty ?? false) ? 200.0 : 0.0;
     final double coverSectionHeight = maxCvrHeight + 200.0 + hasDesc;
 
     return Scaffold(
@@ -219,13 +181,13 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
             height: coverSectionHeight,
             child: Stack(
               children: <Widget>[
-                if (manga.coverUrl != null)
+                if (widget.manga.coverUrl != null)
                   Positioned.fill(
                     child: ClipRRect(
                       child: ImageFiltered(
                         imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
                         child: CachedNetworkImage(
-                          imageUrl: manga.coverUrl!,
+                          imageUrl: widget.manga.coverUrl!,
                           fit: BoxFit.cover,
                           errorWidget: (_, _, _) => const SizedBox.shrink(),
                         ),
@@ -259,7 +221,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                   child: Column(
                     children: <Widget>[
                       // ── Cover + tags + title + score + desc ──
-                      _CoverSection(manga: manga),
+                      _CoverSection(manga: widget.manga),
 
                       // ── Reading progress ──────────────────────
                       if (showTracking)
@@ -271,7 +233,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             ref
                                 .read(readingProgressProvider.notifier)
                                 .setManuallyMarkedCountTo(
-                                  manga.id,
+                                  widget.manga.id,
                                   chapterNumber,
                                   chapters: state.chapters,
                                 );
@@ -333,7 +295,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                                     ref
                                         .read(mangaChaptersProvider.notifier)
                                         .loadLanguages(
-                                          manga.id,
+                                          widget.manga.id,
                                           preferredLang: lang,
                                         );
                                   },
@@ -456,7 +418,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
           ),
 
           // ── Floating top buttons ──────────────────────────────
-          _FloatingTopButtons(manga: manga),
+          _FloatingTopButtons(manga: widget.manga),
         ],
       ),
     );
