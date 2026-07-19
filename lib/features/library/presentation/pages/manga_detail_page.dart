@@ -315,12 +315,13 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                           ),
                         )
                       else if (useBatchList) ...[
-                        ChapterBatchList(
+                          ChapterBatchList(
                           mangaId: widget.manga.id,
                           descending: state.sortDescending,
                           hiddenChapterIds: state.filterUnreadOnly
                               ? progress.readChapterIds
                               : null,
+                          allChapters: state.chapters,
                           batches: computeChapterBatches(
                             chapters: state.chapters,
                             totalChaptersCount: progress.totalChaptersCount,

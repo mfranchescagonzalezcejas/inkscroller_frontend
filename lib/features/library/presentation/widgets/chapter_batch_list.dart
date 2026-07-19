@@ -21,6 +21,7 @@ class ChapterBatchList extends ConsumerWidget {
     required this.mangaId,
     required this.batches,
     required this.onChapterTap,
+    this.allChapters,
     this.descending = false,
     this.scrollController,
     this.hiddenChapterIds,
@@ -35,6 +36,10 @@ class ChapterBatchList extends ConsumerWidget {
   /// When set, readable items whose [Chapter.id] is in this set are omitted.
   /// Used to implement the "hide read chapters" filter in batch mode.
   final Set<String>? hiddenChapterIds;
+
+  /// Full chapter list for cascading checkbox marks across all batches.
+  /// When provided, toggling a chapter as read marks all chapters up to it.
+  final List<Chapter>? allChapters;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,6 +97,7 @@ class ChapterBatchList extends ConsumerWidget {
           progress: progress,
           mangaId: mangaId,
           onChapterTap: onChapterTap,
+          allChapters: allChapters,
         );
       },
     );
@@ -105,12 +111,14 @@ class _BatchExpansionTile extends ConsumerStatefulWidget {
     required this.progress,
     required this.mangaId,
     required this.onChapterTap,
+    this.allChapters,
   });
 
   final ChapterBatch batch;
   final MangaReadingProgress? progress;
   final String mangaId;
   final void Function(Chapter chapter) onChapterTap;
+  final List<Chapter>? allChapters;
 
   @override
   ConsumerState<_BatchExpansionTile> createState() =>
@@ -170,18 +178,18 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
                       widget.progress?.isChapterRead(item.chapter.id) ?? false,
                   onTap: () => widget.onChapterTap(item.chapter),
                   onToggleRead: () {
-                    // Gather available chapters from this batch for cascading.
-                    final batchChapters = batch.items
-                        .whereType<ReadableChapterBatchItem>()
-                        .map((i) => i.chapter)
-                        .toList();
+                    final chapters = widget.allChapters ??
+                        batch.items
+                            .whereType<ReadableChapterBatchItem>()
+                            .map((i) => i.chapter)
+                            .toList();
                     ref
                         .read(readingProgressProvider.notifier)
                         .toggleChapter(
                           mangaId: widget.mangaId,
                           chapterId: item.chapter.id,
                           totalChaptersCount: batch.end,
-                          chapters: batchChapters,
+                          chapters: chapters,
                         );
                   },
                 ),
