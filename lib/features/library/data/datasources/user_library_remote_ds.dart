@@ -10,6 +10,10 @@ abstract class UserLibraryRemoteDataSource {
     String? title,
     String? coverUrl,
     List<String> authors,
+    String? type,
+    String? demographic,
+    List<String>? genres,
+    String? status,
   });
 
   Future<void> updateLibraryStatus(String mangaId, UserLibraryStatus status);
