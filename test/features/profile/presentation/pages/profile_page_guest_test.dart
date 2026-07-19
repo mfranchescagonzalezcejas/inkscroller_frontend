@@ -167,6 +167,16 @@ void main() {
               path: '/login',
               builder: (context, state) => const Scaffold(body: Text('Login')),
             ),
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) =>
+                  const Scaffold(body: Text('Settings')),
+            ),
+            GoRoute(
+              path: '/about',
+              builder: (context, state) =>
+                  const Scaffold(body: Text('About')),
+            ),
           ],
         ),
       ),
@@ -196,8 +206,22 @@ void main() {
     await tester.pumpWidget(buildTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Sign in', skipOffstage: false), findsOneWidget);
   });
 
+  testWidgets('guest view shows app settings section', (tester) async {
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pumpAndSettle();
 
+    expect(find.text('App settings'), findsOneWidget);
+    expect(find.text('Cache & saved data'), findsOneWidget);
+    expect(find.text('App information'), findsOneWidget);
+  });
+
+  testWidgets('guest view does not show settings gear icon', (tester) async {
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.settings_outlined), findsNothing);
+  });
 }
