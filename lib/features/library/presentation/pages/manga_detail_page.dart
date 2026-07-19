@@ -778,23 +778,59 @@ class _CoverSectionState extends State<_CoverSection> {
       _CoverRatio.square => (maxHeight * 0.2),
     };
 
-    // Content below the cover: tags (~60px) + title (~80px) + score (~20px)
+    // ── Score badge row ──────────────────────────────────────
+    final String? scoreStr = widget.manga.score?.toStringAsFixed(1);
 
-    // ConstrainedBox outside ClipRRect: the cap limits the box, but
-    // ClipRRect wraps the image at its RENDERED size, so corner-radius
-    // clips actual image pixels — not letterbox.
+    // Score badge widget (shared between orientations)
+    Widget? scoreBadge;
+    if (scoreStr != null) {
+      scoreBadge = Positioned(
+        top: 8,
+        right: 8,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.cardHigh,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Icon(Icons.star, size: 12, color: AppColors.primary),
+              const SizedBox(width: 4),
+              Text(
+                scoreStr,
+                style: const TextStyle(
+                  fontFamily: AppTypography.fontFamily,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final Widget coverImage = ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: CachedNetworkImage(
-          imageUrl: widget.manga.coverUrl ?? '',
-          fit: BoxFit.contain,
-          placeholder: (_, __) => const ColoredBox(
-            color: AppColors.card,
-            child: Center(child: Icon(Icons.image, color: AppColors.outline)),
-          ),
-          errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
+        child: Stack(
+          children: <Widget>[
+            CachedNetworkImage(
+              imageUrl: widget.manga.coverUrl ?? '',
+              fit: BoxFit.contain,
+              alignment: Alignment.topCenter,
+              placeholder: (_, __) => const ColoredBox(
+                color: AppColors.card,
+                child: Center(child: Icon(Icons.image, color: AppColors.outline)),
+              ),
+              errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
+            ),
+            if (scoreBadge != null) scoreBadge,
+          ],
         ),
       ),
     );
@@ -807,9 +843,6 @@ class _CoverSectionState extends State<_CoverSection> {
         widget.manga.demographic!.toUpperCase(),
     ];
 
-    // ── Score badge row ──────────────────────────────────────
-    final String? scoreStr = widget.manga.score?.toStringAsFixed(1);
-
     return Column(
         mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -820,45 +853,7 @@ class _CoverSectionState extends State<_CoverSection> {
                 ),
                 child: SizedBox(
                   width: coverWidth,
-                  child: Stack(
-                    children: <Widget>[
-                      coverImage,
-                      // Score badge (same style as MangaTile)
-                      // For landscape the image doesn't reach the top, so
-                      // we place the badge at the bottom instead.
-                      if (scoreStr != null)
-                        Positioned(
-                          top: _ratio == _CoverRatio.landscape ? null : 8,
-                          bottom: _ratio == _CoverRatio.landscape ? 8 : null,
-                          right: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.cardHigh,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                const Icon(Icons.star,
-                                    size: 12, color: AppColors.primary),
-                                const SizedBox(width: 4),
-                                Text(
-                                  scoreStr,
-                                  style: const TextStyle(
-                                    fontFamily: AppTypography.fontFamily,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                  child: coverImage,
                 ),
               ),
 
