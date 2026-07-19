@@ -11,7 +11,6 @@ import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/l10n/app_locale_provider.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/widgets/app_top_bar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/providers/auth_state.dart';
 import '../../../library/domain/entities/reader_mode.dart';
@@ -119,17 +118,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Scaffold(
       backgroundColor: AppColors.stage,
-      appBar: AppTopBar(
-        authState: authState,
-        rightWidget: GestureDetector(
-          onTap: () => context.push(AppRoutes.settings),
-          child: const Icon(
-            Icons.settings_outlined,
-            color: AppColors.onSurfaceVariant,
-            size: 24,
-          ),
-        ),
-      ),
+
       body: SafeArea(
         child: isGuest
             ? _buildGuestView(
@@ -244,6 +233,31 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       effectiveReadingLanguage,
                       prefs,
                     ),
+            ),
+          ],
+        ),
+
+        // ── App settings section ──────────────────────────────────────────
+        const SizedBox(height: 20),
+        _SectionLabel(label: context.l10n.profileAppSettingsSection),
+        const SizedBox(height: 8),
+        _PrefCard(
+          children: <Widget>[
+            _PrefRow(
+              icon: Icons.storage_outlined,
+              iconColor: AppColors.onSurfaceVariant,
+              title: context.l10n.profileCacheSettingsTitle,
+              value: context.l10n.profileCacheSettingsSubtitle,
+              valueIsSubtitle: true,
+              onTap: () => context.push(AppRoutes.settings),
+            ),
+            _PrefRow(
+              icon: Icons.info_outline,
+              iconColor: AppColors.onSurfaceVariant,
+              title: context.l10n.profileAppInfoTitle,
+              value: context.l10n.profileAppInfoSubtitle,
+              valueIsSubtitle: true,
+              onTap: () => context.push(AppRoutes.about),
             ),
           ],
         ),

@@ -272,4 +272,40 @@ void main() {
     // Initial is 'A' from email
     expect(find.text('A'), findsOneWidget);
   });
+
+  testWidgets('authenticated view does not show settings gear icon',
+      (tester) async {
+    await tester.pumpWidget(buildTestWidget(
+      profile: UserProfile(
+        firebaseUid: 'uid-123',
+        email: 'alice@example.com',
+        username: 'alice',
+        createdAt: DateTime(2024),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.settings_outlined), findsNothing);
+  });
+
+  testWidgets('authenticated view shows app settings section in body',
+      (tester) async {
+    await tester.pumpWidget(buildTestWidget(
+      profile: UserProfile(
+        firebaseUid: 'uid-123',
+        email: 'alice@example.com',
+        username: 'alice',
+        createdAt: DateTime(2024),
+      ),
+    ));
+    // pumpAndSettle may hang on the FutureProvider; use explicit pumps
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Use skipOffstage: false because the section may be below the scroll fold
+    expect(find.text('App settings', skipOffstage: false), findsOneWidget);
+    expect(find.text('Cache & saved data', skipOffstage: false), findsOneWidget);
+    expect(find.text('App information', skipOffstage: false), findsOneWidget);
+  });
 }
