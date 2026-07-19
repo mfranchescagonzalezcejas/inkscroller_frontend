@@ -120,7 +120,11 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   Future<void> _enrichMissingMetadata() async {
     if (!sl.isRegistered<GetMangaDetail>()) return;
     final getDetail = sl<GetMangaDetail>();
-    for (final entry in state.values) {
+    // Snapshot the keys so state mutations in the loop don't affect iteration.
+    final ids = state.keys.toList();
+    for (final id in ids) {
+      final entry = state[id];
+      if (entry == null) continue;
       final m = entry.manga;
       if (m.type != null && m.demographic != null) continue;
 
@@ -146,7 +150,7 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
           status: entry.status,
           updatedAt: entry.updatedAt,
         );
-        state = <String, UserLibraryEntry>{...state, m.id: enriched};
+        state = <String, UserLibraryEntry>{...state, id: enriched};
       });
     }
   }
