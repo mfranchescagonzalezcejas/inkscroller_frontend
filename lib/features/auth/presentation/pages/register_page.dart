@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -157,7 +158,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
       }
     } on Exception catch (e, st) {
-      debugPrint('[TermsLink] Failed to launch URL: $e\n$st');
+      if (kDebugMode) debugPrint('[TermsLink] Failed to launch URL: $e\n$st');
       if (!mounted) return;
       AppFeedback.showWarning(
         context,

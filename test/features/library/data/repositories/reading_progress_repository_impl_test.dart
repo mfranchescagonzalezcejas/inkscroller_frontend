@@ -26,7 +26,7 @@ void main() {
 
     await repository.save(progress);
 
-    final String? raw = prefs.getString('library.reading_progress.m-1');
+    final String? raw = prefs.getString('library.reading_progress.guest.m-1');
     expect(raw, isNotNull);
 
     final Map<String, dynamic> json =
@@ -37,11 +37,11 @@ void main() {
   });
 
   test('getAll removes corrupted values from storage', () async {
-    await prefs.setString('library.reading_progress.bad', '{broken json');
+    await prefs.setString('library.reading_progress.guest.bad', '{broken json');
 
     final Map<String, MangaReadingProgress> loaded = await repository.getAll();
 
     expect(loaded, isEmpty);
-    expect(prefs.getString('library.reading_progress.bad'), isNull);
+    expect(prefs.getString('library.reading_progress.guest.bad'), isNull);
   });
 }
