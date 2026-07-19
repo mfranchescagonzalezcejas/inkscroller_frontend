@@ -141,9 +141,7 @@ class _HeroSlide extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inLibrary = ref.watch(
-      userLibraryProvider.select(
-        (map) => map[manga.id]?.isInLibrary ?? false,
-      ),
+      userLibraryProvider.select((map) => map[manga.id]?.isInLibrary ?? false),
     );
     final meta = [
       if (manga.typeDisplay != null) manga.typeDisplay!,
@@ -205,86 +203,97 @@ class _HeroSlide extends ConsumerWidget {
                     const _TrendingBadge(),
                     if (meta.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.floating,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           meta,
-                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
+                          style: const TextStyle(
+                            fontFamily: AppTypography.fontFamily,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.onSurfaceVariant,
+                          ),
                         ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
-                // Cover + text row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
-                        width: 150,
-                        height: 250,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Positioned.fill(child: _HeroCover(coverUrl: manga.coverUrl)),
-                            if (manga.score != null)
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.cardHigh,
-                                    borderRadius: BorderRadius.circular(6),
+                // Cover + text row — expands to fill vertical space
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          width: 150,
+                          height: 250,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Positioned.fill(child: _HeroCover(coverUrl: manga.coverUrl)),
+                              if (manga.score != null)
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cardHigh,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          manga.score!.toStringAsFixed(1),
+                                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        manga.score!.toStringAsFixed(1),
-                                        style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
-                                      ),
-                                    ],
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              manga.title,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface),
+                            ),
+                            if (manga.description != null && manga.description!.trim().isNotEmpty)
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    manga.description!,
+                                    maxLines: 100,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35),
                                   ),
                                 ),
                               ),
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            manga.title,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface),
-                          ),
-                          if (manga.description != null && manga.description!.trim().isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                manga.description!,
-                                maxLines: 4,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -354,8 +363,6 @@ class _TrendingBadge extends StatelessWidget {
 // HeroMetadata
 // ─────────────────────────────────────────────────────────────────────────────
 
-
-
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroActions — compact "Ver detalles" + bookmark
 // ─────────────────────────────────────────────────────────────────────────────
@@ -375,8 +382,8 @@ class _HeroActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
-        // Ver detalles
-        Expanded(
+        // Ver detalles — only as wide as the text
+        IntrinsicWidth(
           child: SizedBox(
             height: 40,
             child: FilledButton(
@@ -393,6 +400,7 @@ class _HeroActions extends ConsumerWidget {
                   fontWeight: FontWeight.w600,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: const Text('Ver detalles'),
             ),
