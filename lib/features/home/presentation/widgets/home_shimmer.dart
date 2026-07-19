@@ -105,18 +105,22 @@ class _ChipRowShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
-          SizedBox(width: 8),
-          SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
-          SizedBox(width: 8),
-          SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
-          SizedBox(width: 8),
-          SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
-        ],
+    return const SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: NeverScrollableScrollPhysics(),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: [
+            SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
+            SizedBox(width: 8),
+            SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
+            SizedBox(width: 8),
+            SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
+            SizedBox(width: 8),
+            SizedBox(width: 100, height: 40, child: InkScrollerShimmer(height: 40)),
+          ],
+        ),
       ),
     );
   }

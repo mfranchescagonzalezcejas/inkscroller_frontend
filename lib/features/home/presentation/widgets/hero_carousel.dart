@@ -469,7 +469,7 @@ class _HeroCover extends StatelessWidget {
     }
     return CachedNetworkImage(
       imageUrl: coverUrl!,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       placeholder: (_, __) => const ColoredBox(color: AppColors.card),
       errorWidget: (_, __, ___) => const ColoredBox(
         color: AppColors.card,
@@ -478,7 +478,7 @@ class _HeroCover extends StatelessWidget {
         ),
       ),
       fadeInDuration: const Duration(milliseconds: 300),
-      memCacheWidth: 200,
+      memCacheWidth: 300,
       filterQuality: FilterQuality.medium,
     );
   }
