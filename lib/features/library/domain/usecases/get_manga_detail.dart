@@ -11,7 +11,9 @@ class GetMangaDetail {
   GetMangaDetail(this.repository);
 
   /// Returns the [Manga] entity for the given [mangaId].
-  Future<Either<Failure, Manga>> call(String mangaId) {
-    return repository.getMangaDetail(mangaId);
+  ///
+  /// [language] lets the backend return localized title/description (e.g. "es").
+  Future<Either<Failure, Manga>> call(String mangaId, {String? language}) {
+    return repository.getMangaDetail(mangaId, language: language);
   }
 }

@@ -29,7 +29,9 @@ abstract class LibraryRemoteDataSource {
   });
 
   /// Fetches the full detail model for a single manga by [mangaId].
-  Future<MangaModel> getMangaDetail(String mangaId);
+  ///
+  /// [language] requests localized title/description (e.g. "es").
+  Future<MangaModel> getMangaDetail(String mangaId, {String? language});
 
   /// Fetches the list of chapter models for the manga identified by [mangaId].
   ///

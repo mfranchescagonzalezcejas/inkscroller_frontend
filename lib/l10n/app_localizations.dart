@@ -986,17 +986,11 @@ abstract class AppLocalizations {
   /// **'Confirm settings'**
   String get readerSettingsConfirm;
 
-  /// No description provided for @readerDirectionLtr.
+  /// No description provided for @readerDirectionPaged.
   ///
   /// In en, this message translates to:
-  /// **'LTR'**
-  String get readerDirectionLtr;
-
-  /// No description provided for @readerDirectionRtl.
-  ///
-  /// In en, this message translates to:
-  /// **'RTL'**
-  String get readerDirectionRtl;
+  /// **'Paginated'**
+  String get readerDirectionPaged;
 
   /// No description provided for @readerDirectionVertical.
   ///
@@ -1675,6 +1669,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load chapters.'**
   String get homeChapterError;
+
+  /// No description provided for @mangaStatusOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get mangaStatusOngoing;
+
+  /// No description provided for @mangaStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get mangaStatusCompleted;
+
+  /// No description provided for @mangaStatusHiatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiatus'**
+  String get mangaStatusHiatus;
+
+  /// No description provided for @mangaStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get mangaStatusCancelled;
+
+  /// No description provided for @genreAdventure.
+  ///
+  /// In en, this message translates to:
+  /// **'Adventure'**
+  String get genreAdventure;
+
+  /// No description provided for @genreComedy.
+  ///
+  /// In en, this message translates to:
+  /// **'Comedy'**
+  String get genreComedy;
+
+  /// No description provided for @genreDrama.
+  ///
+  /// In en, this message translates to:
+  /// **'Drama'**
+  String get genreDrama;
+
+  /// No description provided for @genreFantasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Fantasy'**
+  String get genreFantasy;
+
+  /// No description provided for @genreHorror.
+  ///
+  /// In en, this message translates to:
+  /// **'Horror'**
+  String get genreHorror;
+
+  /// No description provided for @genreMystery.
+  ///
+  /// In en, this message translates to:
+  /// **'Mystery'**
+  String get genreMystery;
+
+  /// No description provided for @genreSciFi.
+  ///
+  /// In en, this message translates to:
+  /// **'Sci-Fi'**
+  String get genreSciFi;
+
+  /// No description provided for @genreSliceOfLife.
+  ///
+  /// In en, this message translates to:
+  /// **'Slice of Life'**
+  String get genreSliceOfLife;
+
+  /// No description provided for @genreSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports'**
+  String get genreSports;
+
+  /// No description provided for @genreThriller.
+  ///
+  /// In en, this message translates to:
+  /// **'Thriller'**
+  String get genreThriller;
+
+  /// No description provided for @genreSupernatural.
+  ///
+  /// In en, this message translates to:
+  /// **'Supernatural'**
+  String get genreSupernatural;
+
+  /// No description provided for @noChaptersSetTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set total chapters'**
+  String get noChaptersSetTotal;
+
+  /// No description provided for @noChaptersTotalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual tracking: enter the total chapter count'**
+  String get noChaptersTotalHint;
+
+  /// No description provided for @noChaptersTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total chapters'**
+  String get noChaptersTotalLabel;
+
+  /// No description provided for @noChaptersTotalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get noChaptersTotalConfirm;
 }
 
 class _AppLocalizationsDelegate

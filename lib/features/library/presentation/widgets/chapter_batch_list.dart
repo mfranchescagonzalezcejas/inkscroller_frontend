@@ -21,6 +21,7 @@ class ChapterBatchList extends ConsumerWidget {
     required this.mangaId,
     required this.batches,
     required this.onChapterTap,
+    this.allChapters,
     this.descending = false,
     this.scrollController,
     this.hiddenChapterIds,
@@ -36,6 +37,10 @@ class ChapterBatchList extends ConsumerWidget {
   /// Used to implement the "hide read chapters" filter in batch mode.
   final Set<String>? hiddenChapterIds;
 
+  /// Full chapter list for cascading checkbox marks across all batches.
+  /// When provided, toggling a chapter as read marks all chapters up to it.
+  final List<Chapter>? allChapters;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(
@@ -48,10 +53,11 @@ class ChapterBatchList extends ConsumerWidget {
     final int manualThreshold = progress?.manuallyMarkedCount ?? 0;
 
     // Omit read items (hiddenChapterIds) and placeholders covered by
-    // manuallyMarkedCount, then skip empty batches. Filtering activates
-    // whenever either criterion is present.
-    final bool hasFilter = (hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty) ||
-        manualThreshold > 0;
+    // manuallyMarkedCount. Both filters only activate when the user has
+    // toggled "hide read" (hiddenChapterIds is non-null), so manual marking
+    // alone never hides placeholders from the full list.
+    final bool hasFilter =
+        hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty;
     final Set<String> effectiveHidden = hiddenChapterIds ?? <String>{};
     final visibleBatches = hasFilter
         ? displayBatches
@@ -92,6 +98,7 @@ class ChapterBatchList extends ConsumerWidget {
           progress: progress,
           mangaId: mangaId,
           onChapterTap: onChapterTap,
+          allChapters: allChapters,
         );
       },
     );
@@ -105,12 +112,14 @@ class _BatchExpansionTile extends ConsumerStatefulWidget {
     required this.progress,
     required this.mangaId,
     required this.onChapterTap,
+    this.allChapters,
   });
 
   final ChapterBatch batch;
   final MangaReadingProgress? progress;
   final String mangaId;
   final void Function(Chapter chapter) onChapterTap;
+  final List<Chapter>? allChapters;
 
   @override
   ConsumerState<_BatchExpansionTile> createState() =>
@@ -170,18 +179,25 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
                       widget.progress?.isChapterRead(item.chapter.id) ?? false,
                   onTap: () => widget.onChapterTap(item.chapter),
                   onToggleRead: () {
+                    final chapters = widget.allChapters ??
+                        batch.items
+                            .whereType<ReadableChapterBatchItem>()
+                            .map((i) => i.chapter)
+                            .toList();
                     ref
                         .read(readingProgressProvider.notifier)
                         .toggleChapter(
                           mangaId: widget.mangaId,
                           chapterId: item.chapter.id,
                           totalChaptersCount: batch.end,
+                          chapters: chapters,
                         );
                   },
                 ),
               PlaceholderChapterBatchItem() => _PlaceholderTile(
                   chapterNumber: item.chapterNumber,
                   mangaId: widget.mangaId,
+                  allChapters: widget.allChapters,
                 ),
             };
           }),
@@ -194,10 +210,15 @@ class _PlaceholderTile extends ConsumerWidget {
   const _PlaceholderTile({
     required this.chapterNumber,
     required this.mangaId,
+    this.allChapters,
   });
 
   final int chapterNumber;
   final String mangaId;
+
+  /// Full chapter list so marking a placeholder also cascades to readable
+  /// chapters with the same number range via [setManuallyMarkedCountTo].
+  final List<Chapter>? allChapters;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -220,18 +241,19 @@ class _PlaceholderTile extends ConsumerWidget {
         ),
         onPressed: () {
           if (isChecked) {
-            // Unmark: set count just below this chapter number
             ref
                 .read(readingProgressProvider.notifier)
-                .setManuallyMarkedCountTo(mangaId, chapterNumber - 1);
+                .setManuallyMarkedCountTo(
+                  mangaId, chapterNumber - 1,
+                  chapters: allChapters,
+                );
           } else {
-            // Mark: ensure count reaches this chapter number
-            final delta = chapterNumber - manualCount;
-            if (delta > 0) {
-              ref
-                  .read(readingProgressProvider.notifier)
-                  .updateManuallyMarkedCount(mangaId, delta);
-            }
+            ref
+                .read(readingProgressProvider.notifier)
+                .setManuallyMarkedCountTo(
+                  mangaId, chapterNumber,
+                  chapters: allChapters,
+                );
           }
         },
         tooltip: context.l10n.placeholderMarkRead,

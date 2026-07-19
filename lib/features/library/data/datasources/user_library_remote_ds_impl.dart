@@ -50,6 +50,10 @@ class UserLibraryRemoteDataSourceImpl implements UserLibraryRemoteDataSource {
     String? title,
     String? coverUrl,
     List<String> authors = const [],
+    String? type,
+    String? demographic,
+    List<String>? genres,
+    String? status,
   }) async {
     try {
       await dio.post<void>(
@@ -58,6 +62,10 @@ class UserLibraryRemoteDataSourceImpl implements UserLibraryRemoteDataSource {
           if (title != null) 'title': title,
           if (coverUrl != null) 'cover_url': coverUrl,
           if (authors.isNotEmpty) 'authors': authors,
+          if (type != null) 'type': type,
+          if (demographic != null) 'demographic': demographic,
+          if (genres != null && genres.isNotEmpty) 'genres': genres,
+          if (status != null) 'status': status,
         },
       );
     } on DioException catch (error) {

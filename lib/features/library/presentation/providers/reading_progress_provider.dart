@@ -138,6 +138,16 @@ class ReadingProgressNotifier
     await _repository.save(next);
   }
 
+  /// Sets a user-defined total chapter count for mangas that have no MangaDex
+  /// chapters. Enables manual tracking via batches and checkboxes.
+  Future<void> setTotalChaptersCount(String mangaId, int total) async {
+    final current = progressFor(mangaId);
+    final next = current.copyWith(totalChaptersCount: total);
+    if (next == current) return;
+    state = <String, MangaReadingProgress>{...state, mangaId: next};
+    await _repository.save(next);
+  }
+
   /// Sets the batch size for the batching UI on this manga.
   Future<void> setBatchSize(String mangaId, int batchSize) async {
     final current = progressFor(mangaId);
@@ -213,11 +223,21 @@ class ReadingProgressNotifier
       ...chaptersToMark.map((chapter) => chapter.id),
     };
 
+    // Sync manual count so placeholders below the target also show as read.
+    int nextManual = current.manuallyMarkedCount;
+    for (final c in chaptersToMark) {
+      final n = c.number;
+      if (n != null && n.toInt() > nextManual) {
+        nextManual = n.toInt();
+      }
+    }
+
     final int nextTotal = current.totalChaptersCount > chapters.length
         ? current.totalChaptersCount
         : chapters.length;
 
     if (nextReadIds.length == current.readChapterIds.length &&
+        nextManual <= current.manuallyMarkedCount &&
         (nextTotal <= current.totalChaptersCount)) {
       return null;
     }
@@ -225,6 +245,7 @@ class ReadingProgressNotifier
     final previous = current;
     final next = current.copyWith(
       readChapterIds: nextReadIds,
+      manuallyMarkedCount: nextManual,
       totalChaptersCount: nextTotal,
       updatedAt: DateTime.now().toUtc(),
     );
@@ -234,25 +255,49 @@ class ReadingProgressNotifier
 
   /// Toggles a single chapter read state — mark read if unread, unmark if read.
   ///
-  /// Direct toggle without dialog or navigation. Updates persisted state
-  /// immediately so the UI rebuilds.
+  /// When [chapters] is provided and the chapter is being marked as read (not
+  /// yet read), cascades the mark to all chapters up to [chapterId] — matching
+  /// the same behavior as tapping the row body. Unmarking is always single.
+  ///
+  /// Also syncs [manuallyMarkedCount]: when marking, if the marked chapters'
+  /// max number exceeds the current manual count, the count is bumped so
+  /// tracker-only placeholders below that number also show as read.
   Future<void> toggleChapter({
     required String mangaId,
     required String chapterId,
     required int totalChaptersCount,
+    List<Chapter>? chapters,
   }) async {
     final current = progressFor(mangaId);
     final Set<String> nextReadIds = current.readChapterIds.toSet();
+    int nextManual = current.manuallyMarkedCount;
+
     if (current.isChapterRead(chapterId)) {
+      // Unmark: just the tapped chapter.
       nextReadIds.remove(chapterId);
+    } else if (chapters != null) {
+      // Mark with cascade: all chapters up to the target, like markThrough.
+      final List<Chapter> toMark = chaptersUpToTarget(chapters, chapterId);
+      nextReadIds.addAll(toMark.map((c) => c.id));
+      // Sync manual count: if any marked chapter has a number higher than
+      // the current manual count, bump it so placeholders are in sync.
+      for (final c in toMark) {
+        final n = c.number;
+        if (n != null && n.toInt() > nextManual) {
+          nextManual = n.toInt();
+        }
+      }
     } else {
+      // Mark single (fallback when no chapters list is available).
       nextReadIds.add(chapterId);
     }
+
     final nextTotal = current.totalChaptersCount > totalChaptersCount
         ? current.totalChaptersCount
         : totalChaptersCount;
     final next = current.copyWith(
       readChapterIds: nextReadIds,
+      manuallyMarkedCount: nextManual,
       totalChaptersCount: nextTotal,
       updatedAt: DateTime.now().toUtc(),
     );

@@ -22,6 +22,7 @@ import '../../domain/entities/chapter_batch.dart';
 import '../../domain/entities/manga.dart';
 import '../../domain/entities/manga_reading_progress.dart';
 import '../../domain/entities/reader_mode.dart';
+import '../utils/manga_localizer.dart';
 import '../providers/chapters/manga_chapter_provider.dart';
 import '../providers/chapters/manga_chapter_state.dart';
 import '../providers/per_title_override_provider.dart';
@@ -77,6 +78,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
   @override
   void initState() {
     super.initState();
+
     Future.microtask(() async {
       final notifier = ref.read(mangaChaptersProvider.notifier);
       final prefsState = ref.read(preferencesProvider);
@@ -94,7 +96,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
       // Guard: if the user left this page while preferences were loading,
       // don't continue with a disposed widget (P2 Codex finding).
-      if (!context.mounted) return;
+      if (!mounted) return;
 
       final updatedPrefs = ref.read(preferencesProvider);
       final defaultLang = updatedPrefs.preferences?.defaultLanguage ?? 'en';
@@ -152,7 +154,9 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final bool hasTotal = progress.totalChaptersCount > 0;
     final bool hasMdChapters = state.chapters.isNotEmpty;
     final bool showTracking = hasTotal;
-    final bool showBatches = showTracking && hasMdChapters;
+    // Show batches whenever there's a total, even without MangaDex chapters.
+    // computeChapterBatches fills the gap with PlaceholderChapterBatchItem.
+    final bool showBatches = showTracking;
     final bool showNothing = !showTracking && !hasMdChapters;
     // Batch mode uses the full chapter list (state.chapters) for correct
     // positioning. The read/unread filter is visual only — ChapterTile
@@ -307,19 +311,35 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 40),
                           child: Center(
-                            child: Text(
-                              context.l10n.noChaptersAvailable,
-                              style: const TextStyle(color: AppColors.onSurfaceVariant),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  context.l10n.noChaptersAvailable,
+                                  style: const TextStyle(
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton.icon(
+                                  icon: const Icon(Icons.edit, size: 16),
+                                  onPressed: () => _showSetTotalDialog(context),
+                                  label: Text(
+                                    context.l10n.noChaptersSetTotal,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )
                       else if (useBatchList) ...[
-                        ChapterBatchList(
+                          ChapterBatchList(
                           mangaId: widget.manga.id,
                           descending: state.sortDescending,
                           hiddenChapterIds: state.filterUnreadOnly
                               ? progress.readChapterIds
                               : null,
+                          allChapters: state.chapters,
                           batches: computeChapterBatches(
                             chapters: state.chapters,
                             totalChaptersCount: progress.totalChaptersCount,
@@ -400,6 +420,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                                   mangaId: widget.manga.id,
                                   chapterId: chapter.id,
                                   totalChaptersCount: state.chapters.length,
+                                  chapters: state.chapters,
                                 );
                           },
                         )),
@@ -532,6 +553,44 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
         ref.read(readingProgressProvider.notifier).restore(previous);
       },
     );
+  }
+
+  Future<void> _showSetTotalDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    final total = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.noChaptersSetTotal),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: context.l10n.noChaptersTotalHint,
+            labelText: context.l10n.noChaptersTotalLabel,
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final parsed = int.tryParse(controller.text.trim());
+              if (parsed != null && parsed > 0) {
+                Navigator.of(ctx).pop(parsed);
+              }
+            },
+            child: Text(context.l10n.noChaptersTotalConfirm),
+          ),
+        ],
+      ),
+    );
+    if (total != null && mounted) {
+      await ref
+          .read(readingProgressProvider.notifier)
+          .setTotalChaptersCount(widget.manga.id, total);
+    }
   }
 
   Future<void> _openExternalChapter(
@@ -860,12 +919,9 @@ class _CoverSectionState extends State<_CoverSection> {
     );
 
     // ── Tags ─────────────────────────────────────────────────
-    final List<String> tags = <String>[
-      if (widget.manga.status != null) widget.manga.status!.toUpperCase(),
-      ...widget.manga.genres.take(3).map((g) => g.toUpperCase()),
-      if (widget.manga.demographic != null)
-        widget.manga.demographic!.toUpperCase(),
-    ];
+    final l10n = context.l10n;
+    final typeLabel = widget.manga.typeDisplay;
+    final demoLabel = widget.manga.demographicDisplay;
 
     return Column(
         mainAxisSize: MainAxisSize.min,
@@ -882,17 +938,97 @@ class _CoverSectionState extends State<_CoverSection> {
               ),
 
               // Tags row
-              if (tags.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Wrap(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Wrap(
                     alignment: WrapAlignment.center,
                     spacing: 8,
                     runSpacing: 8,
-                    children: tags.asMap().entries.map((entry) {
-                      final bool isFirst = entry.key == 0;
-                      return _Tag(label: entry.value, isStatus: isFirst);
-                    }).toList(),
+                    children: <Widget>[
+                      // Status badge
+                      if (widget.manga.status != null)
+                        _StatusBadge(
+                          label: MangaLocalizer.localizeStatus(
+                            l10n, widget.manga.status!,
+                          ),
+                        ),
+                      // Genres (max 3)
+                      ...widget.manga.genres.take(3).map((g) =>
+                        _GenreBadge(
+                          label: MangaLocalizer.localizeGenre(l10n, g),
+                        ),
+                      ),
+                      // Type badge (hero style)
+                      if (typeLabel != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.cardHigh,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Icon(
+                                typeLabel == 'Manhwa'
+                                    ? Icons.auto_stories
+                                    : Icons.menu_book,
+                                size: 10,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                typeLabel,
+                                style: const TextStyle(
+                                  fontFamily: AppTypography.fontFamily,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      // Demographic badge (hero style)
+                      if (demoLabel != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.cardHigh,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Icon(
+                                demoLabel == 'Shounen'
+                                    ? Icons.flash_on
+                                    : demoLabel == 'Shoujo'
+                                        ? Icons.favorite
+                                        : demoLabel == 'Seinen'
+                                            ? Icons.explore
+                                            : Icons.auto_awesome,
+                                size: 10,
+                                color: AppColors.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                demoLabel,
+                                style: const TextStyle(
+                                  fontFamily: AppTypography.fontFamily,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
                 ),
 
@@ -913,19 +1049,27 @@ class _CoverSectionState extends State<_CoverSection> {
                 ),
               ),
 
-              // Description — unlimited, adapts to text length
+              // Description — constrained height with internal scroll
               if (widget.manga.description != null &&
                   widget.manga.description!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Text(
-                    widget.manga.description!,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: AppTypography.fontFamily,
-                      fontSize: 14,
-                      height: 1.5,
-                      color: AppColors.onSurfaceVariant,
+                  child: SizedBox(
+                    // ponytail: ~6 lines × 21px line height. Shows enough
+                    // preview without pushing chapters off-screen. Full
+                    // synopsis is reachable via internal scroll.
+                    height: 120,
+                    child: SingleChildScrollView(
+                      child: Text(
+                        widget.manga.description!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 14,
+                          height: 1.5,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -937,48 +1081,71 @@ class _CoverSectionState extends State<_CoverSection> {
   }
 }
 
-// ── Tag Chip ──────────────────────────────────────────────────────────────────
+// ── Badge chips ───────────────────────────────────────────────────────────────
 
-class _Tag extends StatelessWidget {
+/// Status badge with a green dot indicator.
+class _StatusBadge extends StatelessWidget {
   final String label;
-  final bool isStatus;
 
-  const _Tag({required this.label, this.isStatus = false});
+  const _StatusBadge({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A2122),
+        color: AppColors.floating,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if (isStatus) ...<Widget>[
-            Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              shape: BoxShape.circle,
             ),
-            const SizedBox(width: 6),
-          ],
+          ),
+          const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: AppTypography.fontFamily,
-              fontSize: 11,
-              fontWeight: isStatus ? FontWeight.w600 : FontWeight.w400,
-              color: isStatus
-                  ? AppColors.onSurface
-                  : AppColors.onSurfaceVariant,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.onSurface,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Genre badge with muted style.
+class _GenreBadge extends StatelessWidget {
+  final String label;
+
+  const _GenreBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.cardHigh,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: 10,
+          fontWeight: FontWeight.w400,
+          color: AppColors.onSurfaceVariant,
+        ),
       ),
     );
   }

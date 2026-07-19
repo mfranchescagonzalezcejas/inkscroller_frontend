@@ -34,8 +34,20 @@ final homeDiscoverProvider =
         .map((d) => d.toJson())
         .toList(),
   );
-  // Load initial catalogue so Popular/Romance/Action have data.
+  // Load initial catalogue so the All tab has data immediately.
   notifier.loadInitial();
+  // Preload Popular, Romance, and Action in background so the user
+  // sees instant content when tapping those tabs.
+  // Run outside microtask so disposal of the notifier doesn't cause
+  // unhandled exceptions — the mounted guard inside loadInitial handles it.
+  Future<void>.microtask(() async {
+    // Each call writes to _tabCache and is guarded by mounted + version.
+    await notifier.loadInitial(mode: LibraryMode.popular);
+    if (!notifier.mounted) return;
+    await notifier.setGenre('romance');
+    if (!notifier.mounted) return;
+    await notifier.setGenre('action');
+  });
   return notifier;
 });
 

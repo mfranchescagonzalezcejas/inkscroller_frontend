@@ -8,6 +8,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../library/presentation/providers/library/library_provider.dart';
 import '../../domain/entities/home_chapter.dart';
 import '../providers/home_latest_chapters_provider.dart';
+import '../providers/home_discover_provider.dart';
 import '../providers/home_provider.dart';
 import '../providers/home_state.dart';
 import '../widgets/continue_reading_section.dart';
@@ -37,13 +38,22 @@ class HomePage extends ConsumerWidget {
       ),
     );
 
+    // Loading state for the progress bar
+    final homeState = ref.watch(homeProvider);
+    final isHomeLoading = homeState.featured.isEmpty;
+    final discoverState = ref.watch(homeDiscoverProvider);
+    final isDiscoverLoading = discoverState.isLoading &&
+        discoverState.mangas.isEmpty;
+
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
       body: RefreshIndicator(
         color: AppColors.primary,
         backgroundColor: AppColors.card,
         onRefresh: () => _refreshHome(ref),
-        child: const _HomeBody(),
+        child: _HomeBody(
+          isLoading: isHomeLoading || isDiscoverLoading,
+        ),
       ),
     );
   }
@@ -96,7 +106,9 @@ class HomePage extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────
 
 class _HomeBody extends ConsumerWidget {
-  const _HomeBody();
+  final bool isLoading;
+
+  const _HomeBody({this.isLoading = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -111,21 +123,29 @@ class _HomeBody extends ConsumerWidget {
       padding: EdgeInsets.only(
         bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
       ),
-      children: const [
+      children: <Widget>[
         // 1. Hero swipeable de tendencias
-        HeroCarousel(),
+        const HeroCarousel(),
+
+        // Loading bar — debajo del hero, visible sin hacer scroll
+        if (isLoading)
+          const LinearProgressIndicator(
+            backgroundColor: Colors.transparent,
+            color: AppColors.primary,
+            minHeight: 2,
+          ),
 
         // 2. Continue reading
-        ContinueReadingSection(),
+        const ContinueReadingSection(),
 
         // 3. Discover filter + manga row
-        DiscoverSection(),
+        const DiscoverSection(),
 
         // 4. Recommendations
-        RecommendedSection(),
+        const RecommendedSection(),
 
         // 5. Latest chapters
-        LatestChaptersSection(),
+        const LatestChaptersSection(),
       ],
     );
   }
