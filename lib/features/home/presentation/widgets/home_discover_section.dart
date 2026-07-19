@@ -48,11 +48,10 @@ class DiscoverSection extends ConsumerWidget {
         const SizedBox(height: 12),
 
         // ── Manga row — MangaTile width matches Explore's column size ──
-        libraryState.isLoading && mangas.isEmpty
-            ? const HomeShimmer.cardRow()
-            : mangas.isEmpty
-                ? const SizedBox.shrink()
-                : LayoutBuilder(
+        if (libraryState.isLoading && mangas.isEmpty)
+          const HomeShimmer.cardRow()
+        else if (mangas.isNotEmpty)
+          LayoutBuilder(
                     builder: (context, constraints) {
                       final width = constraints.maxWidth;
                       final crossAxisCount = width >= 600 ? 3 : 2;

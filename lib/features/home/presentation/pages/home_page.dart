@@ -55,7 +55,7 @@ class HomePage extends ConsumerWidget {
 
     try {
       await ref.read(homeLatestChaptersProvider.future);
-    } catch (_) {
+    } on Object catch (_) {
       // Refresh is best-effort; errors are handled per-section already.
     }
   }
@@ -70,7 +70,7 @@ class HomePage extends ConsumerWidget {
           unawaited(
             precacheImage(CachedNetworkImageProvider(url), context),
           );
-        } catch (_) {}
+        } on Object catch (_) {}
       }
     }
   }
@@ -85,7 +85,7 @@ class HomePage extends ConsumerWidget {
       if (url != null && url.isNotEmpty) {
         try {
           unawaited(precacheImage(CachedNetworkImageProvider(url), context));
-        } catch (_) {}
+        } on Object catch (_) {}
       }
     }
   }

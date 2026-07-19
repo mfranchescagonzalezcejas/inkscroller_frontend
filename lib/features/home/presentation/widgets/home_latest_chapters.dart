@@ -90,7 +90,7 @@ class _LatestChapterTile extends StatelessWidget {
       coverUrl: chapter.mangaCoverUrl,
     );
 
-    // TODO: Open reader directly when chapter.id routing lands.
+    // TODO(reader): open reader directly when chapter.id routing lands.
     return Material(
       color: AppColors.card,
       borderRadius: BorderRadius.circular(12),
