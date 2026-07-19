@@ -35,7 +35,6 @@ class HomePage extends ConsumerWidget {
     // Hero and trending cards use Image.network → NetworkImage provider.
     final networkUrls = [
       ...state.featured,
-      ...state.latest.take(10),
       ...state.popular.take(10),
     ].map((m) => m.coverUrl).whereType<String>().where((u) => u.isNotEmpty);
 
@@ -124,7 +123,6 @@ class _HomeBody extends StatelessWidget {
     // If there's no data, show empty state
     final hasContent =
         homeState.featured.isNotEmpty ||
-        homeState.latest.isNotEmpty ||
         homeState.popular.isNotEmpty ||
         homeState.shounen.isNotEmpty ||
         homeState.shoujo.isNotEmpty ||
