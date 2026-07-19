@@ -234,20 +234,30 @@ class ReadingProgressNotifier
 
   /// Toggles a single chapter read state — mark read if unread, unmark if read.
   ///
-  /// Direct toggle without dialog or navigation. Updates persisted state
-  /// immediately so the UI rebuilds.
+  /// When [chapters] is provided and the chapter is being marked as read (not
+  /// yet read), cascades the mark to all chapters up to [chapterId] — matching
+  /// the same behavior as tapping the row body. Unmarking is always single.
   Future<void> toggleChapter({
     required String mangaId,
     required String chapterId,
     required int totalChaptersCount,
+    List<Chapter>? chapters,
   }) async {
     final current = progressFor(mangaId);
     final Set<String> nextReadIds = current.readChapterIds.toSet();
+
     if (current.isChapterRead(chapterId)) {
+      // Unmark: just the tapped chapter.
       nextReadIds.remove(chapterId);
+    } else if (chapters != null) {
+      // Mark with cascade: all chapters up to the target, like markThrough.
+      final List<Chapter> toMark = chaptersUpToTarget(chapters, chapterId);
+      nextReadIds.addAll(toMark.map((c) => c.id));
     } else {
+      // Mark single (fallback when no chapters list is available).
       nextReadIds.add(chapterId);
     }
+
     final nextTotal = current.totalChaptersCount > totalChaptersCount
         ? current.totalChaptersCount
         : totalChaptersCount;

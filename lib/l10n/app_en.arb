@@ -236,8 +236,7 @@
   "dialogConfirm": "OK",
   "dialogCancel": "Cancel",
   "readerSettingsConfirm": "Confirm settings",
-  "readerDirectionLtr": "LTR",
-  "readerDirectionRtl": "RTL",
+  "readerDirectionPaged": "Paginated",
   "readerDirectionVertical": "Vertical",
   "deleteAccountTitle": "Delete Account",
   "deleteAccountWarningBody": "This action is permanent and irreversible. All your data, including your profile, preferences, and reading progress, will be deleted.",
@@ -397,5 +396,22 @@
   "homeRecommended": "Recommended for you",
   "homeTrendingLabel": "TRENDING",
   "homeViewAll": "View all",
-  "homeChapterError": "Could not load chapters."
+  "homeChapterError": "Could not load chapters.",
+
+  "mangaStatusOngoing": "Ongoing",
+  "mangaStatusCompleted": "Completed",
+  "mangaStatusHiatus": "Hiatus",
+  "mangaStatusCancelled": "Cancelled",
+
+  "genreAdventure": "Adventure",
+  "genreComedy": "Comedy",
+  "genreDrama": "Drama",
+  "genreFantasy": "Fantasy",
+  "genreHorror": "Horror",
+  "genreMystery": "Mystery",
+  "genreSciFi": "Sci-Fi",
+  "genreSliceOfLife": "Slice of Life",
+  "genreSports": "Sports",
+  "genreThriller": "Thriller",
+  "genreSupernatural": "Supernatural"
 }

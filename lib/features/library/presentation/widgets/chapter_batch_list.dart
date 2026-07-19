@@ -170,12 +170,18 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
                       widget.progress?.isChapterRead(item.chapter.id) ?? false,
                   onTap: () => widget.onChapterTap(item.chapter),
                   onToggleRead: () {
+                    // Gather available chapters from this batch for cascading.
+                    final batchChapters = batch.items
+                        .whereType<ReadableChapterBatchItem>()
+                        .map((i) => i.chapter)
+                        .toList();
                     ref
                         .read(readingProgressProvider.notifier)
                         .toggleChapter(
                           mangaId: widget.mangaId,
                           chapterId: item.chapter.id,
                           totalChaptersCount: batch.end,
+                          chapters: batchChapters,
                         );
                   },
                 ),

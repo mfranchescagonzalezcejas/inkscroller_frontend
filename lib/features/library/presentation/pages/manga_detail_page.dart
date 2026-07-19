@@ -22,6 +22,7 @@ import '../../domain/entities/chapter_batch.dart';
 import '../../domain/entities/manga.dart';
 import '../../domain/entities/manga_reading_progress.dart';
 import '../../domain/entities/reader_mode.dart';
+import '../utils/manga_localizer.dart';
 import '../providers/chapters/manga_chapter_provider.dart';
 import '../providers/chapters/manga_chapter_state.dart';
 import '../providers/per_title_override_provider.dart';
@@ -400,6 +401,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                                   mangaId: widget.manga.id,
                                   chapterId: chapter.id,
                                   totalChaptersCount: state.chapters.length,
+                                  chapters: state.chapters,
                                 );
                           },
                         )),
@@ -860,9 +862,12 @@ class _CoverSectionState extends State<_CoverSection> {
     );
 
     // ── Tags ─────────────────────────────────────────────────
+    final l10n = context.l10n;
     final List<String> tags = <String>[
-      if (widget.manga.status != null) widget.manga.status!.toUpperCase(),
-      ...widget.manga.genres.take(3).map((g) => g.toUpperCase()),
+      if (widget.manga.status != null)
+        MangaLocalizer.localizeStatus(l10n, widget.manga.status!),
+      ...widget.manga.genres.take(3).map((g) =>
+          MangaLocalizer.localizeGenre(l10n, g)),
       if (widget.manga.demographic != null)
         widget.manga.demographic!.toUpperCase(),
     ];

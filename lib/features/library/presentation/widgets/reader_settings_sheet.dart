@@ -241,19 +241,14 @@ class _DirectionSegment extends StatelessWidget {
       child: Row(
         children: <Widget>[
           _SegmentButton(
-            label: context.l10n.readerDirectionLtr,
-            selected: active == ReaderMode.paged,
-            onTap: () => _select(ReaderMode.paged),
-          ),
-          _SegmentButton(
-            label: context.l10n.readerDirectionRtl,
-            selected: false,
-            onTap: () => _select(ReaderMode.paged),
-          ),
-          _SegmentButton(
             label: context.l10n.readerDirectionVertical,
             selected: active == ReaderMode.vertical,
             onTap: () => _select(ReaderMode.vertical),
+          ),
+          _SegmentButton(
+            label: context.l10n.readerDirectionPaged,
+            selected: active == ReaderMode.paged,
+            onTap: () => _select(ReaderMode.paged),
           ),
         ],
       ),

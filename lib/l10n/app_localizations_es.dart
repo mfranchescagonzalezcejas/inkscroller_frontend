@@ -501,10 +501,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get readerSettingsConfirm => 'Confirmar ajustes';
 
   @override
-  String get readerDirectionLtr => 'LTR';
-
-  @override
-  String get readerDirectionRtl => 'RTL';
+  String get readerDirectionPaged => 'Paginado';
 
   @override
   String get readerDirectionVertical => 'Vertical';
@@ -887,4 +884,49 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeChapterError => 'No se pudieron cargar los capítulos.';
+
+  @override
+  String get mangaStatusOngoing => 'En emisión';
+
+  @override
+  String get mangaStatusCompleted => 'Finalizado';
+
+  @override
+  String get mangaStatusHiatus => 'En pausa';
+
+  @override
+  String get mangaStatusCancelled => 'Cancelado';
+
+  @override
+  String get genreAdventure => 'Aventura';
+
+  @override
+  String get genreComedy => 'Comedia';
+
+  @override
+  String get genreDrama => 'Drama';
+
+  @override
+  String get genreFantasy => 'Fantasía';
+
+  @override
+  String get genreHorror => 'Terror';
+
+  @override
+  String get genreMystery => 'Misterio';
+
+  @override
+  String get genreSciFi => 'Ciencia Ficción';
+
+  @override
+  String get genreSliceOfLife => 'Recuentos de la vida';
+
+  @override
+  String get genreSports => 'Deportes';
+
+  @override
+  String get genreThriller => 'Thriller';
+
+  @override
+  String get genreSupernatural => 'Sobrenatural';
 }

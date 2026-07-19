@@ -146,27 +146,38 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
 
     return Scaffold(
       backgroundColor: background,
-      appBar: AppBar(
-        title: Text(context.l10n.readingChapter),
-        backgroundColor: background,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.tune_outlined),
-            tooltip: context.l10n.readerSettingsConfirm,
-            onPressed: () => showReaderSettings(
-              context,
-              chapterId: widget.chapterId,
-              mangaId: widget.mangaId,
-            ),
-          ),
-        ],
-      ),
       body: Stack(
         children: <Widget>[
           switch (state.readerMode) {
             ReaderMode.vertical => VerticalReaderView(pages: state.pages),
             ReaderMode.paged => PagedReaderView(pages: state.pages),
           },
+          // Floating top buttons — back (top-left) + settings (top-right)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 4,
+            left: 0,
+            right: 0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _FloatingIconButton(
+                    icon: Icons.arrow_back,
+                    onTap: () => context.pop(),
+                  ),
+                  _FloatingIconButton(
+                    icon: Icons.tune_outlined,
+                    onTap: () => showReaderSettings(
+                      context,
+                      chapterId: widget.chapterId,
+                      mangaId: widget.mangaId,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           // Brightness overlay — black with opacity inversely proportional to
           // the brightness level. At full brightness (1.0) the overlay is
           // invisible; at minimum (0.1) it dims the content significantly.
@@ -272,6 +283,39 @@ class _ExternalChapterScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating icon button used in the reader's overlay bar.
+///
+/// Semi-transparent rounded square with a centered icon.
+/// Matches the [MangaDetailPage._FloatingTopButtons] style.
+class _FloatingIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _FloatingIconButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: Material(
+        color: AppColors.voidLowest.withValues(alpha: 0.6),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Icon(icon, color: AppColors.onSurface, size: 24),
         ),
       ),
     );
