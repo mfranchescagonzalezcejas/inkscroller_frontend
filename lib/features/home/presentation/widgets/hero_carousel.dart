@@ -197,7 +197,26 @@ class _HeroSlide extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const _TrendingBadge(),
+                // Badge row: trending + demographic
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    const _TrendingBadge(),
+                    if (meta.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.floating,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          meta,
+                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
+                        ),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 12),
 
                 // Cover + text row
@@ -210,8 +229,9 @@ class _HeroSlide extends ConsumerWidget {
                         width: 100,
                         height: 150,
                         child: Stack(
+                          fit: StackFit.expand,
                           children: [
-                            _HeroCover(coverUrl: manga.coverUrl),
+                            Positioned.fill(child: _HeroCover(coverUrl: manga.coverUrl)),
                             if (manga.score != null)
                               Positioned(
                                 top: 4,
@@ -247,22 +267,20 @@ class _HeroSlide extends ConsumerWidget {
                         children: [
                           Text(
                             manga.title,
-                            maxLines: 2,
+                            maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.onSurface),
+                            style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface),
                           ),
                           if (manga.description != null && manga.description!.trim().isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
                                 manga.description!,
-                                maxLines: 2,
+                                maxLines: 4,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35),
                               ),
                             ),
-                          const SizedBox(height: 4),
-                          _HeroMetadata(manga: manga, meta: meta),
                         ],
                       ),
                     ),
@@ -336,31 +354,7 @@ class _TrendingBadge extends StatelessWidget {
 // HeroMetadata
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _HeroMetadata extends StatelessWidget {
-  const _HeroMetadata({required this.manga, required this.meta});
 
-  final Manga manga;
-  final String meta;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (meta.isNotEmpty)
-          Text(
-            meta,
-            style: const TextStyle(
-              fontFamily: AppTypography.fontFamily,
-              fontSize: 12,
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-      ],
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroActions — compact "Ver detalles" + bookmark
@@ -384,31 +378,32 @@ class _HeroActions extends ConsumerWidget {
         // Ver detalles
         Expanded(
           child: SizedBox(
-            height: 48,
+            height: 40,
             child: FilledButton(
               onPressed: onDetail,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.voidLowest,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 textStyle: const TextStyle(
                   fontFamily: AppTypography.fontFamily,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
               ),
               child: const Text('Ver detalles'),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
 
         // Bookmark
         SizedBox(
-          width: 48,
-          height: 48,
+          width: 40,
+          height: 40,
           child: IconButton.filledTonal(
             style: IconButton.styleFrom(
               backgroundColor: AppColors.cardHigh,
