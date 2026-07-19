@@ -43,7 +43,6 @@ class HomeClassifier {
   /// Classifies [all] into a complete [HomeState] ready for the home screen.
   static HomeState classify(List<Manga> all) => HomeState(
         featured: featured(all),
-        latest: latest(all),
         popular: popular(all),
         shounen: byDemographic(all, MangaDemographic.shounen),
         shoujo: byDemographic(all, MangaDemographic.shoujo),
