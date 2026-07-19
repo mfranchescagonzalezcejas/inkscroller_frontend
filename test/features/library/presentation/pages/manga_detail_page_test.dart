@@ -441,7 +441,21 @@ void main() {
       required Manga manga,
       required MangaChaptersNotifier notifier,
       Map<String, MangaReadingProgress>? progressOverrides,
+      ReadingProgressRepository? progressRepo,
     }) {
+      // If progressOverrides or a custom repo is given, wire it through
+      // as a real ReadingProgressNotifier; otherwise use the stub.
+      final bool useRealNotifier = progressRepo != null || progressOverrides != null;
+      if (useRealNotifier && progressRepo == null) {
+        progressRepo = _MockReadingProgressRepository();
+        if (progressOverrides != null) {
+          when(() => progressRepo!.getAll()).thenAnswer(
+            (_) async => progressOverrides,
+          );
+          when(() => progressRepo!.save(any())).thenAnswer((_) async {});
+        }
+      }
+
       return tester.pumpWidget(
         ProviderScope(
           overrides: <Override>[
@@ -454,7 +468,9 @@ void main() {
               (ref) => _StubPreferencesNotifier('en'),
             ),
             readingProgressProvider.overrideWith(
-              (ref) => _makeStubReadingProgressNotifier(),
+              (ref) => useRealNotifier
+                  ? ReadingProgressNotifier(progressRepo!)
+                  : _makeStubReadingProgressNotifier(),
             ),
             userLibraryProvider.overrideWith(
               (ref) => _makeStubUserLibraryNotifier(),
@@ -502,7 +518,6 @@ void main() {
 
         final manga = Manga(id: 'm1', title: 'Test', malId: 1234);
 
-        // Override progress to have totalChaptersCount
         final mockRepo = _MockReadingProgressRepository();
         when(() => mockRepo.getAll()).thenAnswer(
           (_) async => <String, MangaReadingProgress>{
@@ -514,40 +529,7 @@ void main() {
         );
         when(() => mockRepo.save(any())).thenAnswer((_) async {});
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: <Override>[
-              connectivityStatusProvider.overrideWith(
-                (ref) => Stream<bool>.value(true),
-              ),
-              authProvider.overrideWith((_) => _makeStubAuthNotifier()),
-              mangaChaptersProvider.overrideWith((ref) => notifier),
-              preferencesProvider.overrideWith(
-                (ref) => _StubPreferencesNotifier('en'),
-              ),
-              readingProgressProvider.overrideWith(
-                (ref) => ReadingProgressNotifier(mockRepo),
-              ),
-              userLibraryProvider.overrideWith(
-                (ref) => _makeStubUserLibraryNotifier(),
-              ),
-            ],
-            child: MaterialApp.router(
-              locale: const Locale('en'),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              routerConfig: GoRouter(
-                initialLocation: '/manga/m1',
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: '/manga/:mangaId',
-                    builder: (_, __) => MangaDetailPage(manga: manga),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+        await pumpPage(tester, manga: manga, notifier: notifier, progressRepo: mockRepo);
 
         await tester.pumpAndSettle();
 
@@ -601,6 +583,48 @@ void main() {
         expect(find.byType(ReadingProgressSection), findsOneWidget);
         // Flat chapter list should be visible (batchSize 25 > 1 chapter)
         expect(find.byType(ChapterTile), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'has-total state: totalChaptersCount > 0 but no MD chapters → tracking visible, no chapter list',
+      (tester) async {
+        when(
+          () => getMangaChaptersWithLanguages(
+            any<String>(),
+            preferredLang: any<String>(named: 'preferredLang'),
+          ),
+        ).thenAnswer(
+          (_) async => Right<Failure, ChaptersWithLanguages>(
+            ChaptersWithLanguages(
+              availableLanguages: ['en'],
+              matchedLanguage: 'en',
+              chapters: const <Chapter>[], // empty → no MD chapters
+            ),
+          ),
+        );
+
+        final manga = Manga(id: 'm1', title: 'Test', malId: 999);
+        final mockRepo = _MockReadingProgressRepository();
+        when(() => mockRepo.getAll()).thenAnswer(
+          (_) async => <String, MangaReadingProgress>{
+            'm1': const MangaReadingProgress(
+              mangaId: 'm1',
+              totalChaptersCount: 50,
+            ),
+          },
+        );
+        when(() => mockRepo.save(any())).thenAnswer((_) async {});
+
+        await pumpPage(tester, manga: manga, notifier: notifier, progressRepo: mockRepo);
+        await tester.pumpAndSettle();
+
+        // ReadingProgressSection should be visible (has total)
+        expect(find.byType(ReadingProgressSection), findsOneWidget);
+        // Chapters header shows because hasTotal is true
+        expect(find.text('Chapters'), findsOneWidget);
+        // No chapter tiles (no MD chapters loaded)
+        expect(find.byType(ChapterTile), findsNothing);
       },
     );
   });

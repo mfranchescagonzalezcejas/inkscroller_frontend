@@ -146,17 +146,6 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     );
 
     // ── 4-state determination ──────────────────────────────────────
-    debugPrint(
-      '[DetailPage] build $hashCode '
-      'mangaId=${widget.manga.id} '
-      'malId=${widget.manga.malId} '
-      'totalChaptersCount=${progress.totalChaptersCount} '
-      'readChapterIds.len=${progress.readChapterIds.length} '
-      'manuallyMarkedCount=${progress.manuallyMarkedCount} '
-      'readChaptersCount=${progress.readChaptersCount} '
-      'state.chapters=${state.chapters.length} '
-      'totalChaptersCount=${progress.totalChaptersCount}',
-    );
     // Tracking shows progress readChapters / totalChapters even without
     // Jikan data — totalChaptersCount is derived from max chapter number
     // in the MangaDex list or Jikan total.
@@ -315,12 +304,12 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                           ),
                         )
                       else if (showNothing)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 40),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
                           child: Center(
                             child: Text(
-                              'No chapters available',
-                              style: TextStyle(color: AppColors.onSurfaceVariant),
+                              context.l10n.noChaptersAvailable,
+                              style: const TextStyle(color: AppColors.onSurfaceVariant),
                             ),
                           ),
                         )
@@ -383,12 +372,12 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                               )),
                         ]
                       ] else if (displayChapters.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 40),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
                           child: Center(
                             child: Text(
-                              'Chapters filtered out',
-                              style: TextStyle(
+                              context.l10n.chaptersFilteredOut,
+                              style: const TextStyle(
                                   color: AppColors.onSurfaceVariant),
                             ),
                           ),

@@ -45,12 +45,17 @@ class ChapterBatchList extends ConsumerWidget {
     );
 
     final displayBatches = descending ? batches.reversed.toList() : batches;
+    final int manualThreshold = progress?.manuallyMarkedCount ?? 0;
 
-    // When hiddenChapterIds is set, omit read items from each batch and
-    // skip batches that end up empty.
-    final visibleBatches = hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty
+    // When hiddenChapterIds is set, omit read items and placeholders that
+    // are already covered by manuallyMarkedCount, then skip empty batches.
+    final bool hasFilter = hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty;
+    final visibleBatches = hasFilter
         ? displayBatches
-            .map((b) => b.copyWithFilteredItems(hiddenChapterIds!))
+            .map((b) => b.copyWithFilteredItems(
+                  hiddenChapterIds!,
+                  manualThreshold: manualThreshold,
+                ))
             .where((b) => b.items.isNotEmpty)
             .toList()
         : displayBatches;
@@ -79,6 +84,7 @@ class ChapterBatchList extends ConsumerWidget {
       itemBuilder: (context, batchIndex) {
         final batch = visibleBatches[batchIndex];
         return _BatchExpansionTile(
+          key: ValueKey('batch-${batch.start}-${batch.end}'),
           batch: batch,
           progress: progress,
           mangaId: mangaId,
@@ -91,6 +97,7 @@ class ChapterBatchList extends ConsumerWidget {
 
 class _BatchExpansionTile extends ConsumerStatefulWidget {
   const _BatchExpansionTile({
+    super.key,
     required this.batch,
     required this.progress,
     required this.mangaId,
@@ -128,9 +135,8 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
       children: <Widget>[
         ListTile(
           title: Text(
-            context.l10n.chapterLabel(
-              '${formatChapterNumber(batch.start.toDouble())}–${formatChapterNumber(batch.end.toDouble())}',
-            ),
+            '${context.l10n.chaptersTitle} '
+            '${formatChapterNumber(batch.start.toDouble())}–${formatChapterNumber(batch.end.toDouble())}',
             style: const TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 14,

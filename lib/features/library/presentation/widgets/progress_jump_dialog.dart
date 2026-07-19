@@ -35,7 +35,7 @@ class _ProgressJumpDialogBodyState extends State<_ProgressJumpDialogBody> {
   void _validate() {
     final text = _controller.text.trim();
     if (text.isEmpty) {
-      setState(() => _error = context.l10n.jumpToChapterHint);
+      setState(() => _error = context.l10n.jumpToChapterInvalid);
       return;
     }
     final number = int.tryParse(text);

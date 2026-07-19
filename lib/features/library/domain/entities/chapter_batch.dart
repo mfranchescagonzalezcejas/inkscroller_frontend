@@ -19,12 +19,18 @@ class ChapterBatch {
   final List<ChapterBatchItem> items;
 
   /// Returns a copy omitting [ReadableChapterBatchItem]s whose chapter ID
-  /// is in [hiddenIds]. Placeholders are kept as-is.
-  ChapterBatch copyWithFilteredItems(Set<String> hiddenIds) {
+  /// is in [hiddenIds], and [PlaceholderChapterBatchItem]s whose chapter
+  /// number is at or below [manualThreshold] (i.e. marked read by the user).
+  ChapterBatch copyWithFilteredItems(
+    Set<String> hiddenIds, {
+    int manualThreshold = 0,
+  }) {
     final filtered = items.where((item) {
       return switch (item) {
-        ReadableChapterBatchItem(:final chapter) => !hiddenIds.contains(chapter.id),
-        PlaceholderChapterBatchItem() => true,
+        ReadableChapterBatchItem(:final chapter) =>
+          !hiddenIds.contains(chapter.id),
+        PlaceholderChapterBatchItem(:final chapterNumber) =>
+          chapterNumber > manualThreshold,
       };
     }).toList();
     return ChapterBatch(start: start, end: end, items: filtered);

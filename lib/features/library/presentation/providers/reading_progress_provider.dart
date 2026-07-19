@@ -48,11 +48,14 @@ class ReadingProgressNotifier
     final nextCount = math.max(0, current.manuallyMarkedCount + delta);
     final next = current.copyWith(manuallyMarkedCount: nextCount);
     if (next == current) return;
+    // Optimistic update: state changes immediately so rapid calls see the
+    // latest count. The _save call below also re-applies state on completion.
+    state = <String, MangaReadingProgress>{...state, mangaId: next};
     debugPrint('[ProgressNotifier] updateManuallyMarkedCount: '
         '$mangaId delta=$delta '
         '${current.manuallyMarkedCount} → $nextCount '
         'readChapterIds.len=${current.readChapterIds.length}');
-    await _save(next);
+    await _repository.save(next);
   }
 
   /// Sets [MangaReadingProgress.manuallyMarkedCount] to an exact [count].
@@ -79,7 +82,8 @@ class ReadingProgressNotifier
         readChapterIds: const <String>{},
       );
       if (reset == current) return;
-      await _save(reset);
+      state = <String, MangaReadingProgress>{...state, mangaId: reset};
+      await _repository.save(reset);
       return;
     }
 
@@ -113,7 +117,8 @@ class ReadingProgressNotifier
       readChapterIds: nextReadIds,
     );
     if (next == current) return;
-    await _save(next);
+    state = <String, MangaReadingProgress>{...state, mangaId: next};
+    await _repository.save(next);
   }
 
   /// Sets the batch size for the batching UI on this manga.
@@ -121,7 +126,8 @@ class ReadingProgressNotifier
     final current = progressFor(mangaId);
     final next = current.copyWith(batchSize: batchSize);
     if (next == current) return;
-    await _save(next);
+    state = <String, MangaReadingProgress>{...state, mangaId: next};
+    await _repository.save(next);
   }
 
   /// Synchronises the total chapter count from the backend.
