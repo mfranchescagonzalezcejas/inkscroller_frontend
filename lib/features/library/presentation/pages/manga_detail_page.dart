@@ -90,15 +90,28 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     Future.microtask(() async {
       if ((widget.manga.type == null || widget.manga.demographic == null) &&
           GetIt.instance.isRegistered<GetMangaDetail>()) {
+        debugPrint(
+          '[MangaDetail] enriching metadata for ${widget.manga.id} '
+          '(type=${widget.manga.type}, demo=${widget.manga.demographic})',
+        );
         final result = await GetIt.instance<GetMangaDetail>()(
           widget.manga.id,
         );
-        if (!context.mounted) return;
-        result.fold((_) {}, (fullManga) {
-          if (fullManga.type != null || fullManga.demographic != null) {
-            setState(() => _enrichedManga = fullManga);
-          }
-        });
+        if (!mounted) return;
+        result.fold(
+          (failure) => debugPrint(
+            '[MangaDetail] enrichment failed: $failure',
+          ),
+          (fullManga) {
+            debugPrint(
+              '[MangaDetail] enriched: type=${fullManga.type} '
+              'demo=${fullManga.demographic}',
+            );
+            if (fullManga.type != null || fullManga.demographic != null) {
+              setState(() => _enrichedManga = fullManga);
+            }
+          },
+        );
       }
     });
 
@@ -119,7 +132,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
       // Guard: if the user left this page while preferences were loading,
       // don't continue with a disposed widget (P2 Codex finding).
-      if (!context.mounted) return;
+      if (!mounted) return;
 
       final updatedPrefs = ref.read(preferencesProvider);
       final defaultLang = updatedPrefs.preferences?.defaultLanguage ?? 'en';
