@@ -919,19 +919,27 @@ class _CoverSectionState extends State<_CoverSection> {
                 ),
               ),
 
-              // Description — unlimited, adapts to text length
+              // Description — constrained height with internal scroll
               if (widget.manga.description != null &&
                   widget.manga.description!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Text(
-                    widget.manga.description!,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: AppTypography.fontFamily,
-                      fontSize: 14,
-                      height: 1.5,
-                      color: AppColors.onSurfaceVariant,
+                  child: SizedBox(
+                    // ponytail: ~6 lines × 21px line height. Shows enough
+                    // preview without pushing chapters off-screen. Full
+                    // synopsis is reachable via internal scroll.
+                    height: 120,
+                    child: SingleChildScrollView(
+                      child: Text(
+                        widget.manga.description!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 14,
+                          height: 1.5,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   ),
                 ),
