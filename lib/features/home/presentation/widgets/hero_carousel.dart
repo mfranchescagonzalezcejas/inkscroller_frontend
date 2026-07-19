@@ -13,16 +13,15 @@ import '../../../library/domain/entities/manga.dart';
 import '../../../library/presentation/providers/user_library_provider.dart';
 import '../providers/home_provider.dart';
 
-/// ponytail: hardcoded landscape test manga — remove after confirming layout.
-final Manga _landscapeTestManga = Manga(
+/// ponytail: hardcoded test manga from real API data — remove before shipping.
+final Manga _testManga = Manga(
   id: '31148516-db5c-4b36-97a6-5e905aab0523',
-  title: 'Test Landscape Manga — A Very Long Title That Spans Multiple Lines For Testing Purposes',
-  coverUrl: 'https://mangadex.org/covers/92ec8e70-3eca-4ed4-acc6-a4a729512947/4d6d9af6-7654-4b9a-bfba-31d1073f91a2.jpg',
-  description: 'This is a test manga with a landscape/banner style cover image to verify the adaptive hero layout works correctly for non-portrait formats. The description should be long enough to test text overflow and scrolling behavior within the hero section.',
-  score: 9.2,
-  type: 'manhwa',
+  title: 'Onihime wa Uchi no Naka',
+  coverUrl: 'https://uploads.mangadex.org/covers/31148516-db5c-4b36-97a6-5e905aab0523/392b52c8-9ddc-4f7e-a29d-029e9ec516c1.jpg',
+  description: 'Boy, I shall devour your life.\n\nOne spring night, amidst the blooming cherry blossoms, a stunningly beautiful Oni appeared.\n\nThis is a heartwarming slice-of-life story—at once cute and bittersweet—following a boy and his unexpected, supernatural roommate.',
+  score: 7.5,
+  type: 'manga',
   demographic: 'seinen',
-  genres: const ['Action', 'Fantasy', 'Adventure'],
 );
 
 /// Max slides in the hero carousel.
@@ -55,8 +54,7 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
   Widget build(BuildContext context) {
     final mangas = ref.watch(homeProvider).featured;
     final slides = mangas.take(_heroMaxSlides).toList();
-    // ponytail: landscape test — remove before shipping.
-    if (slides.isNotEmpty) slides.insert(0, _landscapeTestManga);
+    if (slides.isNotEmpty) slides.insert(0, _testManga);
 
 
     if (slides.isEmpty) {
@@ -201,11 +199,9 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
     final inLibrary = ref.watch(
       userLibraryProvider.select((map) => map[widget.manga.id]?.isInLibrary ?? false),
     );
-    final meta = [
-      if (widget.manga.typeDisplay != null) widget.manga.typeDisplay!,
-      if (widget.manga.demographicDisplay != null) widget.manga.demographicDisplay!,
-    ].join(' · ');
     final isLandscape = _ratio == _CoverRatio.landscape;
+    final typeLabel = widget.manga.typeDisplay;
+    final demoLabel = widget.manga.demographicDisplay;
 
     void openDetail() =>
         context.push(AppRoutes.mangaDetailPath(widget.manga.id), extra: widget.manga);
@@ -254,13 +250,13 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Badge row: trending + demographic
+                // Badge row: trending + type + demographic
                 Wrap(
                   spacing: 6,
                   runSpacing: 4,
                   children: [
                     const _TrendingBadge(),
-                    if (meta.isNotEmpty)
+                    if (typeLabel != null)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
@@ -268,13 +264,20 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          meta,
-                          style: const TextStyle(
-                            fontFamily: AppTypography.fontFamily,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
+                          typeLabel,
+                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary),
+                        ),
+                      ),
+                    if (demoLabel != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardHigh,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          demoLabel,
+                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant),
                         ),
                       ),
                   ],
@@ -287,13 +290,11 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
                   child: isLandscape
                       ? _LandscapeContent(
                           manga: widget.manga,
-                          meta: meta,
                           inLibrary: inLibrary,
                           onDetail: openDetail,
                         )
                       : _PortraitContent(
                           manga: widget.manga,
-                          meta: meta,
                           inLibrary: inLibrary,
                           onDetail: openDetail,
                         ),
@@ -361,13 +362,11 @@ class _TrendingBadge extends StatelessWidget {
 class _PortraitContent extends StatelessWidget {
   const _PortraitContent({
     required this.manga,
-    required this.meta,
     required this.inLibrary,
     required this.onDetail,
   });
 
   final Manga manga;
-  final String meta;
   final bool inLibrary;
   final VoidCallback onDetail;
 
@@ -436,13 +435,11 @@ class _PortraitContent extends StatelessWidget {
 class _LandscapeContent extends StatelessWidget {
   const _LandscapeContent({
     required this.manga,
-    required this.meta,
     required this.inLibrary,
     required this.onDetail,
   });
 
   final Manga manga;
-  final String meta;
   final bool inLibrary;
   final VoidCallback onDetail;
 
@@ -453,9 +450,30 @@ class _LandscapeContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Cover — full width
+          // Cover with score badge
           Center(
-            child: _AdaptiveHeroCover(coverUrl: manga.coverUrl),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _AdaptiveHeroCover(coverUrl: manga.coverUrl),
+                if (manga.score != null)
+                  Positioned(
+                    top: 4, right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: AppColors.cardHigh, borderRadius: BorderRadius.circular(6)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                          const SizedBox(width: 2),
+                          Text(manga.score!.toStringAsFixed(1), style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold)),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           // Title
