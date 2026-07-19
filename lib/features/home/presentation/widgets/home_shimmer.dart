@@ -18,7 +18,7 @@ class HomeShimmer extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 370, child: InkScrollerShimmer(height: 370)),
+            SizedBox(height: 400, child: InkScrollerShimmer(height: 400)),
             SizedBox(height: 24),
             _SectionTitleShimmer(),
             SizedBox(height: 8),

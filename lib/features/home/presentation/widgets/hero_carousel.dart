@@ -58,11 +58,11 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
 
 
     if (slides.isEmpty) {
-      return const SizedBox(height: 460);
+      return const SizedBox(height: 400);
     }
 
     return SizedBox(
-      height: 460,
+      height: 400,
       child: Stack(
         children: [
           PageView.builder(

@@ -3,8 +3,8 @@ import 'package:inkscroller_flutter/features/home/presentation/constants/home_la
 
 void main() {
   group('HomeLayout', () {
-    test('defines heroCarouselHeight as 460.0', () {
-      expect(HomeLayout.heroCarouselHeight, 460.0);
+    test('defines heroCarouselHeight as 400.0', () {
+      expect(HomeLayout.heroCarouselHeight, 400.0);
     });
 
     test('keeps mangaCardRowHeight for demographic rows', () {
