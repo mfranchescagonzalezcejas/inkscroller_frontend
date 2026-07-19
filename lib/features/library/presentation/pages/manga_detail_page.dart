@@ -829,11 +829,12 @@ class _CoverSectionState extends State<_CoverSection> {
               ),
             ),
           ),
-          // ── Content column — UnconstrainedBox removes the viewport height
-          // cap so the Column can be as tall as its content needs.
-          UnconstrainedBox(
-            alignment: Alignment.topCenter,
-            constrainedAxis: Axis.horizontal,
+          // ── Content column — ConstrainedBox removes the height cap so the
+          // Column can be as tall as its content. Crucially, ConstrainedBox
+          // sizes to ITSELF (the measured child), so the Stack auto-expands
+          // and Positioned.fill blur/gradient follow.
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: double.infinity),
             child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
