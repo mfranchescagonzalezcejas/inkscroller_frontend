@@ -224,7 +224,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         final newState = state.copyWith(
           mangas: dedupeMangas(mangas),
           isLoading: false,
-          hasMore: _mode == LibraryMode.normal && mangas.length == _limit,
+          hasMore: mangas.length == _limit,
           clearFailure: true,
         );
         state = newState;
@@ -351,7 +351,6 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   Future<void> loadMore() async {
-    if (_mode != LibraryMode.normal) return;
     if (state.isSearching) return;
     if (state.isLoadingMore || !state.hasMore) return;
 
@@ -362,6 +361,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     final result = await _getMangaList(
       limit: _limit,
       offset: _offset,
+      order: _mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
       genre: _genre,
       contentRating: _contentRating,
       demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
