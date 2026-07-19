@@ -122,6 +122,8 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     final getDetail = sl<GetMangaDetail>();
     // Snapshot the keys so state mutations in the loop don't affect iteration.
     final ids = state.keys.toList();
+    final Map<String, UserLibraryEntry> updates = <String, UserLibraryEntry>{};
+
     for (final id in ids) {
       final entry = state[id];
       if (entry == null) continue;
@@ -130,10 +132,9 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
 
       final result = await getDetail(m.id);
       result.fold((_) {}, (full) {
-        // Only update if the API actually returned richer data.
         if (full.type == null && full.demographic == null) return;
 
-        final enriched = UserLibraryEntry(
+        updates[id] = UserLibraryEntry(
           manga: Manga(
             id: m.id, title: m.title,
             description: full.description ?? m.description,
@@ -150,8 +151,11 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
           status: entry.status,
           updatedAt: entry.updatedAt,
         );
-        state = <String, UserLibraryEntry>{...state, id: enriched};
       });
+    }
+
+    if (updates.isNotEmpty) {
+      state = <String, UserLibraryEntry>{...state, ...updates};
     }
   }
 
