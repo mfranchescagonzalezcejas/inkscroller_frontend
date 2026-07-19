@@ -47,13 +47,16 @@ class ChapterBatchList extends ConsumerWidget {
     final displayBatches = descending ? batches.reversed.toList() : batches;
     final int manualThreshold = progress?.manuallyMarkedCount ?? 0;
 
-    // When hiddenChapterIds is set, omit read items and placeholders that
-    // are already covered by manuallyMarkedCount, then skip empty batches.
-    final bool hasFilter = hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty;
+    // Omit read items (hiddenChapterIds) and placeholders covered by
+    // manuallyMarkedCount, then skip empty batches. Filtering activates
+    // whenever either criterion is present.
+    final bool hasFilter = (hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty) ||
+        manualThreshold > 0;
+    final Set<String> effectiveHidden = hiddenChapterIds ?? <String>{};
     final visibleBatches = hasFilter
         ? displayBatches
             .map((b) => b.copyWithFilteredItems(
-                  hiddenChapterIds!,
+                  effectiveHidden,
                   manualThreshold: manualThreshold,
                 ))
             .where((b) => b.items.isNotEmpty)
