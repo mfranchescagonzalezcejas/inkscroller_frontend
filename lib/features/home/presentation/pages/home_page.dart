@@ -124,16 +124,16 @@ class _HomeBody extends ConsumerWidget {
         bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
       ),
       children: <Widget>[
-        // Loading bar — shows below top sections when fetching data
+        // 1. Hero swipeable de tendencias
+        const HeroCarousel(),
+
+        // Loading bar — debajo del hero, visible sin hacer scroll
         if (isLoading)
           const LinearProgressIndicator(
             backgroundColor: Colors.transparent,
             color: AppColors.primary,
             minHeight: 2,
           ),
-
-        // 1. Hero swipeable de tendencias
-        const HeroCarousel(),
 
         // 2. Continue reading
         const ContinueReadingSection(),
