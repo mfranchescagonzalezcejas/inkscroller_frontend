@@ -391,5 +391,11 @@
   "extrasTitle": "Extras",
   "homeHeroEmpty": "Todavía no hay mangas destacados.",
   "homeHeroError": "No se pudieron cargar los mangas destacados.",
-  "homeExploreCta": "Explorar todo →"
+  "homeExploreCta": "Explorar todo →",
+  "homeContinueReading": "Continuar leyendo",
+  "homeDiscover": "Descubre",
+  "homeRecommended": "Recomendado para ti",
+  "homeTrendingLabel": "TENDENCIA",
+  "homeViewAll": "Ver todo",
+  "homeChapterError": "No se pudieron cargar los capítulos."
 }

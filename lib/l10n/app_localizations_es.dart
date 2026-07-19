@@ -869,4 +869,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeExploreCta => 'Explorar todo →';
+
+  @override
+  String get homeContinueReading => 'Continuar leyendo';
+
+  @override
+  String get homeDiscover => 'Descubre';
+
+  @override
+  String get homeRecommended => 'Recomendado para ti';
+
+  @override
+  String get homeTrendingLabel => 'TENDENCIA';
+
+  @override
+  String get homeViewAll => 'Ver todo';
+
+  @override
+  String get homeChapterError => 'No se pudieron cargar los capítulos.';
 }

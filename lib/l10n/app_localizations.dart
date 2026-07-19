@@ -1639,6 +1639,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explore all →'**
   String get homeExploreCta;
+
+  /// No description provided for @homeContinueReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue reading'**
+  String get homeContinueReading;
+
+  /// No description provided for @homeDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get homeDiscover;
+
+  /// No description provided for @homeRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for you'**
+  String get homeRecommended;
+
+  /// No description provided for @homeTrendingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TRENDING'**
+  String get homeTrendingLabel;
+
+  /// No description provided for @homeViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get homeViewAll;
+
+  /// No description provided for @homeChapterError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load chapters.'**
+  String get homeChapterError;
 }
 
 class _AppLocalizationsDelegate

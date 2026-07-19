@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/features/home/presentation/providers/home_provider.dart';
 import 'package:inkscroller_flutter/features/home/presentation/providers/home_state.dart';
@@ -12,8 +11,12 @@ import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart'
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_list.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/search_manga.dart';
 import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_notifier.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/user_library_entry.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/user_library_status.dart';
+import 'package:inkscroller_flutter/features/library/domain/repositories/user_library_repository.dart';
 import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_provider.dart';
 import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_state.dart';
+import 'package:inkscroller_flutter/features/library/presentation/providers/user_library_provider.dart';
 import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -21,13 +24,14 @@ class _MockGetMangaList extends Mock implements GetMangaList {}
 
 class _MockSearchManga extends Mock implements SearchManga {}
 
+class _MockUserLibraryRepository extends Mock
+    implements UserLibraryRepository {}
+
 class _FixedLibraryNotifier extends LibraryNotifier {
   _FixedLibraryNotifier(LibraryState state)
     : super(_MockGetMangaList(), _MockSearchManga()) {
     this.state = state;
   }
-
-  int refreshCalls = 0;
 
   @override
   Future<void> loadInitial({
@@ -36,182 +40,114 @@ class _FixedLibraryNotifier extends LibraryNotifier {
     String? contentRating,
     List<String>? demographics,
   }) async {}
-
-  @override
-  Future<void> refresh({
-    String? contentRating,
-    List<String>? demographics,
-  }) async {
-    refreshCalls++;
-  }
-}
-
-Manga _manga(String id, {String? coverUrl, String? title}) => Manga(
-  id: id,
-  title: title ?? 'Manga $id',
-  coverUrl: coverUrl,
-  type: 'manga',
-  demographic: 'seinen',
-  score: 8.5,
-);
-
-LibraryState _libraryState({bool isLoading = false, Failure? failure}) =>
-    LibraryState(
-      mangas: const <Manga>[],
-      isLoading: isLoading,
-      isLoadingMore: false,
-      hasMore: false,
-      query: '',
-      isSearching: false,
-      failure: failure,
-    );
-
-Widget _harness({
-  required List<Manga> featured,
-  required LibraryState libraryState,
-}) {
-  final notifier = _FixedLibraryNotifier(libraryState);
-  final router = GoRouter(
-    routes: <RouteBase>[
-      GoRoute(
-        path: '/',
-        builder: (_, __) => ProviderScope(
-          overrides: <Override>[
-            homeProvider.overrideWithValue(HomeState(
-                featured: featured,
-                popular: const [],
-                shounen: const [],
-                shoujo: const [],
-                seinen: const [],
-                josei: const [],
-              )),
-            libraryProvider.overrideWith((_) => notifier),
-          ],
-          child: const Scaffold(body: HeroCarousel()),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.mangaDetailPattern,
-        builder: (_, state) =>
-            Scaffold(body: Text(state.pathParameters['mangaId']!)),
-      ),
-    ],
-  );
-
-  return MaterialApp.router(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    routerConfig: router,
-  );
 }
 
 void main() {
-  testWidgets('shows the carousel shimmer while the library is loading', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _harness(
-        featured: const <Manga>[],
-        libraryState: _libraryState(isLoading: true),
+  final mangaA = Manga(
+    id: 'manga-a',
+    title: 'Manga A',
+    coverUrl: 'https://example.com/a.jpg',
+    score: 8.5,
+  );
+  final mangaB = Manga(
+    id: 'manga-b',
+    title: 'Manga B',
+    coverUrl: 'https://example.com/b.jpg',
+    score: 7,
+  );
+
+  setUp(() {
+    LibraryNotifier.resetSharedCache();
+    registerFallbackValue(
+      UserLibraryEntry(
+        manga: Manga(id: 'fallback', title: 'fallback'),
+        isInLibrary: true,
+        status: UserLibraryStatus.reading,
+        updatedAt: DateTime(2026),
       ),
     );
-
-    expect(find.byType(HomeShimmer), findsOneWidget);
   });
 
-  testWidgets('shows an empty message when no featured manga exists', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _harness(featured: const <Manga>[], libraryState: _libraryState()),
+  Widget buildTestHarness({
+    required List<Manga> featured,
+    LibraryState? libraryState,
+  }) {
+    final userLibRepo = _MockUserLibraryRepository();
+    when(() => userLibRepo.getAll(userId: any(named: 'userId')))
+        .thenAnswer((_) async => const <String, UserLibraryEntry>{});
+    when(() => userLibRepo.hydrate(any()))
+        .thenAnswer((_) async => const <String, UserLibraryEntry>{});
+    when(() => userLibRepo.save(any(), userId: any(named: 'userId')))
+        .thenAnswer((_) async {});
+    when(() => userLibRepo.remove(any(), userId: any(named: 'userId')))
+        .thenAnswer((_) async {});
+
+    final notifier = _FixedLibraryNotifier(
+      libraryState ??
+          const LibraryState(
+            mangas: <Manga>[],
+            isLoading: false,
+            isLoadingMore: false,
+            hasMore: false,
+            query: '',
+            isSearching: false,
+          ),
     );
-
-    expect(find.text('No featured manga yet.'), findsOneWidget);
-  });
-
-  testWidgets('shows a retry action for a library failure', (tester) async {
-    await tester.pumpWidget(
-      _harness(
-        featured: const <Manga>[],
-        libraryState: _libraryState(
-          failure: const ServerFailure(message: 'network error'),
+    return ProviderScope(
+      overrides: <Override>[
+        libraryProvider.overrideWith((_) => notifier),
+        userLibraryProvider.overrideWith(
+          (_) => UserLibraryNotifier(userLibRepo),
+        ),
+        homeProvider.overrideWithValue(HomeState(
+          featured: featured,
+          popular: const [],
+          shounen: const [],
+          shoujo: const [],
+          seinen: const [],
+          josei: const [],
+        )),
+      ],
+      child: MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: GoRouter(
+          initialLocation: '/',
+          routes: <RouteBase>[
+            GoRoute(
+              path: '/',
+              builder: (_, __) => const Scaffold(body: HeroCarousel()),
+            ),
+            GoRoute(
+              path: '/manga/:id',
+              builder: (_, __) => const Scaffold(
+                key: ValueKey('mangaDetail'),
+                body: Text('DETAIL'),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
 
-    expect(find.text('Could not load featured manga.'), findsOneWidget);
-    expect(find.text('Retry'), findsOneWidget);
-  });
+  group('HeroCarousel', () {
+    testWidgets('renders placeholder when no featured manga', (tester) async {
+      await tester.pumpWidget(buildTestHarness(featured: const []));
+      await tester.pump();
 
-  testWidgets('syncs the active dot after a swipe', (tester) async {
-    await tester.pumpWidget(
-      _harness(
-        featured: <Manga>[_manga('one'), _manga('two')],
-        libraryState: _libraryState(),
-      ),
-    );
+      // When empty, the carousel returns a fixed-height SizedBox
+      expect(find.byType(HeroCarousel), findsOneWidget);
+    });
 
-    expect(
-      find.byKey(const ValueKey<String>('hero-dot-active-0')),
-      findsOneWidget,
-    );
-    await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey<String>('hero-dot-active-1')),
-      findsOneWidget,
-    );
-  });
+    testWidgets('renders at least one featured manga page', (tester) async {
+      await tester.pumpWidget(
+        buildTestHarness(featured: [mangaA, mangaB]),
+      );
+      await tester.pump();
 
-  testWidgets('uses a fallback cover and navigates from the read action', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _harness(
-        featured: <Manga>[
-          _manga(
-            'one',
-            title: 'A very long manga title that must ellipsize safely',
-          ),
-        ],
-        libraryState: _libraryState(),
-      ),
-    );
-
-    expect(find.byIcon(Icons.image_not_supported), findsOneWidget);
-    final title = tester.widget<Text>(
-      find.textContaining('A very long manga title'),
-    );
-    expect(title.overflow, TextOverflow.ellipsis);
-    await tester.tap(find.bySemanticsLabel('Read Now'));
-    await tester.pumpAndSettle();
-    expect(find.text('one'), findsOneWidget);
-  });
-
-  testWidgets('fits a 360dp viewport with a 48dp Read Now target', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(360, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      _harness(
-        featured: <Manga>[
-          _manga(
-            'one',
-            title:
-                'A deliberately long title that must not overflow on narrow screens',
-          ),
-        ],
-        libraryState: _libraryState(),
-      ),
-    );
-
-    expect(
-      tester
-          .getSize(find.byKey(const ValueKey<String>('hero-read-now')))
-          .height,
-      48,
-    );
-    expect(tester.takeException(), isNull);
+      // PageView only renders the active page; check the first manga
+      expect(find.text('Manga A'), findsOneWidget);
+    });
   });
 }

@@ -391,5 +391,11 @@
   "extrasTitle": "Extras",
   "homeHeroEmpty": "No featured manga yet.",
   "homeHeroError": "Could not load featured manga.",
-  "homeExploreCta": "Explore all →"
+  "homeExploreCta": "Explore all →",
+  "homeContinueReading": "Continue reading",
+  "homeDiscover": "Discover",
+  "homeRecommended": "Recommended for you",
+  "homeTrendingLabel": "TRENDING",
+  "homeViewAll": "View all",
+  "homeChapterError": "Could not load chapters."
 }
