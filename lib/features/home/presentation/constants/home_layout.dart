@@ -5,7 +5,7 @@
 class HomeLayout {
   // Hero carousel
   /// Height of the featured hero carousel.
-  static const double heroCarouselHeight = 400;
+  static const double heroCarouselHeight = 460;
 
   // Manga card dimensions
   /// Height of a horizontal manga card row.
