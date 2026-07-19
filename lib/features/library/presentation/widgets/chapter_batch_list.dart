@@ -53,10 +53,11 @@ class ChapterBatchList extends ConsumerWidget {
     final int manualThreshold = progress?.manuallyMarkedCount ?? 0;
 
     // Omit read items (hiddenChapterIds) and placeholders covered by
-    // manuallyMarkedCount, then skip empty batches. Filtering activates
-    // whenever either criterion is present.
-    final bool hasFilter = (hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty) ||
-        manualThreshold > 0;
+    // manuallyMarkedCount. Both filters only activate when the user has
+    // toggled "hide read" (hiddenChapterIds is non-null), so manual marking
+    // alone never hides placeholders from the full list.
+    final bool hasFilter =
+        hiddenChapterIds != null && hiddenChapterIds!.isNotEmpty;
     final Set<String> effectiveHidden = hiddenChapterIds ?? <String>{};
     final visibleBatches = hasFilter
         ? displayBatches
