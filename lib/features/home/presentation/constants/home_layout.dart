@@ -13,4 +13,11 @@ class HomeLayout {
 
   /// Width of a single manga card tile.
   static const double mangaCardWidth = 130;
+
+  // Continue Reading card dimensions
+  /// Width of a Continue Reading card tile.
+  static const double continueReadingCardWidth = 120;
+
+  /// Height of a Continue Reading card tile.
+  static const double continueReadingCardHeight = 180;
 }

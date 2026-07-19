@@ -1621,6 +1621,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extras'**
   String get extrasTitle;
+
+  /// No description provided for @homeHeroEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No featured manga yet.'**
+  String get homeHeroEmpty;
+
+  /// No description provided for @homeHeroError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load featured manga.'**
+  String get homeHeroError;
+
+  /// No description provided for @homeExploreCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore all →'**
+  String get homeExploreCta;
 }
 
 class _AppLocalizationsDelegate

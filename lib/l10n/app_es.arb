@@ -388,5 +388,8 @@
   "placeholderUnmark": "Marcar como no leído",
   "noJikanData": "No hay datos externos disponibles",
   "noChaptersNoTracking": "No hay capítulos disponibles",
-  "extrasTitle": "Extras"
+  "extrasTitle": "Extras",
+  "homeHeroEmpty": "Todavía no hay mangas destacados.",
+  "homeHeroError": "No se pudieron cargar los mangas destacados.",
+  "homeExploreCta": "Explorar todo →"
 }

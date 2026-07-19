@@ -860,4 +860,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get extrasTitle => 'Extras';
+
+  @override
+  String get homeHeroEmpty => 'Todavía no hay mangas destacados.';
+
+  @override
+  String get homeHeroError => 'No se pudieron cargar los mangas destacados.';
+
+  @override
+  String get homeExploreCta => 'Explorar todo →';
 }
