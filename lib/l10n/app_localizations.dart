@@ -1759,6 +1759,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supernatural'**
   String get genreSupernatural;
+
+  /// No description provided for @noChaptersSetTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set total chapters'**
+  String get noChaptersSetTotal;
+
+  /// No description provided for @noChaptersTotalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual tracking: enter the total chapter count'**
+  String get noChaptersTotalHint;
+
+  /// No description provided for @noChaptersTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total chapters'**
+  String get noChaptersTotalLabel;
+
+  /// No description provided for @noChaptersTotalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get noChaptersTotalConfirm;
 }
 
 class _AppLocalizationsDelegate

@@ -413,5 +413,10 @@
   "genreSliceOfLife": "Slice of Life",
   "genreSports": "Sports",
   "genreThriller": "Thriller",
-  "genreSupernatural": "Supernatural"
+  "genreSupernatural": "Supernatural",
+
+  "noChaptersSetTotal": "Set total chapters",
+  "noChaptersTotalHint": "Manual tracking: enter the total chapter count",
+  "noChaptersTotalLabel": "Total chapters",
+  "noChaptersTotalConfirm": "Save"
 }

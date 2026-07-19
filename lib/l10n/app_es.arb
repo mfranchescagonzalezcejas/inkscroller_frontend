@@ -413,5 +413,10 @@
   "genreSliceOfLife": "Recuentos de la vida",
   "genreSports": "Deportes",
   "genreThriller": "Thriller",
-  "genreSupernatural": "Sobrenatural"
+  "genreSupernatural": "Sobrenatural",
+
+  "noChaptersSetTotal": "Establecer total de capítulos",
+  "noChaptersTotalHint": "Seguimiento manual: introduce el total de capítulos",
+  "noChaptersTotalLabel": "Total de capítulos",
+  "noChaptersTotalConfirm": "Guardar"
 }

@@ -309,9 +309,24 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 40),
                           child: Center(
-                            child: Text(
-                              context.l10n.noChaptersAvailable,
-                              style: const TextStyle(color: AppColors.onSurfaceVariant),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  context.l10n.noChaptersAvailable,
+                                  style: const TextStyle(
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton.icon(
+                                  icon: const Icon(Icons.edit, size: 16),
+                                  onPressed: () => _showSetTotalDialog(context),
+                                  label: Text(
+                                    context.l10n.noChaptersSetTotal,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )
@@ -536,6 +551,44 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
         ref.read(readingProgressProvider.notifier).restore(previous);
       },
     );
+  }
+
+  Future<void> _showSetTotalDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    final total = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.noChaptersSetTotal),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: context.l10n.noChaptersTotalHint,
+            labelText: context.l10n.noChaptersTotalLabel,
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(context.l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final parsed = int.tryParse(controller.text.trim());
+              if (parsed != null && parsed > 0) {
+                Navigator.of(ctx).pop(parsed);
+              }
+            },
+            child: Text(context.l10n.noChaptersTotalConfirm),
+          ),
+        ],
+      ),
+    );
+    if (total != null && mounted) {
+      await ref
+          .read(readingProgressProvider.notifier)
+          .setTotalChaptersCount(widget.manga.id, total);
+    }
   }
 
   Future<void> _openExternalChapter(

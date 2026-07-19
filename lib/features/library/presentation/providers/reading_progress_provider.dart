@@ -138,6 +138,16 @@ class ReadingProgressNotifier
     await _repository.save(next);
   }
 
+  /// Sets a user-defined total chapter count for mangas that have no MangaDex
+  /// chapters. Enables manual tracking via batches and checkboxes.
+  Future<void> setTotalChaptersCount(String mangaId, int total) async {
+    final current = progressFor(mangaId);
+    final next = current.copyWith(totalChaptersCount: total);
+    if (next == current) return;
+    state = <String, MangaReadingProgress>{...state, mangaId: next};
+    await _repository.save(next);
+  }
+
   /// Sets the batch size for the batching UI on this manga.
   Future<void> setBatchSize(String mangaId, int batchSize) async {
     final current = progressFor(mangaId);

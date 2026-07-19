@@ -929,4 +929,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get genreSupernatural => 'Sobrenatural';
+
+  @override
+  String get noChaptersSetTotal => 'Establecer total de capítulos';
+
+  @override
+  String get noChaptersTotalHint =>
+      'Seguimiento manual: introduce el total de capítulos';
+
+  @override
+  String get noChaptersTotalLabel => 'Total de capítulos';
+
+  @override
+  String get noChaptersTotalConfirm => 'Guardar';
 }

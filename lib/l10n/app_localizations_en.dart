@@ -921,4 +921,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get genreSupernatural => 'Supernatural';
+
+  @override
+  String get noChaptersSetTotal => 'Set total chapters';
+
+  @override
+  String get noChaptersTotalHint =>
+      'Manual tracking: enter the total chapter count';
+
+  @override
+  String get noChaptersTotalLabel => 'Total chapters';
+
+  @override
+  String get noChaptersTotalConfirm => 'Save';
 }
