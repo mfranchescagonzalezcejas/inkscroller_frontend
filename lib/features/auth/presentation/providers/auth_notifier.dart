@@ -33,6 +33,19 @@ const String _profileCompletionCheckFailureReason =
 const String authSessionVerificationErrorKey =
     'auth_session_verification_failed';
 
+/// Number of leading characters to reveal in debug-logged emails.
+/// Keeping it at 1 preserves enough distinguishability during debugging
+/// without exposing meaningful PII.
+const int _emailLogRevealChars = 1;
+
+/// Sanitizes [email] for debug logging by revealing only the first
+/// [_emailLogRevealChars] characters. Returns `'***'` for short or
+/// null-like values.
+String _sanitizeEmailForLog(String email) {
+  if (email.length <= _emailLogRevealChars) return '***';
+  return '${email.substring(0, _emailLogRevealChars)}***';
+}
+
 // ---------------------------------------------------------------------------
 // Firebase auth error codes (stable — matched by authErrorText to localized
 // messages in app_*.arb). These replace raw/hardcoded user-facing text from
@@ -254,10 +267,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// unverified users to the verification page.
   Future<void> signIn({required String email, required String password}) async {
     if (kDebugMode) {
-      final sanitized = email.length > 3
-          ? '${email.substring(0, 3)}***@${email.split('@').last}'
-          : '***';
-      debugPrint('[AUTH] signIn: attempting login for $sanitized');
+      debugPrint('[AUTH] signIn: attempting login for ${_sanitizeEmailForLog(email)}');
     }
     state = state.copyWith(
       isLoading: true,
@@ -299,7 +309,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       registrationInProgress: true,
     );
 
-    if (kDebugMode) debugPrint('[AUTH] signUp: calling _signUp for $email');
+    if (kDebugMode) debugPrint('[AUTH] signUp: calling _signUp for ${_sanitizeEmailForLog(email)}');
     final result = await _signUp(email: email, password: password);
 
     await result.fold(

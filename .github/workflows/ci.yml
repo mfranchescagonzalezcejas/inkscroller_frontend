@@ -189,6 +189,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -210,6 +212,5 @@ jobs:
 
       - name: Check for outdated dependencies
         run: |
-          echo "## Outdated dependencies" >> $GITHUB_STEP_SUMMARY
-          fvm dart pub outdated --no-dev-dependencies || true
-          fvm dart pub outdated --no-dev-dependencies >> $GITHUB_STEP_SUMMARY || true
+          echo "## Outdated dependencies" >> "$GITHUB_STEP_SUMMARY"
+          fvm dart pub outdated >> "$GITHUB_STEP_SUMMARY"
