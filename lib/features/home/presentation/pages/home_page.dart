@@ -47,21 +47,26 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        backgroundColor: AppColors.card,
-        onRefresh: () => _refreshHome(ref),
-        child: Stack(
-          children: <Widget>[
-            const _HomeBody(),
-            if (isHomeLoading || isDiscoverLoading)
-              const LinearProgressIndicator(
+      body: Stack(
+        children: <Widget>[
+          RefreshIndicator(
+            color: AppColors.primary,
+            backgroundColor: AppColors.card,
+            onRefresh: () => _refreshHome(ref),
+            child: const _HomeBody(),
+          ),
+          if (isHomeLoading || isDiscoverLoading)
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LinearProgressIndicator(
                 backgroundColor: Colors.transparent,
                 color: AppColors.primary,
                 minHeight: 2,
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
