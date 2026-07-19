@@ -226,8 +226,8 @@ class _HeroSlide extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: SizedBox(
-                        width: 100,
-                        height: 150,
+                        width: 150,
+                        height: 250,
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
