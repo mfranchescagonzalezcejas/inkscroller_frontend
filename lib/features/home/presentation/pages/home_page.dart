@@ -109,7 +109,7 @@ class _HomeBody extends ConsumerWidget {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(
-        bottom: 88 + MediaQuery.paddingOf(context).bottom,
+        bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.md,
       ),
       children: const [
         // 1. Hero swipeable de tendencias

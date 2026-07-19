@@ -13,7 +13,7 @@ import 'home_section_header.dart';
 import 'home_shimmer.dart';
 
 /// Max chapters to show on the Home feed.
-const int _maxChapters = 5;
+const int _maxChapters = 10;
 
 /// Latest chapters section with redesigned tiles.
 class LatestChaptersSection extends ConsumerWidget {
@@ -51,7 +51,7 @@ class LatestChaptersSection extends ConsumerWidget {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 20),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 2),
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) => _LatestChapterTile(chapter: items[i]),
             );
           },
