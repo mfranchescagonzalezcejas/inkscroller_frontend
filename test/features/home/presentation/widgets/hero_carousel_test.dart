@@ -134,8 +134,8 @@ void main() {
       await tester.pumpWidget(buildTestHarness(featured: const []));
       await tester.pump();
 
-      // When empty, the carousel returns a fixed-height SizedBox
       expect(find.byType(HeroCarousel), findsOneWidget);
+      expect(find.byType(PageView), findsNothing);
     });
 
     testWidgets('renders the hero carousel with featured manga', (tester) async {
@@ -144,8 +144,7 @@ void main() {
       );
       await tester.pump();
 
-      // The carousel renders (first slide is visible)
-      expect(find.byType(HeroCarousel), findsOneWidget);
+      expect(find.byType(PageView), findsOneWidget);
     });
   });
 }

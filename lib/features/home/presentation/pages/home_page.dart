@@ -84,7 +84,7 @@ class HomePage extends ConsumerWidget {
       final url = ch.mangaCoverUrl;
       if (url != null && url.isNotEmpty) {
         try {
-          unawaited(precacheImage(NetworkImage(url), context));
+          unawaited(precacheImage(CachedNetworkImageProvider(url), context));
         } catch (_) {}
       }
     }

@@ -48,9 +48,9 @@ final homeDiscoverMangasProvider = Provider<List<Manga>>((ref) {
     case HomeDiscoverFilter.popular:
       // Display server-sorted popular results.
       // If still loading / empty, fall back to the home provider's popular.
-      if (libraryState.mangas.isNotEmpty) return libraryState.mangas;
+      if (libraryState.mangas.isNotEmpty) return libraryState.mangas.take(20).toList();
       final homeState = ref.watch(homeProvider);
-      return homeState.popular;
+      return homeState.popular.take(20).toList();
 
     case HomeDiscoverFilter.romance:
       return _byGenre(libraryState.mangas, 'romance');
