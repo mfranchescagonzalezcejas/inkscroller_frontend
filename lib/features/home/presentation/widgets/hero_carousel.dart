@@ -13,17 +13,6 @@ import '../../../library/domain/entities/manga.dart';
 import '../../../library/presentation/providers/user_library_provider.dart';
 import '../providers/home_provider.dart';
 
-/// ponytail: hardcoded test manga from real API data — remove before shipping.
-final Manga _testManga = Manga(
-  id: '31148516-db5c-4b36-97a6-5e905aab0523',
-  title: 'Onihime wa Uchi no Naka',
-  coverUrl: 'https://uploads.mangadex.org/covers/31148516-db5c-4b36-97a6-5e905aab0523/392b52c8-9ddc-4f7e-a29d-029e9ec516c1.jpg',
-  description: 'Boy, I shall devour your life.\n\nOne spring night, amidst the blooming cherry blossoms, a stunningly beautiful Oni appeared.\n\nThis is a heartwarming slice-of-life story—at once cute and bittersweet—following a boy and his unexpected, supernatural roommate.',
-  score: 7.5,
-  type: 'manga',
-  demographic: 'seinen',
-);
-
 /// Max slides in the hero carousel.
 const int _heroMaxSlides = 5;
 
@@ -54,7 +43,6 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
   Widget build(BuildContext context) {
     final mangas = ref.watch(homeProvider).featured;
     final slides = mangas.take(_heroMaxSlides).toList();
-    if (slides.isNotEmpty) slides.insert(0, _testManga);
 
 
     if (slides.isEmpty) {
