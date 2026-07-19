@@ -8,6 +8,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../library/presentation/providers/library/library_provider.dart';
 import '../../domain/entities/home_chapter.dart';
 import '../providers/home_latest_chapters_provider.dart';
+import '../providers/home_discover_provider.dart';
 import '../providers/home_provider.dart';
 import '../providers/home_state.dart';
 import '../widgets/continue_reading_section.dart';
@@ -37,13 +38,30 @@ class HomePage extends ConsumerWidget {
       ),
     );
 
+    // Loading state for the progress bar
+    final homeState = ref.watch(homeProvider);
+    final isHomeLoading = homeState.featured.isEmpty;
+    final discoverState = ref.watch(homeDiscoverProvider);
+    final isDiscoverLoading = discoverState.isLoading &&
+        discoverState.mangas.isEmpty;
+
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
       body: RefreshIndicator(
         color: AppColors.primary,
         backgroundColor: AppColors.card,
         onRefresh: () => _refreshHome(ref),
-        child: const _HomeBody(),
+        child: Stack(
+          children: <Widget>[
+            const _HomeBody(),
+            if (isHomeLoading || isDiscoverLoading)
+              const LinearProgressIndicator(
+                backgroundColor: Colors.transparent,
+                color: AppColors.primary,
+                minHeight: 2,
+              ),
+          ],
+        ),
       ),
     );
   }

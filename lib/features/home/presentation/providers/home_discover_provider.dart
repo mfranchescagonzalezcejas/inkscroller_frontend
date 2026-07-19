@@ -34,8 +34,15 @@ final homeDiscoverProvider =
         .map((d) => d.toJson())
         .toList(),
   );
-  // Load initial catalogue so Popular/Romance/Action have data.
+  // Load initial catalogue so the All tab has data immediately.
   notifier.loadInitial();
+  // Preload Popular, Romance, and Action in background so the user
+  // sees instant content when tapping those tabs.
+  Future<void>.microtask(() {
+    notifier.loadInitial(mode: LibraryMode.popular);
+    notifier.setGenre('romance');
+    notifier.setGenre('action');
+  });
   return notifier;
 });
 
