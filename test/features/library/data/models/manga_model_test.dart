@@ -46,6 +46,26 @@ void main() {
       expect(model.rank, isNull);
     });
 
+    test('parses totalChaptersCount from chapters alias', () {
+      final model = MangaModel.fromJson(<String, dynamic>{
+        'id': 'manga-4',
+        'title': 'One Piece',
+        'chapters': 1116,
+      });
+
+      expect(model.totalChaptersCount, 1116);
+    });
+
+    test('parses malId from response', () {
+      final model = MangaModel.fromJson(<String, dynamic>{
+        'id': 'manga-5',
+        'title': 'Naruto',
+        'malId': 1234,
+      });
+
+      expect(model.malId, 1234);
+    });
+
     test('sanitizes malformed genre/author lists safely', () {
       final model = MangaModel.fromJson(<String, dynamic>{
         'id': 'manga-3',

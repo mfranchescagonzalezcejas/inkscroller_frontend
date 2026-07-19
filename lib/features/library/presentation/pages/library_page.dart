@@ -100,9 +100,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               query: _searchController.text.trim(),
               onRefresh: () async {
                 final authState = ref.read(authProvider);
-                final userId = authState.user?.uid;
-                if (userId != null && userId.isNotEmpty) {
-                  await ref.read(userLibraryProvider.notifier).hydrate(userId);
+                final user = authState.user;
+                if (user != null && user.isEmailVerified) {
+                  await ref.read(userLibraryProvider.notifier).hydrate(user.uid);
                 }
               },
             ),
@@ -316,7 +316,20 @@ class _LibraryBodyState extends State<_LibraryBody> {
   @override
   Widget build(BuildContext context) {
     if (widget.allEntries.isEmpty) {
-      return _LibraryEmptyMessage(message: context.l10n.libraryEmpty);
+      return RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: AppColors.card,
+        onRefresh: widget.onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: _LibraryEmptyMessage(message: context.l10n.libraryEmpty),
+            ),
+          ],
+        ),
+      );
     }
 
     if (widget.filteredEntries.isEmpty) {
@@ -324,7 +337,20 @@ class _LibraryBodyState extends State<_LibraryBody> {
           ? context.l10n.noSearchResults(widget.query)
           : context.l10n.libraryEmptyTab;
 
-      return _LibraryEmptyMessage(message: message);
+      return RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: AppColors.card,
+        onRefresh: widget.onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: _LibraryEmptyMessage(message: message),
+            ),
+          ],
+        ),
+      );
     }
 
     return LayoutBuilder(

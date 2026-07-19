@@ -22,6 +22,11 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
 
   bool _legacyMigrated = false;
 
+  /// Tracks manga IDs that have already been pushed for enrichment this
+  /// session so permanently nullable metadata (e.g. unrated manga) does not
+  /// trigger a re-push on every hydration cycle.
+  final Set<String> _enrichmentAttempted = {};
+
   @override
   Future<Map<String, UserLibraryEntry>> getAll({String? userId}) async {
     await _migrateLegacyGuestDataIfNeeded();
@@ -215,9 +220,11 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
       final UserLibraryEntry? remoteEntry = remote[localEntry.key];
 
       // ponytail: re-push entries whose remote metadata is critically null
-      // (score, demographic, malId) so the backend enriches from MangaDex.
-      // Once enriched, subsequent hydrations skip the re-push.
+      // (score, malId) so the backend enriches from MangaDex.
+      // Tracks attempted IDs to avoid re-pushing permanently nullable metadata
+      // (e.g. unrated manga) on every hydration.
       final bool needsEnrichment = remoteEntry != null &&
+          !_enrichmentAttempted.contains(localEntry.key) &&
           _hasNullCoreMetadata(remoteEntry.manga);
 
       final bool shouldPush =
@@ -227,6 +234,10 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
 
       if (!shouldPush) {
         continue;
+      }
+
+      if (needsEnrichment) {
+        _enrichmentAttempted.add(localEntry.key);
       }
 
       try {
