@@ -248,7 +248,7 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 60),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Badge row: trending + type + demographic
                 Wrap(
