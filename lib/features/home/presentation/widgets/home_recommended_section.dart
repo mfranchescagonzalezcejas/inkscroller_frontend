@@ -64,87 +64,92 @@ class _RecommendedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      child: GestureDetector(
-        onTap: () =>
-            context.push(AppRoutes.mangaDetailPath(manga.id), extra: manga),
-        child: SizedBox(
-          width: 150,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Cover
-              ClipRRect(
+      child: SizedBox(
+        width: 150,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Cover
+            Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => context.push(
+                  AppRoutes.mangaDetailPath(manga.id),
+                  extra: manga,
+                ),
                 borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 150,
-                  height: 220,
-                  child: Stack(
-                    children: [
-                      _cover(manga.coverUrl),
-                      // Score badge
-                      if (manga.score != null)
-                        Positioned(
-                          top: 6,
-                          right: 6,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.cardHigh,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.star,
-                                  size: 10,
-                                  color: AppColors.scoreGold,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  manga.score!.toStringAsFixed(1),
-                                  style: const TextStyle(
-                                    fontFamily: AppTypography.fontFamily,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 150,
+                    height: 220,
+                    child: Stack(
+                      children: [
+                        _cover(manga.coverUrl),
+                        if (manga.score != null)
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.cardHigh,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.star,
+                                    size: 10,
                                     color: AppColors.scoreGold,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    manga.score!.toStringAsFixed(1),
+                                    style: const TextStyle(
+                                      fontFamily: AppTypography.fontFamily,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.scoreGold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              // Title
+            ),
+            const SizedBox(height: 8),
+            Text(
+              manga.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: AppTypography.fontFamily,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.onSurface,
+              ),
+            ),
+            if (manga.demographicDisplay != null)
               Text(
-                manga.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                manga.demographicDisplay!,
                 style: const TextStyle(
                   fontFamily: AppTypography.fontFamily,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.onSurface,
+                  fontSize: 10,
+                  color: AppColors.onSurfaceVariant,
                 ),
               ),
-              if (manga.demographicDisplay != null)
-                Text(
-                  manga.demographicDisplay!,
-                  style: const TextStyle(
-                    fontFamily: AppTypography.fontFamily,
-                    fontSize: 10,
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );

@@ -45,11 +45,11 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
     final slides = mangas.take(_heroMaxSlides).toList();
 
     if (slides.isEmpty) {
-      return const SizedBox(height: 440);
+      return const SizedBox(height: 390);
     }
 
     return SizedBox(
-      height: 440,
+      height: 390,
       child: Stack(
         children: [
           PageView.builder(
@@ -66,8 +66,8 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: -1,
-            height: 60,
+            bottom: 0,
+            height: 48,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -84,7 +84,7 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
 
           // Page indicators
           Positioned(
-            bottom: 48,
+            bottom: 12,
             left: 0,
             right: 0,
             child: _HeroPageIndicator(
@@ -117,11 +117,11 @@ class _HeroPageIndicator extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: isActive ? 20 : 8,
-          height: 8,
+          width: isActive ? 18 : 6,
+          height: 6,
           decoration: BoxDecoration(
             color: isActive ? AppColors.primary : AppColors.onSurfaceVariant,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(3),
           ),
         );
       }),
@@ -192,7 +192,7 @@ class _HeroSlide extends ConsumerWidget {
         SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 60),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -249,7 +249,7 @@ class _HeroSlide extends ConsumerWidget {
         Positioned(
           left: 20,
           right: 20,
-          bottom: 56,
+          bottom: 48,
           child: _HeroActions(
             manga: manga,
             inLibrary: inLibrary,
@@ -372,51 +372,46 @@ class _HeroActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
-        // Ver detalles — compact
-        SizedBox(
-          height: 40,
-          child: Material(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(10),
-            child: InkWell(
-              onTap: onDetail,
-              borderRadius: BorderRadius.circular(10),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Center(
-                  child: Text(
-                    'Ver detalles',
-                    style: TextStyle(
-                      fontFamily: AppTypography.fontFamily,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.voidLowest,
-                    ),
-                  ),
+        // Ver detalles
+        Expanded(
+          child: SizedBox(
+            height: 48,
+            child: FilledButton(
+              onPressed: onDetail,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.voidLowest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                textStyle: const TextStyle(
+                  fontFamily: AppTypography.fontFamily,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+              child: const Text('Ver detalles'),
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
 
         // Bookmark
         SizedBox(
-          width: 40,
-          height: 40,
-          child: Material(
-            color: AppColors.cardHigh,
-            borderRadius: BorderRadius.circular(10),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () => _toggleBookmark(ref, context),
-              child: Center(
-                child: Icon(
-                  inLibrary ? Icons.bookmark : Icons.bookmark_border,
-                  color: AppColors.onSurface,
-                  size: 18,
-                ),
+          width: 48,
+          height: 48,
+          child: IconButton.filledTonal(
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.cardHigh,
+              foregroundColor: AppColors.onSurface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
+            ),
+            onPressed: () => _toggleBookmark(ref, context),
+            icon: Icon(
+              inLibrary ? Icons.bookmark : Icons.bookmark_border,
+              size: 20,
             ),
           ),
         ),

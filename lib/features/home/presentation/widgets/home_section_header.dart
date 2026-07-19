@@ -32,15 +32,19 @@ class HomeSectionHeader extends StatelessWidget {
           ),
           const Spacer(),
           if (actionLabel != null)
-            GestureDetector(
+            InkWell(
               onTap: onActionTap,
-              child: Text(
-                actionLabel!,
-                style: const TextStyle(
-                  fontFamily: AppTypography.fontFamily,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primary,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: Text(
+                  actionLabel!,
+                  style: const TextStyle(
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ),

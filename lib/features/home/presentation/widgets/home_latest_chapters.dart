@@ -118,6 +118,7 @@ class _LatestChapterTile extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       chapter.mangaTitle,
@@ -133,38 +134,27 @@ class _LatestChapterTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,
                         color: AppColors.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    _timeAgo(chapter.publishAt),
                   ],
                 ),
               ),
-              // New indicator + chevron
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // ponytail: "new" indicator — no subscription API yet.
-                  // Always visible as a future placeholder.
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Icon(
-                    Icons.chevron_right,
-                    size: 18,
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ],
+              // Time + chevron
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 64),
+                child: _timeAgo(chapter.publishAt),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: AppColors.onSurfaceVariant,
               ),
             ],
           ),
