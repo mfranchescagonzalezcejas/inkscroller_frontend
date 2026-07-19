@@ -60,6 +60,7 @@ class MangaModel {
         'totalCount',
         'chaptersTotal',
         'total_chapters_count',
+        'chapters',
       ]),
       malId: (json['malId'] as num?)?.toInt(),
     );
