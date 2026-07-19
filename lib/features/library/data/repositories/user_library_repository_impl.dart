@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/entities/manga.dart';
 import '../../domain/entities/user_library_entry.dart';
 import '../../domain/repositories/user_library_repository.dart';
 import '../datasources/user_library_remote_ds.dart';
@@ -212,9 +213,17 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
   }) async {
     for (final MapEntry<String, UserLibraryEntry> localEntry in local.entries) {
       final UserLibraryEntry? remoteEntry = remote[localEntry.key];
+
+      // ponytail: re-push entries whose remote metadata is critically null
+      // (score, demographic, malId) so the backend enriches from MangaDex.
+      // Once enriched, subsequent hydrations skip the re-push.
+      final bool needsEnrichment = remoteEntry != null &&
+          _hasNullCoreMetadata(remoteEntry.manga);
+
       final bool shouldPush =
           remoteEntry == null ||
-          localEntry.value.updatedAt.isAfter(remoteEntry.updatedAt);
+          localEntry.value.updatedAt.isAfter(remoteEntry.updatedAt) ||
+          needsEnrichment;
 
       if (!shouldPush) {
         continue;
@@ -235,6 +244,12 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
         // Best-effort background sync.
       }
     }
+  }
+
+  /// Returns true when the manga entry has null for at least one core
+  /// enrichment field, indicating the cached metadata was never enriched.
+  static bool _hasNullCoreMetadata(Manga manga) {
+    return manga.score == null || manga.malId == null;
   }
 
   Future<void> _migrateLegacyGuestDataIfNeeded() async {

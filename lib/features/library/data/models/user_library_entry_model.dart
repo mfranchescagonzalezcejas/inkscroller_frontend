@@ -18,6 +18,7 @@ class UserLibraryEntryModel {
   final List<String> authors;
   final int? readChaptersCount;
   final int? totalChaptersCount;
+  final int? malId;
   final bool isInLibrary;
   final String userLibraryStatus;
   final int updatedAtMillis;
@@ -37,6 +38,7 @@ class UserLibraryEntryModel {
     required this.authors,
     required this.readChaptersCount,
     required this.totalChaptersCount,
+    this.malId,
     required this.isInLibrary,
     required this.userLibraryStatus,
     required this.updatedAtMillis,
@@ -59,6 +61,7 @@ class UserLibraryEntryModel {
       authors: manga.authors,
       readChaptersCount: manga.readChaptersCount,
       totalChaptersCount: manga.totalChaptersCount,
+      malId: manga.malId,
       isInLibrary: entry.isInLibrary,
       userLibraryStatus: entry.status.storageValue,
       updatedAtMillis: entry.updatedAt.millisecondsSinceEpoch,
@@ -85,6 +88,7 @@ class UserLibraryEntryModel {
           .toList(),
       readChaptersCount: json['readChaptersCount'] as int?,
       totalChaptersCount: json['totalChaptersCount'] as int?,
+      malId: json['malId'] as int?,
       isInLibrary: json['isInLibrary'] as bool? ?? true,
       userLibraryStatus: json['userLibraryStatus'] as String? ?? 'reading',
       updatedAtMillis:
@@ -110,6 +114,7 @@ class UserLibraryEntryModel {
         authors: authors,
         readChaptersCount: readChaptersCount,
         totalChaptersCount: totalChaptersCount,
+        malId: malId,
       ),
       isInLibrary: isInLibrary,
       status: UserLibraryStatusX.fromStorageValue(userLibraryStatus),
@@ -133,6 +138,7 @@ class UserLibraryEntryModel {
       'authors': authors,
       'readChaptersCount': readChaptersCount,
       'totalChaptersCount': totalChaptersCount,
+      'malId': malId,
       'isInLibrary': isInLibrary,
       'userLibraryStatus': userLibraryStatus,
       'updatedAtMillis': updatedAtMillis,
