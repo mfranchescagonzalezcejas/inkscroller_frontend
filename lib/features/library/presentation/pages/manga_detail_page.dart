@@ -824,9 +824,12 @@ class _CoverSectionState extends State<_CoverSection> {
                     children: <Widget>[
                       coverImage,
                       // Score badge (same style as MangaTile)
+                      // For landscape the image doesn't reach the top, so
+                      // we place the badge at the bottom instead.
                       if (scoreStr != null)
                         Positioned(
-                          top: 8,
+                          top: _ratio == _CoverRatio.landscape ? null : 8,
+                          bottom: _ratio == _CoverRatio.landscape ? 8 : null,
                           right: 8,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
