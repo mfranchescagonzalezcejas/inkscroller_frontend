@@ -273,7 +273,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
           final freshState = state.copyWith(
             mangas: dedupeMangas(mangas),
             isLoadingMore: false,
-            hasMore: mode == LibraryMode.normal && mangas.length == _limit,
+            hasMore: mangas.length == _limit,
             clearFailure: true,
           );
           state = freshState;
