@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -281,9 +282,11 @@ class _ExternalChapterScreen extends StatelessWidget {
                         title: context.l10n.externalChapterTitle,
                       );
                     } on Exception catch (e, st) {
-                      debugPrint(
-                        '[ExternalLink] Failed to launch URL: $e\n$st',
-                      );
+                      if (kDebugMode) {
+                        debugPrint(
+                          '[ExternalLink] Failed to launch URL: $e\n$st',
+                        );
+                      }
                       if (!context.mounted) return;
                       AppFeedback.showWarning(
                         context,
