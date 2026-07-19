@@ -13,6 +13,18 @@ import '../../../library/domain/entities/manga.dart';
 import '../../../library/presentation/providers/user_library_provider.dart';
 import '../providers/home_provider.dart';
 
+/// ponytail: hardcoded landscape test manga — remove after confirming layout.
+final Manga _landscapeTestManga = Manga(
+  id: '31148516-db5c-4b36-97a6-5e905aab0523',
+  title: 'Test Landscape Manga — A Very Long Title That Spans Multiple Lines For Testing Purposes',
+  coverUrl: 'https://mangadex.org/covers/92ec8e70-3eca-4ed4-acc6-a4a729512947/4d6d9af6-7654-4b9a-bfba-31d1073f91a2.jpg',
+  description: 'This is a test manga with a landscape/banner style cover image to verify the adaptive hero layout works correctly for non-portrait formats. The description should be long enough to test text overflow and scrolling behavior within the hero section.',
+  score: 9.2,
+  type: 'manhwa',
+  demographic: 'seinen',
+  genres: const ['Action', 'Fantasy', 'Adventure'],
+);
+
 /// Max slides in the hero carousel.
 const int _heroMaxSlides = 5;
 
@@ -43,6 +55,9 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
   Widget build(BuildContext context) {
     final mangas = ref.watch(homeProvider).featured;
     final slides = mangas.take(_heroMaxSlides).toList();
+    // ponytail: landscape test — remove before shipping.
+    if (slides.isNotEmpty) slides.insert(0, _landscapeTestManga);
+
 
     if (slides.isEmpty) {
       return const SizedBox(height: 460);
@@ -136,35 +151,76 @@ class _HeroPageIndicator extends StatelessWidget {
 // HeroSlide — blurred cover + overlay + content
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _HeroSlide extends ConsumerWidget {
+class _HeroSlide extends ConsumerStatefulWidget {
   const _HeroSlide({required this.manga});
 
   final Manga manga;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_HeroSlide> createState() => _HeroSlideState();
+}
+
+class _HeroSlideState extends ConsumerState<_HeroSlide> {
+  _CoverRatio _ratio = _CoverRatio.portrait;
+  ImageStream? _imageStream;
+  late final ImageStreamListener _listener;
+
+  @override
+  void initState() {
+    super.initState();
+    _listener = ImageStreamListener(_onImage, onError: (_, __) {});
+    _resolve();
+  }
+
+  @override
+  void dispose() {
+    _imageStream?.removeListener(_listener);
+    super.dispose();
+  }
+
+  void _resolve() {
+    final url = widget.manga.coverUrl;
+    if (url == null || url.isEmpty) return;
+    _imageStream?.removeListener(_listener);
+    _imageStream = CachedNetworkImageProvider(url)
+        .resolve(ImageConfiguration.empty);
+    _imageStream!.addListener(_listener);
+  }
+
+  void _onImage(ImageInfo info, bool sync) {
+    final size = Size(info.image.width.toDouble(), info.image.height.toDouble());
+    final detected = _ratioFromSize(size);
+    if (!mounted) return;
+    if (detected != _ratio) {
+      setState(() => _ratio = detected);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final inLibrary = ref.watch(
-      userLibraryProvider.select((map) => map[manga.id]?.isInLibrary ?? false),
+      userLibraryProvider.select((map) => map[widget.manga.id]?.isInLibrary ?? false),
     );
     final meta = [
-      if (manga.typeDisplay != null) manga.typeDisplay!,
-      if (manga.demographicDisplay != null) manga.demographicDisplay!,
+      if (widget.manga.typeDisplay != null) widget.manga.typeDisplay!,
+      if (widget.manga.demographicDisplay != null) widget.manga.demographicDisplay!,
     ].join(' · ');
+    final isLandscape = _ratio == _CoverRatio.landscape;
 
     void openDetail() =>
-        context.push(AppRoutes.mangaDetailPath(manga.id), extra: manga);
+        context.push(AppRoutes.mangaDetailPath(widget.manga.id), extra: widget.manga);
 
     return Stack(
       fit: StackFit.expand,
       children: [
         // ── Blurred cover background (like manga detail) ──────────
-        if (manga.coverUrl != null)
+        if (widget.manga.coverUrl != null)
           Positioned.fill(
             child: ClipRRect(
               child: ImageFiltered(
                 imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
                 child: CachedNetworkImage(
-                  imageUrl: manga.coverUrl!,
+                  imageUrl: widget.manga.coverUrl!,
                   fit: BoxFit.cover,
                   errorWidget: (_, _, _) => const SizedBox.shrink(),
                 ),
@@ -225,81 +281,22 @@ class _HeroSlide extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Cover (left) + text (right)
+                // Portrait: two-column layout (cover+buttons | title+desc)
+                // Landscape: single-column layout (badges → cover → title → desc → buttons)
                 Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left column: cover + buttons below it
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              _AdaptiveHeroCover(coverUrl: manga.coverUrl),
-                              if (manga.score != null)
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.cardHigh,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          manga.score!.toStringAsFixed(1),
-                                          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          _HeroActions(
-                            manga: manga,
-                            inLibrary: inLibrary,
-                            onDetail: openDetail,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
-                      // Right column: title + description
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              manga.title,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface),
-                            ),
-                            if (manga.description != null && manga.description!.trim().isNotEmpty)
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: SingleChildScrollView(
-                                    child: Text(
-                                      manga.description!,
-                                      style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
+                  child: isLandscape
+                      ? _LandscapeContent(
+                          manga: widget.manga,
+                          meta: meta,
+                          inLibrary: inLibrary,
+                          onDetail: openDetail,
+                        )
+                      : _PortraitContent(
+                          manga: widget.manga,
+                          meta: meta,
+                          inLibrary: inLibrary,
+                          onDetail: openDetail,
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
@@ -356,6 +353,129 @@ class _TrendingBadge extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroMetadata
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PortraitContent — two-column: (cover+badge+buttons) | (title+desc)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PortraitContent extends StatelessWidget {
+  const _PortraitContent({
+    required this.manga,
+    required this.meta,
+    required this.inLibrary,
+    required this.onDetail,
+  });
+
+  final Manga manga;
+  final String meta;
+  final bool inLibrary;
+  final VoidCallback onDetail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _AdaptiveHeroCover(coverUrl: manga.coverUrl),
+                if (manga.score != null)
+                  Positioned(
+                    top: 4, right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: AppColors.cardHigh, borderRadius: BorderRadius.circular(6)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                          const SizedBox(width: 2),
+                          Text(manga.score!.toStringAsFixed(1), style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold)),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
+          ],
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(manga.title, maxLines: 3, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface)),
+              if (manga.description != null && manga.description!.trim().isNotEmpty)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: SingleChildScrollView(
+                      child: Text(manga.description!, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35)),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LandscapeContent — single-column: cover → title → desc → buttons
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _LandscapeContent extends StatelessWidget {
+  const _LandscapeContent({
+    required this.manga,
+    required this.meta,
+    required this.inLibrary,
+    required this.onDetail,
+  });
+
+  final Manga manga;
+  final String meta;
+  final bool inLibrary;
+  final VoidCallback onDetail;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Cover — full width
+          Center(
+            child: _AdaptiveHeroCover(coverUrl: manga.coverUrl),
+          ),
+          const SizedBox(height: 12),
+          // Title
+          Text(manga.title, maxLines: 3, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface)),
+          // Description
+          if (manga.description != null && manga.description!.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(manga.description!, maxLines: 4, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35)),
+            ),
+          const SizedBox(height: 12),
+          // Buttons
+          _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
+        ],
+      ),
+    );
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HeroActions — compact "Ver detalles" + bookmark
