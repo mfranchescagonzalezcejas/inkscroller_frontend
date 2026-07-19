@@ -5,10 +5,12 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/network/connectivity_status_provider.dart';
+import '../../../../core/widgets/app_top_bar.dart';
 import '../../../../core/widgets/catalog_tab_bar.dart';
 import '../../../../core/widgets/inkscroller_logo_loader.dart';
 import '../../../../core/widgets/offline_banner.dart';
 import '../../../library/presentation/constants/library_ui_constants.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../library/domain/entities/manga.dart';
 import '../../../library/presentation/providers/library/library_notifier.dart';
 import '../../../library/presentation/providers/library/library_provider.dart';
@@ -92,6 +94,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(exploreProvider);
+    final authState = ref.watch(authProvider);
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
         .maybeWhen(data: (isOnline) => !isOnline, orElse: () => false);
@@ -106,6 +109,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
+      appBar: AppTopBar(authState: authState),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
