@@ -48,6 +48,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     String? genre,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
@@ -59,6 +60,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           if (contentRating != null) 'content_rating': contentRating,
           if (demographics != null && demographics.isNotEmpty)
             'demographic': demographics.map((e) => e.toJson()).toList(),
+          if (language != null) 'language': language,
           ...?order?.map((key, value) => MapEntry('order[$key]', value)),
         },
       );
@@ -237,6 +239,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     required int offset,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) async {
     try {
       final response = await dio.get<dynamic>(
@@ -248,7 +251,9 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           if (contentRating != null) 'content_rating': contentRating,
           if (demographics != null && demographics.isNotEmpty)
             'demographic': demographics.map((e) => e.toJson()).toList(),
+          if (language != null) 'language': language,
         },
+        options: Options(extra: {'concurrency_priority': 'high'}),
       );
 
       final data = response.data;

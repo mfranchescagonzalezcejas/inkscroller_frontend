@@ -9,6 +9,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/widgets/inkscroller_shimmer.dart';
 import '../../../library/domain/entities/manga.dart';
 import '../../../library/presentation/providers/user_library_provider.dart';
 import '../providers/home_provider.dart';
@@ -46,7 +47,13 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
 
 
     if (slides.isEmpty) {
-      return const SizedBox(height: 400);
+      // Hero shimmer mientras carga — muestra la estructura inmediatamente
+      return const ExcludeSemantics(
+        child: SizedBox(
+          height: 400,
+          child: InkScrollerShimmer(height: 400),
+        ),
+      );
     }
 
     return SizedBox(

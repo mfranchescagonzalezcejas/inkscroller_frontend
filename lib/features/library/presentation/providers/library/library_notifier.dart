@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../core/constants/app_constants.dart';
+import '../../../domain/entities/manga.dart';
 import '../../../domain/entities/manga_tags.dart';
 import '../../../domain/usecases/get_manga_list.dart';
 import '../../../domain/usecases/search_manga.dart';
@@ -50,19 +51,46 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     String? initialContentRating,
     List<String>? initialDemographics,
     bool enablePreload = false,
-  })  : _mode = LibraryMode.normal,
+    String? language,
+    bool skipInitialLoad = false,
+  })  : _language = language,
+        _mode = LibraryMode.normal,
         _contentRating = initialContentRating,
         _demographics = initialDemographics,
         _enablePreload = enablePreload,
         super(LibraryState.initial()) {
-    loadInitial(
-      contentRating: initialContentRating,
-      demographics: initialDemographics,
+    if (!skipInitialLoad) {
+      loadInitial(
+        contentRating: initialContentRating,
+        demographics: initialDemographics,
+      );
+    }
+  }
+
+  /// Seeds state from the shared tab cache. Usado por Explore para mostrar
+  /// los datos que Home ya cargó, sin disparar requests extra.
+  void seedFromCache({String? contentRating, List<String>? demographics}) {
+    final key = _cacheKey(
+      _mode,
+      _genre,
+      contentRating: contentRating ?? _contentRating,
+      demographics: demographics ?? _demographics,
     );
+    final entry = _tabCache[key];
+    if (entry != null) {
+      state = entry.state.copyWith(isLoadingMore: false);
+      _offset = _tabCacheOffset[key] ?? 0;
+    }
   }
 
   final GetMangaList _getMangaList;
   final SearchManga _searchManga;
+  final String? _language;
+
+  /// Caché simple de búsqueda: query → mangas + timestamp.
+  /// Búsquedas repetidas devuelven resultados instantáneos.
+  static const Duration _searchCacheTtl = Duration(minutes: 5);
+  final Map<String, _SearchCacheEntry> _searchCache = {};
   final bool _enablePreload;
 
   LibraryMode _mode;
@@ -204,6 +232,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       genre: _genre,
       contentRating: _contentRating,
       demographics: effectiveDemographics?.map(MangaDemographic.fromJson).toList(),
+      language: _language,
     );
 
     result.fold(
@@ -241,6 +270,49 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     );
   }
 
+  /// Loads data into the tab cache without mutating [state].
+  ///
+  /// Usado por Discover para precargar tabs sin afectar el Hero/Recommended.
+  /// Devuelve los mangas cargados para que el caller pueda usarlos.
+  Future<List<Manga>?> fetchToCacheOnly({
+    LibraryMode mode = LibraryMode.normal,
+    String? genre,
+  }) async {
+    final key = _cacheKey(mode, genre, contentRating: _contentRating, demographics: _demographics);
+    final existing = _tabCache[key];
+    if (existing != null && existing.isFresh(_cacheTtl)) {
+      return existing.state.mangas;
+    }
+
+    try {
+      final result = await _getMangaList(
+        limit: _limit,
+        offset: 0,
+        order: mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
+        genre: genre,
+        contentRating: _contentRating,
+        demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
+        language: _language,
+      );
+
+      return result.fold(
+        (_) => null,
+        (mangas) {
+          final cachedState = LibraryState.initial().copyWith(
+            mangas: dedupeMangas(mangas),
+            isLoading: false,
+            hasMore: mangas.length == _limit,
+          );
+          _tabCache[key] = _CachedEntry(cachedState, DateTime.now());
+          _tabCacheOffset[key] = mangas.length;
+          return mangas;
+        },
+      );
+    } on Exception catch (_) {
+      return null;
+    }
+  }
+
   /// Background refresh for a stale cache entry. Guarded by [capturedVersion]
   /// so rapid tab switches discard stale responses.
   Future<void> _staleRefresh(
@@ -259,16 +331,18 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         genre: genre,
         contentRating: contentRating,
         demographics: demographics?.map(MangaDemographic.fromJson).toList(),
+        language: _language,
       );
 
       if (capturedVersion != _loadVersion) return;
 
       result.fold(
         (failure) {
-          // Keep stale data visible; surface failure.
+          if (!mounted) return;
           state = state.copyWith(isLoadingMore: false, failure: failure);
         },
         (mangas) {
+          if (!mounted) return;
           _offset = mangas.length;
           final freshState = state.copyWith(
             mangas: dedupeMangas(mangas),
@@ -283,6 +357,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       );
     } on Exception catch (_) {
       // Surface unexpected errors as failure while keeping stale grid.
+      if (!mounted) return;
       if (capturedVersion == _loadVersion) {
         state = state.copyWith(isLoadingMore: false);
       }
@@ -324,6 +399,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
           genre: target.genre,
           contentRating: _contentRating,
           demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
+          language: _language,
         );
 
         if (capturedVersion != _loadVersion) return;
@@ -367,6 +443,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       genre: _genre,
       contentRating: _contentRating,
       demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
+      language: _language,
     );
 
     result.fold(
@@ -521,6 +598,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       offset: _searchOffset,
       contentRating: _contentRating,
       demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
+      language: _language,
     );
 
     if (_searchQueryVersion != capturedGeneration) return;
@@ -556,6 +634,18 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     _searchOffset = 0;
     _totalResults = 0;
 
+    // Cache hit → mostrar resultados al instante, refrescar en background
+    final cached = _searchCache[query];
+    if (cached != null && !cached.isStale(_searchCacheTtl)) {
+      state = state.copyWith(
+        mangas: cached.mangas,
+        isSearching: false,
+        hasMore: cached.hasMore,
+        clearFailure: true,
+      );
+      return;
+    }
+
     state = state.copyWith(
       isSearching: true,
       isLoadingMore: false,
@@ -569,6 +659,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       offset: 0,
       contentRating: _contentRating,
       demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
+      language: _language,
     );
 
     if (_searchQueryVersion != capturedGeneration) return;
@@ -582,6 +673,13 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         final mangas = dedupeMangas(result.mangas);
         _searchOffset = result.mangas.length;
 
+        // Guardar en caché
+        _searchCache[query] = _SearchCacheEntry(
+          mangas: mangas,
+          hasMore: mangas.length < result.total,
+          cachedAt: DateTime.now(),
+        );
+
         state = state.copyWith(
           mangas: mangas,
           isSearching: false,
@@ -591,4 +689,19 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       },
     );
   }
+}
+
+class _SearchCacheEntry {
+  final List<Manga> mangas;
+  final bool hasMore;
+  final DateTime cachedAt;
+
+  const _SearchCacheEntry({
+    required this.mangas,
+    required this.hasMore,
+    required this.cachedAt,
+  });
+
+  bool isStale(Duration ttl) =>
+      DateTime.now().difference(cachedAt) > ttl;
 }
