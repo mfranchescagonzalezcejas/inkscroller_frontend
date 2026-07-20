@@ -800,6 +800,12 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get authSignInButton;
 
+  /// No description provided for @authSignInCreateAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in / Create account'**
+  String get authSignInCreateAccountButton;
+
   /// No description provided for @authNoAccount.
   ///
   /// In en, this message translates to:

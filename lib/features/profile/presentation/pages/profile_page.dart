@@ -183,6 +183,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.voidLowest,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () => context.go(AppRoutes.login),
+                  child: Text(context.l10n.authSignInCreateAccountButton),
+                ),
+              ),
             ],
           ),
         ),
@@ -262,23 +278,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ],
         ),
 
-        // ── Sign In button ────────────────────────────────────────────────
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.voidLowest,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            onPressed: () => context.go(AppRoutes.login),
-            child: Text(context.l10n.authSignInButton),
-          ),
-        ),
       ],
     );
   }
