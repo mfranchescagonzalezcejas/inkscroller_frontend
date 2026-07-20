@@ -405,7 +405,6 @@ class _PortraitContent extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 4),
             _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
           ],
         ),
@@ -670,7 +669,7 @@ class _AdaptiveHeroCoverState extends State<_AdaptiveHeroCover> {
 
     // Dimensions per ratio (same logic as manga_detail, scaled for hero)
     final double coverWidth = switch (_ratio) {
-      _CoverRatio.portrait => 150.0,
+      _CoverRatio.portrait => 142.0,
       _CoverRatio.landscape => 200.0,
       _CoverRatio.square => 170.0,
     };
