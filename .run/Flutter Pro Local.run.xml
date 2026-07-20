@@ -2,7 +2,7 @@
   <configuration default="false" name="Flutter Pro Local" type="FlutterRunConfigurationType" factoryName="Flutter">
     <option name="filePath" value="$PROJECT_DIR$/lib/main_pro.dart" />
     <option name="buildFlavor" value="pro" />
-    <option name="additionalArgs" value="--dart-define=API_BASE_URL=http://127.0.0.1:8000 --dart-define-from-file=$PROJECT_DIR$/.dart-defines/firebase.json" />
+    <option name="additionalArgs" value="--dart-define=API_BASE_URL=http://192.168.1.51:8000 --dart-define-from-file=$PROJECT_DIR$/.dart-defines/firebase.json --dart-define=HIDE_FLAVOR_BANNER=true" />
     <method v="2" />
   </configuration>
 </component>
