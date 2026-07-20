@@ -405,6 +405,7 @@ class _PortraitContent extends StatelessWidget {
                   ),
               ],
             ),
+            const SizedBox(height: 6),
             _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
           ],
         ),
