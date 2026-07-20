@@ -132,6 +132,29 @@ los capítulos externos (enlazados a plataformas oficiales como **Manga Plus**, 
 
 <br/>
 
+<!-- ─── DEMO VIDEO ──────────────────────────────────────────────────── -->
+
+<div align="center">
+  <sub><b>· &nbsp; V I D E O &nbsp; D E M O &nbsp; ·</b></sub>
+</div>
+
+<br/>
+
+<!--
+  Reemplazar VIDEO_ID por el ID del video de YouTube.
+  <a href="https://www.youtube.com/watch?v=VIDEO_ID">
+    <img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" width="100%" alt="Video demo">
+  </a>
+-->
+
+<br/>
+
+<div align="center">
+  <img width="55%" src="https://capsule-render.vercel.app/api?type=rect&color=0:0f172a,50:0d9488,100:0f172a&height=3&section=header" alt=""/>
+</div>
+
+<br/>
+
 <!-- ─── CONFIGURACIÓN / SETUP ─────────────────────────────────────────── -->
 
 <div align="center">
