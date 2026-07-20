@@ -34,6 +34,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   bool _canTriggerLoadMore = true;
   bool _wasActive = true;
   int _selectedGenreIndex = 0; // 0=All, 1=Popular, 2=Romance, 3=Action
+  bool _initialLoadTriggered = false;
 
   @override
   void initState() {
@@ -95,6 +96,16 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
         .maybeWhen(data: (isOnline) => !isOnline, orElse: () => false);
+
+    // Trigger initial load when Explore is first opened
+    if (!_initialLoadTriggered && !state.isLoading && !state.isLoadingMore && state.mangas.isEmpty && state.query.isEmpty && state.failure == null && !isOffline && _selectedGenreIndex == 0) {
+      _initialLoadTriggered = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(exploreProvider.notifier).setGenre(null);
+        }
+      });
+    }
 
     // Keep TextField in sync with state
     if (_searchController.text != state.query) {
