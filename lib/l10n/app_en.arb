@@ -43,6 +43,8 @@
   "settingsCacheClearedMessage": "Cached data cleared",
   "settingsCacheClearFailedMessage": "Could not clear cached data",
   "loadingChapter": "Loading chapter",
+  "readerBackAction": "Back",
+  "readerSettingsAction": "Reader settings",
   "chapterPagesProgress": "{loadedPages} / {totalPages} pages",
   "@chapterPagesProgress": {
     "placeholders": {

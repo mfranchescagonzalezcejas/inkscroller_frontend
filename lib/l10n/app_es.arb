@@ -43,6 +43,8 @@
   "settingsCacheClearedMessage": "Datos guardados eliminados",
   "settingsCacheClearFailedMessage": "No se pudieron eliminar los datos guardados",
   "loadingChapter": "Cargando capítulo",
+  "readerBackAction": "Volver",
+  "readerSettingsAction": "Ajustes del lector",
   "chapterPagesProgress": "{loadedPages} / {totalPages} páginas",
   "@chapterPagesProgress": {
     "placeholders": {

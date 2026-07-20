@@ -109,6 +109,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingChapter => 'Loading chapter';
 
   @override
+  String get readerBackAction => 'Back';
+
+  @override
+  String get readerSettingsAction => 'Reader settings';
+
+  @override
   String chapterPagesProgress(int loadedPages, int totalPages) {
     return '$loadedPages / $totalPages pages';
   }

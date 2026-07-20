@@ -293,6 +293,31 @@ void main() {
       expect(result, <String>[]);
     });
 
+    test('throws NetworkException on Dio transform timeout', () async {
+      when(
+        () => dio.get<List<dynamic>>(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+        ),
+      ).thenThrow(
+        DioException(
+          type: DioExceptionType.transformTimeout,
+          requestOptions: RequestOptions(path: '/chapters/manga/1/languages'),
+        ),
+      );
+
+      expect(
+        () => dataSource.getMangaLanguages('1'),
+        throwsA(
+          isA<NetworkException>().having(
+            (e) => e.message,
+            'message',
+            'network/timeout',
+          ),
+        ),
+      );
+    });
+
     test('throws NetworkException on Dio connection error', () async {
       when(
         () => dio.get<List<dynamic>>(

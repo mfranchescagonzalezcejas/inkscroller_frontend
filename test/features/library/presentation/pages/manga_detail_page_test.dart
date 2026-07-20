@@ -39,6 +39,7 @@ import 'package:inkscroller_flutter/features/library/presentation/providers/chap
 import 'package:inkscroller_flutter/features/library/presentation/providers/reading_progress_provider.dart';
 import 'package:inkscroller_flutter/features/library/presentation/providers/user_library_provider.dart';
 import 'package:inkscroller_flutter/features/library/presentation/widgets/chapter_tile.dart';
+import 'package:inkscroller_flutter/features/library/presentation/widgets/chapter_batch_list.dart';
 import 'package:inkscroller_flutter/features/library/presentation/widgets/language_selector.dart';
 import 'package:inkscroller_flutter/features/library/presentation/widgets/reading_progress_section.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/entities/user_reading_preferences.dart';
@@ -54,8 +55,10 @@ import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockGetMangaChapters extends Mock implements GetMangaChapters {}
+
 class _MockGetMangaChaptersWithLanguages extends Mock
     implements GetMangaChaptersWithLanguages {}
+
 class _MockGetMangaLanguages extends Mock implements GetMangaLanguages {}
 
 class _MockSignIn extends Mock implements SignIn {}
@@ -70,7 +73,8 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
-class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+class _MockSendEmailVerification extends Mock
+    implements SendEmailVerification {}
 
 class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
 
@@ -136,7 +140,9 @@ UserLibraryNotifier _makeStubUserLibraryNotifier() {
   when(
     () => repository.getAll(userId: any(named: 'userId')),
   ).thenAnswer((_) async => const <String, UserLibraryEntry>{});
-  when(() => repository.hydrate(any())).thenAnswer((_) async => const <String, UserLibraryEntry>{});
+  when(
+    () => repository.hydrate(any()),
+  ).thenAnswer((_) async => const <String, UserLibraryEntry>{});
   when(
     () => repository.save(any(), userId: any(named: 'userId')),
   ).thenAnswer((_) async {});
@@ -193,9 +199,7 @@ void _registerGetItMocks() {
       ),
     );
 
-    git.registerLazySingleton<GetPreferences>(
-      () => GetPreferences(prefsRepo),
-    );
+    git.registerLazySingleton<GetPreferences>(() => GetPreferences(prefsRepo));
     git.registerLazySingleton<UpdatePreferences>(
       () => UpdatePreferences(prefsRepo),
     );
@@ -275,12 +279,7 @@ void main() {
             availableLanguages: ['en', 'es'],
             matchedLanguage: 'es',
             chapters: [
-              Chapter(
-                id: 'ch-1',
-                number: 1,
-                readable: true,
-                external: false,
-              ),
+              Chapter(id: 'ch-1', number: 1, readable: true, external: false),
             ],
           ),
         ),
@@ -292,12 +291,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => Right<Failure, List<Chapter>>([
-          Chapter(
-            id: 'ch-1',
-            number: 1,
-            readable: true,
-            external: false,
-          ),
+          Chapter(id: 'ch-1', number: 1, readable: true, external: false),
         ]),
       );
     });
@@ -346,10 +340,7 @@ void main() {
     testWidgets('loads languages and chapters with default language on init', (
       tester,
     ) async {
-      final manga = Manga(
-        id: 'm1',
-        title: 'Test Manga',
-      );
+      final manga = Manga(id: 'm1', title: 'Test Manga');
 
       await pumpPage(tester, manga: manga, notifier: notifier);
       await tester.pumpAndSettle();
@@ -365,10 +356,7 @@ void main() {
     testWidgets('renders LanguageSelector when languages are loaded', (
       tester,
     ) async {
-      final manga = Manga(
-        id: 'm1',
-        title: 'Test Manga',
-      );
+      final manga = Manga(id: 'm1', title: 'Test Manga');
 
       await pumpPage(tester, manga: manga, notifier: notifier);
       await tester.pumpAndSettle();
@@ -377,10 +365,7 @@ void main() {
     });
 
     testWidgets('reloads chapters when language changes', (tester) async {
-      final manga = Manga(
-        id: 'm1',
-        title: 'Test Manga',
-      );
+      final manga = Manga(id: 'm1', title: 'Test Manga');
 
       await pumpPage(tester, manga: manga, notifier: notifier);
       await tester.pumpAndSettle();
@@ -399,9 +384,10 @@ void main() {
       await tester.tap(find.text('Español').last);
       await tester.pumpAndSettle();
 
-      verify(() => getMangaChapters('m1', language: 'es')).called(greaterThan(0));
+      verify(
+        () => getMangaChapters('m1', language: 'es'),
+      ).called(greaterThan(0));
     });
-
   });
 
   group('MangaDetailPage 4-state rendering', () {
@@ -439,9 +425,7 @@ void main() {
           any<String>(),
           language: any<String>(named: 'language'),
         ),
-      ).thenAnswer(
-        (_) async => const Right<Failure, List<Chapter>>([]),
-      );
+      ).thenAnswer((_) async => const Right<Failure, List<Chapter>>([]));
     });
 
     Future<void> pumpPage(
@@ -453,16 +437,19 @@ void main() {
     }) {
       // If progressOverrides or a custom repo is given, wire it through
       // as a real ReadingProgressNotifier; otherwise use the stub.
-      final bool useRealNotifier = progressRepo != null || progressOverrides != null;
+      final bool useRealNotifier =
+          progressRepo != null || progressOverrides != null;
       final ReadingProgressRepository? effectiveRepo =
           useRealNotifier && progressRepo == null
-              ? _MockReadingProgressRepository()
-              : progressRepo;
-      if (effectiveRepo != null && effectiveRepo is _MockReadingProgressRepository &&
-          progressOverrides != null && progressRepo == null) {
-        when(() => effectiveRepo.getAll()).thenAnswer(
-          (_) async => progressOverrides,
-        );
+          ? _MockReadingProgressRepository()
+          : progressRepo;
+      if (effectiveRepo != null &&
+          effectiveRepo is _MockReadingProgressRepository &&
+          progressOverrides != null &&
+          progressRepo == null) {
+        when(
+          () => effectiveRepo.getAll(),
+        ).thenAnswer((_) async => progressOverrides);
         when(() => effectiveRepo.save(any())).thenAnswer((_) async {});
       }
 
@@ -539,7 +526,12 @@ void main() {
         );
         when(() => mockRepo.save(any())).thenAnswer((_) async {});
 
-        await pumpPage(tester, manga: manga, notifier: notifier, progressRepo: mockRepo);
+        await pumpPage(
+          tester,
+          manga: manga,
+          notifier: notifier,
+          progressRepo: mockRepo,
+        );
 
         await tester.pumpAndSettle();
 
@@ -597,7 +589,7 @@ void main() {
     );
 
     testWidgets(
-      'has-total state: totalChaptersCount > 0 but no MD chapters → tracking visible, no chapter list',
+      'has-total state: totalChaptersCount <= batchSize without MD chapters renders placeholder batch',
       (tester) async {
         when(
           () => getMangaChaptersWithLanguages(
@@ -620,20 +612,26 @@ void main() {
           (_) async => <String, MangaReadingProgress>{
             'm1': const MangaReadingProgress(
               mangaId: 'm1',
-              totalChaptersCount: 50,
+              totalChaptersCount: 1,
             ),
           },
         );
         when(() => mockRepo.save(any())).thenAnswer((_) async {});
 
-        await pumpPage(tester, manga: manga, notifier: notifier, progressRepo: mockRepo);
+        await pumpPage(
+          tester,
+          manga: manga,
+          notifier: notifier,
+          progressRepo: mockRepo,
+        );
         await tester.pumpAndSettle();
 
         // ReadingProgressSection should be visible (has total)
         expect(find.byType(ReadingProgressSection), findsOneWidget);
         // Chapters header shows because hasTotal is true
         expect(find.text('Chapters'), findsOneWidget);
-        // No chapter tiles (no MD chapters loaded)
+        expect(find.byType(ChapterBatchList), findsOneWidget);
+        // No MangaDex chapter tiles exist because the batch contains a placeholder.
         expect(find.byType(ChapterTile), findsNothing);
       },
     );

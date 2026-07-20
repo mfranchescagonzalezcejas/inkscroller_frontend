@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/feedback/app_feedback.dart';
@@ -165,10 +167,12 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
                 children: <Widget>[
                   _FloatingIconButton(
                     icon: Icons.arrow_back,
+                    label: context.l10n.readerBackAction,
                     onTap: () => context.pop(),
                   ),
                   _FloatingIconButton(
                     icon: Icons.tune_outlined,
+                    label: context.l10n.readerSettingsAction,
                     onTap: () async {
                       final selected = await showReaderSettings(
                         context,
@@ -281,9 +285,11 @@ class _ExternalChapterScreen extends StatelessWidget {
                         title: context.l10n.externalChapterTitle,
                       );
                     } on Exception catch (e, st) {
-                      debugPrint(
-                        '[ExternalLink] Failed to launch URL: $e\n$st',
-                      );
+                      if (kDebugMode) {
+                        debugPrint(
+                          '[ExternalLink] Failed to launch URL: $e\n$st',
+                        );
+                      }
                       if (!context.mounted) return;
                       AppFeedback.showWarning(
                         context,
@@ -315,27 +321,55 @@ class _ExternalChapterScreen extends StatelessWidget {
 /// Matches the [MangaDetailPage._FloatingTopButtons] style.
 class _FloatingIconButton extends StatelessWidget {
   final IconData icon;
+  final String label;
   final VoidCallback onTap;
 
   const _FloatingIconButton({
     required this.icon,
+    required this.label,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 40,
-      height: 40,
-      child: Material(
-        color: AppColors.voidLowest.withValues(alpha: 0.6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: Icon(icon, color: AppColors.onSurface, size: 24),
+      width: AppLayout.minTouchTarget,
+      height: AppLayout.minTouchTarget,
+      child: Semantics(
+        label: label,
+        button: true,
+        child: Tooltip(
+          message: label,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(
+                AppLayout.readerFloatingControlRadius,
+              ),
+              onTap: onTap,
+              child: Center(
+                child: SizedBox(
+                  width: AppLayout.readerFloatingControlSize,
+                  height: AppLayout.readerFloatingControlSize,
+                  child: Material(
+                    color: AppColors.voidLowest.withValues(
+                      alpha: AppLayout.readerFloatingControlBackgroundOpacity,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppLayout.readerFloatingControlRadius,
+                      ),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: AppColors.onSurface,
+                      size: AppSpacing.xl,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

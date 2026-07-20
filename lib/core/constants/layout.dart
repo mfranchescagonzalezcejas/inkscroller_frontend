@@ -41,4 +41,16 @@ class AppLayout {
   static const double infoListRowGap = 12;
   static const double infoListRowMinHeight = 56;
   static const double infoListRowCopyGap = 3;
+
+  // Manga detail badges and synopsis
+  static const double mangaDetailHorizontalPadding = 20;
+  static const double mangaDetailDescriptionHeight = 120;
+  static const double mangaDetailBadgeHorizontalPadding = 10;
+  static const double mangaDetailBadgeRadius = 20;
+  static const double mangaDetailBadgeIndicatorSize = 6;
+
+  // Reader overlay controls
+  static const double readerFloatingControlSize = 40;
+  static const double readerFloatingControlRadius = 12;
+  static const double readerFloatingControlBackgroundOpacity = 0.6;
 }
