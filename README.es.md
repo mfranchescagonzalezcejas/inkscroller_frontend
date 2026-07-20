@@ -244,7 +244,7 @@ Dirección de capas: `Presentation → Domain ← Data` — el dominio no depend
 <tr><td>🔌 <b>APIs backend</b></td><td><code>dev</code> <code>https://api.dev.inkscroller.devdigi.dev</code> · <code>staging</code> <code>https://api.stg.inkscroller.devdigi.dev</code> · <code>pro</code> <code>https://api.inkscroller.devdigi.dev</code></td></tr>
 <tr><td>📽️ <b>Diapositivas</b></td><td>En proceso — todavía no publicadas</td></tr>
 <tr><td>🎬 <b>Vídeo demo</b></td><td>En proceso — todavía no publicado</td></tr>
-<tr><td>👤 <b>Usuario prueba</b></td><td>No requerido — la app permite crear una cuenta desde el registro con email/contraseña</td></tr>
+<tr><td>👤 <b>Usuario prueba</b></td><td><code>testuserdevdigi@proton.me</code> / <code>1234qweASD-</code> (ya verificado). Para probar el flujo de verificación, registrate con tu propio email.</td></tr>
 </tbody>
 </table>
 
