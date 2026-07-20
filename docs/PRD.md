@@ -22,7 +22,7 @@ InkScroller is a cross-platform manga reading app that aggregates content from M
 | 3 | UX & Feature Expansion | [Completed] | Offline cache, localization, settings, pagination, CI/CD pipeline |
 | 4 | Architecture Hardening | [Completed] | [detail](PRD/phase-4-architecture-hardening.md) |
 | 5 | Identity & Adaptive Reading | [MVP Completed — V1 Follow-up] | [detail](PRD/phase-5-identity-and-adaptive-reading.md) |
-| 6 | Visual Refresh | [In Progress — Sprint 3] | [detail](PRD/phase-6-visual-refresh.md) |
+| 6 | Visual Refresh | [Completed] | [detail](PRD/phase-6-visual-refresh.md) |
 
 ---
 

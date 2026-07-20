@@ -1,6 +1,6 @@
 # Inkscroller — Architecture Document
 
-> **Last updated:** March 2026  
+> **Last updated:** July 2026  
 > **Stack:** Flutter (Dart) + FastAPI (Python)  
 > **State management:** Riverpod (`StateNotifier`)  
 > **DI:** get_it  
@@ -722,8 +722,8 @@ ApiConfig.baseUrl
         │
         ▼
 Dio(BaseOptions(baseUrl: API_BASE_URL))
-  connectTimeout: 15s
-  receiveTimeout: 15s
+  connectTimeout: 60s
+  receiveTimeout: 60s
   headers: { Content-Type: application/json }
 ```
 

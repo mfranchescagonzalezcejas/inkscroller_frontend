@@ -1,6 +1,6 @@
 # API Integration — Inkscroller
 
-> **Last updated:** April 2026  
+> **Last updated:** July 2026  
 > **Backend:** FastAPI 0.1.0 · Python 3.11+  
 > **Flutter HTTP client:** Dio  
 > **Data sources:** MangaDex API + Jikan API (enrichment layer, internal to backend)
@@ -78,8 +78,8 @@ class DioClient {
     dio = Dio(
       BaseOptions(
         baseUrl: ApiConfig.baseUrl,      // resolved via FlavorConfig singleton
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 60),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -94,8 +94,8 @@ class DioClient {
 | Property | Value | Notes |
 |----------|-------|-------|
 | `baseUrl` | `FlavorConfig.instance.apiBaseUrl` | Resolved at runtime based on active flavor |
-| `connectTimeout` | `15s` | Time to establish TCP connection |
-| `receiveTimeout` | `15s` | Time to receive the full response body |
+| `connectTimeout` | `60s` | Time to establish TCP connection |
+| `receiveTimeout` | `60s` | Time to receive the full response body |
 | `Content-Type` | `application/json` | Sent on every request |
 
 ### Base URL resolution chain
@@ -757,8 +757,9 @@ An interceptor-based error mapper is still a valid future refactor, but it is **
 
 | `DioExceptionType` | Cause | Suggested handling |
 |--------------------|-------|--------------------|
-| `connectionTimeout` | Server unreachable within 15s | Show offline/retry UI |
+| `connectionTimeout` | Server unreachable within 60s | Show offline/retry UI |
 | `receiveTimeout` | Response too slow | Show timeout message |
+| `transformTimeout` | Stream transformer timed out | Show timeout message |
 | `badResponse` | 4xx / 5xx status code | Check `e.response?.statusCode` |
 | `connectionError` | No network / DNS failure | Show no-connection state |
 | `cancel` | Request was cancelled | Silently ignore |

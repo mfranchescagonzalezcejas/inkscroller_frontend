@@ -7,7 +7,7 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,25:1e40af,50:0d9488,75:3b82f6,100:0f172a&height=220&section=header&text=InkScroller&fontSize=56&fontColor=fafafa&fontAlignY=38&desc=Flutter%20manga%20reader%20%E2%80%A2%20Clean%20Architecture%20%E2%80%A2%20Riverpod&descAlignY=58&descSize=16&descColor=fafafa&animation=fadeIn" width="100%"/>
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.41-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.9-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.11-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![FVM](https://img.shields.io/badge/FVM-required-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://fvm.app)
 [![License](https://img.shields.io/badge/license-MIT-0d9488?style=for-the-badge)](LICENSE)
 
@@ -58,7 +58,7 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 
 | Frontend | Backend |
 |---|---|
-| Flutter 3.41 / Dart 3.9 | FastAPI 0.128 / Python 3.12 |
+| Flutter 3.41 / Dart 3.11 | FastAPI 0.128 / Python 3.12 |
 | Riverpod (state management) | httpx (async HTTP client) |
 | get_it (dependency injection) | Firebase Admin SDK (auth) |
 | Dio (networking) | MangaDex API client (catalogue, chapters, pages) |
