@@ -174,6 +174,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   color: AppColors.onSurface,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 8),
               Text(
