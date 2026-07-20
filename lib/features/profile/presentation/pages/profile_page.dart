@@ -168,15 +168,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 color: AppColors.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
-              Text(
-                context.l10n.profileGuestTitle,
-                style: AppTypography.bodyLgStyle.copyWith(
-                  color: AppColors.onSurface,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  context.l10n.profileGuestTitle,
+                  style: AppTypography.bodyLgStyle.copyWith(
+                    color: AppColors.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 8),
               Text(
