@@ -284,6 +284,18 @@ abstract class AppLocalizations {
   /// **'Loading chapter'**
   String get loadingChapter;
 
+  /// No description provided for @readerBackAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get readerBackAction;
+
+  /// No description provided for @readerSettingsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reader settings'**
+  String get readerSettingsAction;
+
   /// No description provided for @chapterPagesProgress.
   ///
   /// In en, this message translates to:

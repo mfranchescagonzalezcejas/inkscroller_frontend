@@ -25,25 +25,53 @@ class ReadingProgressRepositoryImpl implements ReadingProgressRepository {
   final FirebaseAuth? _firebaseAuth;
 
   static const String _prefix = 'library.reading_progress.';
+  static const String _guestScope = '${_prefix}guest.';
 
   bool get _isAuthenticated =>
       _firebaseAuth != null && _firebaseAuth.currentUser != null;
 
-  bool get _canSyncRemote =>
-      _remoteDataSource != null && _isAuthenticated;
+  bool get _canSyncRemote => _remoteDataSource != null && _isAuthenticated;
 
   /// Returns the scoped key prefix for the current user, or guest scope
   /// when no user is signed in. This prevents data leakage between users
   /// sharing the same device.
   String _scopePrefix() {
     final uid = _firebaseAuth?.currentUser?.uid;
-    return uid != null ? '$_prefix$uid.' : '${_prefix}guest.';
+    return uid != null ? '$_prefix$uid.' : _guestScope;
+  }
+
+  Future<void> _migrateLegacyGuestProgress() async {
+    for (final String key in _prefs.getKeys().toList()) {
+      if (!key.startsWith(_prefix)) {
+        continue;
+      }
+
+      final String mangaId = key.substring(_prefix.length);
+      // Scoped records always contain both a scope and manga ID.
+      if (mangaId.isEmpty || mangaId.contains('.')) {
+        continue;
+      }
+
+      final String? raw = _prefs.getString(key);
+      if (raw == null) {
+        continue;
+      }
+
+      final String guestKey = '$_guestScope$mangaId';
+      if (!_prefs.containsKey(guestKey)) {
+        await _prefs.setString(guestKey, raw);
+      }
+      await _prefs.remove(key);
+    }
   }
 
   @override
   Future<Map<String, MangaReadingProgress>> getAll() async {
     final Map<String, MangaReadingProgress> progressByManga =
         <String, MangaReadingProgress>{};
+    if (!_isAuthenticated) {
+      await _migrateLegacyGuestProgress();
+    }
     final scope = _scopePrefix();
 
     for (final key in _prefs.getKeys().where(
@@ -60,10 +88,12 @@ class ReadingProgressRepositoryImpl implements ReadingProgressRepository {
         final MangaReadingProgress progress =
             MangaReadingProgressModel.fromJson(json).toEntity();
         if (kDebugMode) {
-          debugPrint('[ProgressRepo] loaded $key: '
-              'readChapterIds=${progress.readChapterIds.length} '
-              'manual=${progress.manuallyMarkedCount} '
-              'total=${progress.totalChaptersCount}');
+          debugPrint(
+            '[ProgressRepo] loaded ${progress.mangaId}: '
+            'readChapterIds=${progress.readChapterIds.length} '
+            'manual=${progress.manuallyMarkedCount} '
+            'total=${progress.totalChaptersCount}',
+          );
         }
         progressByManga[progress.mangaId] = progress;
       } on Object {
@@ -79,11 +109,13 @@ class ReadingProgressRepositoryImpl implements ReadingProgressRepository {
     // Always persist locally first.
     final MangaReadingProgressModel model = progress.toModel();
     if (kDebugMode) {
-      debugPrint('[ProgressRepo] save: '
-          '${progress.mangaId} '
-          'readChapterIds=${progress.readChapterIds.length} '
-          'manual=${progress.manuallyMarkedCount} '
-          'total=${progress.totalChaptersCount}');
+      debugPrint(
+        '[ProgressRepo] save: '
+        '${progress.mangaId} '
+        'readChapterIds=${progress.readChapterIds.length} '
+        'manual=${progress.manuallyMarkedCount} '
+        'total=${progress.totalChaptersCount}',
+      );
     }
     await _prefs.setString(
       '${_scopePrefix()}${progress.mangaId}',

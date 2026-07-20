@@ -62,7 +62,8 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
-class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+class _MockSendEmailVerification extends Mock
+    implements SendEmailVerification {}
 
 class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
 
@@ -185,6 +186,40 @@ void main() {
 
   tearDown(() {
     UrlLauncherPlatform.instance = previousUrlLauncher;
+  });
+
+  testWidgets('labels and tooltips floating reader controls', (tester) async {
+    when(() => getChapterPages('ch-controls')).thenAnswer(
+      (_) async => const Right<Failure, List<String>>(<String>[
+        'https://example.com/page.jpg',
+      ]),
+    );
+    when(
+      () => resolveReaderMode(
+        globalReaderMode: any(named: 'globalReaderMode'),
+        titleOverride: any(named: 'titleOverride'),
+        contentMetadata: any(named: 'contentMetadata'),
+      ),
+    ).thenReturn(ReaderMode.vertical);
+
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    try {
+      await pumpReaderPage(
+        tester,
+        getChapterPages: getChapterPages,
+        resolveReaderMode: resolveReaderMode,
+        chapterId: 'ch-controls',
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byTooltip('Back'), findsOneWidget);
+      expect(find.byTooltip('Reader settings'), findsOneWidget);
+      expect(find.bySemanticsLabel('Back'), findsOneWidget);
+      expect(find.bySemanticsLabel('Reader settings'), findsOneWidget);
+    } finally {
+      semantics.dispose();
+    }
   });
 
   // ── P0-F2: External chapter guard ───────────────────────────────────────

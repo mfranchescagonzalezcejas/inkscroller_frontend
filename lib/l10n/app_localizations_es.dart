@@ -110,6 +110,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loadingChapter => 'Cargando capítulo';
 
   @override
+  String get readerBackAction => 'Volver';
+
+  @override
+  String get readerSettingsAction => 'Ajustes del lector';
+
+  @override
   String chapterPagesProgress(int loadedPages, int totalPages) {
     return '$loadedPages / $totalPages páginas';
   }
