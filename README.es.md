@@ -272,7 +272,7 @@ Dirección de capas: `Presentation → Domain ← Data` — el dominio no depend
 <tr><td>⚙️ <b>Repo backend</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/Inkscroller_backend">mfranchescagonzalezcejas/Inkscroller_backend</a></td></tr>
 <tr><td>📦 <b>Releases app</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases">GitHub Releases</a> · publicación en Google Play en proceso</td></tr>
 <tr><td>🔌 <b>APIs backend</b></td><td><code>dev</code> <code>https://api.dev.inkscroller.devdigi.dev</code> · <code>staging</code> <code>https://api.stg.inkscroller.devdigi.dev</code> · <code>pro</code> <code>https://api.inkscroller.devdigi.dev</code></td></tr>
-<tr><td>📽️ <b>Diapositivas</b></td><td>En proceso — todavía no publicadas</td></tr>
+<tr><td>📽️ <b>Diapositivas</b></td><td><a href="https://docs.google.com/presentation/d/110GKLMFSurLuK8EWqSoyn5J0vsXFw3-rHF6YNvtbzrY/edit?usp=sharing">Google Slides</a></td></tr>
 <tr><td>🎬 <b>Vídeo demo</b></td><td>En proceso — todavía no publicado</td></tr>
 <tr><td>👤 <b>Usuario prueba</b></td><td><code>testuserdevdigi@proton.me</code> / <code>1234qweASD-</code> (ya verificado). Para probar el flujo de verificación, registrate con tu propio email.</td></tr>
 </tbody>
