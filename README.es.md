@@ -102,7 +102,37 @@ los capítulos externos (enlazados a plataformas oficiales como **Manga Plus**, 
 
 <br/>
 
-<!-- ─── SETUP ─────────────────────────────────────────────────────────── -->
+<!-- ─── SCREENSHOTS / CAPTURAS ───────────────────────────────────────── -->
+
+<div align="center">
+  <sub><b>· &nbsp; C A P T U R A S &nbsp; ·</b></sub>
+</div>
+
+<br/>
+
+<!--
+  Añadir capturas aquí. Layout recomendado:
+  <div align="center">
+    <img src="docs/screenshots/home.png" width="30%" alt="Inicio" />
+    <img src="docs/screenshots/manga-detail.png" width="30%" alt="Detalle de manga" />
+    <img src="docs/screenshots/reader.png" width="30%" alt="Lector" />
+  </div>
+  <div align="center">
+    <img src="docs/screenshots/explore.png" width="30%" alt="Explorar" />
+    <img src="docs/screenshots/profile.png" width="30%" alt="Perfil" />
+    <img src="docs/screenshots/login.png" width="30%" alt="Inicio de sesión" />
+  </div>
+-->
+
+<br/>
+
+<div align="center">
+  <img width="55%" src="https://capsule-render.vercel.app/api?type=rect&color=0:0f172a,50:0d9488,100:0f172a&height=3&section=header" alt=""/>
+</div>
+
+<br/>
+
+<!-- ─── CONFIGURACIÓN / SETUP ─────────────────────────────────────────── -->
 
 <div align="center">
   <sub><b>· &nbsp; C O N F I G U R A C I Ó N &nbsp; ·</b></sub>

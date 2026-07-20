@@ -102,6 +102,36 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 
 <br/>
 
+<!-- ─── SCREENSHOTS ───────────────────────────────────────────────────── -->
+
+<div align="center">
+  <sub><b>· &nbsp; S C R E E N S H O T S &nbsp; ·</b></sub>
+</div>
+
+<br/>
+
+<!--
+  Add screenshots here. Recommended layout:
+  <div align="center">
+    <img src="docs/screenshots/home.png" width="30%" alt="Home" />
+    <img src="docs/screenshots/manga-detail.png" width="30%" alt="Manga Detail" />
+    <img src="docs/screenshots/reader.png" width="30%" alt="Reader" />
+  </div>
+  <div align="center">
+    <img src="docs/screenshots/explore.png" width="30%" alt="Explore" />
+    <img src="docs/screenshots/profile.png" width="30%" alt="Profile" />
+    <img src="docs/screenshots/login.png" width="30%" alt="Login" />
+  </div>
+-->
+
+<br/>
+
+<div align="center">
+  <img width="55%" src="https://capsule-render.vercel.app/api?type=rect&color=0:0f172a,50:0d9488,100:0f172a&height=3&section=header" alt=""/>
+</div>
+
+<br/>
+
 <!-- ─── SETUP ─────────────────────────────────────────────────────────── -->
 
 <div align="center">
