@@ -168,12 +168,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 color: AppColors.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
-              Text(
-                context.l10n.profileGuestTitle,
-                style: AppTypography.bodyLgStyle.copyWith(
-                  color: AppColors.onSurface,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  context.l10n.profileGuestTitle,
+                  style: AppTypography.bodyLgStyle.copyWith(
+                    color: AppColors.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
@@ -182,6 +185,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   color: AppColors.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.voidLowest,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () => context.go(AppRoutes.login),
+                  child: Text(context.l10n.authSignInCreateAccountButton),
+                ),
               ),
             ],
           ),
@@ -262,23 +281,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ],
         ),
 
-        // ── Sign In button ────────────────────────────────────────────────
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.voidLowest,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            onPressed: () => context.go(AppRoutes.login),
-            child: Text(context.l10n.authSignInButton),
-          ),
-        ),
       ],
     );
   }

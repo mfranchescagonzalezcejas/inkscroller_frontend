@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -46,33 +48,50 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
       return const Left(CacheFailure(message: 'No guest preferences'));
     }
 
-    // Try remote first for fresh data.
+    // Cache-first: si hay datos locales, devolverlos inmediato y refrescar
+    // el caché en background. Sin caché → esperar el remoto.
+    final cached = await localDataSource.getCachedPreferences();
+    if (cached != null) {
+      unawaited(_refreshCacheInBackground());
+      return Right(cached);
+    }
+
+    // Sin caché local — esperar remoto.
     final remoteResult = await _getFromRemote();
 
     if (remoteResult.isRight()) {
       final remotePrefs = remoteResult.fold((l) => null, (r) => r)!;
-
-      // Check if local has a newer unsynced change.
-      final cached = await localDataSource.getCachedPreferences();
-      if (cached != null && cached.updatedAt.isAfter(remotePrefs.updatedAt)) {
-        // Local is newer — keep it and push to remote in background.
-        await _pushToRemote(cached);
-        return Right(cached);
-      }
-
-      // Remote is fresher — update local cache.
       await localDataSource.savePreferences(remotePrefs);
       return Right(remotePrefs);
     }
-
-    // Remote failed — fall back to local cache.
-    final cached = await localDataSource.getCachedPreferences();
-    if (cached != null) return Right(cached);
 
     return remoteResult.fold(
       (failure) => Left<Failure, UserReadingPreferences>(failure),
       (_) => throw StateError('unreachable'),
     );
+  }
+
+  /// Fire-and-forget remote fetch que actualiza el caché local.
+  /// No bloquea al caller — la próxima vez que [getPreferences] se llame,
+  /// encontrará los datos frescos en local.
+  /// Si local es más nuevo (cambio offline), pushea local a remote.
+  Future<void> _refreshCacheInBackground() async {
+    try {
+      final result = await _getFromRemote();
+      await result.fold(
+        (_) {},
+        (remotePrefs) async {
+          final cached = await localDataSource.getCachedPreferences();
+          if (cached != null && cached.updatedAt.isAfter(remotePrefs.updatedAt)) {
+            await _pushToRemote(cached);
+          } else {
+            await localDataSource.savePreferences(remotePrefs);
+          }
+        },
+      );
+    } on Object {
+      // Best-effort — si falla, el caché actual sigue siendo válido.
+    }
   }
 
   @override

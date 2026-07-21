@@ -24,6 +24,7 @@ void main() {
         () => dio.get<dynamic>(
           any(),
           queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
         ),
       ).thenAnswer(
         (_) async => Response(
@@ -56,6 +57,7 @@ void main() {
             'offset': 10,
             'content_rating': 'safe',
           },
+          options: any(named: 'options'),
         ),
       ).called(1);
     });
@@ -65,6 +67,7 @@ void main() {
         () => dio.get<dynamic>(
           any(),
           queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
         ),
       ).thenAnswer(
         (_) async => Response(
@@ -100,6 +103,7 @@ void main() {
         () => dio.get<dynamic>(
           any(),
           queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
         ),
       ).thenAnswer(
         (_) async => Response(

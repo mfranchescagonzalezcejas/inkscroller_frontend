@@ -139,7 +139,7 @@ Firma: ___________
 ### Evidencias — P0-F3
 
 - **Qué**: Null safety implementada en toda la UI para `score`, `rank`, `genres` y `authors` — la app no crashea cuando la API Jikan devuelve estos campos como `null`.
-- **Verificación**: Implementación documentada en **[PR #47](https://github.com/mfranchescagonzalezcejas/inkscroller_flutter/pull/47)** — mergeado `develop` 2026-04-08. Archivos afectados: `home_page.dart`, `manga_detail_page.dart`, `manga_tile.dart`, `manga_model.dart`, `manga.dart`, `manga_mapper.dart` + 3 test files.
+- **Verificación**: Implementación documentada en **[PR #47](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/pull/47)** — mergeado `develop` 2026-04-08. Archivos afectados: `home_page.dart`, `manga_detail_page.dart`, `manga_tile.dart`, `manga_model.dart`, `manga.dart`, `manga_mapper.dart` + 3 test files.
 - **Fecha de cierre**: 2026-04-08
 - **Referencia cruzada**: Control Tower V1.0 (Obsidian) → P0-F3 marcado ✅; TASK-021 actualizada; TASK-022 con evidencia cruzada registrada.
 

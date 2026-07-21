@@ -24,6 +24,7 @@ abstract class LibraryRepository {
     String? genre,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   });
 
   /// Fetches the full detail of a single manga by its [mangaId].
@@ -68,6 +69,7 @@ abstract class LibraryRepository {
     required int offset,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   });
 
   /// Clears all persisted library cache entries.

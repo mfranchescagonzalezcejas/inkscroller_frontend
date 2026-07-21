@@ -9,6 +9,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/widgets/inkscroller_shimmer.dart';
 import '../../../library/domain/entities/manga.dart';
 import '../../../library/presentation/providers/user_library_provider.dart';
 import '../providers/home_provider.dart';
@@ -46,7 +47,13 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
 
 
     if (slides.isEmpty) {
-      return const SizedBox(height: 400);
+      // Hero shimmer mientras carga — muestra la estructura inmediatamente
+      return const ExcludeSemantics(
+        child: SizedBox(
+          height: 400,
+          child: InkScrollerShimmer(height: 400),
+        ),
+      );
     }
 
     return SizedBox(
@@ -405,7 +412,7 @@ class _PortraitContent extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
           ],
         ),
@@ -670,7 +677,7 @@ class _AdaptiveHeroCoverState extends State<_AdaptiveHeroCover> {
 
     // Dimensions per ratio (same logic as manga_detail, scaled for hero)
     final double coverWidth = switch (_ratio) {
-      _CoverRatio.portrait => 150.0,
+      _CoverRatio.portrait => 142.0,
       _CoverRatio.landscape => 200.0,
       _CoverRatio.square => 170.0,
     };

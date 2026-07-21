@@ -7,7 +7,7 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,25:1e40af,50:0d9488,75:3b82f6,100:0f172a&height=220&section=header&text=InkScroller&fontSize=56&fontColor=fafafa&fontAlignY=38&desc=Flutter%20manga%20reader%20%E2%80%A2%20Clean%20Architecture%20%E2%80%A2%20Riverpod&descAlignY=58&descSize=16&descColor=fafafa&animation=fadeIn" width="100%"/>
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.41-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.9-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.11-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![FVM](https://img.shields.io/badge/FVM-required-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://fvm.app)
 [![License](https://img.shields.io/badge/license-MIT-0d9488?style=for-the-badge)](LICENSE)
 
@@ -58,7 +58,7 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 
 | Frontend | Backend |
 |---|---|
-| Flutter 3.41 / Dart 3.9 | FastAPI 0.128 / Python 3.12 |
+| Flutter 3.41 / Dart 3.11 | FastAPI 0.128 / Python 3.12 |
 | Riverpod (state management) | httpx (async HTTP client) |
 | get_it (dependency injection) | Firebase Admin SDK (auth) |
 | Dio (networking) | MangaDex API client (catalogue, chapters, pages) |
@@ -101,6 +101,35 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 </div>
 
 <br/>
+
+<!-- ─── SCREENSHOTS ───────────────────────────────────────────────────── -->
+
+<div align="center">
+  <sub><b>· &nbsp; S C R E E N S H O T S &nbsp; ·</b></sub>
+</div>
+
+<br/>
+
+<div align="center">
+    <img src="docs/screenshots/home.jpg" width="30%" alt="Home" />
+    <img src="docs/screenshots/manga_detail.jpg" width="30%" alt="Manga Detail" />
+    <img src="docs/screenshots/reader.jpg" width="30%" alt="Reader" />
+</div>
+<div align="center">
+    <img src="docs/screenshots/explore.jpg" width="30%" alt="Explore" />
+    <img src="docs/screenshots/library.jpg" width="30%" alt="Library" />
+    <img src="docs/screenshots/login.jpg" width="30%" alt="Login" />
+</div>
+
+<br/>
+
+<div align="center">
+  <img width="55%" src="https://capsule-render.vercel.app/api?type=rect&color=0:0f172a,50:0d9488,100:0f172a&height=3&section=header" alt=""/>
+</div>
+
+<br/>
+
+
 
 <!-- ─── SETUP ─────────────────────────────────────────────────────────── -->
 
@@ -243,9 +272,9 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 <tr><td>⚙️ <b>Backend repo</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/Inkscroller_backend">mfranchescagonzalezcejas/Inkscroller_backend</a></td></tr>
 <tr><td>📦 <b>App releases</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases">GitHub Releases</a> · Google Play publication in progress</td></tr>
 <tr><td>🔌 <b>Backend APIs</b></td><td><code>dev</code> <code>https://api.dev.inkscroller.devdigi.dev</code> · <code>staging</code> <code>https://api.stg.inkscroller.devdigi.dev</code> · <code>pro</code> <code>https://api.inkscroller.devdigi.dev</code></td></tr>
-<tr><td>📽️ <b>Slides</b></td><td>Work in progress — not published yet</td></tr>
-<tr><td>🎬 <b>Demo video</b></td><td>Work in progress — not published yet</td></tr>
-<tr><td>👤 <b>Test user</b></td><td>Not required — users can create an account from the app with email/password registration</td></tr>
+<tr><td>📽️ <b>Slides</b></td><td><a href="https://docs.google.com/presentation/d/110GKLMFSurLuK8EWqSoyn5J0vsXFw3-rHF6YNvtbzrY/edit?usp=sharing">Google Slides</a></td></tr>
+<tr><td>🎬 <b>Demo video</b></td><td><a href="https://youtu.be/jBlEnNTdkOI">youtu.be/jBlEnNTdkOI</a></td></tr>
+<tr><td>👤 <b>Test user</b></td><td><code>testuserdevdigi@proton.me</code> / <code>1234qweASD-</code> (already verified). To test the email verification flow, register with your own email instead.</td></tr>
 </tbody>
 </table>
 

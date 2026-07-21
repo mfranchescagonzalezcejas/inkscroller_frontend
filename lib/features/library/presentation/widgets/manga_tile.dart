@@ -59,11 +59,8 @@ class MangaTile extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // 🖼 Imagen de portada con Hero para transición fluida
-                Hero(
-                  tag: 'cover-${manga.id}',
-                  child: CoverImage(url: manga.coverUrl),
-                ),
+                // 🖼 Imagen de portada
+                CoverImage(url: manga.coverUrl),
 
                 // 🌑 Degradado inferior
                 Positioned(

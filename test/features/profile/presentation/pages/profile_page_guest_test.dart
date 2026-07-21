@@ -206,7 +206,10 @@ void main() {
     await tester.pumpWidget(buildTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.text('Sign in', skipOffstage: false), findsOneWidget);
+    expect(
+      find.text('Sign in / Create account', skipOffstage: false),
+      findsOneWidget,
+    );
   });
 
   testWidgets('guest view shows app settings section', (tester) async {

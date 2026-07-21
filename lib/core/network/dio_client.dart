@@ -49,6 +49,7 @@ class DioClient {
     );
     dio.interceptors.add(_AuthInterceptor(tokenProvider: tokenProvider));
     dio.interceptors.add(EmailVerificationInterceptor());
+    dio.interceptors.add(_ConcurrencyInterceptor(maxConcurrent: 8));
   }
 }
 
@@ -227,5 +228,63 @@ class _AuthInterceptor extends Interceptor {
     await attachAuthHeader(options, tokenProvider: _tokenProvider);
 
     handler.next(options);
+  }
+}
+
+/// Limits concurrent in-flight requests so the main thread isn't overwhelmed
+/// by too many response payloads arriving simultaneously (which triggers
+/// repeated widget rebuilds and causes "Skipped X frames" jank).
+///
+/// Queues excess requests and releases them as active ones complete.
+class _ConcurrencyInterceptor extends Interceptor {
+  _ConcurrencyInterceptor({required this.maxConcurrent});
+
+  final int maxConcurrent;
+  int _active = 0;
+  final _queue = <({
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  })>[];
+
+  static const String priorityKey = 'concurrency_priority';
+  static const String priorityHigh = 'high';
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // High-priority requests (search, auth) bypass the limit
+    if (options.extra[priorityKey] == priorityHigh) {
+      _active++;
+      handler.next(options);
+      return;
+    }
+    if (_active < maxConcurrent) {
+      _active++;
+      handler.next(options);
+    } else {
+      _queue.add((options: options, handler: handler));
+    }
+  }
+
+  @override
+  void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
+    _active--;
+    _dequeue();
+    handler.next(response);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (err.type != DioExceptionType.cancel) {
+      _active--;
+      _dequeue();
+    }
+    handler.next(err);
+  }
+
+  void _dequeue() {
+    if (_queue.isEmpty) return;
+    final next = _queue.removeAt(0);
+    _active++;
+    next.handler.next(next.options);
   }
 }

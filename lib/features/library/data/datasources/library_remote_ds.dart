@@ -26,6 +26,7 @@ abstract class LibraryRemoteDataSource {
     String? genre,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   });
 
   /// Fetches the full detail model for a single manga by [mangaId].
@@ -72,5 +73,6 @@ abstract class LibraryRemoteDataSource {
     required int offset,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   });
 }

@@ -26,6 +26,7 @@ class GetMangaList {
     String? genre,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) {
     return repository.getMangaList(
       limit: limit,
@@ -34,6 +35,7 @@ class GetMangaList {
       genre: genre,
       contentRating: contentRating,
       demographics: demographics,
+      language: language,
     );
   }
 }

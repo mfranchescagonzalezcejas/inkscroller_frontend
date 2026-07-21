@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/design_tokens.dart';
-import '../../../library/presentation/providers/library/library_provider.dart';
 import '../../domain/entities/home_chapter.dart';
 import '../providers/home_latest_chapters_provider.dart';
-import '../providers/home_discover_provider.dart';
 import '../providers/home_provider.dart';
 import '../providers/home_state.dart';
 import '../widgets/continue_reading_section.dart';
@@ -16,7 +14,6 @@ import '../widgets/hero_carousel.dart';
 import '../widgets/home_discover_section.dart';
 import '../widgets/home_latest_chapters.dart';
 import '../widgets/home_recommended_section.dart';
-import '../widgets/home_shimmer.dart';
 
 /// Home feed — trending carousel, continue reading, discover, recommendations,
 /// and latest chapters.
@@ -41,9 +38,9 @@ class HomePage extends ConsumerWidget {
     // Loading state for the progress bar
     final homeState = ref.watch(homeProvider);
     final isHomeLoading = homeState.featured.isEmpty;
-    final discoverState = ref.watch(homeDiscoverProvider);
-    final isDiscoverLoading = discoverState.isLoading &&
-        discoverState.mangas.isEmpty;
+    final dataState = ref.watch(homeDataProvider);
+    final isDataLoading = dataState.isLoading &&
+        dataState.mangas.isEmpty;
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
@@ -52,7 +49,7 @@ class HomePage extends ConsumerWidget {
         backgroundColor: AppColors.card,
         onRefresh: () => _refreshHome(ref),
         child: _HomeBody(
-          isLoading: isHomeLoading || isDiscoverLoading,
+          isLoading: isHomeLoading || isDataLoading,
         ),
       ),
     );
@@ -112,12 +109,8 @@ class _HomeBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Full-page loading skeleton while the library first hydrates.
-    final libraryState = ref.watch(libraryProvider);
-    if (libraryState.isLoading && libraryState.mangas.isEmpty) {
-      return const HomeShimmer();
-    }
-
+    // Cada sección maneja su propio estado de carga — no hay full-page shimmer.
+    // La página se renderiza de inmediato con esqueletos por sección.
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(

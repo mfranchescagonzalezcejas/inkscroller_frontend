@@ -23,6 +23,7 @@ class SearchManga {
     required int offset,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) {
     return repository.searchManga(
       query,
@@ -30,6 +31,7 @@ class SearchManga {
       offset: offset,
       contentRating: contentRating,
       demographics: demographics,
+      language: language,
     );
   }
 }

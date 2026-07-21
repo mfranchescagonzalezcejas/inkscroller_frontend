@@ -402,6 +402,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authSignInButton => 'Iniciar sesión';
 
   @override
+  String get authSignInCreateAccountButton => 'Iniciar sesión / Crear cuenta';
+
+  @override
   String get authNoAccount => '¿No tienes cuenta? Crear una';
 
   @override

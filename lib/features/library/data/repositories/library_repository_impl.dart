@@ -46,6 +46,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     String? genre,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) async {
     try {
       final models = await remoteDataSource.getMangaList(
@@ -55,6 +56,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         genre: genre,
         contentRating: contentRating,
         demographics: demographics,
+        language: language,
       );
       await _cacheMangaList(
         limit: limit,
@@ -253,6 +255,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
     required int offset,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) async {
     try {
       final model = await remoteDataSource.searchManga(
@@ -261,6 +264,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         offset: offset,
         contentRating: contentRating,
         demographics: demographics,
+        language: language,
       );
       final entity = model.toEntity();
       final demographicTokens = demographics?.map((d) => d.name).toList();

@@ -5,21 +5,20 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/widgets/catalog_tab_bar.dart';
 import '../../../library/presentation/constants/library_ui_constants.dart';
 import '../../../library/presentation/widgets/manga_tile.dart';
-import '../providers/home_discover_provider.dart';
+import '../providers/home_provider.dart';
 import 'home_section_header.dart';
 import 'home_shimmer.dart';
 
 /// Discover section with filter tabs and manga grid.
 ///
-/// Uses its own [homeDiscoverProvider] (isolated [LibraryNotifier]) so it
-/// never contaminates [libraryProvider] or [exploreProvider].
+/// Comparte el mismo [homeDataProvider] que el Hero y Recommended, evitando
+/// duplicar requests. Los cambios de filtro usan el tab cache compartido.
 class DiscoverSection extends ConsumerWidget {
   const DiscoverSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(homeDiscoverFilterProvider);
-    final libraryState = ref.watch(homeDiscoverProvider);
     final mangas = ref.watch(homeDiscoverMangasProvider);
     final l10n = context.l10n;
 
@@ -47,11 +46,12 @@ class DiscoverSection extends ConsumerWidget {
 
         const SizedBox(height: 12),
 
-        // ── Manga row — MangaTile width matches Explore's column size ──
-        if (libraryState.isLoading && mangas.isEmpty)
-          const HomeShimmer.cardRow()
-        else if (mangas.isNotEmpty)
-          LayoutBuilder(
+        // ── Manga row con transición suave shimmer → contenido ──
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: mangas.isEmpty
+              ? const HomeShimmer.cardRow()
+              : LayoutBuilder(
                     builder: (context, constraints) {
                       final width = constraints.maxWidth;
                       final crossAxisCount = width >= 600 ? 3 : 2;
@@ -75,6 +75,7 @@ class DiscoverSection extends ConsumerWidget {
                       );
                     },
                   ),
+              ),
       ],
     );
   }

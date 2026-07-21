@@ -18,11 +18,6 @@ import 'package:inkscroller_flutter/features/library/domain/entities/user_librar
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_status.dart';
 import 'package:inkscroller_flutter/features/library/domain/repositories/reading_progress_repository.dart';
 import 'package:inkscroller_flutter/features/library/domain/repositories/user_library_repository.dart';
-import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_list.dart';
-import 'package:inkscroller_flutter/features/library/domain/usecases/search_manga.dart';
-import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_notifier.dart';
-import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_provider.dart';
-import 'package:inkscroller_flutter/features/library/presentation/providers/library/library_state.dart';
 import 'package:inkscroller_flutter/features/library/presentation/providers/reading_progress_provider.dart';
 import 'package:inkscroller_flutter/features/library/presentation/providers/user_library_provider.dart';
 import 'package:inkscroller_flutter/features/profile/domain/entities/user_profile.dart';
@@ -37,10 +32,6 @@ class _MockReadingProgressRepository extends Mock
 
 class _MockUserLibraryRepository extends Mock
     implements UserLibraryRepository {}
-
-class _MockGetMangaList extends Mock implements GetMangaList {}
-
-class _MockSearchManga extends Mock implements SearchManga {}
 
 class _MockSignIn extends Mock implements SignIn {}
 
@@ -60,21 +51,6 @@ class _MockSendEmailVerification extends Mock
 class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
 
 class _MockReloadUser extends Mock implements ReloadUser {}
-
-class _FixedLibraryNotifier extends LibraryNotifier {
-  _FixedLibraryNotifier(LibraryState state)
-    : super(_MockGetMangaList(), _MockSearchManga()) {
-    this.state = state;
-  }
-
-  @override
-  Future<void> loadInitial({
-    LibraryMode mode = LibraryMode.normal,
-    String? genre,
-    String? contentRating,
-    List<String>? demographics,
-  }) async {}
-}
 
 AuthNotifier _stubAuthNotifier({AppUser? user}) {
   final getAuthState = _MockGetAuthState();
@@ -135,18 +111,6 @@ UserLibraryNotifier _makeUserLibraryNotifier(
   return UserLibraryNotifier(repository);
 }
 
-LibraryNotifier _makeLibraryNotifier(List<Manga> mangas) =>
-    _FixedLibraryNotifier(
-      LibraryState(
-        mangas: mangas,
-        isLoading: false,
-        isLoadingMore: false,
-        hasMore: false,
-        query: '',
-        isSearching: false,
-      ),
-    );
-
 Manga _manga({required String id, String? coverUrl}) =>
     Manga(id: id, title: 'Manga $id', coverUrl: coverUrl);
 
@@ -176,7 +140,6 @@ Widget _buildProviderScope({
   required AuthNotifier authNotifier,
   required ReadingProgressNotifier progressNotifier,
   required UserLibraryNotifier userLibraryNotifier,
-  required LibraryNotifier libraryNotifier,
   required Widget child,
 }) {
   return ProviderScope(
@@ -184,7 +147,6 @@ Widget _buildProviderScope({
       authProvider.overrideWith((_) => authNotifier),
       readingProgressProvider.overrideWith((_) => progressNotifier),
       userLibraryProvider.overrideWith((_) => userLibraryNotifier),
-      libraryProvider.overrideWith((_) => libraryNotifier),
     ],
     child: MaterialApp(home: Scaffold(body: child)),
   );
@@ -228,7 +190,6 @@ void main() {
           authNotifier: _guestAuthNotifier(),
           progressNotifier: _makeProgressNotifier(const {}),
           userLibraryNotifier: _makeUserLibraryNotifier(const {}),
-          libraryNotifier: _makeLibraryNotifier(const []),
           child: _continueReadingConsumer((items) {}),
         ),
       );
@@ -243,7 +204,6 @@ void main() {
           authNotifier: _authenticatedAuthNotifier(),
           progressNotifier: _makeProgressNotifier(const {}),
           userLibraryNotifier: _makeUserLibraryNotifier(const {}),
-          libraryNotifier: _makeLibraryNotifier(const []),
           child: _continueReadingConsumer((items) {}),
         ),
       );
@@ -264,7 +224,6 @@ void main() {
           userLibraryNotifier: _makeUserLibraryNotifier({
             manga.id: _libraryEntry(manga),
           }),
-          libraryNotifier: _makeLibraryNotifier(const []),
           child: _continueReadingConsumer((items) {}),
         ),
       );
@@ -284,7 +243,6 @@ void main() {
           userLibraryNotifier: _makeUserLibraryNotifier({
             manga.id: _libraryEntry(manga),
           }),
-          libraryNotifier: _makeLibraryNotifier(const []),
           child: _continueReadingConsumer((items) {}),
         ),
       );
@@ -304,7 +262,6 @@ void main() {
           userLibraryNotifier: _makeUserLibraryNotifier({
             manga.id: _libraryEntry(manga),
           }),
-          libraryNotifier: _makeLibraryNotifier(const []),
           child: _continueReadingConsumer((items) {}),
         ),
       );
@@ -338,7 +295,6 @@ void main() {
             'a': _libraryEntry(mangaA),
             'b': _libraryEntry(mangaB),
           }),
-          libraryNotifier: _makeLibraryNotifier(const []),
           child: _continueReadingConsumer((items) => captured = items),
         ),
       );
@@ -369,7 +325,6 @@ void main() {
           authNotifier: _authenticatedAuthNotifier(),
           progressNotifier: _makeProgressNotifier(progress),
           userLibraryNotifier: _makeUserLibraryNotifier(entries),
-          libraryNotifier: _makeLibraryNotifier(const []),
           child: _continueReadingConsumer((items) {}),
         ),
       );
@@ -378,25 +333,22 @@ void main() {
       expect(find.text('count:8'), findsOneWidget);
     });
 
-    testWidgets(
-      'falls back to libraryProvider when manga is not in user library',
-      (tester) async {
-        final manga = _manga(id: 'm1');
-        await tester.pumpWidget(
-          _buildProviderScope(
-            authNotifier: _authenticatedAuthNotifier(),
-            progressNotifier: _makeProgressNotifier({
-              'm1': _progress(mangaId: 'm1', read: 2, total: 10),
-            }),
-            userLibraryNotifier: _makeUserLibraryNotifier(const {}),
-            libraryNotifier: _makeLibraryNotifier([manga]),
-            child: _continueReadingConsumer((items) {}),
-          ),
-        );
-        await tester.pumpAndSettle();
+    testWidgets('does not initialize the catalog for unresolved progress', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildProviderScope(
+          authNotifier: _authenticatedAuthNotifier(),
+          progressNotifier: _makeProgressNotifier({
+            'm1': _progress(mangaId: 'm1', read: 2, total: 10),
+          }),
+          userLibraryNotifier: _makeUserLibraryNotifier(const {}),
+          child: _continueReadingConsumer((items) {}),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        expect(find.text('count:1'), findsOneWidget);
-      },
-    );
+      expect(find.text('count:0'), findsOneWidget);
+    });
   });
 }

@@ -4,8 +4,6 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../library/domain/entities/manga.dart';
 import '../../../library/domain/entities/manga_reading_progress.dart';
 import '../../../library/domain/entities/user_library_entry.dart';
-import '../../../library/presentation/providers/library/library_provider.dart';
-import '../../../library/presentation/providers/library/library_state.dart';
 import '../../../library/presentation/providers/reading_progress_provider.dart';
 import '../../../library/presentation/providers/user_library_provider.dart';
 
@@ -19,9 +17,8 @@ class ContinueReadingItem {
 
 /// Derived provider that builds the "Continue Reading" rail for signed-in users.
 ///
-/// It resolves progress records against the user library first, then the public
-/// catalogue, filters out incomplete/invalid entries, sorts by recency, and
-/// caps the result at eight.
+/// It resolves progress records against the user library, filters out
+/// incomplete/invalid entries, sorts by recency, and caps the result at eight.
 final continueReadingProvider = FutureProvider<List<ContinueReadingItem>>((
   ref,
 ) async {
@@ -34,26 +31,20 @@ final continueReadingProvider = FutureProvider<List<ContinueReadingItem>>((
   await progressNotifier.initialized;
   final progressMap = ref.watch(readingProgressProvider);
   final userLibrary = ref.watch(userLibraryProvider);
-  final libraryState = ref.watch(libraryProvider);
 
   return _buildContinueReadingItems(
     progressMap: progressMap,
     userLibrary: userLibrary,
-    libraryState: libraryState,
   );
 });
 
 List<ContinueReadingItem> _buildContinueReadingItems({
   required Map<String, MangaReadingProgress> progressMap,
   required Map<String, UserLibraryEntry> userLibrary,
-  required LibraryState libraryState,
 }) {
   final mangaLookup = <String, Manga>{};
   for (final entry in userLibrary.values) {
     mangaLookup[entry.manga.id] = entry.manga;
-  }
-  for (final manga in libraryState.mangas) {
-    mangaLookup.putIfAbsent(manga.id, () => manga);
   }
 
   final items = <ContinueReadingItem>[];

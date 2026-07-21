@@ -22,6 +22,19 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   String _languagesPath(String mangaId) =>
       '${ApiEndpoints.chaptersLanguagesBase}/$mangaId/languages';
 
+  /// Filtra `unspecified` de demographics antes de mandarlo a la API.
+  /// MangaDex es ~40x más lento cuando se incluye `unspecified` en la query.
+  /// Los mangas sin demografía se siguen mostrando porque MangaDex los
+  /// devuelve con `demographic: null` — el frontend los clasifica igual.
+  Map<String, dynamic> _demographicParam(List<MangaDemographic> demographics) {
+    final filtered = demographics
+        .where((d) => d != MangaDemographic.unspecified)
+        .map((e) => e.toJson())
+        .toList();
+    if (filtered.isEmpty) return const {};
+    return {'demographic': filtered};
+  }
+
   @override
   Future<MangaCapabilities> getMangaCapabilities() async {
     try {
@@ -48,6 +61,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     String? genre,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
@@ -58,7 +72,8 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           if (genre != null) 'genre': genre,
           if (contentRating != null) 'content_rating': contentRating,
           if (demographics != null && demographics.isNotEmpty)
-            'demographic': demographics.map((e) => e.toJson()).toList(),
+            ..._demographicParam(demographics),
+          if (language != null) 'language': language,
           ...?order?.map((key, value) => MapEntry('order[$key]', value)),
         },
       );
@@ -237,6 +252,7 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     required int offset,
     String? contentRating,
     List<MangaDemographic>? demographics,
+    String? language,
   }) async {
     try {
       final response = await dio.get<dynamic>(
@@ -247,8 +263,10 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
           'offset': offset,
           if (contentRating != null) 'content_rating': contentRating,
           if (demographics != null && demographics.isNotEmpty)
-            'demographic': demographics.map((e) => e.toJson()).toList(),
+            ..._demographicParam(demographics),
+          if (language != null) 'language': language,
         },
+        options: Options(extra: {'concurrency_priority': 'high'}),
       );
 
       final data = response.data;

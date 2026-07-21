@@ -205,6 +205,7 @@
   "authEmailLabel": "Email",
   "authPasswordLabel": "Password",
   "authSignInButton": "Sign in",
+  "authSignInCreateAccountButton": "Sign in / Create account",
   "authNoAccount": "Don't have an account? Create one",
   "authContinueAsGuest": "Continue as guest",
   "authEmailRequired": "Enter your email.",
