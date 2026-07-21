@@ -49,7 +49,7 @@ class DioClient {
     );
     dio.interceptors.add(_AuthInterceptor(tokenProvider: tokenProvider));
     dio.interceptors.add(EmailVerificationInterceptor());
-    dio.interceptors.add(_ConcurrencyInterceptor(maxConcurrent: 4));
+    dio.interceptors.add(_ConcurrencyInterceptor(maxConcurrent: 8));
   }
 }
 

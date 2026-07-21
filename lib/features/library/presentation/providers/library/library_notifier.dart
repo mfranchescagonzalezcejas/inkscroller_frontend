@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/app_constants.dart';
 import '../../../domain/entities/manga.dart';
@@ -10,6 +10,8 @@ import '../../../domain/usecases/get_manga_list.dart';
 import '../../../domain/usecases/search_manga.dart';
 import 'dedupe_mangas.dart';
 import 'library_state.dart';
+
+final DateTime _perfAppStart = DateTime.now();
 
 /// Browsing mode that determines the sort order used by [LibraryNotifier].
 enum LibraryMode { normal, popular }
@@ -125,6 +127,10 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   /// resumes correctly when a sibling notifier reuses cached state.
   static final Map<String, int> _tabCacheOffset = {};
 
+  /// In-flight requests to prevent concurrent duplicate preloads (ponytail:
+  /// two callers for the same key should share one request, not make two).
+  static final Map<String, Future<List<Manga>?>> _inflightCache = {};
+
   /// Cache keys written by this notifier instance. Used by [resetExplore] to
   /// evict only this instance's entries, leaving sibling (Home) tabs intact.
   final Set<String> _myCacheKeys = {};
@@ -219,21 +225,38 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     final capturedVersion = _loadVersion;
     state = state.copyWith(isLoading: true, isLoadingMore: false, clearFailure: true);
 
+    // CAPTURAR en locales al inicio. NO usar _contentRating ni _demographics
+    // después del await — otro caller puede pisarlos mientras esperamos.
+    final capturedCR = contentRating ?? _contentRating;
+    final capturedDemos = effectiveDemographics;
     _mode = mode;
     _genre = genre;
-    _contentRating = contentRating;
-    _demographics = effectiveDemographics;
+    _contentRating = capturedCR;
+    _demographics = capturedDemos;
     _offset = 0;
 
+    final t0 = DateTime.now();
+    final isFirstLoad = capturedVersion <= 1;
     final result = await _getMangaList(
       limit: _limit,
       offset: _offset,
       order: _mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
       genre: _genre,
-      contentRating: _contentRating,
-      demographics: effectiveDemographics?.map(MangaDemographic.fromJson).toList(),
+      contentRating: capturedCR,
+      demographics: capturedDemos?.map(MangaDemographic.fromJson).toList(),
       language: _language,
     );
+    final elapsed = DateTime.now().difference(t0).inMilliseconds;
+
+    if (kDebugMode) {
+      final tag = genre ?? _mode.name;
+      final loadType = isFirstLoad ? 'initial' : 'refresh';
+      debugPrint(
+        '[PERF] $loadType:$tag cr=$capturedCR demos=$capturedDemos '
+        '→ ${result.isRight() ? "OK ${result.getOrElse(() => []).length} items" : "FAIL"} '
+        'in ${elapsed}ms (app +${DateTime.now().difference(_perfAppStart).inMilliseconds}ms)',
+      );
+    }
 
     result.fold(
       (failure) {
@@ -279,37 +302,64 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     String? genre,
   }) async {
     final key = _cacheKey(mode, genre, contentRating: _contentRating, demographics: _demographics);
+
+    // Ponytail: concurrent callers for the same key share one request.
+    final inflight = _inflightCache[key];
+    if (inflight != null) return inflight;
+
     final existing = _tabCache[key];
     if (existing != null && existing.isFresh(_cacheTtl)) {
       return existing.state.mangas;
     }
 
-    try {
-      final result = await _getMangaList(
-        limit: _limit,
-        offset: 0,
-        order: mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
-        genre: genre,
-        contentRating: _contentRating,
-        demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
-        language: _language,
-      );
+    final capturedCR = _contentRating;
+    final capturedDemos = _demographics;
 
-      return result.fold(
-        (_) => null,
-        (mangas) {
-          final cachedState = LibraryState.initial().copyWith(
-            mangas: dedupeMangas(mangas),
-            isLoading: false,
-            hasMore: mangas.length == _limit,
+    // Register in-flight BEFORE first await so concurrent callers dedupe.
+    _inflightCache[key] = (() async {
+      final t0 = DateTime.now();
+      try {
+        final result = await _getMangaList(
+          limit: _limit,
+          offset: 0,
+          order: mode == LibraryMode.popular ? {'followedCount': 'desc'} : null,
+          genre: genre,
+          contentRating: capturedCR,
+          demographics: capturedDemos?.map(MangaDemographic.fromJson).toList(),
+          language: _language,
+        );
+        final elapsed = DateTime.now().difference(t0).inMilliseconds;
+
+        if (kDebugMode) {
+          final tag = genre ?? mode.name;
+          debugPrint(
+            '[PERF] preload:$tag cr=$capturedCR '
+            '→ ${result.isRight() ? "OK" : "FAIL"} in ${elapsed}ms',
           );
-          _tabCache[key] = _CachedEntry(cachedState, DateTime.now());
-          _tabCacheOffset[key] = mangas.length;
-          return mangas;
-        },
-      );
-    } on Exception catch (_) {
-      return null;
+        }
+
+        return result.fold(
+          (_) => null,
+          (mangas) {
+            final cachedState = LibraryState.initial().copyWith(
+              mangas: dedupeMangas(mangas),
+              isLoading: false,
+              hasMore: mangas.length == _limit,
+            );
+            _tabCache[key] = _CachedEntry(cachedState, DateTime.now());
+            _tabCacheOffset[key] = mangas.length;
+            return mangas;
+          },
+        );
+      } on Exception catch (_) {
+        return null;
+      }
+    })();
+
+    try {
+      return await _inflightCache[key]!;
+    } finally {
+      unawaited(_inflightCache.remove(key));
     }
   }
 
@@ -592,6 +642,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     _searchQueryVersion++;
     final capturedGeneration = _searchQueryVersion;
 
+    final t0 = DateTime.now();
     final result = await _searchManga(
       query,
       limit: _limit,
@@ -600,6 +651,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
       language: _language,
     );
+    final elapsed = DateTime.now().difference(t0).inMilliseconds;
+
+    if (kDebugMode) {
+      debugPrint('[PERF] search-more "$query" offset=$_searchOffset → in ${elapsed}ms');
+    }
 
     if (_searchQueryVersion != capturedGeneration) return;
 
@@ -637,6 +693,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     // Cache hit → mostrar resultados al instante, refrescar en background
     final cached = _searchCache[query];
     if (cached != null && !cached.isStale(_searchCacheTtl)) {
+      if (kDebugMode) {
+        debugPrint('[PERF] search cache hit for "$query"');
+      }
       state = state.copyWith(
         mangas: cached.mangas,
         isSearching: false,
@@ -653,6 +712,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       clearFailure: true,
     );
 
+    final t0 = DateTime.now();
     final result = await _searchManga(
       query,
       limit: _limit,
@@ -661,6 +721,11 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       demographics: _demographics?.map(MangaDemographic.fromJson).toList(),
       language: _language,
     );
+    final elapsed = DateTime.now().difference(t0).inMilliseconds;
+
+    if (kDebugMode) {
+      debugPrint('[PERF] search "$query" → ${result.isRight() ? "OK" : "FAIL"} in ${elapsed}ms');
+    }
 
     if (_searchQueryVersion != capturedGeneration) return;
 

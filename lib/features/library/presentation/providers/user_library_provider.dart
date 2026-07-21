@@ -6,10 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/providers/auth_state.dart';
+import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../domain/entities/manga.dart';
 import '../../domain/entities/user_library_entry.dart';
 import '../../domain/entities/user_library_status.dart';
-import '../../../preferences/domain/usecases/get_preferences.dart';
 import '../../domain/usecases/get_manga_detail.dart';
 import '../../domain/repositories/user_library_repository.dart';
 import 'reading_progress_provider.dart';
@@ -28,6 +28,8 @@ final userLibraryProvider =
 
       final UserLibraryNotifier notifier = UserLibraryNotifier(
         sl<UserLibraryRepository>(),
+        language: () =>
+            ref.read(preferencesProvider).preferences?.defaultLanguage ?? 'en',
         onSyncStart: () =>
             ref.read(userLibrarySyncingProvider.notifier).state = true,
         onSyncEnd: () =>
@@ -56,15 +58,18 @@ final userLibraryProvider =
 class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   UserLibraryNotifier(
     this._repository, {
+    String Function()? language,
     VoidCallback? onSyncStart,
     VoidCallback? onSyncEnd,
-  })  : _onSyncStart = onSyncStart,
-        _onSyncEnd = onSyncEnd,
-        super(const <String, UserLibraryEntry>{}) {
+  }) : _language = language ?? _defaultLanguage,
+       _onSyncStart = onSyncStart,
+       _onSyncEnd = onSyncEnd,
+       super(const <String, UserLibraryEntry>{}) {
     _load();
   }
 
   final UserLibraryRepository _repository;
+  final String Function() _language;
   final VoidCallback? _onSyncStart;
   final VoidCallback? _onSyncEnd;
   String? _activeUserId;
@@ -121,13 +126,9 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
   Future<void> _enrichMissingMetadata() async {
     if (!sl.isRegistered<GetMangaDetail>()) return;
     final getDetail = sl<GetMangaDetail>();
-    // Resolve the user's language so the API returns localized titles.
-    final lang = sl.isRegistered<GetPreferences>()
-        ? (await sl<GetPreferences>()()).fold(
-            (_) => 'en',
-            (p) => p.defaultLanguage,
-          )
-        : 'en';
+    // Preferences are loaded during session startup; never issue another GET
+    // while metadata enrichment is running.
+    final lang = _language();
     // Snapshot the keys so state mutations in the loop don't affect iteration.
     final ids = state.keys.toList();
     final Map<String, UserLibraryEntry> updates = <String, UserLibraryEntry>{};
@@ -144,16 +145,21 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
 
         updates[id] = UserLibraryEntry(
           manga: Manga(
-            id: m.id, title: m.title,
+            id: m.id,
+            title: m.title,
             description: full.description ?? m.description,
-            coverUrl: m.coverUrl, demographic: full.demographic ?? m.demographic,
+            coverUrl: m.coverUrl,
+            demographic: full.demographic ?? m.demographic,
             status: full.status ?? m.status,
             genres: full.genres.isNotEmpty ? full.genres : m.genres,
-            score: full.score ?? m.score, rank: full.rank ?? m.rank,
-            type: full.type ?? m.type, year: full.year ?? m.year,
+            score: full.score ?? m.score,
+            rank: full.rank ?? m.rank,
+            type: full.type ?? m.type,
+            year: full.year ?? m.year,
             authors: full.authors.isNotEmpty ? full.authors : m.authors,
             readChaptersCount: m.readChaptersCount,
-            totalChaptersCount: m.totalChaptersCount, malId: full.malId ?? m.malId,
+            totalChaptersCount: m.totalChaptersCount,
+            malId: full.malId ?? m.malId,
           ),
           isInLibrary: entry.isInLibrary,
           status: entry.status,
@@ -221,4 +227,6 @@ class UserLibraryNotifier extends StateNotifier<Map<String, UserLibraryEntry>> {
     await _repository.save(entry, userId: _activeUserId);
     state = <String, UserLibraryEntry>{...state, entry.manga.id: entry};
   }
+
+  static String _defaultLanguage() => 'en';
 }
