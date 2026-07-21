@@ -129,25 +129,7 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 
 <br/>
 
-<!-- ─── DEMO VIDEO ──────────────────────────────────────────────────── -->
 
-<div align="center">
-  <sub><b>· &nbsp; D E M O &nbsp; V I D E O &nbsp; ·</b></sub>
-</div>
-
-<br/>
-
-<a href="https://www.youtube.com/watch?v=jBlEnNTdkOI">
-    <img src="https://img.youtube.com/vi/jBlEnNTdkOI/maxresdefault.jpg" width="100%" alt="Demo video">
-</a>
-
-<br/>
-
-<div align="center">
-  <img width="55%" src="https://capsule-render.vercel.app/api?type=rect&color=0:0f172a,50:0d9488,100:0f172a&height=3&section=header" alt=""/>
-</div>
-
-<br/>
 
 <!-- ─── SETUP ─────────────────────────────────────────────────────────── -->
 
