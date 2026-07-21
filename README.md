@@ -291,7 +291,7 @@ Layer direction: `Presentation → Domain ← Data` — domain stays framework-a
 <tr><td>📦 <b>App releases</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases">GitHub Releases</a> · Google Play publication in progress</td></tr>
 <tr><td>🔌 <b>Backend APIs</b></td><td><code>dev</code> <code>https://api.dev.inkscroller.devdigi.dev</code> · <code>staging</code> <code>https://api.stg.inkscroller.devdigi.dev</code> · <code>pro</code> <code>https://api.inkscroller.devdigi.dev</code></td></tr>
 <tr><td>📽️ <b>Slides</b></td><td><a href="https://docs.google.com/presentation/d/110GKLMFSurLuK8EWqSoyn5J0vsXFw3-rHF6YNvtbzrY/edit?usp=sharing">Google Slides</a></td></tr>
-<tr><td>🎬 <b>Demo video</b></td><td>Work in progress — not published yet</td></tr>
+<tr><td>🎬 <b>Demo video</b></td><td><a href="https://youtu.be/jBlEnNTdkOI">youtu.be/jBlEnNTdkOI</a></td></tr>
 <tr><td>👤 <b>Test user</b></td><td><code>testuserdevdigi@proton.me</code> / <code>1234qweASD-</code> (already verified). To test the email verification flow, register with your own email instead.</td></tr>
 </tbody>
 </table>
