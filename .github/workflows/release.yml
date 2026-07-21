@@ -143,7 +143,7 @@ jobs:
           done
 
       - name: Upload release metadata
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: release-metadata
           path: release-metadata/
@@ -242,7 +242,7 @@ jobs:
             --dart-define-from-file=.dart-defines/firebase.json
 
       - name: Upload ${{ matrix.flavor }} APK
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: apk-${{ matrix.flavor }}
           path: build/app/outputs/flutter-apk/${{ matrix.apk_name }}
@@ -261,7 +261,7 @@ jobs:
 
       - name: Upload ${{ matrix.flavor }} AAB
         if: matrix.flavor == 'pro'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: aab-${{ matrix.flavor }}
           path: build/app/outputs/bundle/${{ matrix.flavor }}Release/app-${{ matrix.flavor }}-release.aab
