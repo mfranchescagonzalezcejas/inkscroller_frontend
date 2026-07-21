@@ -538,6 +538,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   Future<void> clearSearch() async {
     _searchDebounce?.cancel();
     _searchQueryVersion++;
+    if (_activeQuery.isNotEmpty) {
+      _searchCache.remove(_activeQuery);
+    }
     _activeQuery = '';
     _searchOffset = 0;
     _totalResults = 0;
@@ -567,6 +570,8 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     if (query.isNotEmpty) {
       // ponytail: search refresh reuses _performSearch which resets offset
       // and version internally — no need to duplicate cursor reset here.
+      // Clear the search cache so the refresh forces a fresh API call.
+      _searchCache.remove(query);
       _searchDebounce?.cancel();
       return _performSearch(query);
     }

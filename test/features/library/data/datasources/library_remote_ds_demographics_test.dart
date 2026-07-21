@@ -152,6 +152,7 @@ void main() {
         () => dio.get<dynamic>(
           any(),
           queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
         ),
       ).thenAnswer((_) async => mockSearchResponse());
 
@@ -165,6 +166,7 @@ void main() {
         ],
       );
 
+      // unspecified is filtered by _demographicParam for performance
       verify(
         () => dio.get<dynamic>(
           '${ApiEndpoints.manga}/search',
@@ -172,8 +174,9 @@ void main() {
             'q': 'mystery',
             'limit': 20,
             'offset': 0,
-            'demographic': ['shounen', 'unspecified'],
+            'demographic': ['shounen'],
           },
+          options: any(named: 'options'),
         ),
       ).called(1);
     });
@@ -183,6 +186,7 @@ void main() {
         () => dio.get<dynamic>(
           any(),
           queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
         ),
       ).thenAnswer((_) async => mockSearchResponse());
 
@@ -196,6 +200,7 @@ void main() {
         () => dio.get<dynamic>(
           '${ApiEndpoints.manga}/search',
           queryParameters: captureAny(named: 'queryParameters'),
+          options: any(named: 'options'),
         ),
       ).captured.single as Map<String, dynamic>;
 
@@ -207,6 +212,7 @@ void main() {
         () => dio.get<dynamic>(
           any(),
           queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
         ),
       ).thenAnswer((_) async => mockSearchResponse());
 

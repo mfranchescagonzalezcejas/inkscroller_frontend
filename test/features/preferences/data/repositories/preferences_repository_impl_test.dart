@@ -146,6 +146,9 @@ void main() {
     final prefs = (result as Right<Failure, UserReadingPreferences>).value;
     expect(prefs.defaultReaderMode, ReaderMode.paged);
     expect(prefs.defaultLanguage, 'es');
+    // Wait for the background refresh to complete — repository returns cached
+    // data immediately and refreshes in background (cache-first strategy).
+    await Future<void>.delayed(const Duration(milliseconds: 50));
     verify(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: 'paged',
