@@ -110,19 +110,16 @@ los capítulos externos (enlazados a plataformas oficiales como **Manga Plus**, 
 
 <br/>
 
-<!--
-  Añadir capturas aquí. Layout recomendado:
-  <div align="center">
-    <img src="docs/screenshots/home.png" width="30%" alt="Inicio" />
-    <img src="docs/screenshots/manga-detail.png" width="30%" alt="Detalle de manga" />
-    <img src="docs/screenshots/reader.png" width="30%" alt="Lector" />
-  </div>
-  <div align="center">
-    <img src="docs/screenshots/explore.png" width="30%" alt="Explorar" />
-    <img src="docs/screenshots/profile.png" width="30%" alt="Perfil" />
-    <img src="docs/screenshots/login.png" width="30%" alt="Inicio de sesión" />
-  </div>
--->
+<div align="center">
+    <img src="docs/screenshots/home.jpg" width="30%" alt="Inicio" />
+    <img src="docs/screenshots/manga_detail.jpg" width="30%" alt="Detalle de manga" />
+    <img src="docs/screenshots/reader.jpg" width="30%" alt="Lector" />
+</div>
+<div align="center">
+    <img src="docs/screenshots/explore.jpg" width="30%" alt="Explorar" />
+    <img src="docs/screenshots/library.jpg" width="30%" alt="Biblioteca" />
+    <img src="docs/screenshots/login.jpg" width="30%" alt="Inicio de sesión" />
+</div>
 
 <br/>
 
@@ -132,28 +129,7 @@ los capítulos externos (enlazados a plataformas oficiales como **Manga Plus**, 
 
 <br/>
 
-<!-- ─── DEMO VIDEO ──────────────────────────────────────────────────── -->
 
-<div align="center">
-  <sub><b>· &nbsp; V I D E O &nbsp; D E M O &nbsp; ·</b></sub>
-</div>
-
-<br/>
-
-<!--
-  Reemplazar VIDEO_ID por el ID del video de YouTube.
-  <a href="https://www.youtube.com/watch?v=VIDEO_ID">
-    <img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" width="100%" alt="Video demo">
-  </a>
--->
-
-<br/>
-
-<div align="center">
-  <img width="55%" src="https://capsule-render.vercel.app/api?type=rect&color=0:0f172a,50:0d9488,100:0f172a&height=3&section=header" alt=""/>
-</div>
-
-<br/>
 
 <!-- ─── CONFIGURACIÓN / SETUP ─────────────────────────────────────────── -->
 
@@ -296,7 +272,7 @@ Dirección de capas: `Presentation → Domain ← Data` — el dominio no depend
 <tr><td>📦 <b>Releases app</b></td><td><a href="https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/releases">GitHub Releases</a> · publicación en Google Play en proceso</td></tr>
 <tr><td>🔌 <b>APIs backend</b></td><td><code>dev</code> <code>https://api.dev.inkscroller.devdigi.dev</code> · <code>staging</code> <code>https://api.stg.inkscroller.devdigi.dev</code> · <code>pro</code> <code>https://api.inkscroller.devdigi.dev</code></td></tr>
 <tr><td>📽️ <b>Diapositivas</b></td><td><a href="https://docs.google.com/presentation/d/110GKLMFSurLuK8EWqSoyn5J0vsXFw3-rHF6YNvtbzrY/edit?usp=sharing">Google Slides</a></td></tr>
-<tr><td>🎬 <b>Vídeo demo</b></td><td>En proceso — todavía no publicado</td></tr>
+<tr><td>🎬 <b>Vídeo demo</b></td><td><a href="https://youtu.be/jBlEnNTdkOI">youtu.be/jBlEnNTdkOI</a></td></tr>
 <tr><td>👤 <b>Usuario prueba</b></td><td><code>testuserdevdigi@proton.me</code> / <code>1234qweASD-</code> (ya verificado). Para probar el flujo de verificación, registrate con tu propio email.</td></tr>
 </tbody>
 </table>
