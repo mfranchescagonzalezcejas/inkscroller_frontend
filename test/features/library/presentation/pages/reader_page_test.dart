@@ -15,6 +15,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_email_verification.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_password_reset.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
@@ -59,6 +62,13 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
+class _MockSendEmailVerification extends Mock
+    implements SendEmailVerification {}
+
+class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
+
+class _MockReloadUser extends Mock implements ReloadUser {}
+
 class _FakeUrlLauncher extends UrlLauncherPlatform {
   bool canLaunchResult = false;
   bool canLaunchThrows = false;
@@ -94,6 +104,9 @@ AuthNotifier _makeStubAuthNotifier() {
     signUp: _MockSignUp(),
     signOut: _MockSignOut(),
     getAuthState: getAuthState,
+    sendEmailVerification: _MockSendEmailVerification(),
+    sendPasswordReset: _MockSendPasswordReset(),
+    reloadUser: _MockReloadUser(),
     getUserProfile: _MockGetUserProfile(),
     updateUserProfile: _MockUpdateUserProfile(),
   );
@@ -173,6 +186,40 @@ void main() {
 
   tearDown(() {
     UrlLauncherPlatform.instance = previousUrlLauncher;
+  });
+
+  testWidgets('labels and tooltips floating reader controls', (tester) async {
+    when(() => getChapterPages('ch-controls')).thenAnswer(
+      (_) async => const Right<Failure, List<String>>(<String>[
+        'https://example.com/page.jpg',
+      ]),
+    );
+    when(
+      () => resolveReaderMode(
+        globalReaderMode: any(named: 'globalReaderMode'),
+        titleOverride: any(named: 'titleOverride'),
+        contentMetadata: any(named: 'contentMetadata'),
+      ),
+    ).thenReturn(ReaderMode.vertical);
+
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    try {
+      await pumpReaderPage(
+        tester,
+        getChapterPages: getChapterPages,
+        resolveReaderMode: resolveReaderMode,
+        chapterId: 'ch-controls',
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byTooltip('Back'), findsOneWidget);
+      expect(find.byTooltip('Reader settings'), findsOneWidget);
+      expect(find.bySemanticsLabel('Back'), findsOneWidget);
+      expect(find.bySemanticsLabel('Reader settings'), findsOneWidget);
+    } finally {
+      semantics.dispose();
+    }
   });
 
   // ── P0-F2: External chapter guard ───────────────────────────────────────

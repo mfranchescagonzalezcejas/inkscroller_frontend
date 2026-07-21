@@ -1,44 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/design/design_tokens.dart' show AppColors;
+import '../../../../core/design/design_tokens.dart';
 import '../../../../core/l10n/l10n.dart';
 
 /// About screen — app version, legal disclaimer, and API credits.
 ///
 /// Accessible from Profile → "App information".
 /// Contains the legal disclaimer required by MangaDex and MAL/Jikan API ToS.
-class AboutPage extends StatefulWidget {
+class AboutPage extends ConsumerWidget {
   const AboutPage({super.key});
 
   @override
-  State<AboutPage> createState() => _AboutPageState();
-}
-
-class _AboutPageState extends State<AboutPage> {
-  PackageInfo? _packageInfo;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPackageInfo();
-  }
-
-  Future<void> _loadPackageInfo() async {
-    try {
-      final info = await PackageInfo.fromPlatform();
-      if (!mounted) return;
-      setState(() => _packageInfo = info);
-    } on Object catch (_) {
-      // ponytail: PackageInfo fails silently — version row stays empty.
-      // Add a retry or Sentry breadcrumb when error tracking is wired.
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final packageInfo = ref.watch(appVersionProvider).valueOrNull;
+
     return Scaffold(
       backgroundColor: AppColors.stage,
       appBar: AppBar(
@@ -48,7 +27,7 @@ class _AboutPageState extends State<AboutPage> {
         title: Text(
           l10n.aboutTitle,
           style: const TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
+            fontFamily: AppTypography.fontFamily,
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: AppColors.onSurface,
@@ -58,10 +37,10 @@ class _AboutPageState extends State<AboutPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: <Widget>[
-          _AppIdentitySection(packageInfo: _packageInfo),
-          const SizedBox(height: 24),
+          _AppIdentitySection(packageInfo: packageInfo),
+          const SizedBox(height: AppSpacing.xl),
           const _DisclaimerSection(),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
           const _CreditsSection(),
         ],
       ),
@@ -72,7 +51,7 @@ class _AboutPageState extends State<AboutPage> {
 // ── App identity ──────────────────────────────────────────────────────────────
 
 class _AppIdentitySection extends StatelessWidget {
-  final PackageInfo? packageInfo;
+  final AppVersionInfo? packageInfo;
 
   const _AppIdentitySection({this.packageInfo});
 
@@ -80,43 +59,40 @@ class _AppIdentitySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final version = packageInfo != null
-        ? l10n.aboutVersion(
-            packageInfo!.version,
-            packageInfo!.buildNumber,
-          )
+        ? l10n.aboutVersion(packageInfo!.version, packageInfo!.buildNumber)
         : '';
 
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
       ),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         children: <Widget>[
           const Text(
             AppConstants.appName,
             style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
+              fontFamily: AppTypography.fontFamily,
+              fontSize: AppTypography.display,
+              fontWeight: AppTypography.displayWeight,
               color: AppColors.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             version,
             style: const TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
+              fontFamily: AppTypography.fontFamily,
               fontSize: 13,
               color: AppColors.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             l10n.aboutAppDescription,
             style: const TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
+              fontFamily: AppTypography.fontFamily,
               fontSize: 12,
               color: AppColors.outline,
             ),
@@ -139,13 +115,13 @@ class _DisclaimerSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _SectionTitle(text: l10n.aboutDisclaimerTitle),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -154,13 +130,13 @@ class _DisclaimerSection extends StatelessWidget {
                 title: l10n.aboutDisclaimerMangadexTitle,
                 body: l10n.aboutDisclaimerMangadexBody(AppConstants.appName),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               _DisclaimerItem(
                 icon: Icons.no_photography_outlined,
                 title: l10n.aboutDisclaimerMalTitle,
                 body: l10n.aboutDisclaimerMalBody(AppConstants.appName),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               _DisclaimerItem(
                 icon: Icons.copyright_outlined,
                 title: l10n.aboutDisclaimerCopyrightTitle,
@@ -186,13 +162,16 @@ class _CreditsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _SectionTitle(text: l10n.aboutCreditsTitle),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.lg,
+          ),
           child: Column(
             children: <Widget>[
               _CreditRow(
@@ -211,9 +190,9 @@ class _CreditsSection extends StatelessWidget {
               const Divider(color: AppColors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.cloud_outlined,
-                name: 'Google Cloud Run',
-                description: l10n.aboutCreditCloudRunDescription,
-                url: 'cloud.google.com',
+                name: 'Railway',
+                description: l10n.aboutCreditInfrastructureDescription,
+                url: 'railway.app',
               ),
               const Divider(color: AppColors.outlineVariant, height: 1),
               _CreditRow(
@@ -240,12 +219,12 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4),
+      padding: const EdgeInsets.only(left: AppSpacing.xs),
       child: Text(
         text,
         style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontSize: 11,
+          fontFamily: AppTypography.fontFamily,
+          fontSize: AppTypography.label,
           fontWeight: FontWeight.w600,
           color: AppColors.outline,
           letterSpacing: 0.5,
@@ -275,7 +254,7 @@ class _DisclaimerItem extends StatelessWidget {
           padding: const EdgeInsets.only(top: 2),
           child: Icon(icon, size: 18, color: AppColors.primary),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,17 +262,17 @@ class _DisclaimerItem extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
+                  fontFamily: AppTypography.fontFamily,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppColors.onSurface,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 body,
                 style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
+                  fontFamily: AppTypography.fontFamily,
                   fontSize: 12,
                   color: AppColors.onSurfaceVariant,
                   height: 1.5,
@@ -335,7 +314,7 @@ class _CreditRow extends StatelessWidget {
             ),
             child: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,8 +322,8 @@ class _CreditRow extends StatelessWidget {
                 Text(
                   name,
                   style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontSize: 14,
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: AppTypography.body,
                     color: AppColors.onSurface,
                   ),
                 ),
@@ -352,7 +331,7 @@ class _CreditRow extends StatelessWidget {
                 Text(
                   description,
                   style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
+                    fontFamily: AppTypography.fontFamily,
                     fontSize: 12,
                     color: AppColors.onSurfaceVariant,
                   ),
@@ -363,8 +342,8 @@ class _CreditRow extends StatelessWidget {
           Text(
             url,
             style: const TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontSize: 11,
+              fontFamily: AppTypography.fontFamily,
+              fontSize: AppTypography.label,
               color: AppColors.outline,
             ),
           ),

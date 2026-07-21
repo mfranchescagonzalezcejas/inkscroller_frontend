@@ -22,16 +22,43 @@ class AuthState {
   /// metadata submission orchestration is in-flight.
   final bool registrationInProgress;
 
+  /// True after a verification email has been sent to the user.
+  final bool emailVerificationSent;
+
+  /// True after a password reset email has been sent successfully.
+  final bool passwordResetSent;
+
+  /// [DateTime.now().millisecondsSinceEpoch] when the last verification email
+  /// was sent. Used to enforce a 60-second cooldown on the resend button.
+  final int? lastVerificationSentAt;
+
+  /// True when enough time has passed since the last verification email to
+  /// allow another resend (60-second cooldown). Returns true when no email
+  /// has been sent yet (cold start, existing unverified account) so the user
+  /// can request their first verification email.
+  bool get canResendVerification {
+    if (lastVerificationSentAt == null) return true;
+    return DateTime.now().millisecondsSinceEpoch - lastVerificationSentAt! >= 60000;
+  }
+
   const AuthState({
     this.isLoading = false,
     this.user,
     this.error,
     this.profileCompletionPending = false,
     this.registrationInProgress = false,
+    this.emailVerificationSent = false,
+    this.passwordResetSent = false,
+    this.lastVerificationSentAt,
   });
 
   /// Convenience getter — true when a user is signed in.
   bool get isAuthenticated => user != null;
+
+  /// Convenience getter — true when the user is signed in but their email
+  /// has not been verified.
+  bool get needsEmailVerification =>
+      user != null && !user!.isEmailVerified;
 
   /// Returns a copy of this state with the provided fields overwritten.
   AuthState copyWith({
@@ -40,8 +67,13 @@ class AuthState {
     String? error,
     bool? profileCompletionPending,
     bool? registrationInProgress,
+    bool? emailVerificationSent,
+    bool? passwordResetSent,
+    int? lastVerificationSentAt,
     bool clearUser = false,
     bool clearError = false,
+    bool clearLastVerificationSentAt = false,
+    bool clearPasswordResetSent = false,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -53,6 +85,15 @@ class AuthState {
       registrationInProgress:
           registrationInProgress ??
               (!clearUser && this.registrationInProgress),
+      emailVerificationSent:
+          emailVerificationSent ??
+              (!clearUser && this.emailVerificationSent),
+      passwordResetSent:
+          passwordResetSent ?? (!clearPasswordResetSent && this.passwordResetSent),
+      lastVerificationSentAt:
+          clearLastVerificationSentAt
+              ? null
+              : lastVerificationSentAt ?? this.lastVerificationSentAt,
     );
   }
 }

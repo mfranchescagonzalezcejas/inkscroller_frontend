@@ -15,6 +15,11 @@ class FlavorBanner extends StatelessWidget {
       return child; // no banner in PRO
     }
 
+    // ponytail: --dart-define=HIDE_FLAVOR_BANNER=true hides the banner so
+    // screen recordings for demos don't show the dev/staging label.
+    const bool hideBanner = bool.fromEnvironment('HIDE_FLAVOR_BANNER');
+    if (hideBanner) return child;
+
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Banner(

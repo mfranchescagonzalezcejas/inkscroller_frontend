@@ -22,6 +22,10 @@ class _MemoryRemoteUserLibraryDataSource
     String? title,
     String? coverUrl,
     List<String> authors = const [],
+    String? type,
+    String? demographic,
+    List<String>? genres,
+    String? status,
   }) async {
     addCalls.add(mangaId);
   }
@@ -208,6 +212,8 @@ void main() {
     );
 
     await repository.save(entry, userId: 'uid-1');
+    // Wait for the unawaited background sync to process.
+    await Future<void>.delayed(Duration.zero);
 
     expect(remote.addCalls, contains('m-2'));
     expect(
@@ -218,6 +224,8 @@ void main() {
 
   test('remove with authenticated user triggers remote delete', () async {
     await repository.remove('m-3', userId: 'uid-1');
+    // Wait for the unawaited background sync to process.
+    await Future<void>.delayed(Duration.zero);
 
     expect(remote.removeCalls, contains('m-3'));
   });

@@ -15,6 +15,7 @@ extension ChapterModelMapper on ChapterModel {
       readable: readable,
       external: external,
       externalUrl: externalUrl,
+      language: language,
     );
   }
 }

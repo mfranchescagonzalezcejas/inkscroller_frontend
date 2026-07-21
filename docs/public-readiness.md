@@ -1,8 +1,8 @@
 # Public Readiness Checklist
 
-This document tracks the work required before changing `inkscroller_flutter` to public visibility.
+This document tracks the work required before changing `inkscroller_frontend` to public visibility.
 
-Related issue: [#132 — prepare frontend repository for public visibility](https://github.com/mfranchescagonzalezcejas/inkscroller_flutter/issues/132)
+Related issue: [#132 — prepare frontend repository for public visibility](https://github.com/mfranchescagonzalezcejas/inkscroller_frontend/issues/132)
 
 ## Goal
 

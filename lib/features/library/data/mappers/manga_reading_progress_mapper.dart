@@ -9,6 +9,9 @@ extension MangaReadingProgressModelMapper on MangaReadingProgressModel {
       mangaId: mangaId,
       readChapterIds: readChapterIds,
       totalChaptersCount: totalChaptersCount,
+      manuallyMarkedCount: manuallyMarkedCount,
+      batchSize: batchSize,
+      updatedAt: updatedAt,
     );
   }
 }
@@ -21,6 +24,9 @@ extension MangaReadingProgressEntityMapper on MangaReadingProgress {
       mangaId: mangaId,
       readChapterIds: readChapterIds,
       totalChaptersCount: totalChaptersCount,
+      manuallyMarkedCount: manuallyMarkedCount,
+      batchSize: batchSize,
+      updatedAt: updatedAt,
     );
   }
 }

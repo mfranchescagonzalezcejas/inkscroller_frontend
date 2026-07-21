@@ -110,6 +110,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loadingChapter => 'Cargando capítulo';
 
   @override
+  String get readerBackAction => 'Volver';
+
+  @override
+  String get readerSettingsAction => 'Ajustes del lector';
+
+  @override
   String chapterPagesProgress(int loadedPages, int totalPages) {
     return '$loadedPages / $totalPages páginas';
   }
@@ -151,6 +157,27 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get demographicJosei => 'Josei';
+
+  @override
+  String get demographicUnspecified => 'Sin especificar';
+
+  @override
+  String get profileDemographicTitle => 'Demografía mostrada';
+
+  @override
+  String profileDemographicCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seleccionados',
+      one: '1 seleccionado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileDemographicSelectionRequired =>
+      'Selecciona al menos una demografía';
 
   @override
   String get readNow => 'Leer ahora';
@@ -334,7 +361,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileAppInfoSubtitle => 'Versión, licencias, créditos';
 
   @override
-  String get profileGuestTitle => 'Estás usando la app como invitada.';
+  String get profileGuestTitle => 'Estás usando la app como invitado/a.';
 
   @override
   String get profileGuestSubtitle =>
@@ -348,7 +375,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileSignOutSnackBar =>
-      'Sesión cerrada. Sigues en modo invitada.';
+      'Sesión cerrada. Sigues en modo invitado/a.';
 
   @override
   String get profileServerConnectionError =>
@@ -375,10 +402,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authSignInButton => 'Iniciar sesión';
 
   @override
+  String get authSignInCreateAccountButton => 'Iniciar sesión / Crear cuenta';
+
+  @override
   String get authNoAccount => '¿No tienes cuenta? Crear una';
 
   @override
-  String get authContinueAsGuest => 'Continuar como invitada';
+  String get authContinueAsGuest => 'Continuar como invitado/a';
 
   @override
   String get authEmailRequired => 'Ingresa tu email.';
@@ -471,13 +501,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ocultar barras de navegación del sistema';
 
   @override
+  String get dialogConfirm => 'OK';
+
+  @override
+  String get dialogCancel => 'Cancelar';
+
+  @override
   String get readerSettingsConfirm => 'Confirmar ajustes';
 
   @override
-  String get readerDirectionLtr => 'LTR';
-
-  @override
-  String get readerDirectionRtl => 'RTL';
+  String get readerDirectionPaged => 'Paginado';
 
   @override
   String get readerDirectionVertical => 'Vertical';
@@ -609,6 +642,50 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authUnknownError => 'Error de autenticación. Intenta de nuevo.';
 
   @override
+  String get authEmailNotVerified =>
+      'Verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada y haz clic en el link de verificación.';
+
+  @override
+  String get authVerifyEmailTitle => 'Verifica tu email';
+
+  @override
+  String authVerifyEmailBody(String email) {
+    return 'Enviamos un link de verificación a $email. Haz clic en el link del email para activar tu cuenta.';
+  }
+
+  @override
+  String get authVerifyEmailSent => '✅ Email de verificación enviado';
+
+  @override
+  String get authVerifyEmailContinue => 'Ya verifiqué — continuar';
+
+  @override
+  String get authVerifyEmailResend => 'Reenviar email de verificación';
+
+  @override
+  String get authVerifyEmailWait => 'Espera un momento antes de reenviar';
+
+  @override
+  String get authVerifyEmailDifferentEmail => 'Usar otro email';
+
+  @override
+  String get authVerifyEmailSuccess =>
+      '¡Email verificado! Bienvenido/a a InkScroller.';
+
+  @override
+  String get authVerifyEmailNotYet =>
+      'Tu email todavía no fue verificado. Revisa tu bandeja de entrada y haz clic en el link.';
+
+  @override
+  String get authVerifyEmailResent => 'Email de verificación reenviado.';
+
+  @override
+  String get authVerifyInProfile => 'Verificar email';
+
+  @override
+  String get authVerifyInProfileSubtitle => 'Cuenta sin verificar';
+
+  @override
   String get libraryErrorNetworkNoConnection =>
       'No se pudo conectar con el servidor.';
 
@@ -682,8 +759,196 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aboutCreditJikanDescription => 'Metadatos adicionales (MAL)';
 
   @override
-  String get aboutCreditCloudRunDescription => 'Infraestructura de backend';
+  String get aboutCreditInfrastructureDescription =>
+      'Infraestructura de backend';
 
   @override
   String get aboutCreditFirebaseDescription => 'Autenticación de usuarios';
+
+  @override
+  String get profileContentRatingTitle => 'Clasificación de contenido';
+
+  @override
+  String get profileContentRatingSafe => 'Seguro';
+
+  @override
+  String get profileContentRatingSuggestive => 'Seguro + Sugestivo';
+
+  @override
+  String get profileContentRatingAll => 'Todo';
+
+  @override
+  String get profileBirthDateRequired =>
+      'Completa tu perfil con una fecha de nacimiento para cambiar tu nombre de usuario.';
+
+  @override
+  String get chaptersSortAsc => 'Número ↑';
+
+  @override
+  String get chaptersSortDesc => 'Número ↓';
+
+  @override
+  String get chaptersFilterAll => 'Todos los capítulos';
+
+  @override
+  String get chaptersFilterUnread => 'Solo no leídos';
+
+  @override
+  String get markAsRead => 'Marcar como leído';
+
+  @override
+  String get markAsUnread => 'Marcar como no leído';
+
+  @override
+  String get chaptersFilteredOut => 'Ningún capítulo coincide con el filtro';
+
+  @override
+  String get authForgotPasswordLink => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get authForgotPasswordTitle => 'Restablecer contraseña';
+
+  @override
+  String get authForgotPasswordSend => 'Enviar email de recuperación';
+
+  @override
+  String get authResetPasswordSent =>
+      'Email de recuperación enviado. Revisa tu bandeja de entrada.';
+
+  @override
+  String get authResetPasswordButton => 'Restablecer contraseña';
+
+  @override
+  String get authChangeUsernameOption => 'Cambiar nombre de usuario';
+
+  @override
+  String get authChangeUsernameTitle => 'Cambiar nombre de usuario';
+
+  @override
+  String get authChangeUsernameSave => 'Guardar';
+
+  @override
+  String get authChangeUsernameSuccess =>
+      'Nombre de usuario actualizado con éxito';
+
+  @override
+  String get readingProgressTitle => 'Progreso de lectura';
+
+  @override
+  String get manualMarkIncrease => 'Marcar uno más como leído';
+
+  @override
+  String get manualMarkDecrease => 'Desmarcar un capítulo';
+
+  @override
+  String get batchSizeLabel => 'Tamaño de lote';
+
+  @override
+  String get jumpToChapter => 'Saltar al capítulo';
+
+  @override
+  String get jumpToChapterHint => 'Número de capítulo';
+
+  @override
+  String get jumpToChapterInvalid => 'Ingresa un número de capítulo válido';
+
+  @override
+  String get placeholderMarkRead => 'Marcar como leído';
+
+  @override
+  String get placeholderUnmark => 'Marcar como no leído';
+
+  @override
+  String get noJikanData => 'No hay datos externos disponibles';
+
+  @override
+  String get noChaptersNoTracking => 'No hay capítulos disponibles';
+
+  @override
+  String get extrasTitle => 'Extras';
+
+  @override
+  String get homeHeroEmpty => 'Todavía no hay mangas destacados.';
+
+  @override
+  String get homeHeroError => 'No se pudieron cargar los mangas destacados.';
+
+  @override
+  String get homeExploreCta => 'Explorar todo →';
+
+  @override
+  String get homeContinueReading => 'Continuar leyendo';
+
+  @override
+  String get homeDiscover => 'Descubre';
+
+  @override
+  String get homeRecommended => 'Recomendado para ti';
+
+  @override
+  String get homeTrendingLabel => 'TENDENCIA';
+
+  @override
+  String get homeViewAll => 'Ver todo';
+
+  @override
+  String get homeChapterError => 'No se pudieron cargar los capítulos.';
+
+  @override
+  String get mangaStatusOngoing => 'En emisión';
+
+  @override
+  String get mangaStatusCompleted => 'Finalizado';
+
+  @override
+  String get mangaStatusHiatus => 'En pausa';
+
+  @override
+  String get mangaStatusCancelled => 'Cancelado';
+
+  @override
+  String get genreAdventure => 'Aventura';
+
+  @override
+  String get genreComedy => 'Comedia';
+
+  @override
+  String get genreDrama => 'Drama';
+
+  @override
+  String get genreFantasy => 'Fantasía';
+
+  @override
+  String get genreHorror => 'Terror';
+
+  @override
+  String get genreMystery => 'Misterio';
+
+  @override
+  String get genreSciFi => 'Ciencia Ficción';
+
+  @override
+  String get genreSliceOfLife => 'Recuentos de la vida';
+
+  @override
+  String get genreSports => 'Deportes';
+
+  @override
+  String get genreThriller => 'Thriller';
+
+  @override
+  String get genreSupernatural => 'Sobrenatural';
+
+  @override
+  String get noChaptersSetTotal => 'Establecer total de capítulos';
+
+  @override
+  String get noChaptersTotalHint =>
+      'Seguimiento manual: introduce el total de capítulos';
+
+  @override
+  String get noChaptersTotalLabel => 'Total de capítulos';
+
+  @override
+  String get noChaptersTotalConfirm => 'Guardar';
 }

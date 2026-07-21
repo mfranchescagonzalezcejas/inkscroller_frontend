@@ -22,6 +22,18 @@ abstract class FirebaseAuthDataSource {
 
   /// Returns the current Firebase ID token, refreshing if needed.
   Future<String> getIdToken();
+
+  /// Sends an email verification link to the current user.
+  Future<void> sendEmailVerification();
+
+  /// Reloads the current Firebase user and returns the updated [AppUser].
+  Future<AppUser> reloadUser();
+
+  /// Sends a password reset email to [email].
+  Future<void> sendPasswordResetEmail({required String email});
+
+  /// Updates the Firebase Auth [User.displayName] to [displayName].
+  Future<void> updateDisplayName(String displayName);
 }
 
 /// Concrete implementation wrapping [FirebaseAuth].
@@ -32,7 +44,10 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
 
   @override
   Stream<AppUser?> get authStateChanges {
-    return _firebaseAuth.authStateChanges().map(_mapUser);
+    // Use userChanges() instead of authStateChanges() so listeners receive
+    // the updated Firebase user after profile mutations like updateDisplayName()
+    // without requiring an explicit reload or re-auth.
+    return _firebaseAuth.userChanges().map(_mapUser);
   }
 
   @override
@@ -94,11 +109,77 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       throw const ServerException(message: 'No authenticated user for token retrieval.');
     }
     try {
+      // Use the cached token for normal requests — the backend already validates
+      // claims on each call. Force-refresh (getIdToken(true)) is only needed
+      // after reloadUser(), which calls it explicitly to pick up the latest
+      // email_verified claim.
       final token = await user.getIdToken();
       if (token == null || token.isEmpty) {
         throw const ServerException(message: 'Firebase returned an empty ID token.');
       }
       return token;
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const ServerException(
+        message: 'auth/requires-authentication',
+        code: 401,
+      );
+    }
+    try {
+      await user.sendEmailVerification();
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<AppUser> reloadUser() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const ServerException(
+        message: 'auth/requires-authentication',
+        code: 401,
+      );
+    }
+    try {
+      await user.reload();
+      // Force-refresh the ID token so the backend sees the updated
+      // email_verified claim. Without this, the cached token still
+      // says email_not_verified and API calls return 403.
+      await user.getIdToken(true);
+      final refreshed = _firebaseAuth.currentUser;
+      if (refreshed == null) {
+        throw const ServerException(
+          message: 'auth/session-expired',
+          code: 401,
+        );
+      }
+      return _mapUserStrict(refreshed);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> updateDisplayName(String displayName) async {
+    try {
+      await _firebaseAuth.currentUser?.updateDisplayName(displayName);
     } on FirebaseAuthException catch (e) {
       throw _mapFirebaseException(e);
     }
@@ -116,6 +197,7 @@ class FirebaseAuthDataSourceImpl implements FirebaseAuthDataSource {
       uid: user.uid,
       email: user.email ?? '',
       displayName: user.displayName,
+      isEmailVerified: user.emailVerified,
     );
   }
 

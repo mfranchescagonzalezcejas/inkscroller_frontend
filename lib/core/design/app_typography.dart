@@ -3,6 +3,7 @@
 /// Uses Plus Jakarta Sans to balance modern tech with editorial elegance.
 /// Based on DESIGN.md typography specs.
 library;
+
 import 'package:flutter/material.dart';
 
 class AppTypography {
@@ -54,6 +55,9 @@ class AppTypography {
   static const double label = 11;
   static const FontWeight labelWeight = FontWeight.w500;
 
+  /// Compact label — dense manga metadata badges.
+  static const double compactLabel = 10;
+
   /// Label large — Button text
   static const double labelLg = 14;
   static const FontWeight labelLgWeight = FontWeight.w600;
@@ -63,51 +67,51 @@ class AppTypography {
   // ═══════════════════════════════════════════════════════════════════════
 
   static TextStyle get displayStyle => const TextStyle(
-        fontFamily: fontFamily,
-        fontSize: display,
-        fontWeight: displayWeight,
-        height: 1.2,
-      );
+    fontFamily: fontFamily,
+    fontSize: display,
+    fontWeight: displayWeight,
+    height: 1.2,
+  );
 
   static TextStyle get titleLgStyle => const TextStyle(
-        fontFamily: fontFamily,
-        fontSize: titleLg,
-        fontWeight: titleLgWeight,
-        height: 1.3,
-      );
+    fontFamily: fontFamily,
+    fontSize: titleLg,
+    fontWeight: titleLgWeight,
+    height: 1.3,
+  );
 
   static TextStyle get titleMdStyle => const TextStyle(
-        fontFamily: fontFamily,
-        fontSize: titleMd,
-        fontWeight: titleMdWeight,
-        height: 1.4,
-      );
+    fontFamily: fontFamily,
+    fontSize: titleMd,
+    fontWeight: titleMdWeight,
+    height: 1.4,
+  );
 
   static TextStyle get bodyStyle => const TextStyle(
-        fontFamily: fontFamily,
-        fontSize: body,
-        fontWeight: bodyWeight,
-        height: 1.5,
-      );
+    fontFamily: fontFamily,
+    fontSize: body,
+    fontWeight: bodyWeight,
+    height: 1.5,
+  );
 
   static TextStyle get bodyLgStyle => const TextStyle(
-        fontFamily: fontFamily,
-        fontSize: bodyLg,
-        fontWeight: bodyLgWeight,
-        height: 1.5,
-      );
+    fontFamily: fontFamily,
+    fontSize: bodyLg,
+    fontWeight: bodyLgWeight,
+    height: 1.5,
+  );
 
   static TextStyle get labelStyle => const TextStyle(
-        fontFamily: fontFamily,
-        fontSize: label,
-        fontWeight: labelWeight,
-        height: 1.4,
-      );
+    fontFamily: fontFamily,
+    fontSize: label,
+    fontWeight: labelWeight,
+    height: 1.4,
+  );
 
   static TextStyle get labelLgStyle => const TextStyle(
-        fontFamily: fontFamily,
-        fontSize: labelLg,
-        fontWeight: labelLgWeight,
-        height: 1.4,
-      );
+    fontFamily: fontFamily,
+    fontSize: labelLg,
+    fontWeight: labelLgWeight,
+    height: 1.4,
+  );
 }

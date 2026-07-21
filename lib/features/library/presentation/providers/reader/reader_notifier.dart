@@ -125,8 +125,30 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
       unawaited(_precacheAllConcurrent(
         pages.sublist(_initialPrecacheCount),
         generation: _loadGeneration,
+        initialLoaded: _initialPrecacheCount,
       ));
     }
+  }
+
+  /// Re-resolves and applies the reader mode after a settings change.
+  ///
+  /// Does NOT reload pages — only updates [ReaderState.readerMode] so the
+  /// reader switches between [VerticalReaderView] and [PagedReaderView]
+  /// without re-fetching the chapter.
+  void reapplyReaderMode({
+    ReaderMode? globalReaderMode,
+    PerTitleOverride? titleOverride,
+  }) {
+    final currentPages = state.pages;
+    if (currentPages.isEmpty) return;
+
+    final readerMode = resolveReaderMode(
+      globalReaderMode: globalReaderMode,
+      titleOverride: titleOverride,
+      contentMetadata: ReaderContentMetadata(pageCount: currentPages.length),
+    );
+
+    state = state.copyWith(readerMode: readerMode);
   }
 
   /// Downloads and caches [urls] using a worker-pool with [concurrency] slots.
@@ -138,9 +160,10 @@ class ReaderNotifier extends StateNotifier<ReaderState> {
     List<String> urls, {
     int concurrency = 4,
     required int generation,
+    int initialLoaded = 0,
   }) async {
     var index = 0;
-    var loaded = 0;
+    var loaded = initialLoaded;
 
     Future<void> worker() async {
       while (!_isDisposed) {

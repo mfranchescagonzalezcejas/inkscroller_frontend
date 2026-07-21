@@ -24,6 +24,9 @@ class Chapter {
   /// URL to the external reader when [external] is `true`.
   final String? externalUrl;
 
+  /// Chapter language code (e.g., `en`, `es`). `null` for legacy chapters.
+  final String? language;
+
   Chapter({
     required this.id,
     this.number,
@@ -32,5 +35,6 @@ class Chapter {
     required this.readable,
     required this.external,
     this.externalUrl,
+    this.language,
   });
 }

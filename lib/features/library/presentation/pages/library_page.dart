@@ -6,7 +6,6 @@ import 'package:inkscroller_flutter/core/design/design_tokens.dart';
 import 'package:inkscroller_flutter/core/feedback/app_feedback.dart';
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
-import 'package:inkscroller_flutter/core/widgets/app_top_bar.dart';
 import 'package:inkscroller_flutter/core/widgets/catalog_tab_bar.dart';
 import 'package:inkscroller_flutter/core/widgets/offline_banner.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
@@ -43,7 +42,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
         .maybeWhen(data: (isOnline) => !isOnline, orElse: () => false);
@@ -68,7 +66,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
     return Scaffold(
       backgroundColor: AppColors.voidLowest,
-      appBar: AppTopBar(authState: authState),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -101,6 +98,13 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               filteredEntries: filteredEntries,
               selectedTabIndex: _selectedTabIndex,
               query: _searchController.text.trim(),
+              onRefresh: () async {
+                final authState = ref.read(authProvider);
+                final user = authState.user;
+                if (user != null && user.isEmailVerified) {
+                  await ref.read(userLibraryProvider.notifier).hydrate(user.uid);
+                }
+              },
             ),
           ),
         ],
@@ -130,7 +134,7 @@ class _LibraryHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.only(left: 20, top: 32, right: 20, bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -251,12 +255,14 @@ class _LibraryBody extends StatefulWidget {
   final List<UserLibraryEntry> filteredEntries;
   final int selectedTabIndex;
   final String query;
+  final Future<void> Function() onRefresh;
 
   const _LibraryBody({
     required this.allEntries,
     required this.filteredEntries,
     required this.selectedTabIndex,
     required this.query,
+    required this.onRefresh,
   });
 
   @override
@@ -310,7 +316,20 @@ class _LibraryBodyState extends State<_LibraryBody> {
   @override
   Widget build(BuildContext context) {
     if (widget.allEntries.isEmpty) {
-      return _LibraryEmptyMessage(message: context.l10n.libraryEmpty);
+      return RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: AppColors.card,
+        onRefresh: widget.onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: _LibraryEmptyMessage(message: context.l10n.libraryEmpty),
+            ),
+          ],
+        ),
+      );
     }
 
     if (widget.filteredEntries.isEmpty) {
@@ -318,7 +337,20 @@ class _LibraryBodyState extends State<_LibraryBody> {
           ? context.l10n.noSearchResults(widget.query)
           : context.l10n.libraryEmptyTab;
 
-      return _LibraryEmptyMessage(message: message);
+      return RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: AppColors.card,
+        onRefresh: widget.onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: _LibraryEmptyMessage(message: message),
+            ),
+          ],
+        ),
+      );
     }
 
     return LayoutBuilder(
@@ -335,7 +367,11 @@ class _LibraryBodyState extends State<_LibraryBody> {
             _displayLimit.clamp(0, widget.filteredEntries.length);
         final bool hasMore = displayCount < widget.filteredEntries.length;
 
-        return CustomScrollView(
+        return RefreshIndicator(
+          color: AppColors.primary,
+          backgroundColor: AppColors.card,
+          onRefresh: widget.onRefresh,
+          child: CustomScrollView(
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
@@ -379,7 +415,8 @@ class _LibraryBodyState extends State<_LibraryBody> {
               ),
             ),
           ],
-        );
+        ),
+      );
       },
     );
   }
@@ -444,8 +481,8 @@ class _LibraryEntryCard extends ConsumerWidget {
               : null,
         ),
         Positioned(
-          top: 6,
-          left: 6,
+          top: -3,
+          left: -3,
           child: PopupMenuButton<_LibraryEntryAction>(
             icon: const CircleAvatar(
               radius: 14,

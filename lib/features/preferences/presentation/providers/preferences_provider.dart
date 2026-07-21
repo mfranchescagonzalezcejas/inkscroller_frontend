@@ -10,21 +10,38 @@ import 'preferences_state.dart';
 ///
 /// Automatically clears cached preferences when the user signs out so that
 /// guest sessions do not inherit stale preferences from a previous user.
+/// Syncs guest preferences to the backend when the user verifies their email.
 final preferencesProvider =
-    StateNotifierProvider<PreferencesNotifier, PreferencesState>(
-      (ref) {
-        final notifier = PreferencesNotifier(
-          getPreferences: sl(),
-          updatePreferences: sl(),
-        );
+    StateNotifierProvider<PreferencesNotifier, PreferencesState>((ref) {
+      final notifier = PreferencesNotifier(
+        getPreferences: sl(),
+        updatePreferences: sl(),
+        isServerBackedSession: () {
+          final authState = ref.read(authProvider);
+          return authState.user != null &&
+              authState.needsEmailVerification == false;
+        },
+      );
 
-        // Listen to auth state changes and reset preferences on logout.
-        ref.listen<AuthState>(authProvider, (_, authState) {
-          if (authState.user == null) {
-            notifier.clearPreferences();
-          }
-        });
+      // Listen to auth state changes.
+      ref.listen<AuthState>(authProvider, (previous, authState) {
+        // Clear preferences on logout.
+        if (authState.user == null) {
+          notifier.clearPreferences();
+          return;
+        }
 
-        return notifier;
-      },
-    );
+        // Sync local-only preferences when transitioning to verified.
+        // Both null (guest) and unverified users are treated as local-only.
+        final wasLocalOnly =
+            previous?.user == null ||
+            (previous?.needsEmailVerification ?? false);
+        final isVerified =
+            authState.user != null && authState.needsEmailVerification == false;
+        if (wasLocalOnly && isVerified) {
+          notifier.syncGuestPreferencesToRemote();
+        }
+      });
+
+      return notifier;
+    });

@@ -6,19 +6,26 @@ import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/design/design_tokens.dart'
     show AppColors, AppTypography;
+import '../../../../core/design/app_spacing.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/l10n/app_locale_provider.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/widgets/app_top_bar.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/providers/auth_state.dart';
 import '../../../library/domain/entities/reader_mode.dart';
+import '../../../preferences/domain/entities/content_rating.dart';
+import '../../../preferences/presentation/providers/content_rating_resolution_provider.dart';
 import '../../../preferences/domain/entities/user_reading_preferences.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../../preferences/presentation/providers/preferences_state.dart';
+import '../../../preferences/presentation/providers/demographic_resolution_provider.dart';
+import '../../../preferences/domain/entities/demographic_resolution.dart';
+import '../../../library/domain/entities/manga_tags.dart';
 import '../../domain/entities/user_profile.dart';
 import '../providers/user_profile_provider.dart';
 import '../providers/user_profile_state.dart';
+import '../widgets/demographic_selection_dialog.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -32,6 +39,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _preferencesRequested = false;
   ReaderMode? _selectedReaderMode;
   String? _selectedReadingLanguage;
+  List<MangaDemographic>? _selectedDemographics;
 
   static const List<String> _supportedAppLanguages = <String>['en', 'es'];
 
@@ -64,29 +72,37 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final authState = ref.watch(authProvider);
     final profileState = ref.watch(userProfileProvider);
     final preferencesState = ref.watch(preferencesProvider);
+    final contentRatingResolution = ref.watch(contentRatingResolutionProvider);
+    final demographicResolution = ref.watch(demographicResolutionProvider);
 
-    if (authState.user != null && !_profileRequested) {
+    // Skip profile loading for unverified users — the backend returns 403.
+    // But always load preferences (guests need them too).
+    final isGuest = authState.user == null;
+    final shouldLoadProfile =
+        authState.user != null && authState.needsEmailVerification == false;
+    final shouldLoadPreferences = !preferencesState.isLoading &&
+        preferencesState.preferences == null;
+
+    if (shouldLoadProfile && !_profileRequested) {
       _profileRequested = true;
       Future<void>.microtask(
         () => ref.read(userProfileProvider.notifier).loadProfile(),
       );
     }
 
-    if (authState.user != null &&
-        !_preferencesRequested &&
-        !preferencesState.isLoading &&
-        preferencesState.preferences == null) {
+    if (shouldLoadPreferences && !_preferencesRequested) {
       _preferencesRequested = true;
       Future<void>.microtask(
         () => ref.read(preferencesProvider.notifier).loadPreferences(),
       );
     }
 
-    if (authState.user == null) {
+    if (isGuest) {
       _profileRequested = false;
       _preferencesRequested = false;
       _selectedReaderMode = null;
       _selectedReadingLanguage = null;
+      _selectedDemographics = null;
     }
 
     ref.listen(preferencesProvider, (previous, next) {
@@ -95,36 +111,49 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         setState(() {
           _selectedReaderMode = next.preferences?.defaultReaderMode;
           _selectedReadingLanguage = next.preferences?.defaultLanguage;
+          _selectedDemographics = next.preferences?.demographicFilter;
         });
       }
     });
 
     return Scaffold(
       backgroundColor: AppColors.stage,
-      appBar: AppTopBar(
-        authState: authState,
-        enableDrawer: false,
-        rightWidget: GestureDetector(
-          onTap: () => context.push(AppRoutes.settings),
-          child: const Icon(
-            Icons.settings_outlined,
-            color: AppColors.onSurfaceVariant,
-            size: 24,
-          ),
-        ),
-      ),
+
       body: SafeArea(
-        child: authState.user == null
-            ? _buildGuestView(context)
-            : _buildAuthenticatedView(context, profileState, preferencesState),
+        child: isGuest
+            ? _buildGuestView(
+                context,
+                preferencesState,
+              )
+            : _buildAuthenticatedView(
+                context,
+                authState,
+                profileState,
+                preferencesState,
+                contentRatingResolution,
+                demographicResolution,
+              ),
       ),
     );
   }
 
-  Widget _buildGuestView(BuildContext context) {
+  Widget _buildGuestView(
+    BuildContext context,
+    PreferencesState preferencesState,
+  ) {
+    final prefs = preferencesState.preferences;
+    final appLocale = ref.watch(appLocaleProvider);
+    final effectiveReaderMode =
+        _selectedReaderMode ?? prefs?.defaultReaderMode ?? ReaderMode.vertical;
+    final effectiveReadingLanguage =
+        _selectedReadingLanguage ?? prefs?.defaultLanguage ?? AppConstants.defaultLanguage;
+    final effectiveAppLanguage =
+        appLocale?.languageCode ?? Localizations.localeOf(context).languageCode;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
       children: <Widget>[
+        // ── Guest header ──────────────────────────────────────────────────
         Container(
           decoration: BoxDecoration(
             color: AppColors.card,
@@ -139,12 +168,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 color: AppColors.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
-              Text(
-                context.l10n.profileGuestTitle,
-                style: AppTypography.bodyLgStyle.copyWith(
-                  color: AppColors.onSurface,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  context.l10n.profileGuestTitle,
+                  style: AppTypography.bodyLgStyle.copyWith(
+                    color: AppColors.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
@@ -167,20 +199,99 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: () => context.go(AppRoutes.login),
-                  child: Text(context.l10n.profileGuestCta),
+                  child: Text(context.l10n.authSignInCreateAccountButton),
                 ),
               ),
             ],
           ),
         ),
+
+        // ── Preferences section ───────────────────────────────────────────
+        const SizedBox(height: 20),
+        _SectionLabel(label: context.l10n.profileReadingPreferencesSection),
+        const SizedBox(height: 8),
+        _PrefCard(
+          children: <Widget>[
+            _PrefRow(
+              icon: Icons.menu_book_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profileReadingModeTitle,
+              value: effectiveReaderMode == ReaderMode.vertical
+                  ? context.l10n.profileReadingModeVertical
+                  : context.l10n.profileReadingModePaged,
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showReaderModeDialog(
+                      context,
+                      effectiveReaderMode,
+                      prefs,
+                    ),
+            ),
+            _PrefRow(
+              icon: Icons.translate_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profilePreferredAppLanguageTitle,
+              value:
+                  _languageLabels[effectiveAppLanguage] ??
+                  effectiveAppLanguage.toUpperCase(),
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showAppLanguageDialog(context, effectiveAppLanguage),
+            ),
+            _PrefRow(
+              icon: Icons.language_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profilePreferredReadingLanguageTitle,
+              value:
+                  _languageLabels[effectiveReadingLanguage] ??
+                  effectiveReadingLanguage.toUpperCase(),
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showReadingLanguageDialog(
+                      context,
+                      effectiveReadingLanguage,
+                      prefs,
+                    ),
+            ),
+          ],
+        ),
+
+        // ── App settings section ──────────────────────────────────────────
+        const SizedBox(height: 20),
+        _SectionLabel(label: context.l10n.profileAppSettingsSection),
+        const SizedBox(height: 8),
+        _PrefCard(
+          children: <Widget>[
+            _PrefRow(
+              icon: Icons.storage_outlined,
+              iconColor: AppColors.onSurfaceVariant,
+              title: context.l10n.profileCacheSettingsTitle,
+              value: context.l10n.profileCacheSettingsSubtitle,
+              valueIsSubtitle: true,
+              onTap: () => context.push(AppRoutes.settings),
+            ),
+            _PrefRow(
+              icon: Icons.info_outline,
+              iconColor: AppColors.onSurfaceVariant,
+              title: context.l10n.profileAppInfoTitle,
+              value: context.l10n.profileAppInfoSubtitle,
+              valueIsSubtitle: true,
+              onTap: () => context.push(AppRoutes.about),
+            ),
+          ],
+        ),
+
       ],
     );
   }
 
   Widget _buildAuthenticatedView(
     BuildContext context,
+    AuthState authState,
     UserProfileState profileState,
     PreferencesState preferencesState,
+    ContentRatingResolution contentRatingResolution,
+    DemographicResolution demographicResolution,
   ) {
     final appLocale = ref.watch(appLocaleProvider);
     final profile = profileState.profile;
@@ -207,6 +318,40 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
         // ── Avatar section ────────────────────────────────────────────────
         _AvatarSection(profile: profile, isLoading: profileState.isLoading),
+
+        // ── Email verification section ────────────────────────────────────
+        if (authState.needsEmailVerification) ...[
+          const SizedBox(height: 20),
+          _EmailVerificationSection(
+            onResend: () => ref.read(authProvider.notifier).sendVerificationEmail(),
+            isLoading: authState.isLoading,
+          ),
+        ],
+
+        // ── Account section ─────────────────────────────────────────────
+        const SizedBox(height: 20),
+        _SectionLabel(label: context.l10n.accountSectionLabel.toUpperCase()),
+        const SizedBox(height: 8),
+        _PrefCard(
+          children: <Widget>[
+            _PrefRow(
+              icon: Icons.person_outline,
+              iconColor: AppColors.primary,
+              title: context.l10n.authChangeUsernameOption,
+              value: profile?.username ?? '',
+              onTap: () {
+                if (profile?.birthDate == null) {
+                  AppFeedback.showError(
+                    context,
+                    title: context.l10n.profileBirthDateRequired,
+                  );
+                  return;
+                }
+                _showChangeUsernameDialog(context, ref, profile!);
+              },
+            ),
+          ],
+        ),
 
         // ── Preferences section ───────────────────────────────────────────
         _SectionLabel(label: context.l10n.profileReadingPreferencesSection),
@@ -253,6 +398,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       effectiveReadingLanguage,
                       prefs,
                     ),
+            ),
+            _PrefRow(
+              icon: Icons.visibility_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profileContentRatingTitle,
+              value: _contentRatingLabel(
+                context,
+                contentRatingResolution.effectiveRating,
+              ),
+              // Always tappable for authenticated users. The dialog shows only
+              // age-allowed options, so an under-16 user sees a single option
+              // (safe) with no effective choice — clear UX instead of a silent
+              // no-op when profile/preferences are still loading.
+              onTap: () => _showContentRatingDialog(
+                context,
+                contentRatingResolution,
+                prefs,
+              ),
+            ),
+            _PrefRow(
+              icon: Icons.category_outlined,
+              iconColor: AppColors.primary,
+              title: context.l10n.profileDemographicTitle,
+              value: _demographicCountLabel(
+                context,
+                DemographicResolution.selectionForDialog(
+                  stored: _selectedDemographics,
+                  resolution: demographicResolution,
+                ),
+              ),
+              onTap: preferencesState.isLoading
+                  ? null
+                  : () => _showDemographicDialog(
+                        context, demographicResolution, prefs,
+                      ),
             ),
           ],
         ),
@@ -362,6 +542,217 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           defaultLanguage: selected,
         );
   }
+
+  String _demographicCountLabel(
+    BuildContext context,
+    List<MangaDemographic> selected,
+  ) {
+    return context.l10n.profileDemographicCount(selected.length);
+  }
+
+  Future<void> _showDemographicDialog(
+    BuildContext context,
+    DemographicResolution resolution,
+    UserReadingPreferences? prefs,
+  ) async {
+    final current = DemographicResolution.selectionForDialog(
+      stored: _selectedDemographics ?? prefs?.demographicFilter,
+      resolution: resolution,
+    );
+    final selected = await showDialog<Set<MangaDemographic>>(
+      context: context,
+      builder: (ctx) => DemographicSelectionDialog(
+        options: resolution.allowedOptions,
+        current: current.toSet(),
+        labelFor: (demo) => _demographicLabel(context, demo),
+        emptySelectionMessage:
+            context.l10n.profileDemographicSelectionRequired,
+      ),
+    );
+    if (selected == null || !context.mounted) return;
+    final demographics = selected.toList();
+    if (!DemographicResolution.isValidSelection(demographics)) {
+      AppFeedback.showError(
+        context,
+        title: context.l10n.profileDemographicSelectionRequired,
+      );
+      return;
+    }
+    setState(() => _selectedDemographics = demographics);
+    await ref
+        .read(preferencesProvider.notifier)
+        .savePreferences(
+          defaultReaderMode:
+              (_selectedReaderMode ??
+                      prefs?.defaultReaderMode ??
+                      ReaderMode.vertical)
+                  .name,
+          defaultLanguage:
+              _selectedReadingLanguage ??
+              prefs?.defaultLanguage ??
+              AppConstants.defaultLanguage,
+          contentRatingFilter: prefs?.contentRatingFilter?.wireValue,
+          demographicFilter: demographics.map((d) => d.toJson()).toList(),
+        );
+  }
+
+  String _demographicLabel(BuildContext context, MangaDemographic demo) {
+    return switch (demo) {
+      MangaDemographic.shounen => context.l10n.demographicShounen,
+      MangaDemographic.shoujo => context.l10n.demographicShoujo,
+      MangaDemographic.seinen => context.l10n.demographicSeinen,
+      MangaDemographic.josei => context.l10n.demographicJosei,
+      MangaDemographic.unspecified => context.l10n.demographicUnspecified,
+    };
+  }
+
+  String _contentRatingLabel(BuildContext context, ContentRating rating) {
+    return switch (rating) {
+      ContentRating.safe => context.l10n.profileContentRatingSafe,
+      ContentRating.suggestive => context.l10n.profileContentRatingSuggestive,
+      ContentRating.all => context.l10n.profileContentRatingAll,
+    };
+  }
+
+  Future<void> _showChangeUsernameDialog(
+    BuildContext context,
+    WidgetRef ref,
+    UserProfile profile,
+  ) async {
+    final controller = TextEditingController(text: profile.username);
+    final formKey = GlobalKey<FormState>();
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        ),
+        title: Text(
+          context.l10n.authChangeUsernameTitle,
+          style: const TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.onSurface,
+          ),
+        ),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Plus Jakarta Sans',
+              fontSize: 14,
+              color: AppColors.onSurface,
+            ),
+            decoration: InputDecoration(
+              labelText: context.l10n.authUsernameLabel,
+              labelStyle: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                color: AppColors.onSurfaceVariant,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+                borderSide: const BorderSide(color: AppColors.outlineVariant),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+                borderSide: const BorderSide(color: AppColors.primary),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return context.l10n.authUsernameRequired;
+              }
+              final trimmed = value.trim();
+              if (trimmed.length < 3 || trimmed.length > 30) {
+                return context.l10n.authUsernameInvalid;
+              }
+              if (!RegExp(r'^[a-z0-9_-]+$').hasMatch(trimmed)) {
+                return context.l10n.authUsernameInvalid;
+              }
+              return null;
+            },
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              context.l10n.dialogCancel,
+              style: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState?.validate() ?? false) {
+                Navigator.of(ctx).pop(true);
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(context.l10n.authChangeUsernameSave),
+          ),
+        ],
+      ),
+    );
+
+    if (saved != true || !context.mounted) return;
+
+    final newUsername = controller.text.trim();
+    // ponytail: birthDate is guaranteed non-null by the guard before opening
+    // the dialog — if it were null the user gets a profile-completion prompt
+    // instead.
+    final birthDate = profile.birthDate!;
+    await ref
+        .read(userProfileProvider.notifier)
+        .updateProfile(username: newUsername, birthDate: birthDate);
+    if (!context.mounted) return;
+    final profileState = ref.read(userProfileProvider);
+    if (profileState.error != null) {
+      AppFeedback.showError(context, title: profileState.error!);
+    } else {
+      AppFeedback.showSuccess(
+        context,
+        title: context.l10n.authChangeUsernameSuccess,
+      );
+    }
+  }
+
+  Future<void> _showContentRatingDialog(
+    BuildContext context,
+    ContentRatingResolution resolution,
+    UserReadingPreferences? prefs,
+  ) async {
+    final selected = await showDialog<ContentRating>(
+      context: context,
+      builder: (ctx) => _SelectionDialog<ContentRating>(
+        title: context.l10n.profileContentRatingTitle,
+        options: resolution.allowedOptions,
+        current: resolution.effectiveRating,
+        labelFor: (rating) => _contentRatingLabel(context, rating),
+      ),
+    );
+    if (selected == null || !mounted) return;
+    await ref
+        .read(preferencesProvider.notifier)
+        .savePreferences(
+          defaultReaderMode:
+              (_selectedReaderMode ??
+                      prefs?.defaultReaderMode ??
+                      ReaderMode.vertical)
+                  .name,
+          defaultLanguage:
+              _selectedReadingLanguage ??
+              prefs?.defaultLanguage ??
+              AppConstants.defaultLanguage,
+          contentRatingFilter: selected.wireValue,
+        );
+  }
 }
 
 // ── Avatar section ────────────────────────────────────────────────────────────
@@ -381,8 +772,8 @@ class _AvatarSection extends StatelessWidget {
       );
     }
 
+    final preferredName = _resolvePreferredName(profile);
     final initials = _getInitials(profile);
-    final name = profile?.displayName;
     final email = profile?.email ?? '';
 
     return Padding(
@@ -414,9 +805,9 @@ class _AvatarSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          if (name != null && name.isNotEmpty) ...<Widget>[
+          if (preferredName != null) ...<Widget>[
             Text(
-              name,
+              preferredName,
               style: const TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 20,
@@ -440,10 +831,23 @@ class _AvatarSection extends StatelessWidget {
     );
   }
 
+  /// Resolves the display name: non-blank username → non-blank displayName → null.
+  String? _resolvePreferredName(UserProfile? profile) {
+    if (profile == null) return null;
+    if (profile.username != null && profile.username!.trim().isNotEmpty) {
+      return profile.username!.trim();
+    }
+    if (profile.displayName != null && profile.displayName!.trim().isNotEmpty) {
+      return profile.displayName!.trim();
+    }
+    return null;
+  }
+
   String _getInitials(UserProfile? profile) {
-    final name = profile?.displayName;
-    if (name != null && name.trim().isNotEmpty) {
-      final parts = name.trim().split(' ');
+    // Prefer username (non-blank) → displayName (non-blank) → email for avatar initials.
+    final name = _resolvePreferredName(profile);
+    if (name != null && name.isNotEmpty) {
+      final parts = name.split(' ');
       if (parts.length >= 2) {
         return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
       }
@@ -566,6 +970,88 @@ class _PrefRow extends StatelessWidget {
             const Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Email verification section ─────────────────────────────────────────────────
+
+class _EmailVerificationSection extends ConsumerWidget {
+  const _EmailVerificationSection({
+    required this.onResend,
+    required this.isLoading,
+  });
+
+  final VoidCallback onResend;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.cardHighest,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.mark_email_unread_outlined,
+              size: 20,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  context.l10n.authVerifyInProfile,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 14,
+                    color: AppColors.accent,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  context.l10n.authVerifyInProfileSubtitle,
+                  style: const TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 12,
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: isLoading ? null : onResend,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              context.l10n.authVerifyEmailResend,
+              style: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -755,6 +1241,126 @@ class _SelectionDialog<T> extends StatelessWidget {
                       )
                       .toList(),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Multi-select dialog ──────────────────────────────────────────────────────
+
+class _MultiSelectDialog<T> extends StatefulWidget {
+  const _MultiSelectDialog({
+    required this.title,
+    required this.options,
+    required this.current,
+    required this.labelFor,
+  });
+
+  final String title;
+  final List<T> options;
+  final Set<T> current;
+  final String Function(T) labelFor;
+
+  @override
+  State<_MultiSelectDialog<T>> createState() => _MultiSelectDialogState<T>();
+}
+
+class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
+  late Set<T> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Set<T>.from(widget.current);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.card,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+              child: Text(
+                widget.title,
+                style: const TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onSurface,
+                ),
+              ),
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: widget.options
+                      .map(
+                        (option) => CheckboxListTile(
+                          value: _selected.contains(option),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value ?? false) {
+                                _selected.add(option);
+                              } else {
+                                _selected.remove(option);
+                              }
+                            });
+                          },
+                          title: Text(
+                            widget.labelFor(option),
+                            style: const TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 14,
+                              color: AppColors.onSurface,
+                            ),
+                          ),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: AppColors.primary,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      context.l10n.deleteAccountCancelAction,
+                      style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(_selected),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                    ),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
             ),
           ],

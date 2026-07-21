@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../library/domain/entities/manga_tags.dart';
 import '../../../library/domain/entities/reader_mode.dart';
+import '../../domain/entities/content_rating.dart';
 import '../../domain/entities/user_reading_preferences.dart';
 import '../../domain/repositories/preferences_repository.dart';
 import '../datasources/preferences_local_ds.dart';
@@ -18,36 +23,47 @@ import '../datasources/preferences_remote_ds.dart';
 class PreferencesRepositoryImpl implements PreferencesRepository {
   final PreferencesRemoteDataSource remoteDataSource;
   final PreferencesLocalDataSource localDataSource;
+  final FirebaseAuth firebaseAuth;
 
   const PreferencesRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.firebaseAuth,
   });
+
+  /// True when the user is null or unverified — both should be local-only.
+  /// The backend returns 403 for unverified users on /users/me/* endpoints.
+  bool get _isLocalOnly {
+    final user = firebaseAuth.currentUser;
+    return user == null || !user.emailVerified;
+  }
 
   @override
   Future<Either<Failure, UserReadingPreferences>> getPreferences() async {
-    // Try remote first for fresh data.
+    final localOnly = _isLocalOnly;
+
+    if (localOnly) {
+      final cached = await localDataSource.getCachedPreferences(isGuest: true);
+      if (cached != null) return Right(cached);
+      return const Left(CacheFailure(message: 'No guest preferences'));
+    }
+
+    // Cache-first: si hay datos locales, devolverlos inmediato y refrescar
+    // el caché en background. Sin caché → esperar el remoto.
+    final cached = await localDataSource.getCachedPreferences();
+    if (cached != null) {
+      unawaited(_refreshCacheInBackground());
+      return Right(cached);
+    }
+
+    // Sin caché local — esperar remoto.
     final remoteResult = await _getFromRemote();
 
     if (remoteResult.isRight()) {
       final remotePrefs = remoteResult.fold((l) => null, (r) => r)!;
-
-      // Check if local has a newer unsynced change.
-      final cached = await localDataSource.getCachedPreferences();
-      if (cached != null && cached.updatedAt.isAfter(remotePrefs.updatedAt)) {
-        // Local is newer — keep it and push to remote in background.
-        await _pushToRemote(cached);
-        return Right(cached);
-      }
-
-      // Remote is fresher — update local cache.
       await localDataSource.savePreferences(remotePrefs);
       return Right(remotePrefs);
     }
-
-    // Remote failed — fall back to local cache.
-    final cached = await localDataSource.getCachedPreferences();
-    if (cached != null) return Right(cached);
 
     return remoteResult.fold(
       (failure) => Left<Failure, UserReadingPreferences>(failure),
@@ -55,13 +71,40 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     );
   }
 
+  /// Fire-and-forget remote fetch que actualiza el caché local.
+  /// No bloquea al caller — la próxima vez que [getPreferences] se llame,
+  /// encontrará los datos frescos en local.
+  /// Si local es más nuevo (cambio offline), pushea local a remote.
+  Future<void> _refreshCacheInBackground() async {
+    try {
+      final result = await _getFromRemote();
+      await result.fold(
+        (_) {},
+        (remotePrefs) async {
+          final cached = await localDataSource.getCachedPreferences();
+          if (cached != null && cached.updatedAt.isAfter(remotePrefs.updatedAt)) {
+            await _pushToRemote(cached);
+          } else {
+            await localDataSource.savePreferences(remotePrefs);
+          }
+        },
+      );
+    } on Object {
+      // Best-effort — si falla, el caché actual sigue siendo válido.
+    }
+  }
+
   @override
   Future<Either<Failure, UserReadingPreferences>> updatePreferences({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
+    List<String>? demographicFilter,
   }) async {
+    final localOnly = _isLocalOnly;
+
     // Read current cached preferences to preserve fields we're not updating.
-    final cached = await localDataSource.getCachedPreferences();
+    final cached = await localDataSource.getCachedPreferences(isGuest: localOnly);
 
     // Determine effective values: new value > cached value > default.
     final effectiveReaderMode = ReaderMode.values.byName(
@@ -71,16 +114,30 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
     );
     final effectiveLanguage =
         defaultLanguage ?? cached?.defaultLanguage ?? 'en';
+    final effectiveContentRating = contentRatingFilter != null
+        ? ContentRating.values.byName(contentRatingFilter)
+        : cached?.contentRatingFilter;
+
+    // Determine demographic filter: explicit new value > cached value.
+    final effectiveDemographics = demographicFilter != null
+        ? demographicFilter.map(MangaDemographic.fromJson).toList()
+        : cached?.demographicFilter;
 
     // Build the optimistic preferences with current timestamp.
     final optimistic = UserReadingPreferences(
       defaultReaderMode: effectiveReaderMode,
       defaultLanguage: effectiveLanguage,
+      contentRatingFilter: effectiveContentRating,
+      demographicFilter: effectiveDemographics,
       updatedAt: DateTime.now(),
     );
 
     // Optimistic write: persist to local immediately.
-    await localDataSource.savePreferences(optimistic);
+    await localDataSource.savePreferences(optimistic, isGuest: localOnly);
+
+    if (localOnly) {
+      return Right(optimistic);
+    }
 
     // Attempt remote sync in background. If it succeeds, update local with
     // the server's response (authoritative timestamp). If it fails, local
@@ -89,6 +146,8 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
       final model = await remoteDataSource.updatePreferences(
         defaultReaderMode: defaultReaderMode,
         defaultLanguage: defaultLanguage,
+        contentRatingFilter: contentRatingFilter,
+        demographicFilter: demographicFilter,
       );
       final preferences = model.toEntity();
       await localDataSource.savePreferences(preferences);
@@ -120,6 +179,10 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
       await remoteDataSource.updatePreferences(
         defaultReaderMode: prefs.defaultReaderMode.name,
         defaultLanguage: prefs.defaultLanguage,
+        contentRatingFilter: prefs.contentRatingFilter?.wireValue,
+        demographicFilter: prefs.demographicFilter
+            ?.map((e) => e.toJson())
+            .toList(),
       );
     } on Object {
       // Best-effort push — if it fails, next sync will retry.

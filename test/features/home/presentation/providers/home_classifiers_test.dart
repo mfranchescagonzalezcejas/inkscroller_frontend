@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/features/home/presentation/providers/home_classifiers.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/manga_tags.dart';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -104,13 +105,13 @@ void main() {
         _manga(id: '2', demographic: 'shoujo'),
         _manga(id: '3', demographic: 'shounen'),
       ];
-      final result = HomeClassifier.byDemographic(all, 'shounen');
+      final result = HomeClassifier.byDemographic(all, MangaDemographic.shounen);
       expect(result.map((m) => m.id).toList(), ['1', '3']);
     });
 
     test('returns empty list when no items match', () {
       final all = [_manga(id: '1', demographic: 'shounen')];
-      expect(HomeClassifier.byDemographic(all, 'josei'), isEmpty);
+      expect(HomeClassifier.byDemographic(all, MangaDemographic.josei), isEmpty);
     });
 
     test('caps to showMany items', () {
@@ -119,7 +120,7 @@ void main() {
         (i) => _manga(id: '$i', demographic: 'seinen'),
       );
       expect(
-        HomeClassifier.byDemographic(all, 'seinen').length,
+        HomeClassifier.byDemographic(all, MangaDemographic.seinen).length,
         HomeClassifier.showMany,
       );
     });
@@ -136,18 +137,16 @@ void main() {
       final state = HomeClassifier.classify(all);
 
       expect(state.featured, HomeClassifier.featured(all));
-      expect(state.latest, HomeClassifier.latest(all));
       expect(state.popular, HomeClassifier.popular(all));
-      expect(state.shounen, HomeClassifier.byDemographic(all, 'shounen'));
-      expect(state.shoujo, HomeClassifier.byDemographic(all, 'shoujo'));
-      expect(state.seinen, HomeClassifier.byDemographic(all, 'seinen'));
-      expect(state.josei, HomeClassifier.byDemographic(all, 'josei'));
+      expect(state.shounen, HomeClassifier.byDemographic(all, MangaDemographic.shounen));
+      expect(state.shoujo, HomeClassifier.byDemographic(all, MangaDemographic.shoujo));
+      expect(state.seinen, HomeClassifier.byDemographic(all, MangaDemographic.seinen));
+      expect(state.josei, HomeClassifier.byDemographic(all, MangaDemographic.josei));
     });
 
     test('returns empty lists for every section when input is empty', () {
       final state = HomeClassifier.classify([]);
       expect(state.featured, isEmpty);
-      expect(state.latest, isEmpty);
       expect(state.popular, isEmpty);
       expect(state.shounen, isEmpty);
       expect(state.shoujo, isEmpty);

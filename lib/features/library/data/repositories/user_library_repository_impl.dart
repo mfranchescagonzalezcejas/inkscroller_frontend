@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/entities/manga.dart';
 import '../../domain/entities/user_library_entry.dart';
 import '../../domain/repositories/user_library_repository.dart';
 import '../datasources/user_library_remote_ds.dart';
@@ -19,6 +21,11 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
   static const String _lastSyncPrefix = 'library.last_synced_at.';
 
   bool _legacyMigrated = false;
+
+  /// Tracks manga IDs that have already been pushed for enrichment this
+  /// session so permanently nullable metadata (e.g. unrated manga) does not
+  /// trigger a re-push on every hydration cycle.
+  final Set<String> _enrichmentAttempted = {};
 
   @override
   Future<Map<String, UserLibraryEntry>> getAll({String? userId}) async {
@@ -109,6 +116,11 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
       return;
     }
 
+    // Remote sync in background — optimistic UI: caller updates state immediately.
+    unawaited(_syncSaveToRemote(entry, userId));
+  }
+
+  Future<void> _syncSaveToRemote(UserLibraryEntry entry, String userId) async {
     try {
       if (entry.isInLibrary) {
         await _remoteDataSource.addToLibrary(
@@ -116,6 +128,10 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
           title: entry.manga.title,
           coverUrl: entry.manga.coverUrl,
           authors: entry.manga.authors,
+          type: entry.manga.type,
+          demographic: entry.manga.demographic,
+          genres: entry.manga.genres,
+          status: entry.manga.status,
         );
         await _remoteDataSource.updateLibraryStatus(
           entry.manga.id,
@@ -139,6 +155,11 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
       return;
     }
 
+    // Remote sync in background — optimistic UI: caller updates state immediately.
+    unawaited(_syncRemoveFromRemote(mangaId));
+  }
+
+  Future<void> _syncRemoveFromRemote(String mangaId) async {
     try {
       await _remoteDataSource.removeFromLibrary(mangaId);
     } on Object {
@@ -157,13 +178,57 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
     for (final MapEntry<String, UserLibraryEntry> entry in remote.entries) {
       final UserLibraryEntry? localEntry = merged[entry.key];
 
-      if (localEntry == null ||
-          !localEntry.updatedAt.isAfter(entry.value.updatedAt)) {
+      if (localEntry == null) {
         merged[entry.key] = entry.value;
+      } else if (!localEntry.updatedAt.isAfter(entry.value.updatedAt)) {
+        // Remote is newer or equal — use remote BUT preserve local metadata
+        // enrichment (type, demographic, genres) that the library endpoint
+        // may not return.
+        merged[entry.key] = _withLocalEnrichment(localEntry, entry.value);
       }
+      // else: local is newer → keep local (already in merged from ...local)
     }
 
     return merged;
+  }
+
+  /// Merges richer manga metadata from [local] into [remote] when remote is
+  /// missing fields that local has (e.g. type, demographic after a sync with
+  /// a backend that doesn't return them in the library endpoint).
+  UserLibraryEntry _withLocalEnrichment(
+    UserLibraryEntry local,
+    UserLibraryEntry remote,
+  ) {
+    final Manga lm = local.manga;
+    final Manga rm = remote.manga;
+
+    // If local already has everything remote has, skip.
+    if (lm.type == null && lm.demographic == null && lm.genres.isEmpty) {
+      return remote;
+    }
+
+    return UserLibraryEntry(
+      manga: Manga(
+        id: rm.id,
+        title: rm.title,
+        description: lm.description ?? rm.description,
+        coverUrl: rm.coverUrl,
+        demographic: lm.demographic ?? rm.demographic,
+        status: lm.status ?? rm.status,
+        genres: lm.genres.isNotEmpty ? lm.genres : rm.genres,
+        score: lm.score ?? rm.score,
+        rank: lm.rank ?? rm.rank,
+        type: lm.type ?? rm.type,
+        year: lm.year ?? rm.year,
+        authors: lm.authors.isNotEmpty ? lm.authors : rm.authors,
+        readChaptersCount: rm.readChaptersCount,
+        totalChaptersCount: rm.totalChaptersCount,
+        malId: lm.malId ?? rm.malId,
+      ),
+      isInLibrary: remote.isInLibrary,
+      status: remote.status,
+      updatedAt: remote.updatedAt,
+    );
   }
 
   Future<void> _replaceScopedEntries({
@@ -201,12 +266,26 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
   }) async {
     for (final MapEntry<String, UserLibraryEntry> localEntry in local.entries) {
       final UserLibraryEntry? remoteEntry = remote[localEntry.key];
+
+      // ponytail: re-push entries whose remote metadata is critically null
+      // (score, malId) so the backend enriches from MangaDex.
+      // Tracks attempted IDs to avoid re-pushing permanently nullable metadata
+      // (e.g. unrated manga) on every hydration.
+      final bool needsEnrichment = remoteEntry != null &&
+          !_enrichmentAttempted.contains(localEntry.key) &&
+          _hasNullCoreMetadata(remoteEntry.manga);
+
       final bool shouldPush =
           remoteEntry == null ||
-          localEntry.value.updatedAt.isAfter(remoteEntry.updatedAt);
+          localEntry.value.updatedAt.isAfter(remoteEntry.updatedAt) ||
+          needsEnrichment;
 
       if (!shouldPush) {
         continue;
+      }
+
+      if (needsEnrichment) {
+        _enrichmentAttempted.add(localEntry.key);
       }
 
       try {
@@ -224,6 +303,12 @@ class UserLibraryRepositoryImpl implements UserLibraryRepository {
         // Best-effort background sync.
       }
     }
+  }
+
+  /// Returns true when the manga entry has null for at least one core
+  /// enrichment field, indicating the cached metadata was never enriched.
+  static bool _hasNullCoreMetadata(Manga manga) {
+    return manga.score == null || manga.malId == null;
   }
 
   Future<void> _migrateLegacyGuestDataIfNeeded() async {

@@ -10,14 +10,19 @@ import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_email_verification.dart';
+import 'package:inkscroller_flutter/features/auth/domain/usecases/send_password_reset.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_in.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_out.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/sign_up.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_provider.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/chapter.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/chapters_with_languages.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/manga_reading_progress.dart';
+import 'package:inkscroller_flutter/features/library/domain/entities/search_result.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reading_preferences.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/user_library_entry.dart';
@@ -27,6 +32,8 @@ import 'package:inkscroller_flutter/features/library/domain/repositories/reading
 import 'package:inkscroller_flutter/features/library/domain/repositories/user_library_repository.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/repositories/preferences_repository.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_chapters.dart';
+import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_chapters_with_languages.dart';
+import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_languages.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_manga_list.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/get_per_title_override.dart';
 import 'package:inkscroller_flutter/features/library/domain/usecases/remove_per_title_override.dart';
@@ -56,6 +63,11 @@ class _MockSearchManga extends Mock implements SearchManga {}
 
 class _MockGetMangaChapters extends Mock implements GetMangaChapters {}
 
+class _MockGetMangaChaptersWithLanguages extends Mock
+    implements GetMangaChaptersWithLanguages {}
+
+class _MockGetMangaLanguages extends Mock implements GetMangaLanguages {}
+
 class _MockSignIn extends Mock implements SignIn {}
 
 class _MockSignUp extends Mock implements SignUp {}
@@ -67,6 +79,12 @@ class _MockGetAuthState extends Mock implements GetAuthState {}
 class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
+class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+
+class _MockReloadUser extends Mock implements ReloadUser {}
+
+class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
 
 class _MockReadingProgressRepository extends Mock
     implements ReadingProgressRepository {}
@@ -88,6 +106,9 @@ AuthNotifier _makeStubAuthNotifier() {
     signUp: _MockSignUp(),
     signOut: _MockSignOut(),
     getAuthState: getAuthState,
+    sendEmailVerification: _MockSendEmailVerification(),
+    sendPasswordReset: _MockSendPasswordReset(),
+    reloadUser: _MockReloadUser(),
     getUserProfile: _MockGetUserProfile(),
     updateUserProfile: _MockUpdateUserProfile(),
   );
@@ -153,6 +174,7 @@ void _registerGetItMocks() {
     when(() => prefsRepo.updatePreferences(
       defaultReaderMode: any(named: 'defaultReaderMode'),
       defaultLanguage: any(named: 'defaultLanguage'),
+      contentRatingFilter: any(named: 'contentRatingFilter'),
     )).thenAnswer(
       (_) async => Right<Failure, UserReadingPreferences>(
         UserReadingPreferences(
@@ -226,6 +248,8 @@ void main() {
   late GetMangaList getMangaList;
   late SearchManga searchManga;
   late GetMangaChapters getMangaChapters;
+  late GetMangaChaptersWithLanguages getMangaChaptersWithLanguages;
+  late GetMangaLanguages getMangaLanguages;
 
   Future<void> pumpApp(WidgetTester tester) {
     final router = GoRouter(
@@ -255,7 +279,11 @@ void main() {
             (ref) => LibraryNotifier(getMangaList, searchManga),
           ),
           mangaChaptersProvider.overrideWith(
-            (ref) => MangaChaptersNotifier(getMangaChapters: getMangaChapters),
+            (ref) => MangaChaptersNotifier(
+              getMangaChapters: getMangaChapters,
+              getMangaLanguages: getMangaLanguages,
+              getMangaChaptersWithLanguages: getMangaChaptersWithLanguages,
+            ),
           ),
           readingProgressProvider.overrideWith(
             (ref) => _makeStubReadingProgressNotifier(),
@@ -307,14 +335,47 @@ void main() {
     getMangaList = _MockGetMangaList();
     searchManga = _MockSearchManga();
     getMangaChapters = _MockGetMangaChapters();
+    getMangaChaptersWithLanguages = _MockGetMangaChaptersWithLanguages();
+    getMangaLanguages = _MockGetMangaLanguages();
+
+    when(() => getMangaChaptersWithLanguages(
+      'monster',
+      preferredLang: any(named: 'preferredLang'),
+    )).thenAnswer(
+      (_) async => Right<Failure, ChaptersWithLanguages>(
+        ChaptersWithLanguages(
+          availableLanguages: ['en'],
+          matchedLanguage: 'en',
+          chapters: [
+            Chapter(
+              id: 'chapter-1',
+              number: 1,
+              title: 'Chapter One',
+              readable: true,
+              external: false,
+            ),
+          ],
+        ),
+      ),
+    );
+    when(() => getMangaLanguages('monster')).thenAnswer(
+      (_) async => const Right<Failure, List<String>>(['en']),
+    );
 
     when(() => getMangaList(limit: 20, offset: 0)).thenAnswer(
       (_) async => Right<Failure, List<Manga>>(<Manga>[berserk, monster]),
     );
-    when(() => searchManga('monster')).thenAnswer(
-      (_) async => Right<Failure, List<Manga>>(<Manga>[monster]),
+    when(() => searchManga(
+      'monster',
+      limit: any(named: 'limit'),
+      offset: any(named: 'offset'),
+      contentRating: any(named: 'contentRating'),
+    )).thenAnswer(
+      (_) async => Right<Failure, SearchResult>(
+        SearchResult(mangas: [monster], limit: 20, offset: 0, total: 1),
+      ),
     );
-    when(() => getMangaChapters('monster')).thenAnswer(
+    when(() => getMangaChapters('monster', language: 'en')).thenAnswer(
       (_) async => Right<Failure, List<Chapter>>(<Chapter>[
         Chapter(
           id: 'chapter-1',

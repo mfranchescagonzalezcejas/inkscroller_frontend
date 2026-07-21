@@ -11,7 +11,12 @@ class GetMangaChapters {
   GetMangaChapters(this.repository);
 
   /// Returns all [Chapter] entries available for the manga identified by [mangaId].
-  Future<Either<Failure, List<Chapter>>> call(String mangaId) {
-    return repository.getMangaChapters(mangaId);
+  ///
+  /// [language] filters the chapters to the given language code (e.g. "es").
+  Future<Either<Failure, List<Chapter>>> call(
+    String mangaId, {
+    String? language,
+  }) {
+    return repository.getMangaChapters(mangaId, language: language);
   }
 }

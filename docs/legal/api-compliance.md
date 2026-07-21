@@ -29,7 +29,7 @@ El cliente Flutter **no llama a MangaDex ni a Jikan directamente**. Sin embargo,
 ## 2. Arquitectura de acceso a APIs
 
 ```
-inkscroller_flutter (este repo)
+inkscroller_frontend (este repo)
         │
         ▼ HTTP / Dio → autenticado con Firebase ID token
 Inkscroller Backend (FastAPI)

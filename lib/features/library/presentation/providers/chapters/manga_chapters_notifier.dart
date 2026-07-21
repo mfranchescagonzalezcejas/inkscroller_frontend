@@ -1,38 +1,237 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../domain/entities/chapter.dart';
 import '../../../domain/usecases/get_manga_chapters.dart';
+import '../../../domain/usecases/get_manga_chapters_with_languages.dart';
+import '../../../domain/usecases/get_manga_languages.dart';
 import 'manga_chapter_state.dart';
 
 /// Loads the chapter list for a given manga and tracks loading/error state.
 ///
-/// Fetches chapters via [GetMangaChapters] and emits [MangaChaptersState]
-/// snapshots consumed by [MangaDetailPage].
+/// Uses a stale-while-revalidate strategy: cached chapters (from a previous
+/// fetch within the same session) are shown immediately while the network
+/// call refreshes the data in the background. This eliminates the loading
+/// shimmer on repeat visits within the session — the user sees chapters
+/// instantly and the list updates silently when the API responds.
+///
+/// The in-memory cache is scoped to the provider lifetime (session-only).
+/// The repository-level SharedPreferences cache still serves as the offline
+/// fallback when the network is unavailable.
 class MangaChaptersNotifier extends StateNotifier<MangaChaptersState> {
   final GetMangaChapters getMangaChapters;
+  final GetMangaLanguages getMangaLanguages;
+  final GetMangaChaptersWithLanguages getMangaChaptersWithLanguages;
+
+  /// ponytail: in-memory per-manga chapter cache for stale-while-revalidate.
+  /// Cleared on app restart. Persists across manga detail navigations so
+  /// returning to a previously viewed manga shows chapters instantly.
+  final Map<String, List<Chapter>> _chapterCache = {};
+
+  /// Tracks the composite key (`mangaId:language`) of the most recent
+  /// [loadChapters] call so stale responses from a previous navigation or
+  /// language switch are discarded.
+  String? _lastRequestKey;
+
+  /// Tracks the last mangaId loaded. When it changes, the selected language
+  /// resets to the default ('en') because each manga has its own available
+  /// language set.
+  String? _lastMangaId;
 
   MangaChaptersNotifier({
     required this.getMangaChapters,
+    required this.getMangaLanguages,
+    required this.getMangaChaptersWithLanguages,
   }) : super(const MangaChaptersState());
 
-  Future<void> loadChapters(String mangaId) async {
-    state = state.copyWith(
-      isLoading: true,
-      clearFailure: true,
-    );
+  Future<void> loadChapters(String mangaId, {String? language}) async {
+    final bool mangaChanged = _lastMangaId != null && _lastMangaId != mangaId;
+    _lastMangaId = mangaId;
+    final lang = language ?? (mangaChanged ? 'en' : state.selectedLanguage);
+    final requestKey = '$mangaId:$lang';
 
-    final result = await getMangaChapters(mangaId);
+    debugPrint('[ChaptersNotifier] loadChapters(mangaId=$mangaId, lang=$lang)'
+        ' hash=${identityHashCode(this)}');
+
+    _lastRequestKey = requestKey;
+    final cached = _chapterCache[requestKey];
+    final bool isCacheHit = cached != null;
+
+    if (isCacheHit) {
+      // Stale-while-revalidate: serve cached data immediately, no loading.
+      state = state.copyWith(
+        chapters: cached,
+        isLoading: false,
+        clearFailure: true,
+        selectedLanguage: lang,
+      );
+    } else {
+      // First load for this manga/language: show shimmer until API responds.
+      // Clear any stale chapters from a previous manga so the error branch
+      // below correctly detects an empty state if the API call fails.
+      state = state.copyWith(
+        chapters: const [],
+        isLoading: true,
+        clearFailure: true,
+        selectedLanguage: lang,
+      );
+    }
+
+    final result = await getMangaChapters(mangaId, language: lang);
+
+    // Guard: discard stale responses if the user navigated to another manga
+    // or switched language while this request was in-flight.
+    if (_lastRequestKey != requestKey) return;
 
     result.fold(
       (failure) {
-        state = state.copyWith(isLoading: false, failure: failure);
+        // On a cache hit (including a legitimate empty chapter list), keep
+        // the cached data silently. Only show the error on a fresh load.
+        if (!isCacheHit) {
+          state = state.copyWith(isLoading: false, failure: failure);
+        }
       },
       (chapters) {
+        _chapterCache[requestKey] = chapters;
         state = state.copyWith(
           chapters: chapters,
           isLoading: false,
           clearFailure: true,
+          selectedLanguage: lang,
         );
       },
     );
+  }
+
+  /// Loads the available chapter languages for [mangaId] along with chapters
+  /// for the best-matching language — single call via the unified endpoint.
+  ///
+  /// [preferredLang] is the user's default language preference. The backend
+  /// selects the best match (e.g. `es-la` when `es` is not available).
+  Future<void> loadLanguages(String mangaId, {String? preferredLang}) async {
+    final lang = preferredLang ?? 'en';
+    final requestKey = '$mangaId:languages:$lang';
+
+    // Stale-while-revalidate: if we have cached chapters for the preferred
+    // language, show them immediately while the API refreshes in background.
+    final cacheKey = '$mangaId:$lang';
+    final cached = _chapterCache[cacheKey];
+    final bool isCacheHit = cached != null;
+
+    _lastRequestKey = requestKey;
+
+    if (isCacheHit) {
+      state = state.copyWith(
+        chapters: cached,
+        isLoading: false,
+        isLanguageLoading: true,
+        clearFailure: true,
+      );
+    } else {
+      // Clear previous manga's chapters immediately so stale data is never
+      // visible when navigating between different manga.
+      state = state.copyWith(
+        chapters: const [],
+        isLoading: true,
+        isLanguageLoading: true,
+        clearFailure: true,
+      );
+    }
+
+    final result = await getMangaChaptersWithLanguages(
+      mangaId,
+      preferredLang: preferredLang,
+    );
+
+    // Guard: discard stale response if user navigated to another manga
+    // while this request was in-flight.
+    if (_lastRequestKey != requestKey) return;
+
+    result.fold(
+      (failure) {
+        // On a cache hit, keep cached data silently. Only show error on
+        // fresh load so previous chapters aren't replaced by a failure.
+        if (!isCacheHit) {
+          state = state.copyWith(
+            isLanguageLoading: false,
+            isLoading: false,
+            failure: failure,
+            availableLanguages: const ['en'],
+          );
+        } else {
+          // Cache hit but refresh failed: keep cached chapters, reset
+          // language state so the selector doesn't show stale data.
+          state = state.copyWith(
+            isLanguageLoading: false,
+            isLoading: false,
+            availableLanguages: const ['en'],
+            selectedLanguage: 'en',
+          );
+        }
+      },
+      (response) {
+        _chapterCache['$mangaId:${response.matchedLanguage}'] =
+            response.chapters;
+        // Also cache under the preferred language key so offline fallback
+        // works when the backend matched a variant (e.g. es → es-la).
+        // Only alias when it's a real variant (preferred base + "-"), not
+        // when the backend returned a completely unrelated language.
+        if (preferredLang != null &&
+            preferredLang != response.matchedLanguage) {
+          final isVariant = response.matchedLanguage.startsWith('$preferredLang-') ||
+              preferredLang.startsWith('${response.matchedLanguage}-');
+          if (isVariant) {
+            _chapterCache['$mangaId:$preferredLang'] = response.chapters;
+          }
+        }
+        state = state.copyWith(
+          isLanguageLoading: false,
+          isLoading: false,
+          availableLanguages: response.availableLanguages,
+          selectedLanguage: response.matchedLanguage,
+          chapters: response.chapters,
+          clearFailure: true,
+        );
+      },
+    );
+  }
+
+  /// Sets the loading state before an async operation (e.g. awaiting preferences)
+  /// so the UI shows a shimmer instead of an empty "no chapters" state.
+  /// Also invalidates any in-flight request by updating the stale guard.
+  void setLoading([String? mangaId]) {
+    if (mangaId != null) {
+      // Invalidate any in-flight request so it's discarded on arrival.
+      _lastRequestKey = '';
+    }
+    state = state.copyWith(
+      chapters: const [],
+      isLoading: true,
+      clearFailure: true,
+    );
+  }
+
+  /// Clears the in-memory per-manga chapter cache.
+  ///
+  /// Called from the settings "Clear cached data" action so that stale
+  /// in-memory chapters are not served after the user explicitly clears
+  /// all persisted cache. Unlike provider invalidation, this does not
+  /// dispose the notifier, so in-flight requests remain safe.
+  void clearCache() {
+    _chapterCache.clear();
+    // Reset the last-requested guard so any in-flight response arriving
+    // after this point is discarded — it would otherwise repopulate the
+    // cache with stale data from a request that started before clearing.
+    _lastRequestKey = null;
+    // Also reset the state so the next visit starts fresh.
+    state = const MangaChaptersState();
+  }
+
+  void setSortDescending({required bool value}) {
+    state = state.copyWith(sortDescending: value);
+  }
+
+  void setFilterUnreadOnly({required bool value}) {
+    state = state.copyWith(filterUnreadOnly: value);
   }
 }

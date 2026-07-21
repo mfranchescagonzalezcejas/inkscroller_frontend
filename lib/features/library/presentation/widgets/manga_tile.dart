@@ -6,6 +6,7 @@ import 'package:inkscroller_flutter/features/library/presentation/constants/libr
 
 import '../../../../core/design/design_tokens.dart';
 import '../../domain/entities/manga.dart';
+import '../utils/manga_localizer.dart';
 import 'cover_image.dart';
 
 /// Presentational card widget that displays a manga cover and title.
@@ -29,10 +30,11 @@ class MangaTile extends StatelessWidget {
     final double? safeScore = manga.score;
     final String badgeLabel = safeScore?.toStringAsFixed(1) ?? '--';
     final String secondaryMeta =
-        manga.status ??
-        (manga.year != null
-            ? '${manga.year}'
-            : context.l10n.libraryUnknownMeta);
+        manga.status != null
+            ? MangaLocalizer.localizeStatus(context.l10n, manga.status!)
+            : (manga.year != null
+                ? '${manga.year}'
+                : context.l10n.libraryUnknownMeta);
     final int? effectiveReadCount =
         readChaptersCount ?? manga.readChaptersCount;
     final int? effectiveTotalCount =
@@ -155,7 +157,7 @@ class MangaTile extends StatelessWidget {
                           Icons.star,
                           size: 12,
                           color: safeScore != null
-                              ? AppColors.primary
+                              ? AppColors.scoreGold
                               : AppColors.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
@@ -166,7 +168,7 @@ class MangaTile extends StatelessWidget {
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: safeScore != null
-                                ? AppColors.primary
+                                ? AppColors.scoreGold
                                 : AppColors.onSurfaceVariant,
                           ),
                         ),

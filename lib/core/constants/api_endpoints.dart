@@ -5,7 +5,10 @@
 class ApiEndpoints {
   // ── Library ───────────────────────────────────────────────────────────────
   static const manga = '/manga';
+  static const mangaCapabilities = '/manga/capabilities';
   static const chaptersByManga = '/chapters/manga';
+  static const chaptersLanguagesBase = '/chapters/manga';
+  static const chaptersLanguages = '/chapters/manga/{id}/languages';
   static const chapterPages = '/chapters';
   static const latestChapters = '/chapters/latest';
 

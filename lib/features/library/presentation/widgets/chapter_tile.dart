@@ -8,16 +8,21 @@ import '../../domain/entities/chapter.dart';
 ///
 /// Displays the chapter number (or "Extra"), title, and an icon indicating
 /// whether the chapter is readable in-app or opens an external URL.
+///
+/// Tap the leading checkbox to toggle read state without navigation.
+/// Tap the tile body to open the reader.
 class ChapterTile extends StatelessWidget {
   final Chapter chapter;
   final bool isRead;
   final VoidCallback? onTap;
+  final VoidCallback? onToggleRead;
 
   const ChapterTile({
     super.key,
     required this.chapter,
     this.isRead = false,
     this.onTap,
+    this.onToggleRead,
   });
 
   @override
@@ -35,13 +40,22 @@ class ChapterTile extends StatelessWidget {
     }
 
     return ListTile(
-      leading: Icon(
-        isRead ? Icons.check_circle : Icons.radio_button_unchecked,
-        size: 18,
-        color: isRead ? Theme.of(context).colorScheme.primary : null,
+      leading: IconButton(
+        icon: Icon(
+          isRead ? Icons.check_circle : Icons.radio_button_unchecked,
+          size: 22,
+          color: isRead ? Theme.of(context).colorScheme.primary : null,
+        ),
+        onPressed: onToggleRead,
+        tooltip: isRead ? context.l10n.markAsUnread : context.l10n.markAsRead,
+        visualDensity: VisualDensity.compact,
       ),
       title: Text(label),
-      subtitle: chapter.title != null ? Text(chapter.title!) : null,
+      // Avoid showing a subtitle that duplicates the auto-generated label
+      // (e.g. a chapter with number=1 and title="Capítulo 1" in Spanish locale).
+      subtitle: (chapter.title != null && chapter.title != label)
+          ? Text(chapter.title!)
+          : null,
       trailing: trailing,
       enabled: chapter.readable || chapter.external,
       onTap: onTap,

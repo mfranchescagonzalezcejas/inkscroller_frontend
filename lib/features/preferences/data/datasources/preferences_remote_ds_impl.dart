@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/error/exceptions.dart';
@@ -19,6 +20,12 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
       final Response<Map<String, dynamic>> response = await dio
           .get<Map<String, dynamic>>(ApiEndpoints.usersMePreferences);
 
+      if (kDebugMode) {
+        debugPrint(
+          '[PreferencesRemoteDS] GET ${response.statusCode} → ${response.data}',
+        );
+      }
+
       final data = response.data;
       if (data == null) {
         throw const ServerException(message: 'Preferences response was empty.');
@@ -34,6 +41,8 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
   Future<UserPreferencesModel> updatePreferences({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
+    List<String>? demographicFilter,
   }) async {
     try {
       final payload =
@@ -45,13 +54,28 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
           ).toUpdateJson(
             defaultReaderMode: defaultReaderMode,
             defaultLanguage: defaultLanguage,
+            contentRatingFilter: contentRatingFilter,
           );
+
+      // If demographicFilter is explicitly passed, add it to the payload.
+      if (demographicFilter != null) {
+        payload['demographic_filter'] = demographicFilter.isEmpty
+            ? null
+            : demographicFilter;
+      }
 
       final Response<Map<String, dynamic>> response = await dio
           .put<Map<String, dynamic>>(
             ApiEndpoints.usersMePreferences,
             data: payload,
           );
+
+      if (kDebugMode) {
+        debugPrint(
+          '[PreferencesRemoteDS] PUT ${response.statusCode} '
+          'payload: $payload → ${response.data}',
+        );
+      }
 
       final data = response.data;
       if (data == null) {
@@ -79,6 +103,15 @@ class PreferencesRemoteDataSourceImpl implements PreferencesRemoteDataSource {
 
     final statusCode = error.response?.statusCode;
     final responseData = error.response?.data;
+
+    if (kDebugMode) {
+      debugPrint(
+        '[PreferencesRemoteDS] ${error.requestOptions.method} '
+        '${error.requestOptions.uri} → $statusCode '
+        'body: $responseData',
+      );
+    }
+
     final responseMessage = responseData is Map<String, dynamic>
         ? responseData['detail'] as String?
         : null;

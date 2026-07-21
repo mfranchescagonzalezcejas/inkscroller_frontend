@@ -12,6 +12,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/info_list_card.dart';
 import '../../../../flavors/flavor_config.dart';
+import '../../../../features/library/presentation/providers/chapters/manga_chapter_provider.dart';
 import '../providers/settings_cache_controller.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/account_section.dart';
@@ -32,6 +33,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _clearCache() async {
     setState(() => _isClearingCache = true);
+
+    // Clear the in-memory chapter cache BEFORE the mounted guard so it
+    // runs even if the settings page was already popped. The persisted
+    // library cache is cleared inside clearLibraryCache() below.
+    ref.read(mangaChaptersProvider.notifier).clearCache();
 
     final result = await ref
         .read(settingsCacheControllerProvider)
@@ -75,7 +81,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: context.l10n.settingsAccountDeletedSuccessfully,
           );
         }
-        context.go(AppRoutes.login);
+        // Defer to the next frame so GoRouter's auth redirect settles
+        // before we request a route transition.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          context.go(AppRoutes.home);
+        });
       }
       if (next.deleteError != null && mounted) {
         final errorTitle = next.cleanupRecoveryPending

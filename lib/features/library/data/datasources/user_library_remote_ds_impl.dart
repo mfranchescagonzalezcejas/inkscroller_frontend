@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/error/exceptions.dart';
@@ -49,6 +50,10 @@ class UserLibraryRemoteDataSourceImpl implements UserLibraryRemoteDataSource {
     String? title,
     String? coverUrl,
     List<String> authors = const [],
+    String? type,
+    String? demographic,
+    List<String>? genres,
+    String? status,
   }) async {
     try {
       await dio.post<void>(
@@ -57,6 +62,10 @@ class UserLibraryRemoteDataSourceImpl implements UserLibraryRemoteDataSource {
           if (title != null) 'title': title,
           if (coverUrl != null) 'cover_url': coverUrl,
           if (authors.isNotEmpty) 'authors': authors,
+          if (type != null) 'type': type,
+          if (demographic != null) 'demographic': demographic,
+          if (genres != null && genres.isNotEmpty) 'genres': genres,
+          if (status != null) 'status': status,
         },
       );
     } on DioException catch (error) {
@@ -101,6 +110,15 @@ class UserLibraryRemoteDataSourceImpl implements UserLibraryRemoteDataSource {
 
     final int? statusCode = error.response?.statusCode;
     final dynamic responseData = error.response?.data;
+
+    if (kDebugMode) {
+      debugPrint(
+        '[LibraryDS] ${error.requestOptions.method} '
+        '${error.requestOptions.uri} → $statusCode '
+        'body: $responseData',
+      );
+    }
+
     final String? responseMessage = responseData is Map<String, dynamic>
         ? responseData['detail'] as String?
         : null;

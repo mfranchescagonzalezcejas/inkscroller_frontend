@@ -1,0 +1,216 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:inkscroller_flutter/features/library/presentation/widgets/language_selector.dart';
+
+import '../../../../support/l10n_test_helpers.dart';
+
+void main() {
+  group('LanguageSelector', () {
+    testWidgets('renders available languages as dropdown items', (
+      tester,
+    ) async {
+      final languages = <String>['en', 'es', 'ja'];
+      String selected = 'en';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: languages,
+              selectedLanguage: selected,
+              onLanguageChanged: (lang) => selected = lang,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+
+      expect(find.text('English'), findsWidgets);
+      expect(find.text('Spanish'), findsOneWidget);
+      expect(find.text('Japanese'), findsOneWidget);
+    });
+
+    testWidgets('shows nothing when no languages available', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const [],
+              selectedLanguage: 'en',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(DropdownButton<String>), findsNothing);
+      expect(find.text('English'), findsNothing);
+    });
+
+    testWidgets('shows plain text label when only one language available', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['it'],
+              selectedLanguage: 'it',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Italian'), findsOneWidget);
+      expect(find.byType(DropdownButton<String>), findsNothing);
+    });
+
+    testWidgets('shows dropdown when multiple languages available', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['en', 'es'],
+              selectedLanguage: 'en',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
+    });
+
+    testWidgets('shows disabled dropdown with loading text when isLoading is true', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['en', 'es'],
+              selectedLanguage: 'en',
+              isLoading: true,
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('English'), findsWidgets);
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
+    });
+
+    testWidgets('calls onLanguageChanged when a language is selected', (
+      tester,
+    ) async {
+      String? changedLanguage;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['en', 'es'],
+              selectedLanguage: 'en',
+              onLanguageChanged: (lang) => changedLanguage = lang,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Spanish').last);
+      await tester.pumpAndSettle();
+
+      expect(changedLanguage, equals('es'));
+    });
+
+    testWidgets('displays the selectedLanguage value', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['en', 'es', 'ja'],
+              selectedLanguage: 'ja',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Japanese'), findsOneWidget);
+    });
+
+    testWidgets('falls back to first language when selectedLanguage is not available', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['en', 'es'],
+              selectedLanguage: 'fr',
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('French'), findsNothing);
+    });
+
+    testWidgets('dropdown is disabled while loading', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: LanguageSelector(
+              availableLanguages: const ['en', 'es'],
+              selectedLanguage: 'en',
+              isLoading: true,
+              onLanguageChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      // Shows loading placeholder instead of language options
+      expect(find.text('English'), findsWidgets);
+      expect(find.text('Spanish'), findsNothing);
+    });
+
+    testWidgets('renders Spanish language names when locale is es', (
+      tester,
+    ) async {
+      final languages = <String>['en', 'es', 'ja'];
+      String selected = 'en';
+
+      await tester.pumpWidget(
+        wrapWithL10n(
+          Scaffold(
+            body: LanguageSelector(
+              availableLanguages: languages,
+              selectedLanguage: selected,
+              onLanguageChanged: (lang) => selected = lang,
+            ),
+          ),
+          locale: const Locale('es'),
+        ),
+      );
+
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Inglés'), findsWidgets);
+      expect(find.text('Español'), findsOneWidget);
+      expect(find.text('Japonés'), findsOneWidget);
+    });
+  });
+}

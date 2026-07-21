@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/feedback/app_feedback.dart';
@@ -92,14 +94,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         );
     if (!mounted) return;
 
-    final completedAuthState = ref.read(authProvider);
-    final registrationSucceeded =
-        !completedAuthState.registrationInProgress &&
-        !completedAuthState.profileCompletionPending &&
-        completedAuthState.error == null &&
-        completedAuthState.user != null;
-
-    if (registrationSucceeded) {
+    // Only navigate away when the account was created AND the profile was
+    // saved. If signUp itself failed (email in use, weak password, network),
+    // or the profile PATCH failed (username conflict, server error), the
+    // user stays on this page to retry or correct the input.
+    // When signed in with a complete profile but unverified, the router
+    // redirects to /verify-email.
+    final postSignUpState = ref.read(authProvider);
+    if (postSignUpState.user != null && !postSignUpState.profileCompletionPending) {
       context.go(AppRoutes.home);
     }
   }
@@ -143,6 +145,26 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final day = value.day.toString().padLeft(2, '0');
 
     return '$year-$month-$day';
+  }
+
+  Future<void> _openTermsUrl() async {
+    final uri = Uri.parse('https://inkscroller-privacy.vercel.app/');
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (!mounted) return;
+        AppFeedback.showWarning(
+          context,
+          title: context.l10n.authTermsAcknowledgement,
+        );
+      }
+    } on Exception catch (e, st) {
+      if (kDebugMode) debugPrint('[TermsLink] Failed to launch URL: $e\n$st');
+      if (!mounted) return;
+      AppFeedback.showWarning(
+        context,
+        title: context.l10n.authTermsAcknowledgement,
+      );
+    }
   }
 
   @override
@@ -361,16 +383,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   if (!isProfileCompletion) ...<Widget>[
                     const SizedBox(height: 16),
 
-                    CheckboxListTile(
-                      value: _acceptedTerms,
-                      onChanged: isActionLocked
-                          ? null
-                          : (value) =>
-                                setState(() => _acceptedTerms = value ?? false),
+                    ListTile(
                       contentPadding: EdgeInsets.zero,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      activeColor: AppColors.primary,
-                      checkColor: Colors.white,
+                      leading: Checkbox(
+                        value: _acceptedTerms,
+                        onChanged: isActionLocked
+                            ? null
+                            : (value) => setState(
+                                () => _acceptedTerms = value ?? false),
+                        activeColor: AppColors.primary,
+                        checkColor: Colors.white,
+                      ),
                       title: Text(
                         context.l10n.authTermsAcknowledgement,
                         style: const TextStyle(
@@ -380,6 +403,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           color: AppColors.onSurfaceVariant,
                         ),
                       ),
+                      trailing: IconButton(
+                        icon: const Icon(
+                          Icons.open_in_new,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: isActionLocked ? null : _openTermsUrl,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        tooltip: context.l10n.authTermsAcknowledgement,
+                      ),
+                      onTap: isActionLocked
+                          ? null
+                          : () => setState(
+                              () => _acceptedTerms = !_acceptedTerms),
                     ),
                   ],
 

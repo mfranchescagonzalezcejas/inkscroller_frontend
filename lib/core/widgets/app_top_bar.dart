@@ -12,9 +12,6 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   /// Current auth state to render avatar consistently with Home.
   final AuthState authState;
 
-  /// Whether the left menu icon should open drawer.
-  final bool enableDrawer;
-
   /// Optional override for the right-side widget.
   /// When null (default), renders the user avatar / person icon navigating to /profile.
   /// Pass a custom widget (e.g. a settings icon) to override.
@@ -23,7 +20,6 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({
     super.key,
     required this.authState,
-    this.enableDrawer = true,
     this.rightWidget,
   });
 
@@ -41,14 +37,6 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            GestureDetector(
-              onTap: enableDrawer ? () => Scaffold.of(context).openDrawer() : null,
-              child: Icon(
-                Icons.menu,
-                color: enableDrawer ? AppColors.onSurface : AppColors.outline,
-                size: 24,
-              ),
-            ),
             Text(
               AppConstants.appName,
               style: AppTypography.titleLgStyle.copyWith(color: AppColors.primary),

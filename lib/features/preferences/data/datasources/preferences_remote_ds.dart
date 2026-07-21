@@ -9,5 +9,7 @@ abstract class PreferencesRemoteDataSource {
   Future<UserPreferencesModel> updatePreferences({
     String? defaultReaderMode,
     String? defaultLanguage,
+    String? contentRatingFilter,
+    List<String>? demographicFilter,
   });
 }

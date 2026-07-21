@@ -2,7 +2,7 @@ name: inkscroller_flutter
 description: "InkScroller Flutter application"
 publish_to: 'none'
 
-version: 1.0.7+33
+version: 1.1.0+34
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
@@ -15,9 +15,9 @@ dependencies:
 
   cached_network_image: ^3.4.1
   connectivity_plus: ^6.1.5
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   dartz: ^0.10.1
-  dio: ^5.4.0
+  dio: ^5.10.0
   firebase_analytics: ^12.1.1
   firebase_auth: ^6.1.4
   firebase_core: ^4.3.0
@@ -28,14 +28,14 @@ dependencies:
   go_router: ^14.8.1
   intl: ^0.20.2
   package_info_plus: ^8.3.1
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.5.5
   shimmer: ^3.0.0
   url_launcher: ^6.3.0
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   integration_test:
     sdk: flutter
-  mocktail: ^1.0.4
+  mocktail: ^1.0.5
   url_launcher_platform_interface: ^2.3.2
   flutter_test:
     sdk: flutter

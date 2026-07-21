@@ -26,9 +26,10 @@ class AppConstants {
 
   // Cache
   static const int imageCacheDays = 7;
+  static const int tabCacheTtlMinutes = 5;
   static const int mangaListCacheTtlMinutes = 10;
   static const int mangaDetailCacheTtlMinutes = 30;
-  static const int mangaChaptersCacheTtlMinutes = 15;
+  static const int mangaChaptersCacheTtlMinutes = 60;
 
   // Pagination
   static const int firstPageOffset = 0;

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../domain/entities/manga_tags.dart';
 import '../models/chapter_model.dart';
 import '../models/manga_model.dart';
 import 'library_local_ds.dart';
@@ -18,10 +19,20 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
     required int limit,
     required int offset,
     Map<String, String>? order,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
     required Duration maxAge,
   }) async {
     final Map<String, dynamic>? payload = _readPayload(
-      _mangaListKey(limit: limit, offset: offset, order: order),
+      _mangaListKey(
+        limit: limit,
+        offset: offset,
+        order: order,
+        genre: genre,
+        contentRating: contentRating,
+        demographics: demographics,
+      ),
       maxAge: maxAge,
     );
 
@@ -39,10 +50,20 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
     required int limit,
     required int offset,
     Map<String, String>? order,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
     required List<MangaModel> mangas,
   }) {
     return _writePayload(
-      _mangaListKey(limit: limit, offset: offset, order: order),
+      _mangaListKey(
+        limit: limit,
+        offset: offset,
+        order: order,
+        genre: genre,
+        contentRating: contentRating,
+        demographics: demographics,
+      ),
       <String, dynamic>{
         'items': mangas.map((manga) => manga.toJson()).toList(),
       },
@@ -79,11 +100,12 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
   Future<List<ChapterModel>?> getCachedMangaChapters(
     String mangaId, {
     required Duration maxAge,
+    String? language,
   }) async {
-    final Map<String, dynamic>? payload = _readPayload(
-      'library.manga_chapters.$mangaId',
-      maxAge: maxAge,
-    );
+    final cacheKey = language != null
+        ? 'library.manga_chapters.$mangaId:$language'
+        : 'library.manga_chapters.$mangaId';
+    final Map<String, dynamic>? payload = _readPayload(cacheKey, maxAge: maxAge);
 
     final List<dynamic>? rawItems = payload?['items'] as List<dynamic>?;
     if (rawItems == null) return null;
@@ -95,9 +117,16 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
   }
 
   @override
-  Future<void> cacheMangaChapters(String mangaId, List<ChapterModel> chapters) {
+  Future<void> cacheMangaChapters(
+    String mangaId,
+    List<ChapterModel> chapters, {
+    String? language,
+  }) {
+    final cacheKey = language != null
+        ? 'library.manga_chapters.$mangaId:$language'
+        : 'library.manga_chapters.$mangaId';
     return _writePayload(
-      'library.manga_chapters.$mangaId',
+      cacheKey,
       <String, dynamic>{
         'items': chapters.map((chapter) => chapter.toJson()).toList(),
       },
@@ -123,6 +152,9 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
     required int limit,
     required int offset,
     Map<String, String>? order,
+    String? genre,
+    String? contentRating,
+    List<String>? demographics,
   }) {
     final String orderPart = order == null || order.isEmpty
         ? 'default'
@@ -130,7 +162,10 @@ class LibraryLocalDataSourceImpl implements LibraryLocalDataSource {
               .map((entry) => '${entry.key}:${entry.value}')
               .join(',');
 
-    return 'library.manga_list.$limit.$offset.$orderPart';
+    return 'library.manga_list.v2.$limit.$offset.$orderPart'
+        '.g:${genre ?? 'none'}'
+        '.cr:${contentRating ?? 'default'}'
+        '.d:${canonicalDemographicsKey(demographics)}';
   }
 
   Map<String, dynamic>? _readPayload(String key, {required Duration maxAge}) {

@@ -8,6 +8,9 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/get_auth_state.dart';
 import '../../features/auth/domain/usecases/get_id_token.dart';
+import '../../features/auth/domain/usecases/reload_user.dart';
+import '../../features/auth/domain/usecases/send_email_verification.dart';
+import '../../features/auth/domain/usecases/send_password_reset.dart';
 import '../../features/auth/domain/usecases/sign_in.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/sign_up.dart';
@@ -20,6 +23,8 @@ import '../../features/library/data/datasources/library_local_ds.dart';
 import '../../features/library/data/datasources/library_local_ds_impl.dart';
 import '../../features/library/data/datasources/library_remote_ds.dart';
 import '../../features/library/data/datasources/library_remote_ds_impl.dart';
+import '../../features/library/data/datasources/reading_progress_remote_ds.dart';
+import '../../features/library/data/datasources/reading_progress_remote_ds_impl.dart';
 import '../../features/library/data/datasources/user_library_remote_ds.dart';
 import '../../features/library/data/datasources/user_library_remote_ds_impl.dart';
 import '../../features/library/data/repositories/library_repository_impl.dart';
@@ -32,7 +37,9 @@ import '../../features/library/domain/repositories/reading_progress_repository.d
 import '../../features/library/domain/repositories/user_library_repository.dart';
 import '../../features/library/domain/usecases/get_chapter_pages.dart';
 import '../../features/library/domain/usecases/get_manga_chapters.dart';
+import '../../features/library/domain/usecases/get_manga_chapters_with_languages.dart';
 import '../../features/library/domain/usecases/get_manga_detail.dart';
+import '../../features/library/domain/usecases/get_manga_languages.dart';
 import '../../features/library/domain/usecases/get_manga_list.dart';
 import '../../features/library/domain/usecases/get_per_title_override.dart';
 import '../../features/library/domain/usecases/remove_per_title_override.dart';
@@ -104,6 +111,15 @@ Future<void> initDI() async {
   _registerIfAbsent<SignOut>(() => SignOut(sl<AuthRepository>()));
   _registerIfAbsent<GetAuthState>(() => GetAuthState(sl<AuthRepository>()));
   _registerIfAbsent<GetIdToken>(() => GetIdToken(sl<AuthRepository>()));
+  _registerIfAbsent<SendEmailVerification>(
+    () => SendEmailVerification(sl<AuthRepository>()),
+  );
+  _registerIfAbsent<SendPasswordReset>(
+    () => SendPasswordReset(sl<AuthRepository>()),
+  );
+  _registerIfAbsent<ReloadUser>(
+    () => ReloadUser(sl<AuthRepository>()),
+  );
 
   // Core
   _registerIfAbsent<DioClient>(
@@ -147,6 +163,12 @@ Future<void> initDI() async {
   _registerIfAbsent<GetMangaList>(() => GetMangaList(sl()));
   _registerIfAbsent<GetMangaDetail>(() => GetMangaDetail(sl()));
   _registerIfAbsent<GetMangaChapters>(() => GetMangaChapters(sl()));
+  _registerIfAbsent<GetMangaChaptersWithLanguages>(
+    () => GetMangaChaptersWithLanguages(sl<LibraryRepository>()),
+  );
+  _registerIfAbsent<GetMangaLanguages>(
+    () => GetMangaLanguages(sl<LibraryRepository>()),
+  );
   _registerIfAbsent<GetChapterPages>(
     () => GetChapterPages(sl<LibraryRepository>()),
   );
@@ -160,8 +182,16 @@ Future<void> initDI() async {
     () => PerTitleOverrideRepositoryImpl(sl<SharedPreferences>()),
   );
 
+  _registerIfAbsent<ReadingProgressRemoteDataSource>(
+    () => ReadingProgressRemoteDataSourceImpl(dioClient: sl<DioClient>()),
+  );
+
   _registerIfAbsent<ReadingProgressRepository>(
-    () => ReadingProgressRepositoryImpl(sl<SharedPreferences>()),
+    () => ReadingProgressRepositoryImpl(
+      sl<SharedPreferences>(),
+      remoteDataSource: sl<ReadingProgressRemoteDataSource>(),
+      firebaseAuth: sl<FirebaseAuth>(),
+    ),
   );
 
   _registerIfAbsent<UserLibraryRemoteDataSource>(
@@ -200,6 +230,7 @@ Future<void> initDI() async {
     () => PreferencesRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
+      firebaseAuth: sl<FirebaseAuth>(),
     ),
   );
 

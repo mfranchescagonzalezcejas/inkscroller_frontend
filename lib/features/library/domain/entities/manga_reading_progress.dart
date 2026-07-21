@@ -1,16 +1,38 @@
+import 'dart:math' as math;
+
 /// Immutable domain entity that represents reading progress for one manga.
 class MangaReadingProgress {
   const MangaReadingProgress({
     required this.mangaId,
     this.readChapterIds = const <String>{},
     this.totalChaptersCount = 0,
-  });
+    this.manuallyMarkedCount = 0,
+    this.batchSize = 25,
+    DateTime? updatedAt,
+  }) : _updatedAt = updatedAt;
 
   final String mangaId;
   final Set<String> readChapterIds;
   final int totalChaptersCount;
 
-  int get readChaptersCount => readChapterIds.length;
+  /// Self-reported chapter count independent of MangaDex chapter IDs.
+  final int manuallyMarkedCount;
+
+  /// Number of chapters per batch in the batching UI.
+  final int batchSize;
+
+  /// Last time this progress record changed in a user-facing way.
+  ///
+  /// Defaults to the epoch so legacy records without a timestamp sort last.
+  DateTime get updatedAt =>
+      _updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+
+  final DateTime? _updatedAt;
+
+  /// Returns the effective read count — the larger of the MangaDex set size
+  /// and the self-reported manual count.
+  int get readChaptersCount =>
+      math.max(readChapterIds.length, manuallyMarkedCount);
 
   bool get hasKnownTotal => totalChaptersCount > 0;
 
@@ -19,11 +41,17 @@ class MangaReadingProgress {
   MangaReadingProgress copyWith({
     Set<String>? readChapterIds,
     int? totalChaptersCount,
+    int? manuallyMarkedCount,
+    int? batchSize,
+    DateTime? updatedAt,
   }) {
     return MangaReadingProgress(
       mangaId: mangaId,
       readChapterIds: readChapterIds ?? this.readChapterIds,
       totalChaptersCount: totalChaptersCount ?? this.totalChaptersCount,
+      manuallyMarkedCount: manuallyMarkedCount ?? this.manuallyMarkedCount,
+      batchSize: batchSize ?? this.batchSize,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

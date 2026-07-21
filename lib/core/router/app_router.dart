@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_constants.dart';
 import '../l10n/l10n.dart';
 import 'app_routes.dart';
+import 'redirect_notifier.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/verify_email_page.dart';
 import '../../features/explore/presentation/pages/explore_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/library/domain/entities/chapter.dart';
@@ -19,41 +22,51 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/about/presentation/pages/about_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 
-/// Notifier that rebuilds the router whenever the Firebase auth state changes.
-///
-/// [GoRouter] holds a [Listenable] that it watches for changes; connecting it
-/// to the Firebase auth stream ensures route redirects fire immediately after
-/// sign-in or sign-out without requiring an explicit refresh.
-final _authStateListenable = _FirebaseAuthStateListenable();
-
 /// Routes that require an authenticated user.
 ///
 /// Guests landing on any of these paths are redirected to `/login`.
-const _protectedRoutes = <String>[AppRoutes.profile];
+const _protectedRoutes = <String>[];
 
 /// Routes reserved for unauthenticated users.
 ///
-/// Authenticated users landing here are redirected to `/`.
+/// Authenticated+verified users landing here are redirected to `/`.
 const _authOnlyRoutes = <String>[AppRoutes.login, AppRoutes.register];
+const _authVerifiedRoutes = <String>[AppRoutes.verifyEmail];
 
 /// Computes the auth redirect for a given route and Firebase auth state.
 ///
-/// Redirect rules:
-/// - Authenticated user on an auth-only surface (`/login`, `/register`) → `/`
-/// - Guest on a protected surface (`/profile`) → `/login`
-/// - All other combinations → `null` (no redirect, allow navigation)
+/// The backend enforces email verification — unverified users cannot access
+/// protected endpoints. The router redirects them to `/verify-email` so they
+/// see the verification page instead of a broken app.
 ///
-/// Public routes (home, explore, library, manga-detail, reader) remain fully
-/// accessible without authentication so the app is usable as a guest.
+/// Redirect rules:
+/// - Authenticated+verified user on auth surfaces → `/`
+/// - Authenticated+verified user on `/verify-email` → `/`
+/// - Authenticated+unverified user on non-auth routes → `/verify-email`
+/// - Guest on protected routes → `/login`
+/// - Guest on `/verify-email` → `/login`
+/// - All other combinations → `null` (no redirect)
 String? resolveAuthRedirect({
   required User? currentUser,
   required String matchedLocation,
 }) {
   final isLoggedIn = currentUser != null;
+  final isVerified = currentUser?.emailVerified ?? false;
 
-  // Authenticated user should not stay on auth screens.
-  if (isLoggedIn && _authOnlyRoutes.contains(matchedLocation)) {
-    return AppRoutes.home;
+  if (kDebugMode) {
+    debugPrint(
+      '[ROUTER] resolveRedirect route=$matchedLocation '
+      'loggedIn=$isLoggedIn verified=$isVerified',
+    );
+  }
+
+  // Verified user should not stay on auth or verification screens.
+  if (isLoggedIn && isVerified) {
+    if (_authOnlyRoutes.contains(matchedLocation) ||
+        _authVerifiedRoutes.contains(matchedLocation)) {
+      return AppRoutes.home;
+    }
+    return null;
   }
 
   // Guest must not access protected routes — redirect to login.
@@ -61,13 +74,23 @@ String? resolveAuthRedirect({
     return AppRoutes.login;
   }
 
-  return null;
-}
-
-class _FirebaseAuthStateListenable extends ChangeNotifier {
-  _FirebaseAuthStateListenable() {
-    FirebaseAuth.instance.authStateChanges().listen((_) => notifyListeners());
+  // Guest cannot access verification page.
+  if (!isLoggedIn && _authVerifiedRoutes.contains(matchedLocation)) {
+    return AppRoutes.login;
   }
+
+  // Unverified user on any app page → redirect to verification page.
+  // Only /register and /verify-email are exempt: /register so the
+  // signUp flow completes first, /verify-email to prevent an infinite
+  // redirect loop when the user is already on that page.
+  if (isLoggedIn &&
+      !isVerified &&
+      matchedLocation != AppRoutes.register &&
+      matchedLocation != AppRoutes.verifyEmail) {
+    return AppRoutes.verifyEmail;
+  }
+
+  return null;
 }
 
 /// Centralized application router with authentication guard.
@@ -77,7 +100,7 @@ class _FirebaseAuthStateListenable extends ChangeNotifier {
 /// to `/`.
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.home,
-  refreshListenable: _authStateListenable,
+  refreshListenable: routerRefreshNotifier,
   redirect: (context, state) {
     return resolveAuthRedirect(
       currentUser: FirebaseAuth.instance.currentUser,
@@ -140,6 +163,13 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+
+    // ── Auth sub-routes ─────────────────────────────────────────────────
+    GoRoute(
+      path: AppRoutes.verifyEmail,
+      name: 'verify-email',
+      builder: (context, state) => const VerifyEmailPage(),
     ),
 
     // ── Sub-routes (accessible from tabs, not tabs themselves) ────────────

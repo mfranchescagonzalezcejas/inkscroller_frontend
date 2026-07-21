@@ -24,6 +24,7 @@ String authErrorText(BuildContext context, String? error) {
     authWeakPasswordKey => l10n.authWeakPassword,
     authTooManyRequestsKey => l10n.authTooManyRequests,
     authNetworkErrorKey => l10n.authNetworkError,
+    authEmailNotVerifiedKey => l10n.authEmailNotVerified,
     authUnknownErrorKey => l10n.authUnknownError,
     _ => error,
   };

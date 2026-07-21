@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/error/exceptions.dart';
@@ -68,6 +69,15 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
 
     final statusCode = error.response?.statusCode;
     final responseData = error.response?.data;
+
+    if (kDebugMode) {
+      debugPrint(
+        '[ProfileDS] ${error.requestOptions.method} '
+        '${error.requestOptions.uri} → $statusCode '
+        'body: $responseData',
+      );
+    }
+
     final responseMessage = responseData is Map<String, dynamic>
         ? _extractResponseMessage(responseData['detail'])
         : null;

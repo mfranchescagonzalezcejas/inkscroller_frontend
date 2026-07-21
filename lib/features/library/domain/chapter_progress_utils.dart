@@ -30,6 +30,49 @@ List<Chapter> chaptersUpToTarget(
   return ordered.sublist(0, targetIndex + 1);
 }
 
+/// Sorts chapters by number (ascending by default) and optionally keeps only
+/// unread chapters (those whose [id] is NOT in [readChapterIds]).
+///
+/// Reuses [orderChaptersForProgress] for stable ascending sort of numbered
+/// chapters. Unnumbered chapters (extras, oneshots) always stay at the
+/// bottom regardless of [descending], so the descending view never starts
+/// with specials.
+List<Chapter> organizeChapters(
+  List<Chapter> chapters, {
+  bool descending = false,
+  Set<String>? readChapterIds,
+}) {
+  // Deduplicate by full chapter number keeping the first occurrence.
+  // MangaDex sometimes returns multiple entries for the same number
+  // (different scanlators, multiple uploads). Uses the full double so
+  // decimal chapters like 12.0 and 12.5 are both retained.
+  final Set<double> seenNumbers = <double>{};
+  final List<Chapter> deduped = <Chapter>[];
+  for (final chapter in chapters) {
+    final num? n = chapter.number;
+    if (n != null) {
+      if (seenNumbers.contains(n.toDouble())) continue;
+      seenNumbers.add(n.toDouble());
+    }
+    deduped.add(chapter);
+  }
+
+  final ordered = orderChaptersForProgress(deduped);
+  final List<Chapter> numbered =
+      ordered.where((c) => c.number != null).toList();
+  final List<Chapter> unnumbered =
+      ordered.where((c) => c.number == null).toList();
+  final List<Chapter> sorted = descending
+      ? <Chapter>[...numbered.reversed, ...unnumbered]
+      : <Chapter>[...numbered, ...unnumbered];
+  if (readChapterIds != null && readChapterIds.isNotEmpty) {
+    return sorted
+        .where((c) => !readChapterIds.contains(c.id))
+        .toList();
+  }
+  return sorted;
+}
+
 int _compareChaptersForProgress(Chapter left, Chapter right) {
   final double? leftNumber = left.number;
   final double? rightNumber = right.number;

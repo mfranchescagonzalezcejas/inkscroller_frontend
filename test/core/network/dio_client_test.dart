@@ -14,8 +14,8 @@ void main() {
 
     test('P0-F6: public paths are not protected', () {
       expect(isProtectedAuthPath('/ping'), isFalse);
-      expect(isProtectedAuthPath('/manga'), isFalse);
-      expect(isProtectedAuthPath('/chapters/latest'), isFalse);
+      expect(isProtectedAuthPath('/manga'), isTrue);
+      expect(isProtectedAuthPath('/chapters/latest'), isTrue);
     });
   });
 
@@ -55,7 +55,7 @@ void main() {
       expect(options.headers.containsKey('Authorization'), isFalse);
     });
 
-    test('does not attach token to /manga routes', () async {
+    test('attaches token to /manga routes for age-aware content filter', () async {
       final options = RequestOptions(path: '/manga');
 
       await attachAuthHeaderForRequest(
@@ -63,7 +63,7 @@ void main() {
         tokenProvider: () async => 'token-123',
       );
 
-      expect(options.headers.containsKey('Authorization'), isFalse);
+      expect(options.headers['Authorization'], 'Bearer token-123');
     });
 
     test('P0-F7: silently skips auth header when token provider throws — '

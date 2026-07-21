@@ -1,9 +1,15 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/app_user.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/get_auth_state.dart';
+import '../../domain/usecases/reload_user.dart';
+import '../../domain/usecases/send_email_verification.dart';
+import '../../domain/usecases/send_password_reset.dart';
 import '../../domain/usecases/sign_in.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up.dart';
@@ -11,6 +17,7 @@ import '../../../profile/domain/entities/user_profile.dart';
 import '../../../profile/domain/usecases/get_user_profile.dart';
 import '../../../profile/domain/usecases/update_user_profile.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/router/redirect_notifier.dart';
 import 'auth_state.dart';
 
 const String _signUpProfileMetadataFailureReason =
@@ -25,6 +32,19 @@ const String _profileCompletionCheckFailureReason =
 /// localized message via [context.l10n.authSessionVerificationFailed].
 const String authSessionVerificationErrorKey =
     'auth_session_verification_failed';
+
+/// Number of leading characters to reveal in debug-logged emails.
+/// Keeping it at 1 preserves enough distinguishability during debugging
+/// without exposing meaningful PII.
+const int _emailLogRevealChars = 1;
+
+/// Sanitizes [email] for debug logging by revealing only the first
+/// [_emailLogRevealChars] characters. Returns `'***'` for short or
+/// null-like values.
+String _sanitizeEmailForLog(String email) {
+  if (email.length <= _emailLogRevealChars) return '***';
+  return '${email.substring(0, _emailLogRevealChars)}***';
+}
 
 // ---------------------------------------------------------------------------
 // Firebase auth error codes (stable — matched by authErrorText to localized
@@ -50,6 +70,9 @@ const String authNetworkErrorKey = 'auth/network-error';
 /// An unexpected / uncategorised auth failure.
 const String authUnknownErrorKey = 'auth/unknown-error';
 
+/// The user's email has not been verified yet.
+const String authEmailNotVerifiedKey = 'auth/email-not-verified';
+
 /// Reports profile metadata failures to observability without coupling the
 /// notifier to a concrete analytics SDK.
 typedef ProfileMetadataFailureReporter =
@@ -70,9 +93,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignUp _signUp;
   final SignOut _signOut;
   final GetAuthState _getAuthState;
+  final SendEmailVerification _sendEmailVerification;
+  final SendPasswordReset _sendPasswordReset;
+  final ReloadUser _reloadUser;
   final GetUserProfile _getUserProfile;
   final UpdateUserProfile _updateUserProfile;
   final ProfileMetadataFailureReporter _profileMetadataFailureReporter;
+  final AuthRepository? _authRepository;
 
   StreamSubscription<AppUser?>? _authSubscription;
   String? _profileCompletionCheckUserId;
@@ -84,17 +111,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required SignUp signUp,
     required SignOut signOut,
     required GetAuthState getAuthState,
+    required SendEmailVerification sendEmailVerification,
+    required SendPasswordReset sendPasswordReset,
+    required ReloadUser reloadUser,
     required GetUserProfile getUserProfile,
     required UpdateUserProfile updateUserProfile,
     ProfileMetadataFailureReporter profileMetadataFailureReporter =
         _ignoreProfileMetadataFailure,
+    AuthRepository? authRepository,
   }) : _signIn = signIn,
        _signUp = signUp,
        _signOut = signOut,
        _getAuthState = getAuthState,
+       _sendEmailVerification = sendEmailVerification,
+       _sendPasswordReset = sendPasswordReset,
+       _reloadUser = reloadUser,
        _getUserProfile = getUserProfile,
        _updateUserProfile = updateUserProfile,
        _profileMetadataFailureReporter = profileMetadataFailureReporter,
+       _authRepository = authRepository,
        super(const AuthState()) {
     _listenToAuthState();
   }
@@ -104,11 +139,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void _listenToAuthState() {
     _authSubscription = _getAuthState().listen(
       (user) {
+        if (kDebugMode) {
+          debugPrint('[AUTH] authStateChange → ${user != null ? "user=${user.uid} verified=${user.isEmailVerified}" : "null"}');
+        }
         state = state.copyWith(
           user: user,
           clearUser: user == null,
           clearError: true,
           isLoading: state.registrationInProgress && state.isLoading,
+          // Preserve verification/reset sent flags across auth state changes so
+          // the login page still shows the banner after signOut.
+          emailVerificationSent: state.emailVerificationSent,
+          passwordResetSent: state.passwordResetSent,
         );
         _checkProfileCompletionIfNeeded(user);
       },
@@ -128,7 +170,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   void _checkProfileCompletionIfNeeded(AppUser? user) {
-    if (user == null || state.registrationInProgress) return;
+    if (user == null || state.registrationInProgress) {
+      if (kDebugMode) debugPrint('[AUTH] checkProfileCompletion skipped: user=null or regInProgress');
+      return;
+    }
+    if (!user.isEmailVerified) {
+      if (kDebugMode) debugPrint('[AUTH] checkProfileCompletion skipped: email not verified');
+      return;
+    }
 
     final userId = user.uid;
     if (_profileCompletionCheckUserId == userId &&
@@ -212,7 +261,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // --- Public methods --------------------------------------------------------
 
   /// Signs in with [email] and [password].
+  ///
+  /// The backend enforces email verification — unverified users receive
+  /// 403/email_not_verified on protected API calls. The router redirects
+  /// unverified users to the verification page.
   Future<void> signIn({required String email, required String password}) async {
+    if (kDebugMode) {
+      debugPrint('[AUTH] signIn: attempting login for ${_sanitizeEmailForLog(email)}');
+    }
     state = state.copyWith(
       isLoading: true,
       clearError: true,
@@ -223,8 +279,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _signIn(email: email, password: password);
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] signIn FAILED: ${failure.message}');
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
       (user) {
         state = state.copyWith(
           user: user,
@@ -251,39 +309,75 @@ class AuthNotifier extends StateNotifier<AuthState> {
       registrationInProgress: true,
     );
 
+    if (kDebugMode) debugPrint('[AUTH] signUp: calling _signUp for ${_sanitizeEmailForLog(email)}');
     final result = await _signUp(email: email, password: password);
 
     await result.fold(
-      (failure) async => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-        registrationInProgress: false,
-      ),
+      (failure) async {
+        if (kDebugMode) debugPrint('[AUTH] signUp FAILED: ${failure.message}');
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+          registrationInProgress: false,
+        );
+      },
       (_) async {
+        if (kDebugMode) debugPrint('[AUTH] signUp: Firebase account created, updating profile');
         final profileResult = await _updateUserProfile(
           username: username,
           birthDate: birthDate,
         );
 
-        profileResult.fold(
-          (failure) {
+        if (kDebugMode) debugPrint('[AUTH] signUp: sending verification email');
+        final verificationResult = await _sendEmailVerification();
+        if (kDebugMode) debugPrint('[AUTH] signUp: verification email result received');
+
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final profileError = await profileResult.fold(
+          (failure) async {
             _reportProfileMetadataFailure(
               flow: 'sign_up',
               reason: _signUpProfileMetadataFailureReason,
             );
-            state = state.copyWith(
-              isLoading: false,
-              error: failure.message,
-              profileCompletionPending: true,
-              registrationInProgress: false,
-            );
+            return failure.message;
           },
-          (_) => state = state.copyWith(
-            isLoading: false,
-            clearError: true,
-            profileCompletionPending: false,
-            registrationInProgress: false,
-          ),
+          (_) async {
+            // Best-effort Firebase Auth displayName sync — only when
+            // backend profile metadata persisted successfully.
+            unawaited(
+              _authRepository
+                  ?.updateDisplayName(username)
+                  .catchError((Object e) {
+                if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
+                return const Right<Failure, void>(null);
+              }),
+            );
+            return null;
+          },
+        );
+
+        final verificationSent = verificationResult.fold(
+          (failure) {
+            if (kDebugMode) debugPrint('[AUTH] signUp sendVerification FAILED: ${failure.message}');
+            return false;
+          },
+          (_) => true,
+        );
+
+        final verificationError = verificationResult.fold<String?>(
+          (f) => f.message,
+          (_) => null,
+        );
+        final bothSucceeded = profileError == null && verificationError == null;
+
+        state = state.copyWith(
+          isLoading: false,
+          clearError: bothSucceeded,
+          error: profileError ?? verificationError,
+          profileCompletionPending: profileError != null,
+          registrationInProgress: false,
+          emailVerificationSent: verificationSent,
+          lastVerificationSentAt: verificationSent ? now : null,
         );
       },
     );
@@ -315,32 +409,142 @@ class AuthNotifier extends StateNotifier<AuthState> {
           registrationInProgress: false,
         );
       },
-      (_) => state = state.copyWith(
-        isLoading: false,
-        clearError: true,
-        profileCompletionPending: false,
-        registrationInProgress: false,
-      ),
+      (_) {
+        // Best-effort Firebase Auth displayName sync — only when
+        // backend profile metadata persisted successfully.
+        unawaited(
+          _authRepository
+              ?.updateDisplayName(username)
+              .catchError((Object e) {
+            if (kDebugMode) debugPrint('[AUTH] updateDisplayName FAILED: $e');
+            return const Right<Failure, void>(null);
+          }),
+        );
+        state = state.copyWith(
+          isLoading: false,
+          clearError: true,
+          profileCompletionPending: false,
+          registrationInProgress: false,
+        );
+      },
     );
   }
 
   /// Signs out the current user.
   Future<void> signOut() async {
+    if (kDebugMode) debugPrint('[AUTH] signOut');
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _signOut();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(isLoading: false, error: failure.message),
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] signOut FAILED: ${failure.message}');
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
       (_) => state = state.copyWith(
         isLoading: false,
         clearUser: true,
         clearError: true,
         profileCompletionPending: false,
         registrationInProgress: false,
+        clearLastVerificationSentAt: true,
+        clearPasswordResetSent: true,
       ),
     );
+  }
+
+  /// Sends a verification email to the current user.
+  Future<void> sendVerificationEmail() async {
+    if (kDebugMode) debugPrint('[AUTH] sendVerificationEmail');
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _sendEmailVerification();
+
+    result.fold(
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] sendVerificationEmail FAILED: ${failure.message}');
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
+      (_) {
+        if (kDebugMode) debugPrint('[AUTH] sendVerificationEmail SUCCESS');
+        state = state.copyWith(
+          isLoading: false,
+          emailVerificationSent: true,
+          lastVerificationSentAt: DateTime.now().millisecondsSinceEpoch,
+        );
+      },
+    );
+  }
+
+  /// Sends a password reset email to [email].
+  Future<void> resetPassword(String email) async {
+    if (kDebugMode) debugPrint('[AUTH] resetPassword');
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _sendPasswordReset(email: email);
+
+    result.fold(
+      (failure) {
+        if (kDebugMode) debugPrint('[AUTH] resetPassword FAILED: ${failure.message}');
+        state = state.copyWith(isLoading: false, error: failure.message);
+      },
+      (_) {
+        if (kDebugMode) debugPrint('[AUTH] resetPassword SUCCESS');
+        state = state.copyWith(
+          isLoading: false,
+          passwordResetSent: true,
+          clearError: true,
+        );
+      },
+    );
+  }
+
+  /// Clears the password reset sent flag.
+  void clearPasswordResetSent() {
+    state = state.copyWith(clearPasswordResetSent: true);
+  }
+
+  /// Reloads the current user and checks if email is verified.
+  ///
+  /// Returns `true` when email is now verified.
+  Future<bool> checkEmailVerification() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    final result = await _reloadUser();
+
+    return result.fold(
+      (failure) {
+        state = state.copyWith(isLoading: false, error: failure.message);
+        return false;
+      },
+      (user) {
+        state = state.copyWith(
+          user: user,
+          isLoading: false,
+          clearError: true,
+        );
+        if (user.isEmailVerified) {
+          // Trigger profile completion check now that the user is verified.
+          _checkProfileCompletionIfNeeded(user);
+        }
+        return user.isEmailVerified;
+      },
+    );
+  }
+
+  /// Called by the Dio error interceptor when the backend returns
+  /// 403/email_not_verified. Sets [AuthState.emailVerificationSent]
+  /// so the app redirects the user to the verification page.
+  void setEmailVerificationRequired() {
+    if (kDebugMode) debugPrint('[AUTH] setEmailVerificationRequired called');
+    // Don't set emailVerificationSent — no email was actually sent by this
+    // interceptor path. The user lands on /verify-email and can request one
+    // via the resend button.
+    triggerRouterRefresh();
   }
 
   /// Clears any pending auth error from the state.

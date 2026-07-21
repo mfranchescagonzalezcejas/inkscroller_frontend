@@ -11,34 +11,49 @@ import '../providers/reader/reader_ui_state.dart';
 /// Phase 6 reader settings bottom sheet.
 ///
 /// Controls:
-/// - Reading direction: LTR (paged) / RTL (paged) / Vertical — persisted via
-///   [perTitleOverrideProvider] for this manga.
+/// - Reading direction: Vertical / Paginated — persisted and returned on confirm.
 /// - Brightness overlay: local, transient, stored in [readerUiProvider].
 /// - AMOLED Black toggle: local, transient.
 /// - Immersive Mode toggle: local, triggers [SystemChrome] change.
 ///
 /// Open via [showReaderSettings].
-class ReaderSettingsSheet extends ConsumerWidget {
+class ReaderSettingsSheet extends ConsumerStatefulWidget {
   final String chapterId;
   final String? mangaId;
+
+  /// The reader mode currently active when the sheet opened.
+  /// Used to highlight the correct segment even when no per-title override exists.
+  final ReaderMode initialMode;
 
   const ReaderSettingsSheet({
     super.key,
     required this.chapterId,
     this.mangaId,
+    this.initialMode = ReaderMode.vertical,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ReaderUiState uiState = ref.watch(readerUiProvider(chapterId));
-    final ReaderUiNotifier uiNotifier =
-        ref.read(readerUiProvider(chapterId).notifier);
+  ConsumerState<ReaderSettingsSheet> createState() =>
+      _ReaderSettingsSheetState();
+}
 
-    // Per-title override determines the active reading direction.
-    final override = mangaId != null
-        ? ref.watch(perTitleOverrideProvider(mangaId!))
+class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
+  late ReaderMode _selectedMode;
+
+  @override
+  void initState() {
+    super.initState();
+    final override = widget.mangaId != null
+        ? ref.read(perTitleOverrideProvider(widget.mangaId!))
         : null;
-    final activeMode = override?.preferredReaderMode ?? ReaderMode.vertical;
+    _selectedMode = override?.preferredReaderMode ?? widget.initialMode;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ReaderUiState uiState = ref.watch(readerUiProvider(widget.chapterId));
+    final ReaderUiNotifier uiNotifier =
+        ref.read(readerUiProvider(widget.chapterId).notifier);
 
     return Container(
       decoration: const BoxDecoration(
@@ -81,9 +96,17 @@ class ReaderSettingsSheet extends ConsumerWidget {
                   _SectionLabel(context.l10n.readerSettingsDirection),
                   const SizedBox(height: 12),
                   _DirectionSegment(
-                    active: activeMode,
-                    mangaId: mangaId,
-                    ref: ref,
+                    active: _selectedMode,
+                    onChanged: (mode) {
+                      setState(() => _selectedMode = mode);
+                      // Persist immediately so the override survives page reload.
+                      if (widget.mangaId != null) {
+                        ref
+                            .read(perTitleOverrideProvider(widget.mangaId!)
+                                .notifier)
+                            .setMode(mode);
+                      }
+                    },
                   ),
 
                   const SizedBox(height: 32),
@@ -160,7 +183,7 @@ class ReaderSettingsSheet extends ConsumerWidget {
                           letterSpacing: 1.4,
                         ),
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => Navigator.of(context).pop(_selectedMode),
                       child: Text(
                         context.l10n.readerSettingsConfirm.toUpperCase(),
                       ),
@@ -177,18 +200,23 @@ class ReaderSettingsSheet extends ConsumerWidget {
 }
 
 /// Opens the [ReaderSettingsSheet] as a modal bottom sheet.
-Future<void> showReaderSettings(
+///
+/// Returns the selected [ReaderMode] when the user taps Confirm,
+/// or `null` if the sheet was dismissed without confirming.
+Future<ReaderMode?> showReaderSettings(
   BuildContext context, {
   required String chapterId,
   String? mangaId,
+  ReaderMode initialMode = ReaderMode.vertical,
 }) {
-  return showModalBottomSheet<void>(
+  return showModalBottomSheet<ReaderMode>(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
     builder: (_) => ReaderSettingsSheet(
       chapterId: chapterId,
       mangaId: mangaId,
+      initialMode: initialMode,
     ),
   );
 }
@@ -216,19 +244,12 @@ class _SectionLabel extends StatelessWidget {
 
 class _DirectionSegment extends StatelessWidget {
   final ReaderMode active;
-  final String? mangaId;
-  final WidgetRef ref;
+  final ValueChanged<ReaderMode> onChanged;
 
   const _DirectionSegment({
     required this.active,
-    required this.mangaId,
-    required this.ref,
+    required this.onChanged,
   });
-
-  void _select(ReaderMode mode) {
-    if (mangaId == null) return;
-    ref.read(perTitleOverrideProvider(mangaId!).notifier).setMode(mode);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -241,19 +262,14 @@ class _DirectionSegment extends StatelessWidget {
       child: Row(
         children: <Widget>[
           _SegmentButton(
-            label: context.l10n.readerDirectionLtr,
-            selected: active == ReaderMode.paged,
-            onTap: () => _select(ReaderMode.paged),
-          ),
-          _SegmentButton(
-            label: context.l10n.readerDirectionRtl,
-            selected: false,
-            onTap: () => _select(ReaderMode.paged),
-          ),
-          _SegmentButton(
             label: context.l10n.readerDirectionVertical,
             selected: active == ReaderMode.vertical,
-            onTap: () => _select(ReaderMode.vertical),
+            onTap: () => onChanged(ReaderMode.vertical),
+          ),
+          _SegmentButton(
+            label: context.l10n.readerDirectionPaged,
+            selected: active == ReaderMode.paged,
+            onTap: () => onChanged(ReaderMode.paged),
           ),
         ],
       ),

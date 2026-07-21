@@ -41,4 +41,20 @@ abstract class AuthRepository {
   ///
   /// Refreshes the token if it has expired. Returns [Right(token)] on success.
   Future<Either<Failure, String>> getIdToken();
+
+  /// Sends an email verification link to the current user.
+  Future<Either<Failure, void>> sendEmailVerification();
+
+  /// Reloads the current Firebase user and returns the updated [AppUser].
+  Future<Either<Failure, AppUser>> reloadUser();
+
+  /// Sends a password reset email to [email].
+  ///
+  /// Returns [Right(null)] on success or [Left(Failure)] on failure.
+  Future<Either<Failure, void>> sendPasswordReset({required String email});
+
+  /// Updates the Firebase Auth display name to [displayName].
+  ///
+  /// Returns [Right(null)] on success or [Left(Failure)] on failure.
+  Future<Either<Failure, void>> updateDisplayName(String displayName);
 }

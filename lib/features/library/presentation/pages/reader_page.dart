@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/feedback/app_feedback.dart';
@@ -11,6 +13,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../preferences/presentation/providers/preferences_provider.dart';
 import '../../domain/entities/chapter.dart';
 import '../../domain/entities/reader_mode.dart';
+import '../../domain/entities/reading_preferences.dart';
 import '../providers/per_title_override_provider.dart';
 import '../providers/reader/reader_provider.dart';
 import '../providers/reader/reader_ui_provider.dart';
@@ -146,27 +149,59 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
 
     return Scaffold(
       backgroundColor: background,
-      appBar: AppBar(
-        title: Text(context.l10n.readingChapter),
-        backgroundColor: background,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.tune_outlined),
-            tooltip: context.l10n.readerSettingsConfirm,
-            onPressed: () => showReaderSettings(
-              context,
-              chapterId: widget.chapterId,
-              mangaId: widget.mangaId,
-            ),
-          ),
-        ],
-      ),
       body: Stack(
         children: <Widget>[
           switch (state.readerMode) {
             ReaderMode.vertical => VerticalReaderView(pages: state.pages),
             ReaderMode.paged => PagedReaderView(pages: state.pages),
           },
+          // Floating top buttons — back (top-left) + settings (top-right)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 4,
+            left: 0,
+            right: 0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _FloatingIconButton(
+                    icon: Icons.arrow_back,
+                    label: context.l10n.readerBackAction,
+                    onTap: () => context.pop(),
+                  ),
+                  _FloatingIconButton(
+                    icon: Icons.tune_outlined,
+                    label: context.l10n.readerSettingsAction,
+                    onTap: () async {
+                      final selected = await showReaderSettings(
+                        context,
+                        chapterId: widget.chapterId,
+                        mangaId: widget.mangaId,
+                        initialMode: state.readerMode,
+                      );
+                      if (selected != null && context.mounted) {
+                        ref
+                            .read(readerProvider(widget.chapterId).notifier)
+                            .reapplyReaderMode(
+                              globalReaderMode: ref
+                                  .read(preferencesProvider)
+                                  .preferences
+                                  ?.defaultReaderMode,
+                              titleOverride: widget.mangaId != null
+                                  ? PerTitleOverride(
+                                      mangaId: widget.mangaId!,
+                                      preferredReaderMode: selected,
+                                    )
+                                  : null,
+                            );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
           // Brightness overlay — black with opacity inversely proportional to
           // the brightness level. At full brightness (1.0) the overlay is
           // invisible; at minimum (0.1) it dims the content significantly.
@@ -250,9 +285,11 @@ class _ExternalChapterScreen extends StatelessWidget {
                         title: context.l10n.externalChapterTitle,
                       );
                     } on Exception catch (e, st) {
-                      debugPrint(
-                        '[ExternalLink] Failed to launch URL: $e\n$st',
-                      );
+                      if (kDebugMode) {
+                        debugPrint(
+                          '[ExternalLink] Failed to launch URL: $e\n$st',
+                        );
+                      }
                       if (!context.mounted) return;
                       AppFeedback.showWarning(
                         context,
@@ -271,6 +308,67 @@ class _ExternalChapterScreen extends StatelessWidget {
                 child: Text(context.l10n.externalChapterGoBackAction),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating icon button used in the reader's overlay bar.
+///
+/// Semi-transparent rounded square with a centered icon.
+/// Matches the [MangaDetailPage._FloatingTopButtons] style.
+class _FloatingIconButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _FloatingIconButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: AppLayout.minTouchTarget,
+      height: AppLayout.minTouchTarget,
+      child: Semantics(
+        label: label,
+        button: true,
+        child: Tooltip(
+          message: label,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(
+                AppLayout.readerFloatingControlRadius,
+              ),
+              onTap: onTap,
+              child: Center(
+                child: SizedBox(
+                  width: AppLayout.readerFloatingControlSize,
+                  height: AppLayout.readerFloatingControlSize,
+                  child: Material(
+                    color: AppColors.voidLowest.withValues(
+                      alpha: AppLayout.readerFloatingControlBackgroundOpacity,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppLayout.readerFloatingControlRadius,
+                      ),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: AppColors.onSurface,
+                      size: AppSpacing.xl,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

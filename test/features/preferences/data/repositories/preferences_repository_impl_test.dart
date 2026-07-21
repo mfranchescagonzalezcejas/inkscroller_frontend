@@ -1,15 +1,29 @@
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/error/exceptions.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/features/library/domain/entities/reader_mode.dart';
 import 'package:inkscroller_flutter/features/preferences/data/datasources/preferences_local_ds.dart';
 import 'package:inkscroller_flutter/features/preferences/data/datasources/preferences_remote_ds.dart';
+import 'package:inkscroller_flutter/features/preferences/domain/entities/content_rating.dart';
 import 'package:inkscroller_flutter/features/preferences/data/models/user_preferences_model.dart';
 import 'package:inkscroller_flutter/features/preferences/data/repositories/preferences_repository_impl.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/entities/user_reading_preferences.dart';
 import 'package:inkscroller_flutter/features/preferences/domain/repositories/preferences_repository.dart';
 import 'package:mocktail/mocktail.dart';
+
+class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class _FakeUser extends Fake implements User {
+  @override
+  bool get emailVerified => true;
+}
+
+class _FakeUnverifiedUser extends Fake implements User {
+  @override
+  bool get emailVerified => false;
+}
 
 class _MockRemoteDataSource extends Mock implements PreferencesRemoteDataSource {}
 
@@ -18,6 +32,7 @@ class _MockLocalDataSource extends Mock implements PreferencesLocalDataSource {}
 void main() {
   late PreferencesRemoteDataSource remoteDataSource;
   late PreferencesLocalDataSource localDataSource;
+  late FirebaseAuth firebaseAuth;
   late PreferencesRepository repository;
 
   setUpAll(() {
@@ -26,14 +41,24 @@ void main() {
       defaultLanguage: 'en',
       updatedAt: DateTime.now(),
     ));
+    registerFallbackValue(false);
   });
 
   setUp(() {
     remoteDataSource = _MockRemoteDataSource();
     localDataSource = _MockLocalDataSource();
+    firebaseAuth = _MockFirebaseAuth();
+    // Default: authenticated user (guest tests override this).
+    when(() => firebaseAuth.currentUser).thenReturn(_FakeUser());
+    // Default stubs for authenticated path (no isGuest param).
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => null);
+    when(() => localDataSource.savePreferences(any()))
+        .thenAnswer((_) async {});
     repository = PreferencesRepositoryImpl(
       remoteDataSource: remoteDataSource,
       localDataSource: localDataSource,
+      firebaseAuth: firebaseAuth,
     );
   });
 
@@ -57,12 +82,6 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenAnswer((_) async => remoteModel);
-    when(
-      () => localDataSource.getCachedPreferences(),
-    ).thenAnswer((_) async => null);
-    when(
-      () => localDataSource.savePreferences(any()),
-    ).thenAnswer((_) async {});
 
     final result = await repository.getPreferences();
 
@@ -76,9 +95,8 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenThrow(const NetworkException(message: 'offline'));
-    when(
-      () => localDataSource.getCachedPreferences(),
-    ).thenAnswer((_) async => localPrefs);
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => localPrefs);
 
     final result = await repository.getPreferences();
 
@@ -92,9 +110,7 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenThrow(const NetworkException(message: 'offline'));
-    when(
-      () => localDataSource.getCachedPreferences(),
-    ).thenAnswer((_) async => null);
+    // getCachedPreferences returns null from setUp stub.
 
     final result = await repository.getPreferences();
 
@@ -114,13 +130,13 @@ void main() {
     when(
       () => remoteDataSource.getPreferences(),
     ).thenAnswer((_) async => olderRemoteModel);
-    when(
-      () => localDataSource.getCachedPreferences(),
-    ).thenAnswer((_) async => localPrefs);
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => localPrefs);
     when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer((_) async => remoteModel);
 
@@ -128,14 +144,16 @@ void main() {
 
     expect(result, isA<Right<Failure, UserReadingPreferences>>());
     final prefs = (result as Right<Failure, UserReadingPreferences>).value;
-    // Local is newer, so it should be kept.
     expect(prefs.defaultReaderMode, ReaderMode.paged);
     expect(prefs.defaultLanguage, 'es');
-    // Verify push-to-remote was attempted.
+    // Wait for the background refresh to complete — repository returns cached
+    // data immediately and refreshes in background (cache-first strategy).
+    await Future<void>.delayed(const Duration(milliseconds: 50));
     verify(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: 'paged',
         defaultLanguage: 'es',
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).called(1);
   });
@@ -144,15 +162,10 @@ void main() {
 
   test('writes to local first then syncs remote on success', () async {
     when(
-      () => localDataSource.getCachedPreferences(),
-    ).thenAnswer((_) async => null);
-    when(
-      () => localDataSource.savePreferences(any()),
-    ).thenAnswer((_) async {});
-    when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenAnswer((_) async => remoteModel);
 
@@ -161,21 +174,15 @@ void main() {
     );
 
     expect(result, isA<Right<Failure, UserReadingPreferences>>());
-    // Local should be written at least once (optimistic + remote response).
     verify(() => localDataSource.savePreferences(any())).called(2);
   });
 
   test('returns optimistic data when remote fails during update', () async {
     when(
-      () => localDataSource.getCachedPreferences(),
-    ).thenAnswer((_) async => null);
-    when(
-      () => localDataSource.savePreferences(any()),
-    ).thenAnswer((_) async {});
-    when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenThrow(const NetworkException(message: 'offline'));
 
@@ -184,27 +191,58 @@ void main() {
       defaultLanguage: 'es',
     );
 
-    // Should still return Right with optimistic data.
     expect(result, isA<Right<Failure, UserReadingPreferences>>());
     final prefs =
         (result as Right<Failure, UserReadingPreferences>).value;
     expect(prefs.defaultReaderMode, ReaderMode.paged);
     expect(prefs.defaultLanguage, 'es');
-    // Local was written optimistically.
     verify(() => localDataSource.savePreferences(any())).called(1);
   });
 
-  test('preserves cached fields not being updated', () async {
-    when(
-      () => localDataSource.getCachedPreferences(),
-    ).thenAnswer((_) async => localPrefs);
-    when(
-      () => localDataSource.savePreferences(any()),
-    ).thenAnswer((_) async {});
+  test('updatePreferences with non-null contentRatingFilter passes it to remote', () async {
+    const modelWithRating = UserPreferencesModel(
+      firebaseUid: 'uid-123',
+      defaultReaderMode: 'vertical',
+      defaultLanguage: 'en',
+      contentRatingFilter: 'suggestive',
+      updatedAt: '2026-07-01T00:00:00.000',
+    );
+
     when(
       () => remoteDataSource.updatePreferences(
         defaultReaderMode: any(named: 'defaultReaderMode'),
         defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
+      ),
+    ).thenAnswer((_) async => modelWithRating);
+
+    final result = await repository.updatePreferences(
+      defaultReaderMode: 'vertical',
+      defaultLanguage: 'en',
+      contentRatingFilter: 'suggestive',
+    );
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    final prefs = (result as Right<Failure, UserReadingPreferences>).value;
+    expect(prefs.contentRatingFilter, ContentRating.suggestive);
+
+    verify(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: 'vertical',
+        defaultLanguage: 'en',
+        contentRatingFilter: 'suggestive',
+      ),
+    ).called(1);
+  });
+
+  test('preserves cached fields not being updated', () async {
+    when(() => localDataSource.getCachedPreferences())
+        .thenAnswer((_) async => localPrefs);
+    when(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
       ),
     ).thenThrow(const NetworkException(message: 'offline'));
 
@@ -218,5 +256,99 @@ void main() {
     expect(prefs.defaultReaderMode, ReaderMode.vertical);
     // Language should be preserved from cache.
     expect(prefs.defaultLanguage, 'es');
+  });
+
+  // ── guest path ────────────────────────────────────────────────────────────
+
+  test('getPreferences skips remote and reads guest key when currentUser is null',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(null);
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => localPrefs);
+
+    final result = await repository.getPreferences();
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    final prefs = (result as Right<Failure, UserReadingPreferences>).value;
+    expect(prefs.defaultReaderMode, ReaderMode.paged);
+    // Zero remote calls.
+    verifyNever(() => remoteDataSource.getPreferences());
+    // Guest key used.
+    verify(() => localDataSource.getCachedPreferences(isGuest: true)).called(1);
+  });
+
+  test('updatePreferences skips remote and writes to guest key when currentUser is null',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(null);
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => null);
+    when(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).thenAnswer((_) async {});
+
+    final result = await repository.updatePreferences(
+      defaultReaderMode: 'vertical',
+    );
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    // Zero remote calls.
+    verifyNever(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
+      ),
+    );
+    // Guest key used for local write.
+    verify(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).called(1);
+  });
+
+  // ── unverified user path (treated as local-only) ───────────────────────────
+
+  test(
+      'getPreferences skips remote and reads guest key when user is unverified',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(_FakeUnverifiedUser());
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => localPrefs);
+
+    final result = await repository.getPreferences();
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    verifyNever(() => remoteDataSource.getPreferences());
+    verify(() => localDataSource.getCachedPreferences(isGuest: true)).called(1);
+  });
+
+  test(
+      'updatePreferences skips remote and writes to guest key when user is unverified',
+      () async {
+    when(() => firebaseAuth.currentUser).thenReturn(_FakeUnverifiedUser());
+    when(
+      () => localDataSource.getCachedPreferences(isGuest: true),
+    ).thenAnswer((_) async => null);
+    when(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).thenAnswer((_) async {});
+
+    final result = await repository.updatePreferences(
+      defaultReaderMode: 'vertical',
+    );
+
+    expect(result, isA<Right<Failure, UserReadingPreferences>>());
+    verifyNever(
+      () => remoteDataSource.updatePreferences(
+        defaultReaderMode: any(named: 'defaultReaderMode'),
+        defaultLanguage: any(named: 'defaultLanguage'),
+        contentRatingFilter: any(named: 'contentRatingFilter'),
+      ),
+    );
+    verify(
+      () => localDataSource.savePreferences(any(), isGuest: true),
+    ).called(1);
   });
 }

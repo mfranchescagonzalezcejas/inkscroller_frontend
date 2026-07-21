@@ -284,6 +284,18 @@ abstract class AppLocalizations {
   /// **'Loading chapter'**
   String get loadingChapter;
 
+  /// No description provided for @readerBackAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get readerBackAction;
+
+  /// No description provided for @readerSettingsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reader settings'**
+  String get readerSettingsAction;
+
   /// No description provided for @chapterPagesProgress.
   ///
   /// In en, this message translates to:
@@ -361,6 +373,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Josei'**
   String get demographicJosei;
+
+  /// No description provided for @demographicUnspecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unspecified'**
+  String get demographicUnspecified;
+
+  /// No description provided for @profileDemographicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Demographics shown'**
+  String get profileDemographicTitle;
+
+  /// No description provided for @profileDemographicCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{1 selected} other{{count} selected}}'**
+  String profileDemographicCount(int count);
+
+  /// No description provided for @profileDemographicSelectionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one demographic'**
+  String get profileDemographicSelectionRequired;
 
   /// No description provided for @readNow.
   ///
@@ -764,6 +800,12 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get authSignInButton;
 
+  /// No description provided for @authSignInCreateAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in / Create account'**
+  String get authSignInCreateAccountButton;
+
   /// No description provided for @authNoAccount.
   ///
   /// In en, this message translates to:
@@ -944,23 +986,29 @@ abstract class AppLocalizations {
   /// **'Hide system navigation bars'**
   String get readerSettingsImmersiveSubtitle;
 
+  /// No description provided for @dialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get dialogConfirm;
+
+  /// No description provided for @dialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get dialogCancel;
+
   /// No description provided for @readerSettingsConfirm.
   ///
   /// In en, this message translates to:
   /// **'Confirm settings'**
   String get readerSettingsConfirm;
 
-  /// No description provided for @readerDirectionLtr.
+  /// No description provided for @readerDirectionPaged.
   ///
   /// In en, this message translates to:
-  /// **'LTR'**
-  String get readerDirectionLtr;
-
-  /// No description provided for @readerDirectionRtl.
-  ///
-  /// In en, this message translates to:
-  /// **'RTL'**
-  String get readerDirectionRtl;
+  /// **'Paginated'**
+  String get readerDirectionPaged;
 
   /// No description provided for @readerDirectionVertical.
   ///
@@ -1178,6 +1226,84 @@ abstract class AppLocalizations {
   /// **'Authentication failed. Please try again.'**
   String get authUnknownError;
 
+  /// No description provided for @authEmailNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify your email before signing in. Check your inbox and click the verification link.'**
+  String get authEmailNotVerified;
+
+  /// No description provided for @authVerifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get authVerifyEmailTitle;
+
+  /// No description provided for @authVerifyEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to {email}. Click the link in the email to activate your account.'**
+  String authVerifyEmailBody(String email);
+
+  /// No description provided for @authVerifyEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Verification email sent'**
+  String get authVerifyEmailSent;
+
+  /// No description provided for @authVerifyEmailContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve verified — continue'**
+  String get authVerifyEmailContinue;
+
+  /// No description provided for @authVerifyEmailResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend verification email'**
+  String get authVerifyEmailResend;
+
+  /// No description provided for @authVerifyEmailWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait a moment before resending'**
+  String get authVerifyEmailWait;
+
+  /// No description provided for @authVerifyEmailDifferentEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get authVerifyEmailDifferentEmail;
+
+  /// No description provided for @authVerifyEmailSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified! Welcome to InkScroller.'**
+  String get authVerifyEmailSuccess;
+
+  /// No description provided for @authVerifyEmailNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email hasn\'t been verified yet. Check your inbox and click the link.'**
+  String get authVerifyEmailNotYet;
+
+  /// No description provided for @authVerifyEmailResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email resent.'**
+  String get authVerifyEmailResent;
+
+  /// No description provided for @authVerifyInProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get authVerifyInProfile;
+
+  /// No description provided for @authVerifyInProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unverified account'**
+  String get authVerifyInProfileSubtitle;
+
   /// No description provided for @libraryErrorNetworkNoConnection.
   ///
   /// In en, this message translates to:
@@ -1298,17 +1424,383 @@ abstract class AppLocalizations {
   /// **'Additional metadata (MAL)'**
   String get aboutCreditJikanDescription;
 
-  /// No description provided for @aboutCreditCloudRunDescription.
+  /// No description provided for @aboutCreditInfrastructureDescription.
   ///
   /// In en, this message translates to:
   /// **'Backend infrastructure'**
-  String get aboutCreditCloudRunDescription;
+  String get aboutCreditInfrastructureDescription;
 
   /// No description provided for @aboutCreditFirebaseDescription.
   ///
   /// In en, this message translates to:
   /// **'User authentication'**
   String get aboutCreditFirebaseDescription;
+
+  /// No description provided for @profileContentRatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content rating'**
+  String get profileContentRatingTitle;
+
+  /// No description provided for @profileContentRatingSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get profileContentRatingSafe;
+
+  /// No description provided for @profileContentRatingSuggestive.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe + Suggestive'**
+  String get profileContentRatingSuggestive;
+
+  /// No description provided for @profileContentRatingAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get profileContentRatingAll;
+
+  /// No description provided for @profileBirthDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile with a birth date to change your username.'**
+  String get profileBirthDateRequired;
+
+  /// No description provided for @chaptersSortAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Number ↑'**
+  String get chaptersSortAsc;
+
+  /// No description provided for @chaptersSortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Number ↓'**
+  String get chaptersSortDesc;
+
+  /// No description provided for @chaptersFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All chapters'**
+  String get chaptersFilterAll;
+
+  /// No description provided for @chaptersFilterUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread only'**
+  String get chaptersFilterUnread;
+
+  /// No description provided for @markAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get markAsRead;
+
+  /// No description provided for @markAsUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as unread'**
+  String get markAsUnread;
+
+  /// No description provided for @chaptersFilteredOut.
+  ///
+  /// In en, this message translates to:
+  /// **'No chapters match the current filter'**
+  String get chaptersFilteredOut;
+
+  /// No description provided for @authForgotPasswordLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get authForgotPasswordLink;
+
+  /// No description provided for @authForgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get authForgotPasswordTitle;
+
+  /// No description provided for @authForgotPasswordSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset email'**
+  String get authForgotPasswordSend;
+
+  /// No description provided for @authResetPasswordSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent. Check your inbox.'**
+  String get authResetPasswordSent;
+
+  /// No description provided for @authResetPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get authResetPasswordButton;
+
+  /// No description provided for @authChangeUsernameOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Change username'**
+  String get authChangeUsernameOption;
+
+  /// No description provided for @authChangeUsernameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change username'**
+  String get authChangeUsernameTitle;
+
+  /// No description provided for @authChangeUsernameSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get authChangeUsernameSave;
+
+  /// No description provided for @authChangeUsernameSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Username updated successfully'**
+  String get authChangeUsernameSuccess;
+
+  /// No description provided for @readingProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Progress'**
+  String get readingProgressTitle;
+
+  /// No description provided for @manualMarkIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark one more as read'**
+  String get manualMarkIncrease;
+
+  /// No description provided for @manualMarkDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmark one chapter'**
+  String get manualMarkDecrease;
+
+  /// No description provided for @batchSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch size'**
+  String get batchSizeLabel;
+
+  /// No description provided for @jumpToChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to chapter'**
+  String get jumpToChapter;
+
+  /// No description provided for @jumpToChapterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter number'**
+  String get jumpToChapterHint;
+
+  /// No description provided for @jumpToChapterInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid chapter number'**
+  String get jumpToChapterInvalid;
+
+  /// No description provided for @placeholderMarkRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get placeholderMarkRead;
+
+  /// No description provided for @placeholderUnmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as unread'**
+  String get placeholderUnmark;
+
+  /// No description provided for @noJikanData.
+  ///
+  /// In en, this message translates to:
+  /// **'No external data available'**
+  String get noJikanData;
+
+  /// No description provided for @noChaptersNoTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'No chapters available'**
+  String get noChaptersNoTracking;
+
+  /// No description provided for @extrasTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extras'**
+  String get extrasTitle;
+
+  /// No description provided for @homeHeroEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No featured manga yet.'**
+  String get homeHeroEmpty;
+
+  /// No description provided for @homeHeroError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load featured manga.'**
+  String get homeHeroError;
+
+  /// No description provided for @homeExploreCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore all →'**
+  String get homeExploreCta;
+
+  /// No description provided for @homeContinueReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue reading'**
+  String get homeContinueReading;
+
+  /// No description provided for @homeDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get homeDiscover;
+
+  /// No description provided for @homeRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for you'**
+  String get homeRecommended;
+
+  /// No description provided for @homeTrendingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TRENDING'**
+  String get homeTrendingLabel;
+
+  /// No description provided for @homeViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get homeViewAll;
+
+  /// No description provided for @homeChapterError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load chapters.'**
+  String get homeChapterError;
+
+  /// No description provided for @mangaStatusOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get mangaStatusOngoing;
+
+  /// No description provided for @mangaStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get mangaStatusCompleted;
+
+  /// No description provided for @mangaStatusHiatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiatus'**
+  String get mangaStatusHiatus;
+
+  /// No description provided for @mangaStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get mangaStatusCancelled;
+
+  /// No description provided for @genreAdventure.
+  ///
+  /// In en, this message translates to:
+  /// **'Adventure'**
+  String get genreAdventure;
+
+  /// No description provided for @genreComedy.
+  ///
+  /// In en, this message translates to:
+  /// **'Comedy'**
+  String get genreComedy;
+
+  /// No description provided for @genreDrama.
+  ///
+  /// In en, this message translates to:
+  /// **'Drama'**
+  String get genreDrama;
+
+  /// No description provided for @genreFantasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Fantasy'**
+  String get genreFantasy;
+
+  /// No description provided for @genreHorror.
+  ///
+  /// In en, this message translates to:
+  /// **'Horror'**
+  String get genreHorror;
+
+  /// No description provided for @genreMystery.
+  ///
+  /// In en, this message translates to:
+  /// **'Mystery'**
+  String get genreMystery;
+
+  /// No description provided for @genreSciFi.
+  ///
+  /// In en, this message translates to:
+  /// **'Sci-Fi'**
+  String get genreSciFi;
+
+  /// No description provided for @genreSliceOfLife.
+  ///
+  /// In en, this message translates to:
+  /// **'Slice of Life'**
+  String get genreSliceOfLife;
+
+  /// No description provided for @genreSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports'**
+  String get genreSports;
+
+  /// No description provided for @genreThriller.
+  ///
+  /// In en, this message translates to:
+  /// **'Thriller'**
+  String get genreThriller;
+
+  /// No description provided for @genreSupernatural.
+  ///
+  /// In en, this message translates to:
+  /// **'Supernatural'**
+  String get genreSupernatural;
+
+  /// No description provided for @noChaptersSetTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set total chapters'**
+  String get noChaptersSetTotal;
+
+  /// No description provided for @noChaptersTotalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual tracking: enter the total chapter count'**
+  String get noChaptersTotalHint;
+
+  /// No description provided for @noChaptersTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total chapters'**
+  String get noChaptersTotalLabel;
+
+  /// No description provided for @noChaptersTotalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get noChaptersTotalConfirm;
 }
 
 class _AppLocalizationsDelegate
