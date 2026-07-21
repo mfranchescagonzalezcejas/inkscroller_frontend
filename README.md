@@ -110,19 +110,16 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 
 <br/>
 
-<!--
-  Add screenshots here. Recommended layout:
-  <div align="center">
-    <img src="docs/screenshots/home.png" width="30%" alt="Home" />
-    <img src="docs/screenshots/manga-detail.png" width="30%" alt="Manga Detail" />
-    <img src="docs/screenshots/reader.png" width="30%" alt="Reader" />
-  </div>
-  <div align="center">
-    <img src="docs/screenshots/explore.png" width="30%" alt="Explore" />
-    <img src="docs/screenshots/profile.png" width="30%" alt="Profile" />
-    <img src="docs/screenshots/login.png" width="30%" alt="Login" />
-  </div>
--->
+<div align="center">
+    <img src="docs/screenshots/home.jpg" width="30%" alt="Home" />
+    <img src="docs/screenshots/manga_detail.jpg" width="30%" alt="Manga Detail" />
+    <img src="docs/screenshots/reader.jpg" width="30%" alt="Reader" />
+</div>
+<div align="center">
+    <img src="docs/screenshots/explore.jpg" width="30%" alt="Explore" />
+    <img src="docs/screenshots/library.jpg" width="30%" alt="Library" />
+    <img src="docs/screenshots/login.jpg" width="30%" alt="Login" />
+</div>
 
 <br/>
 
@@ -140,12 +137,9 @@ external-only chapters (linked to official platforms such as **Manga Plus**, **V
 
 <br/>
 
-<!--
-  Replace VIDEO_ID with your YouTube video ID.
-  <a href="https://www.youtube.com/watch?v=VIDEO_ID">
-    <img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" width="100%" alt="Demo video">
-  </a>
--->
+<a href="https://www.youtube.com/watch?v=jBlEnNTdkOI">
+    <img src="https://img.youtube.com/vi/jBlEnNTdkOI/maxresdefault.jpg" width="100%" alt="Demo video">
+</a>
 
 <br/>
 
