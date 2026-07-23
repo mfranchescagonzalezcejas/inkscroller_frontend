@@ -272,6 +272,7 @@ jobs:
     needs:
       - quality-gates
       - build-apk
+      - publish-google-play
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -392,11 +393,36 @@ jobs:
             --app "$FIREBASE_APP_ID" \
             --groups "testers" \
             --release-notes "$(cat release-metadata/${{ matrix.release_notes }})"
+  publish-google-play:
+    name: Publish pro AAB to Google Play Alpha
+    needs:
+      - quality-gates
+      - build-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Download pro AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: aab-pro
+          path: dist
+
+      - name: Upload to Google Play closed testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: dev.devdigi.inkscroller
+          releaseFiles: dist/app-pro-release.aab
+          tracks: alpha
+          status: completed
+          releaseName: ${{ github.ref_name }}
 
   sync-develop:
     name: Sync main → develop
     needs:
       - create-release
+      - publish-google-play
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
