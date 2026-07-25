@@ -15,7 +15,7 @@ import '../widgets/auth_form_widgets.dart';
 
 /// Phase 6 (Cinematic Canvas) account creation page.
 ///
-/// Consistent with [LoginPage] — same [AppColors.stage] surface, same
+/// Consistent with [LoginPage] — same themed surface, same
 /// [AuthField] style, same [AuthGradientButton] CTA. Uses an inline back
 /// button instead of a full [AppBar] to keep the layout lightweight.
 class RegisterPage extends ConsumerStatefulWidget {
@@ -170,6 +170,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final colors = Theme.of(context).colorScheme;
     final isProfileCompletion = authState.profileCompletionPending;
     final isActionLocked =
         authState.isLoading || authState.registrationInProgress;
@@ -185,7 +186,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return PopScope<void>(
       canPop: !isRouteLocked,
       child: Scaffold(
-        backgroundColor: AppColors.stage,
+        backgroundColor: colors.surfaceContainerLowest,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -201,9 +202,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ? const SizedBox(height: 48)
                         : IconButton(
                             padding: EdgeInsets.zero,
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.arrow_back,
-                              color: AppColors.onSurfaceVariant,
+                              color: colors.onSurfaceVariant,
                             ),
                             onPressed: isActionLocked
                                 ? null
@@ -218,11 +219,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     isProfileCompletion
                         ? context.l10n.authCompleteProfileTitle
                         : context.l10n.authCreateAccountTitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.onSurface,
+                      color: colors.onSurface,
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -233,11 +234,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     isProfileCompletion
                         ? context.l10n.authCompleteProfileSubtitle
                         : context.l10n.authCreateAccountSubtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
 
@@ -301,7 +302,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           _obscurePassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: AppColors.onSurfaceVariant,
+                           color: colors.onSurfaceVariant,
                           size: 20,
                         ),
                       ),
@@ -337,7 +338,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           _obscureConfirmPassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: AppColors.onSurfaceVariant,
+                           color: colors.onSurfaceVariant,
                           size: 20,
                         ),
                       ),
@@ -391,23 +392,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             ? null
                             : (value) => setState(
                                 () => _acceptedTerms = value ?? false),
-                        activeColor: AppColors.primary,
-                        checkColor: Colors.white,
+                        activeColor: colors.primary,
+                        checkColor: colors.onPrimary,
                       ),
                       title: Text(
                         context.l10n.authTermsAcknowledgement,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                       trailing: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.open_in_new,
                           size: 16,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                         onPressed: isActionLocked ? null : _openTermsUrl,
                         padding: EdgeInsets.zero,
@@ -444,11 +445,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           : () => context.go(AppRoutes.login),
                       child: Text(
                         context.l10n.authHaveAccount,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                       ),
                     ),
@@ -460,11 +461,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           : () => context.go(AppRoutes.home),
                       child: Text(
                         context.l10n.authContinueAsGuest,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -474,11 +475,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       onPressed: isActionLocked ? null : _signOutRecovery,
                       child: Text(
                         context.l10n.profileSignOutAction,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                       ),
                     ),

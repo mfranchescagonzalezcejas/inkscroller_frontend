@@ -41,7 +41,7 @@ void main() {
       final Text active = tester.widget<Text>(find.text('Active'));
       final Text inactive = tester.widget<Text>(find.text('Inactive'));
 
-      expect(decoration.color, theme.colorScheme.surfaceContainerLow);
+      expect(decoration.color, theme.colorScheme.surfaceContainer);
       expect(
         activePill.color,
         theme.colorScheme.primary.withValues(alpha: 0.16),

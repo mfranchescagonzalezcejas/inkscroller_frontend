@@ -131,10 +131,10 @@ class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
                   const SizedBox(height: 12),
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: AppColors.primary,
+                      activeTrackColor: colors.primary,
                       inactiveTrackColor: colors.surfaceContainerHighest,
-                      thumbColor: AppColors.primary,
-                      overlayColor: AppColors.primary.withValues(alpha: 0.12),
+                      thumbColor: colors.primary,
+                      overlayColor: colors.primary.withValues(alpha: 0.12),
                       trackHeight: 3,
                       thumbShape: const RoundSliderThumbShape(
                         enabledThumbRadius: 9,
@@ -305,7 +305,7 @@ class _SegmentButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.15)
+                ? colors.primary.withValues(alpha: 0.15)
                 : Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
@@ -316,7 +316,7 @@ class _SegmentButton extends StatelessWidget {
               fontFamily: AppTypography.fontFamily,
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: selected ? AppColors.primary : colors.onSurfaceVariant,
+                color: selected ? colors.primary : colors.onSurfaceVariant,
             ),
           ),
         ),
@@ -397,7 +397,7 @@ class _InkToggle extends StatelessWidget {
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: value
-            ? AppColors.primary.withValues(alpha: 0.25)
+            ? colors.primary.withValues(alpha: 0.25)
             : colors.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
@@ -412,7 +412,7 @@ class _InkToggle extends StatelessWidget {
               height: 18,
               decoration: BoxDecoration(
                 color: value
-                    ? AppColors.primary
+                    ? colors.primary
                     : colors.onSurfaceVariant.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),

@@ -11,7 +11,12 @@ class AppTheme {
   static const _darkPrimary = AppColors.primary;
   static const _lightPrimary = AppColors.primaryLight;
   static const _tealSecondary = AppColors.secondary;
-  static const _tealAccent = AppColors.primaryDeepLight;
+  static const _score = AppColors.scoreGold;
+  static const _brandGradientStart = AppColors.brandGradientStart;
+  static const _brandGradientEnd = AppColors.brandGradientEnd;
+  static const _darkError = AppColors.danger;
+  static const _lightError = AppColors.dangerLight;
+  static const _onAction = AppColors.voidLowest;
 
   // 🌙 Dark colors
   static const _darkBg = AppColors.stage;
@@ -19,6 +24,7 @@ class AppTheme {
   static const _darkSurface = AppColors.card;
   static const _darkSurfaceHigh = AppColors.cardHigh;
   static const _darkDivider = AppColors.outlineVariant;
+  static const _darkOutline = AppColors.outlineDark;
   static const _darkText = AppColors.onSurface;
   static const _darkTextSecondary = AppColors.onSurfaceVariant;
 
@@ -52,9 +58,13 @@ class AppTheme {
 
       colorScheme: const ColorScheme.light(
         primary: _lightPrimary,
-        onPrimary: _lightText,
+        onPrimary: _onAction,
         secondary: _tealSecondary,
-        tertiary: _tealAccent,
+        tertiary: _score,
+        primaryContainer: _brandGradientStart,
+        secondaryContainer: _brandGradientEnd,
+        error: _lightError,
+        onError: _onAction,
         // Material's white default matches Card Light; keep the token mapping explicit.
         surface: _lightSurface, // ignore: avoid_redundant_argument_values
         onSurface: _lightText,
@@ -65,6 +75,7 @@ class AppTheme {
         surfaceContainerHigh: _lightSurfaceHigh,
         surfaceContainerHighest: _lightSurfaceHigh,
         outlineVariant: _lightDivider,
+        outline: _lightDivider,
       ),
 
       appBarTheme: const AppBarTheme(
@@ -166,8 +177,13 @@ class AppTheme {
 
       colorScheme: const ColorScheme.dark(
         primary: _darkPrimary,
+        onPrimary: _onAction,
         secondary: _tealSecondary,
-        tertiary: _tealAccent,
+        tertiary: _score,
+        primaryContainer: _brandGradientStart,
+        secondaryContainer: _brandGradientEnd,
+        error: _darkError,
+        onError: _onAction,
         surface: _darkSurface,
         onSurface: _darkText,
         onSurfaceVariant: _darkTextSecondary,
@@ -177,6 +193,7 @@ class AppTheme {
         surfaceContainerHigh: _darkSurfaceHigh,
         surfaceContainerHighest: _darkSurfaceHigh,
         outlineVariant: _darkDivider,
+        outline: _darkOutline,
       ),
 
       appBarTheme: const AppBarTheme(

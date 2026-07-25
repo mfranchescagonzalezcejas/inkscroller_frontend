@@ -37,6 +37,7 @@ class AuthField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
@@ -46,23 +47,23 @@ class AuthField extends StatelessWidget {
       readOnly: readOnly,
       onTap: onTap,
       validator: validator,
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: AppTypography.fontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: AppColors.onSurface,
+        color: colors.onSurface,
       ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: 13,
-          color: AppColors.onSurfaceVariant,
+          color: colors.onSurfaceVariant,
         ),
-        prefixIcon: Icon(icon, color: AppColors.onSurfaceVariant, size: 20),
+        prefixIcon: Icon(icon, color: colors.onSurfaceVariant, size: 20),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: AppColors.card,
+        fillColor: colors.surfaceContainer,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppLayout.authFieldRadius),
           borderSide: BorderSide.none,
@@ -110,9 +111,10 @@ class AuthGradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: onPressed != null ? AppColors.primary : AppColors.card,
+        color: onPressed != null ? colors.primary : colors.surfaceContainer,
         borderRadius: BorderRadius.circular(AppLayout.authButtonRadius),
       ),
       child: Material(
@@ -129,12 +131,12 @@ class AuthGradientButton extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               child: Center(
                 child: isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: colors.onPrimary,
                         ),
                       )
                     : Text(
@@ -144,8 +146,8 @@ class AuthGradientButton extends StatelessWidget {
                           fontSize: AppTypography.labelLg,
                           fontWeight: FontWeight.w700,
                           color: onPressed == null
-                              ? AppColors.onSurfaceVariant
-                              : AppColors.voidLowest,
+                              ? colors.onSurfaceVariant
+                              : colors.onPrimary,
                           letterSpacing: 0.3,
                         ),
                       ),

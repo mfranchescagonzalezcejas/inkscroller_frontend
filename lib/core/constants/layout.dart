@@ -26,7 +26,7 @@ class AppLayout {
   static const double tabBarBottomPadding = 16;
   static const double tonalTabPadding = 6;
   static const double tonalTabRadius = 14;
-  static const double tonalTabItemRadius = 18;
+  static const double tonalTabItemRadius = tonalTabRadius - tonalTabPadding;
   static const double tonalTabItemVerticalPadding = 10;
   static const double tonalTabItemMinHeight = minTouchTarget;
   static const double settingsSectionCardRadius = 20;
