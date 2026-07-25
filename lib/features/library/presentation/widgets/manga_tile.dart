@@ -157,7 +157,7 @@ class MangaTile extends StatelessWidget {
                           Icons.star,
                           size: 12,
                           color: safeScore != null
-                              ? AppColors.scoreGold
+                              ? colorScheme.tertiary
                               : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
@@ -168,7 +168,7 @@ class MangaTile extends StatelessWidget {
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: safeScore != null
-                                ? AppColors.scoreGold
+                                ? colorScheme.tertiary
                                 : colorScheme.onSurfaceVariant,
                           ),
                         ),

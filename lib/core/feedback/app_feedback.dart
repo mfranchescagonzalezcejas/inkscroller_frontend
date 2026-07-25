@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../design/app_colors.dart';
 
 /// Unified feedback patterns for InkScroller.
 ///
@@ -27,11 +26,12 @@ class AppFeedback {
     required String title,
     String? body,
   }) {
+    final colors = Theme.of(context).colorScheme;
     _showSnackBar(
       context,
       icon: Icons.check_circle_outline,
-      iconColor: AppColors.primary,
-      iconBackground: AppColors.primary.withValues(alpha: 0.12),
+      iconColor: colors.primary,
+      iconBackground: colors.primary.withValues(alpha: 0.12),
       title: title,
       body: body,
     );
@@ -43,11 +43,12 @@ class AppFeedback {
     required String title,
     String? body,
   }) {
+    final colors = Theme.of(context).colorScheme;
     _showSnackBar(
       context,
       icon: Icons.error_outline,
-      iconColor: const Color(0xFFF44336),
-      iconBackground: const Color(0xFFF44336).withValues(alpha: 0.12),
+      iconColor: colors.error,
+      iconBackground: colors.error.withValues(alpha: 0.12),
       title: title,
       body: body,
     );
@@ -59,11 +60,12 @@ class AppFeedback {
     required String title,
     String? body,
   }) {
+    final colors = Theme.of(context).colorScheme;
     _showSnackBar(
       context,
       icon: Icons.warning_amber_outlined,
-      iconColor: const Color(0xFFFF9800),
-      iconBackground: const Color(0xFFFF9800).withValues(alpha: 0.12),
+      iconColor: colors.tertiary,
+      iconBackground: colors.tertiary.withValues(alpha: 0.12),
       title: title,
       body: body,
     );
@@ -75,11 +77,12 @@ class AppFeedback {
     required String title,
     String? body,
   }) {
+    final colors = Theme.of(context).colorScheme;
     _showSnackBar(
       context,
       icon: Icons.info_outline,
-      iconColor: const Color(0xFF2196F3),
-      iconBackground: const Color(0xFF2196F3).withValues(alpha: 0.12),
+      iconColor: colors.secondary,
+      iconBackground: colors.secondary.withValues(alpha: 0.12),
       title: title,
       body: body,
     );
@@ -93,9 +96,10 @@ class AppFeedback {
     required VoidCallback onUndo,
     String undoLabel = 'UNDO',
   }) {
+    final colors = Theme.of(context).colorScheme;
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.glassSurface,
+      backgroundColor: colors.surfaceContainerLow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       content: Row(
         children: [
@@ -104,12 +108,12 @@ class AppFeedback {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: colors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.delete_outline,
-              color: AppColors.primary,
+              color: colors.primary,
               size: 22,
             ),
           ),
@@ -122,8 +126,8 @@ class AppFeedback {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.onSurface,
+                  style: TextStyle(
+                    color: colors.onSurface,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -132,8 +136,8 @@ class AppFeedback {
                   const SizedBox(height: 4),
                   Text(
                     body,
-                    style: const TextStyle(
-                      color: AppColors.onSurfaceVariant,
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
                       fontSize: 12,
                     ),
                   ),
@@ -149,8 +153,8 @@ class AppFeedback {
             },
             child: Text(
               undoLabel,
-              style: const TextStyle(
-                color: AppColors.primary,
+              style: TextStyle(
+                color: colors.primary,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -187,9 +191,10 @@ class AppFeedback {
     required String title,
     double progress = 0.0,
   }) {
+    final colors = Theme.of(context).colorScheme;
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.glassSurface,
+      backgroundColor: colors.surfaceContainerLow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       content: Row(
         children: [
@@ -197,12 +202,12 @@ class AppFeedback {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: colors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.download_outlined,
-              color: AppColors.primary,
+              color: colors.primary,
               size: 22,
             ),
           ),
@@ -214,8 +219,8 @@ class AppFeedback {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.onSurface,
+                  style: TextStyle(
+                    color: colors.onSurface,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -225,8 +230,8 @@ class AppFeedback {
                   borderRadius: BorderRadius.circular(2),
                   child: LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: AppColors.outlineVariant,
-                    valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+                    backgroundColor: colors.outlineVariant,
+                    valueColor: AlwaysStoppedAnimation(colors.primary),
                     minHeight: 4,
                   ),
                 ),
@@ -252,23 +257,24 @@ class AppFeedback {
     String cancelText = 'Cancel',
     bool isDestructive = false,
   }) async {
+    final colors = Theme.of(context).colorScheme;
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.stage,
+        backgroundColor: colors.surfaceContainerLowest,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           title,
-          style: const TextStyle(
-            color: AppColors.onSurface,
+          style: TextStyle(
+            color: colors.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         content: Text(
           message,
-          style: const TextStyle(
-            color: AppColors.onSurfaceVariant,
+          style: TextStyle(
+            color: colors.onSurfaceVariant,
             fontSize: 14,
           ),
         ),
@@ -277,17 +283,17 @@ class AppFeedback {
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
               cancelText,
-              style: const TextStyle(color: AppColors.onSurfaceVariant),
+              style: TextStyle(color: colors.onSurfaceVariant),
             ),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: isDestructive ? const Color(0xFFF44336) : AppColors.primary,
+              backgroundColor: isDestructive ? colors.error : colors.primary,
             ),
             child: Text(
               confirmText,
-              style: const TextStyle(color: AppColors.voidLowest),
+              style: TextStyle(color: isDestructive ? colors.onError : colors.onPrimary),
             ),
           ),
         ],
@@ -309,9 +315,10 @@ class AppFeedback {
     String? body,
     bool showClose = false,
   }) {
+    final colors = Theme.of(context).colorScheme;
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.glassSurface,
+      backgroundColor: colors.surfaceContainerLow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       duration: const Duration(seconds: 3),
       content: Row(
@@ -339,8 +346,8 @@ class AppFeedback {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.onSurface,
+                  style: TextStyle(
+                    color: colors.onSurface,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -349,8 +356,8 @@ class AppFeedback {
                   const SizedBox(height: 4),
                   Text(
                     body,
-                    style: const TextStyle(
-                      color: AppColors.onSurfaceVariant,
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
                       fontSize: 12,
                     ),
                   ),
@@ -361,9 +368,9 @@ class AppFeedback {
           // Close button (optional)
           if (showClose)
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.close,
-                color: AppColors.outline,
+                color: colors.outline,
                 size: 20,
               ),
               onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),

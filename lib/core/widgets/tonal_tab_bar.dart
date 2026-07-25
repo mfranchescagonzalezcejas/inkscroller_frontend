@@ -31,7 +31,7 @@ class TonalTabBar extends StatelessWidget {
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(AppLayout.tonalTabRadius),
         ),
         child: Padding(

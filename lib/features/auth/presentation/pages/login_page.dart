@@ -13,7 +13,7 @@ import '../widgets/auth_form_widgets.dart';
 
 /// Phase 6 (Cinematic Canvas) sign-in page.
 ///
-/// Immersive full-bleed layout on [AppColors.stage]. Wordmark uses the brand
+/// Immersive full-bleed layout on the active theme surface. Wordmark uses the brand
 /// gradient. Primary CTA uses [AuthGradientButton] — signals the transition
 /// from "browsing" to "experience" per the Cinematic Canvas spec.
 class LoginPage extends ConsumerStatefulWidget {
@@ -47,6 +47,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _showForgotPasswordSheet(BuildContext context) async {
+    final colors = Theme.of(context).colorScheme;
     final emailController = TextEditingController(
       text: _emailController.text.trim(),
     );
@@ -56,7 +57,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       await showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
-        backgroundColor: AppColors.card,
+        backgroundColor: colors.surfaceContainer,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -76,11 +77,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 children: <Widget>[
                   Text(
                     context.l10n.authForgotPasswordTitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.onSurface,
+                      color: colors.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -143,6 +144,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final colors = Theme.of(context).colorScheme;
 
     ref.listen(authProvider, (previous, next) {
       if (next.error != null && next.error != previous?.error) {
@@ -153,7 +155,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.stage,
+       backgroundColor: colors.surfaceContainerLowest,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -165,14 +167,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 64),
 
                 // ── Wordmark ──────────────────────────────────────────────────
-                const Text(
+                Text(
                   AppConstants.appName,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 36,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.onSurface,
+                    color: colors.onSurface,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -182,11 +184,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Text(
                   context.l10n.authSignInSubtitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
 
@@ -198,19 +200,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.card,
+                      color: colors.surfaceContainer,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                        color: colors.primary.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        const Icon(
+                        Icon(
                           Icons.mark_email_unread_outlined,
                           size: 18,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -218,10 +220,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             context.l10n.authVerifyEmailBody(
                               authState.user?.email ?? _emailController.text,
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 12,
-                              color: AppColors.onSurfaceVariant,
+                              color: colors.onSurfaceVariant,
                               height: 1.4,
                             ),
                           ),
@@ -269,7 +271,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       _obscurePassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                       size: 20,
                     ),
                   ),
@@ -302,11 +304,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onPressed: () => _showForgotPasswordSheet(context),
                   child: Text(
                     context.l10n.authForgotPasswordLink,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -319,11 +321,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onPressed: () => context.go(AppRoutes.register),
                   child: Text(
                     context.l10n.authNoAccount,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                 ),
@@ -332,11 +334,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   onPressed: () => context.go(AppRoutes.home),
                   child: Text(
                     context.l10n.authContinueAsGuest,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 13,
                       fontWeight: FontWeight.w400,
-                      color: AppColors.onSurfaceVariant,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ),

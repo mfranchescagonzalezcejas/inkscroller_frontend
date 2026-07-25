@@ -6,7 +6,6 @@ import 'core/l10n/app_locale_provider.dart';
 import 'core/providers/session_startup_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'core/design/app_colors.dart';
 import 'core/widgets/inkscroller_logo_loader.dart';
 import 'features/home/presentation/providers/home_provider.dart';
 import 'flavors/flavor_config.dart';
@@ -97,25 +96,26 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Container(
-        color: AppColors.voidLowest,
+        color: colors.surfaceContainerLowest,
         width: double.infinity,
         height: double.infinity,
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              InkScrollerLogoLoader(),
-              SizedBox(height: 24),
+              const InkScrollerLogoLoader(),
+              const SizedBox(height: 24),
               Text(
                 'InkScroller',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
               ),
             ],

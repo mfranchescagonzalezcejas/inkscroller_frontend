@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
-import 'package:inkscroller_flutter/core/design/design_tokens.dart';
+import 'package:inkscroller_flutter/core/design/app_typography.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/features/auth/presentation/providers/auth_state.dart';
 
@@ -28,8 +28,9 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return AppBar(
-      backgroundColor: AppColors.voidLowest,
+      backgroundColor: colors.surfaceContainerLowest,
       toolbarHeight: 56,
       titleSpacing: 0,
       title: Padding(
@@ -39,12 +40,12 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
           children: <Widget>[
             Text(
               AppConstants.appName,
-              style: AppTypography.titleLgStyle.copyWith(color: AppColors.primary),
+              style: AppTypography.titleLgStyle.copyWith(color: colors.primary),
             ),
             rightWidget ??
             GestureDetector(
               onTap: () => context.go(AppRoutes.profile),
-              child: _buildAvatar(authState),
+              child: _buildAvatar(authState, colors),
             ),
           ],
         ),
@@ -52,7 +53,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildAvatar(AuthState authState) {
+  Widget _buildAvatar(AuthState authState, ColorScheme colors) {
     if (authState.user != null) {
       final String? displayName = authState.user!.displayName;
       final String initial =
@@ -63,14 +64,14 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       return Container(
         width: 32,
         height: 32,
-        decoration: const BoxDecoration(
-          color: AppColors.cardHigh,
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHigh,
           shape: BoxShape.circle,
         ),
         child: Center(
           child: Text(
             initial,
-            style: AppTypography.labelLgStyle.copyWith(color: AppColors.primary),
+            style: AppTypography.labelLgStyle.copyWith(color: colors.primary),
           ),
         ),
       );
@@ -79,13 +80,13 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       width: 32,
       height: 32,
-      decoration: const BoxDecoration(
-        color: AppColors.cardHigh,
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHigh,
         shape: BoxShape.circle,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.person,
-        color: AppColors.onSurfaceVariant,
+        color: colors.onSurfaceVariant,
         size: 20,
       ),
     );

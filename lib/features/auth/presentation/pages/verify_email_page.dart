@@ -51,6 +51,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
     final authState = ref.watch(authProvider);
     final email = authState.user?.email ?? '';
     final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
 
     // Start a 1-second periodic timer while the resend cooldown is active
     // so the button text/state updates automatically when it expires.
@@ -65,7 +66,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.stage,
+       backgroundColor: colors.surfaceContainerLowest,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -79,13 +80,13 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: colors.surfaceContainer,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.mark_email_unread_outlined,
                   size: 40,
-                  color: AppColors.primary,
+                  color: colors.primary,
                 ),
               ),
 
@@ -95,11 +96,11 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
               Text(
                 l10n.authVerifyEmailTitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -110,11 +111,11 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
               Text(
                 l10n.authVerifyEmailBody(email),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -127,11 +128,11 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                   child: Text(
                     l10n.authVerifyEmailSent,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: AppTypography.fontFamily,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                 ),
@@ -142,8 +143,11 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  gradient: const LinearGradient(
-                    colors: AppColors.brandGradient,
+                  gradient: LinearGradient(
+                    colors: <Color>[
+                      colors.primaryContainer,
+                      colors.secondaryContainer,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -157,21 +161,21 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       alignment: Alignment.center,
                       child: _isChecking
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.voidLowest,
+                                color: colors.onPrimary,
                               ),
                             )
                           : Text(
                               l10n.authVerifyEmailContinue,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: AppTypography.fontFamily,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.voidLowest,
+                                color: colors.onPrimary,
                               ),
                             ),
                     ),
@@ -196,8 +200,8 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: authState.canResendVerification
-                        ? AppColors.primary
-                        : AppColors.onSurfaceVariant,
+                        ? colors.primary
+                        : colors.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -219,11 +223,11 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                       },
                 child: Text(
                   l10n.authVerifyEmailDifferentEmail,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ),

@@ -450,19 +450,19 @@ class _PortraitContent extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.star,
                             size: 10,
-                            color: AppColors.scoreGold,
+                            color: colorScheme.tertiary,
                           ),
                           const SizedBox(width: 2),
                           Text(
                             manga.score!.toStringAsFixed(1),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.scoreGold,
+                              color: colorScheme.tertiary,
                             ),
                           ),
                         ],
@@ -564,19 +564,19 @@ class _LandscapeContent extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.star,
                           size: 10,
-                          color: AppColors.scoreGold,
+                          color: colorScheme.tertiary,
                         ),
                         const SizedBox(width: 2),
                         Text(
                           manga.score!.toStringAsFixed(1),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.scoreGold,
+                            color: colorScheme.tertiary,
                           ),
                         ),
                       ],

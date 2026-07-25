@@ -39,13 +39,9 @@ class _InkScrollerShimmerState extends State<InkScrollerShimmer>
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey.shade800
-        : Colors.grey.shade300;
-
-    final highlightColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey.shade700
-        : Colors.grey.shade100;
+    final colors = Theme.of(context).colorScheme;
+    final baseColor = colors.surfaceContainerLow;
+    final highlightColor = colors.surfaceContainerHigh;
 
     return AnimatedBuilder(
       animation: _controller,
