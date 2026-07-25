@@ -26,6 +26,7 @@ class _MyAppState extends ConsumerState<MyApp>
     with SingleTickerProviderStateMixin {
   late final AnimationController _splashController;
   bool _splashDone = false;
+  bool _isFadingOut = false;
   bool _minSplashElapsed = false;
 
   @override
@@ -45,9 +46,10 @@ class _MyAppState extends ConsumerState<MyApp>
   }
 
   void _tryFadeOut() {
-    if (!_minSplashElapsed || _splashDone) return;
+    if (!_minSplashElapsed || _splashDone || _isFadingOut) return;
     final homeData = ref.read(homeDataProvider);
     if (!homeData.isLoading) {
+      _isFadingOut = true;
       _splashController.forward().then((_) {
         if (!mounted) return;
         setState(() => _splashDone = true);
@@ -92,9 +94,7 @@ class _MyAppState extends ConsumerState<MyApp>
         if (!_splashDone)
           Positioned.fill(
             child: FadeTransition(
-              opacity: _splashController.drive(
-                Tween<double>(begin: 1, end: 0),
-              ),
+              opacity: _splashController.drive(Tween<double>(begin: 1, end: 0)),
               child: const _SplashScreen(),
             ),
           ),
