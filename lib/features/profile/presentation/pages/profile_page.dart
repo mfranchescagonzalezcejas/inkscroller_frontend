@@ -6,7 +6,7 @@ import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart'
-    show AppColors, AppTypography;
+    show AppTypography;
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/l10n/app_locale_provider.dart';
@@ -786,7 +786,7 @@ class _AvatarSection extends StatelessWidget {
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: AppColors.brandGradient,
+                colors: [Color(0xFF0F766E), Color(0xFF1E40AF)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

@@ -4,6 +4,8 @@
 /// consolidated layout constants haven't drifted.
 library;
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/constants/layout.dart';
 import 'package:inkscroller_flutter/core/design/app_spacing.dart';
@@ -100,10 +102,10 @@ void main() {
     test('no component-specific constants in AppSpacing', () {
       // AppSpacing should only have spacing scale values.
       // Verify no bottomNav, cover, card, etc. prefixed members leak in.
-      final members = AppSpacing.toString();
-      expect(members, isNot(contains('bottomNav')));
-      expect(members, isNot(contains('cover')));
-      expect(members, isNot(contains('card')));
+      final source = File('lib/core/design/app_spacing.dart').readAsStringSync();
+      expect(source, isNot(contains('bottomNav')));
+      expect(source, isNot(contains('cover')));
+      expect(source, isNot(contains('card')));
     });
   });
 }
