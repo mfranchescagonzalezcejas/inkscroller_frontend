@@ -81,7 +81,6 @@ class AppTheme {
         secondaryContainer: _brandGradientEnd,
         error: _lightError,
         onError: _onAction,
-        surface: _lightSurface,
         onSurface: _lightText,
         onSurfaceVariant: _lightTextSecondary,
         surfaceContainerLowest: _lightBg,
