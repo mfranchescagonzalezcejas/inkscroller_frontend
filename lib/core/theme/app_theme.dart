@@ -15,14 +15,18 @@ class AppTheme {
 
   // 🌙 Dark colors
   static const _darkBg = AppColors.stage;
+  static const _darkGlass = AppColors.glassSurface;
   static const _darkSurface = AppColors.card;
+  static const _darkSurfaceHigh = AppColors.cardHigh;
   static const _darkDivider = AppColors.outlineVariant;
   static const _darkText = AppColors.onSurface;
   static const _darkTextSecondary = AppColors.onSurfaceVariant;
 
   // ☀️ Light colors
   static const _lightBg = AppColors.stageLight;
+  static const _lightGlass = AppColors.glassLight;
   static const _lightSurface = AppColors.cardLight;
+  static const _lightSurfaceHigh = AppColors.cardHighLight;
   static const _lightDivider = AppColors.outlineLight;
   static const _lightText = AppColors.onSurfaceLight;
   static const _lightTextSecondary = AppColors.onSurfaceVariantLight;
@@ -48,8 +52,19 @@ class AppTheme {
 
       colorScheme: const ColorScheme.light(
         primary: _lightPrimary,
+        onPrimary: _lightText,
         secondary: _tealSecondary,
         tertiary: _tealAccent,
+        // Material's white default matches Card Light; keep the token mapping explicit.
+        surface: _lightSurface, // ignore: avoid_redundant_argument_values
+        onSurface: _lightText,
+        onSurfaceVariant: _lightTextSecondary,
+        surfaceContainerLowest: _lightBg,
+        surfaceContainerLow: _lightGlass,
+        surfaceContainer: _lightSurface,
+        surfaceContainerHigh: _lightSurfaceHigh,
+        surfaceContainerHighest: _lightSurfaceHigh,
+        outlineVariant: _lightDivider,
       ),
 
       appBarTheme: const AppBarTheme(
@@ -112,22 +127,22 @@ class AppTheme {
       ),
 
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: _darkSurface,
-        contentTextStyle: const TextStyle(color: _darkText),
+        backgroundColor: _lightSurface,
+        contentTextStyle: const TextStyle(color: _lightText),
         actionTextColor: _lightPrimary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
       dialogTheme: DialogThemeData(
-        backgroundColor: _darkSurface,
+        backgroundColor: _lightSurface,
         titleTextStyle: const TextStyle(
-          color: _darkText,
+          color: _lightText,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
         contentTextStyle: const TextStyle(
-          color: _darkTextSecondary,
+          color: _lightTextSecondary,
           fontSize: 14,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -154,6 +169,14 @@ class AppTheme {
         secondary: _tealSecondary,
         tertiary: _tealAccent,
         surface: _darkSurface,
+        onSurface: _darkText,
+        onSurfaceVariant: _darkTextSecondary,
+        surfaceContainerLowest: _darkBg,
+        surfaceContainerLow: _darkGlass,
+        surfaceContainer: _darkSurface,
+        surfaceContainerHigh: _darkSurfaceHigh,
+        surfaceContainerHighest: _darkSurfaceHigh,
+        outlineVariant: _darkDivider,
       ),
 
       appBarTheme: const AppBarTheme(

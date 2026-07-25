@@ -132,6 +132,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final state = ref.watch(mangaChaptersProvider);
     final progress = ref.watch(
       readingProgressProvider.select(
@@ -179,7 +180,7 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
     final double coverSectionHeight = maxCvrHeight + 200.0 + hasDesc;
 
     return Scaffold(
-      backgroundColor: AppColors.voidLowest,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: <Widget>[
           // ── Blur + gradient fill behind the cover content ──────
@@ -214,8 +215,10 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                         end: Alignment.bottomCenter,
                         colors: <Color>[
                           Colors.black.withValues(alpha: 0.6),
-                          AppColors.voidLowest.withValues(alpha: 0.85),
-                          AppColors.voidLowest,
+                          Theme.of(
+                            context,
+                          ).scaffoldBackgroundColor.withValues(alpha: 0.85),
+                          Theme.of(context).scaffoldBackgroundColor,
                         ],
                       ),
                     ),
@@ -278,11 +281,11 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                               children: <Widget>[
                                 Text(
                                   context.l10n.failedToLoadChapters,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: AppTypography.fontFamily,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.onSurface,
+                                    color: colorScheme.onSurface,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -293,8 +296,8 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                                     context.l10n,
                                   ),
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: AppColors.onSurfaceVariant,
+                                  style: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -329,8 +332,8 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                               children: <Widget>[
                                 Text(
                                   context.l10n.noChaptersAvailable,
-                                  style: const TextStyle(
-                                    color: AppColors.onSurfaceVariant,
+                                  style: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -370,11 +373,11 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                             child: Text(
                               context.l10n.extrasTitle,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: AppTypography.fontFamily,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.onSurfaceVariant,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -410,8 +413,8 @@ class _MangaDetailPageState extends ConsumerState<MangaDetailPage> {
                           child: Center(
                             child: Text(
                               context.l10n.chaptersFilteredOut,
-                              style: const TextStyle(
-                                color: AppColors.onSurfaceVariant,
+                              style: TextStyle(
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -670,6 +673,7 @@ class _FloatingTopButtons extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final bool isInLibrary = ref.watch(
       userLibraryProvider.select(
         (value) => value[manga.id]?.isInLibrary ?? false,
@@ -690,16 +694,16 @@ class _FloatingTopButtons extends ConsumerWidget {
               width: 40,
               height: 40,
               child: Material(
-                color: AppColors.voidLowest.withValues(alpha: 0.6),
+                color: colorScheme.surface.withValues(alpha: 0.6),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () => context.pop(),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: AppColors.onSurface,
+                    color: colorScheme.onSurface,
                     size: 24,
                   ),
                 ),
@@ -710,7 +714,7 @@ class _FloatingTopButtons extends ConsumerWidget {
               width: 40,
               height: 40,
               child: Material(
-                color: AppColors.voidLowest.withValues(alpha: 0.6),
+                color: colorScheme.surface.withValues(alpha: 0.6),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -736,7 +740,7 @@ class _FloatingTopButtons extends ConsumerWidget {
                   },
                   child: Icon(
                     isInLibrary ? Icons.bookmark : Icons.bookmark_border,
-                    color: AppColors.onSurface,
+                    color: colorScheme.onSurface,
                     size: 24,
                   ),
                 ),
@@ -833,6 +837,7 @@ class _CoverSectionState extends State<_CoverSection> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
@@ -877,7 +882,7 @@ class _CoverSectionState extends State<_CoverSection> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.cardHigh,
+            color: colorScheme.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -911,16 +916,16 @@ class _CoverSectionState extends State<_CoverSection> {
             CachedNetworkImage(
               imageUrl: widget.manga.coverUrl ?? '',
               fit: BoxFit.cover,
-              placeholder: (_, __) => const ColoredBox(
-                color: AppColors.card,
+              placeholder: (_, __) => ColoredBox(
+                color: colorScheme.surfaceContainer,
                 child: Center(
-                  child: Icon(Icons.image, color: AppColors.outline),
+                  child: Icon(Icons.image, color: colorScheme.outline),
                 ),
               ),
-              errorWidget: (_, __, ___) => const ColoredBox(
-                color: AppColors.card,
+              errorWidget: (_, __, ___) => ColoredBox(
+                color: colorScheme.surfaceContainer,
                 child: Center(
-                  child: Icon(Icons.broken_image, color: AppColors.outline),
+                  child: Icon(Icons.broken_image, color: colorScheme.outline),
                 ),
               ),
             ),
@@ -980,7 +985,7 @@ class _CoverSectionState extends State<_CoverSection> {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.cardHigh,
+                    color: colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(
                       AppLayout.mangaDetailBadgeRadius,
                     ),
@@ -1016,7 +1021,7 @@ class _CoverSectionState extends State<_CoverSection> {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.cardHigh,
+                    color: colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(
                       AppLayout.mangaDetailBadgeRadius,
                     ),
@@ -1033,16 +1038,16 @@ class _CoverSectionState extends State<_CoverSection> {
                             ? Icons.explore
                             : Icons.auto_awesome,
                         size: AppTypography.compactLabel,
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
                         demoLabel,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: AppTypography.fontFamily,
                           fontSize: AppTypography.compactLabel,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.onSurfaceVariant,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -1062,11 +1067,11 @@ class _CoverSectionState extends State<_CoverSection> {
           child: Text(
             widget.manga.title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 26,
               fontWeight: FontWeight.w700,
-              color: AppColors.onSurface,
+              color: colorScheme.onSurface,
             ),
           ),
         ),
@@ -1091,7 +1096,7 @@ class _CoverSectionState extends State<_CoverSection> {
                   widget.manga.description!,
                   textAlign: TextAlign.center,
                   style: AppTypography.bodyStyle.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -1115,13 +1120,14 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppLayout.mangaDetailBadgeHorizontalPadding,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.floating,
+        color: colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppLayout.mangaDetailBadgeRadius),
       ),
       child: Row(
@@ -1138,11 +1144,11 @@ class _StatusBadge extends StatelessWidget {
           const SizedBox(width: AppLayout.mangaDetailBadgeIndicatorSize),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: AppTypography.compactLabel,
               fontWeight: FontWeight.w600,
-              color: AppColors.onSurface,
+              color: colorScheme.onSurface,
             ),
           ),
         ],
@@ -1159,22 +1165,23 @@ class _GenreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppLayout.mangaDetailBadgeHorizontalPadding,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.cardHigh,
+        color: colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppLayout.mangaDetailBadgeRadius),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: AppTypography.compactLabel,
           fontWeight: FontWeight.w400,
-          color: AppColors.onSurfaceVariant,
+          color: colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -1196,6 +1203,7 @@ class _ChaptersHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final state = ref.watch(mangaChaptersProvider);
 
     return Column(
@@ -1209,11 +1217,11 @@ class _ChaptersHeader extends ConsumerWidget {
               children: <Widget>[
                 Text(
                   context.l10n.chaptersTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.onSurface,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -1226,7 +1234,7 @@ class _ChaptersHeader extends ConsumerWidget {
                     state.sortDescending
                         ? Icons.arrow_downward
                         : Icons.arrow_upward,
-                    color: const Color(0xFF889391),
+                    color: colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                   onPressed: () => ref
@@ -1242,7 +1250,7 @@ class _ChaptersHeader extends ConsumerWidget {
                     state.filterUnreadOnly
                         ? Icons.visibility_off
                         : Icons.visibility,
-                    color: const Color(0xFF889391),
+                    color: colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                   onPressed: () => ref
@@ -1290,6 +1298,7 @@ class _CompactReaderModeToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final mangaId = GoRouterState.of(context).pathParameters['mangaId'];
     if (mangaId == null) return const SizedBox.shrink();
 
@@ -1317,31 +1326,31 @@ class _CompactReaderModeToggle extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Icon(
+            Icon(
               Icons.menu_book_outlined,
               size: 16,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
             Text(
               currentLabel,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppTypography.fontFamily,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_drop_down,
               size: 16,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
           ],
         ),
@@ -1364,7 +1373,7 @@ class _CompactReaderModeToggle extends ConsumerWidget {
               value: globalMode,
               child: Text(
                 'Usar global (${globalMode == ReaderMode.vertical ? "Vertical" : "Paginado"})',
-                style: const TextStyle(fontSize: 13, color: AppColors.primary),
+                style: TextStyle(fontSize: 13, color: colorScheme.primary),
               ),
             ),
           );

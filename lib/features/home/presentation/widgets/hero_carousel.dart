@@ -42,17 +42,14 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final canvasColor = Theme.of(context).scaffoldBackgroundColor;
     final mangas = ref.watch(homeProvider).featured;
     final slides = mangas.take(_heroMaxSlides).toList();
-
 
     if (slides.isEmpty) {
       // Hero shimmer mientras carga — muestra la estructura inmediatamente
       return const ExcludeSemantics(
-        child: SizedBox(
-          height: 400,
-          child: InkScrollerShimmer(height: 400),
-        ),
+        child: SizedBox(height: 400, child: InkScrollerShimmer(height: 400)),
       );
     }
 
@@ -83,9 +80,9 @@ class _HeroCarouselState extends ConsumerState<HeroCarousel> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.voidLowest.withValues(alpha: 0),
-                    AppColors.voidLowest,
-                    AppColors.voidLowest,
+                    canvasColor.withValues(alpha: 0),
+                    canvasColor,
+                    canvasColor,
                   ],
                   stops: const [0.0, 0.5, 1.0],
                 ),
@@ -121,6 +118,7 @@ class _HeroPageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(count, (i) {
@@ -131,7 +129,9 @@ class _HeroPageIndicator extends StatelessWidget {
           width: isActive ? 18 : 6,
           height: 6,
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : AppColors.onSurfaceVariant,
+            color: isActive
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant,
             borderRadius: BorderRadius.circular(3),
           ),
         );
@@ -175,13 +175,17 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
     final url = widget.manga.coverUrl;
     if (url == null || url.isEmpty) return;
     _imageStream?.removeListener(_listener);
-    _imageStream = CachedNetworkImageProvider(url)
-        .resolve(ImageConfiguration.empty);
+    _imageStream = CachedNetworkImageProvider(
+      url,
+    ).resolve(ImageConfiguration.empty);
     _imageStream!.addListener(_listener);
   }
 
   void _onImage(ImageInfo info, bool sync) {
-    final size = Size(info.image.width.toDouble(), info.image.height.toDouble());
+    final size = Size(
+      info.image.width.toDouble(),
+      info.image.height.toDouble(),
+    );
     final detected = _ratioFromSize(size);
     if (!mounted) return;
     if (detected != _ratio) {
@@ -191,15 +195,20 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final inLibrary = ref.watch(
-      userLibraryProvider.select((map) => map[widget.manga.id]?.isInLibrary ?? false),
+      userLibraryProvider.select(
+        (map) => map[widget.manga.id]?.isInLibrary ?? false,
+      ),
     );
     final isLandscape = _ratio == _CoverRatio.landscape;
     final typeLabel = widget.manga.typeDisplay;
     final demoLabel = widget.manga.demographicDisplay;
 
-    void openDetail() =>
-        context.push(AppRoutes.mangaDetailPath(widget.manga.id), extra: widget.manga);
+    void openDetail() => context.push(
+      AppRoutes.mangaDetailPath(widget.manga.id),
+      extra: widget.manga,
+    );
 
     return Stack(
       fit: StackFit.expand,
@@ -228,8 +237,8 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.black.withValues(alpha: 0.5),
-                  AppColors.voidLowest.withValues(alpha: 0.7),
-                  AppColors.voidLowest.withValues(alpha: 0.85),
+                  colorScheme.surface.withValues(alpha: 0.7),
+                  colorScheme.surface.withValues(alpha: 0.85),
                 ],
               ),
             ),
@@ -253,42 +262,71 @@ class _HeroSlideState extends ConsumerState<_HeroSlide> {
                     const _TrendingBadge(),
                     if (typeLabel != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.cardHigh,
+                          color: colorScheme.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              typeLabel == 'Manhwa' ? Icons.auto_stories : Icons.menu_book,
-                              size: 10, color: AppColors.primary,
+                              typeLabel == 'Manhwa'
+                                  ? Icons.auto_stories
+                                  : Icons.menu_book,
+                              size: 10,
+                              color: colorScheme.primary,
                             ),
                             const SizedBox(width: 4),
-                            Text(typeLabel, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                            Text(
+                              typeLabel,
+                              style: TextStyle(
+                                fontFamily: AppTypography.fontFamily,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.primary,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     if (demoLabel != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.cardHigh,
+                          color: colorScheme.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              demoLabel == 'Shounen' ? Icons.flash_on :
-                              demoLabel == 'Shoujo' ? Icons.favorite :
-                              demoLabel == 'Seinen' ? Icons.explore :
-                              Icons.auto_awesome,
-                              size: 10, color: AppColors.onSurfaceVariant,
+                              demoLabel == 'Shounen'
+                                  ? Icons.flash_on
+                                  : demoLabel == 'Shoujo'
+                                  ? Icons.favorite
+                                  : demoLabel == 'Seinen'
+                                  ? Icons.explore
+                                  : Icons.auto_awesome,
+                              size: 10,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 4),
-                            Text(demoLabel, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.onSurfaceVariant)),
+                            Text(
+                              demoLabel,
+                              style: TextStyle(
+                                fontFamily: AppTypography.fontFamily,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -329,10 +367,11 @@ class _TrendingBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.floating,
+        color: colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -341,19 +380,19 @@ class _TrendingBadge extends StatelessWidget {
           Container(
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 6),
           Text(
             context.l10n.homeTrendingLabel,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: colorScheme.primary,
               letterSpacing: .8,
             ),
           ),
@@ -384,6 +423,7 @@ class _PortraitContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -396,16 +436,35 @@ class _PortraitContent extends StatelessWidget {
                 _AdaptiveHeroCover(coverUrl: manga.coverUrl),
                 if (manga.score != null)
                   Positioned(
-                    top: 4, right: 4,
+                    top: 4,
+                    right: 4,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: AppColors.cardHigh, borderRadius: BorderRadius.circular(6)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                          const Icon(
+                            Icons.star,
+                            size: 10,
+                            color: AppColors.scoreGold,
+                          ),
                           const SizedBox(width: 2),
-                          Text(manga.score!.toStringAsFixed(1), style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold)),
+                          Text(
+                            manga.score!.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontFamily: AppTypography.fontFamily,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.scoreGold,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -413,7 +472,11 @@ class _PortraitContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            _HeroActions(manga: manga, inLibrary: inLibrary, onDetail: onDetail),
+            _HeroActions(
+              manga: manga,
+              inLibrary: inLibrary,
+              onDetail: onDetail,
+            ),
           ],
         ),
         const SizedBox(width: 16),
@@ -421,14 +484,32 @@ class _PortraitContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(manga.title, maxLines: 3, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onSurface)),
-              if (manga.description != null && manga.description!.trim().isNotEmpty)
+              Text(
+                manga.title,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: AppTypography.fontFamily,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              if (manga.description != null &&
+                  manga.description!.trim().isNotEmpty)
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: SingleChildScrollView(
-                      child: Text(manga.description!, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35)),
+                      child: Text(
+                        manga.description!,
+                        style: TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 12,
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -457,6 +538,7 @@ class _LandscapeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -468,34 +550,70 @@ class _LandscapeContent extends StatelessWidget {
               _AdaptiveHeroCover(coverUrl: manga.coverUrl),
               if (manga.score != null)
                 Positioned(
-                  top: 4, right: 4,
+                  top: 4,
+                  right: 4,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: AppColors.cardHigh, borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, size: 10, color: AppColors.scoreGold),
+                        const Icon(
+                          Icons.star,
+                          size: 10,
+                          color: AppColors.scoreGold,
+                        ),
                         const SizedBox(width: 2),
-                        Text(manga.score!.toStringAsFixed(1), style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.scoreGold)),
+                        Text(
+                          manga.score!.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontFamily: AppTypography.fontFamily,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.scoreGold,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-              ),
+                ),
             ],
           ),
         ),
         const SizedBox(height: 12),
         // Title
-        Text(manga.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.onSurface)),
+        Text(
+          manga.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: colorScheme.onSurface,
+          ),
+        ),
         // Description — fills remaining space
         if (manga.description != null && manga.description!.trim().isNotEmpty)
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: SingleChildScrollView(
-                child: Text(manga.description!, style: const TextStyle(fontFamily: AppTypography.fontFamily, fontSize: 12, color: AppColors.onSurfaceVariant, height: 1.35)),
+                child: Text(
+                  manga.description!,
+                  style: TextStyle(
+                    fontFamily: AppTypography.fontFamily,
+                    fontSize: 12,
+                    color: colorScheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
               ),
             ),
           ),
@@ -523,6 +641,7 @@ class _HeroActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         // Ver detalles — only as wide as the text
@@ -532,8 +651,8 @@ class _HeroActions extends ConsumerWidget {
             child: FilledButton(
               onPressed: onDetail,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.voidLowest,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -557,8 +676,8 @@ class _HeroActions extends ConsumerWidget {
           height: 40,
           child: IconButton.filledTonal(
             style: IconButton.styleFrom(
-              backgroundColor: AppColors.cardHigh,
-              foregroundColor: AppColors.onSurface,
+              backgroundColor: colorScheme.surfaceContainerHigh,
+              foregroundColor: colorScheme.onSurface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -652,7 +771,10 @@ class _AdaptiveHeroCoverState extends State<_AdaptiveHeroCover> {
   }
 
   void _onImage(ImageInfo info, bool sync) {
-    final size = Size(info.image.width.toDouble(), info.image.height.toDouble());
+    final size = Size(
+      info.image.width.toDouble(),
+      info.image.height.toDouble(),
+    );
     final detected = _ratioFromSize(size);
     final aspect = size.width / size.height;
     if (!mounted) return;
@@ -666,11 +788,12 @@ class _AdaptiveHeroCoverState extends State<_AdaptiveHeroCover> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (widget.coverUrl == null || widget.coverUrl!.isEmpty) {
-      return const ColoredBox(
-        color: AppColors.card,
+      return ColoredBox(
+        color: colorScheme.surfaceContainer,
         child: Center(
-          child: Icon(Icons.image_not_supported, color: AppColors.outline),
+          child: Icon(Icons.image_not_supported, color: colorScheme.outline),
         ),
       );
     }
@@ -691,11 +814,15 @@ class _AdaptiveHeroCoverState extends State<_AdaptiveHeroCover> {
         child: CachedNetworkImage(
           imageUrl: widget.coverUrl!,
           fit: BoxFit.cover,
-          placeholder: (_, __) => const ColoredBox(color: AppColors.card),
-          errorWidget: (_, __, ___) => const ColoredBox(
-            color: AppColors.card,
+          placeholder: (_, __) =>
+              ColoredBox(color: colorScheme.surfaceContainer),
+          errorWidget: (_, __, ___) => ColoredBox(
+            color: colorScheme.surfaceContainer,
             child: Center(
-              child: Icon(Icons.image_not_supported, color: AppColors.outline),
+              child: Icon(
+                Icons.image_not_supported,
+                color: colorScheme.outline,
+              ),
             ),
           ),
           fadeInDuration: const Duration(milliseconds: 300),

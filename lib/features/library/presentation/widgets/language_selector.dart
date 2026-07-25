@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/design/design_tokens.dart' show AppColors, AppSpacing, AppTypography;
+import '../../../../core/design/design_tokens.dart'
+    show AppSpacing, AppTypography;
 
 /// Maps ISO 639-1 language codes to user-facing Spanish names.
 ///
@@ -116,7 +117,9 @@ const _languageNamesEn = <String, String>{
 ///
 /// Falls back to the uppercased code when the code is not in the map.
 String languageDisplayName(String code, [Locale? locale]) {
-  final map = locale?.languageCode == 'en' ? _languageNamesEn : _languageNamesEs;
+  final map = locale?.languageCode == 'en'
+      ? _languageNamesEn
+      : _languageNamesEs;
   return map[code] ?? code.toUpperCase();
 }
 
@@ -143,25 +146,21 @@ class LanguageSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = Localizations.localeOf(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Row(
         children: [
-          const Icon(
-            Icons.translate,
-            size: 20,
-            color: AppColors.onSurfaceVariant,
-          ),
+          Icon(Icons.translate, size: 20, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: _buildContent(locale),
-          ),
+          Expanded(child: _buildContent(context, locale)),
         ],
       ),
     );
   }
 
-  Widget _buildContent(Locale locale) {
+  Widget _buildContent(BuildContext context, Locale locale) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (isLoading) {
       return DropdownButtonFormField<String>(
         disabledHint: Text(languageDisplayName(selectedLanguage, locale)),
@@ -186,9 +185,9 @@ class LanguageSelector extends ConsumerWidget {
     if (availableLanguages.length == 1) {
       return Text(
         languageDisplayName(availableLanguages.first, locale),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
-          color: AppColors.onSurfaceVariant,
+          color: colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.w500,
         ),
       );
@@ -198,7 +197,7 @@ class LanguageSelector extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButtonHideUnderline(
@@ -207,12 +206,12 @@ class LanguageSelector extends ConsumerWidget {
               ? selectedLanguage
               : availableLanguages.first,
           isDense: true,
-          dropdownColor: const Color(0xFF1A2122),
-          style: const TextStyle(
+          dropdownColor: colorScheme.surfaceContainer,
+          style: TextStyle(
             fontFamily: AppTypography.fontFamily,
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: AppColors.onSurfaceVariant,
+            color: colorScheme.onSurfaceVariant,
           ),
           items: availableLanguages.map((code) {
             return DropdownMenuItem<String>(

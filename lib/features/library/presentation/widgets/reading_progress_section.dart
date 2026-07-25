@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inkscroller_flutter/core/design/design_tokens.dart'
-    show AppColors, AppSpacing, AppTypography;
+    show AppSpacing, AppTypography;
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 
 import '../providers/reading_progress_provider.dart';
@@ -34,15 +34,16 @@ class ReadingProgressSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final progress = ref.watch(
-      readingProgressProvider.select(
-        (value) => value[mangaId],
-      ),
+      readingProgressProvider.select((value) => value[mangaId]),
     );
-    final int effectiveTotal =
-        totalCount > 0 ? totalCount : progress?.totalChaptersCount ?? 0;
-    final double fraction =
-        effectiveTotal > 0 ? readCount / effectiveTotal : 0.0;
+    final int effectiveTotal = totalCount > 0
+        ? totalCount
+        : progress?.totalChaptersCount ?? 0;
+    final double fraction = effectiveTotal > 0
+        ? readCount / effectiveTotal
+        : 0.0;
     final int batchSize = progress?.batchSize ?? 25;
 
     return Padding(
@@ -56,8 +57,8 @@ class ReadingProgressSection extends ConsumerWidget {
             child: LinearProgressIndicator(
               value: fraction.clamp(0.0, 1.0),
               minHeight: 6,
-              backgroundColor: AppColors.card,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              backgroundColor: colorScheme.surfaceContainer,
+              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -68,17 +69,17 @@ class ReadingProgressSection extends ConsumerWidget {
               // Read count label
               Text(
                 context.l10n.libraryProgressValue(readCount, effectiveTotal),
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
+                  color: colorScheme.primary,
                 ),
               ),
               // Edit total — override when MangaDex total is wrong
               IconButton(
                 icon: const Icon(Icons.edit, size: 14),
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
                 onPressed: () async {
                   final controller = TextEditingController(
                     text: effectiveTotal.toString(),
@@ -102,9 +103,7 @@ class ReadingProgressSection extends ConsumerWidget {
                         ),
                         FilledButton(
                           onPressed: () {
-                            final parsed = int.tryParse(
-                              controller.text.trim(),
-                            );
+                            final parsed = int.tryParse(controller.text.trim());
                             if (parsed != null && parsed > 0) {
                               Navigator.of(ctx).pop(parsed);
                             }
@@ -127,15 +126,12 @@ class ReadingProgressSection extends ConsumerWidget {
 
               // Batch size selector — only when enough chapters to batch
               if (effectiveTotal > _BatchSizeSelector.minSize)
-                _BatchSizeSelector(
-                  mangaId: mangaId,
-                  currentSize: batchSize,
-                ),
+                _BatchSizeSelector(mangaId: mangaId, currentSize: batchSize),
 
               // Jump button
               IconButton(
                 icon: const Icon(Icons.fast_forward, size: 20),
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
                 onPressed: () async {
                   final chapter = await showProgressJumpDialog(
                     context,
@@ -157,10 +153,7 @@ class ReadingProgressSection extends ConsumerWidget {
 }
 
 class _BatchSizeSelector extends ConsumerWidget {
-  const _BatchSizeSelector({
-    required this.mangaId,
-    required this.currentSize,
-  });
+  const _BatchSizeSelector({required this.mangaId, required this.currentSize});
 
   final String mangaId;
   final int currentSize;
@@ -172,12 +165,11 @@ class _BatchSizeSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     return PopupMenuButton<int>(
       initialValue: currentSize,
       onSelected: (value) {
-        ref
-            .read(readingProgressProvider.notifier)
-            .setBatchSize(mangaId, value);
+        ref.read(readingProgressProvider.notifier).setBatchSize(mangaId, value);
       },
       itemBuilder: (context) => _sizes
           .map(
@@ -185,10 +177,10 @@ class _BatchSizeSelector extends ConsumerWidget {
               value: size,
               child: Text(
                 '$size',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 13,
-                  color: AppColors.onSurface,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ),
@@ -197,7 +189,7 @@ class _BatchSizeSelector extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
@@ -205,14 +197,18 @@ class _BatchSizeSelector extends ConsumerWidget {
           children: <Widget>[
             Text(
               '$currentSize',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppTypography.fontFamily,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.onSurfaceVariant),
+            Icon(
+              Icons.arrow_drop_down,
+              size: 16,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ],
         ),
       ),

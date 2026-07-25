@@ -52,6 +52,7 @@ class _FloatingBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -67,13 +68,13 @@ class _FloatingBottomBar extends StatelessWidget {
           child: Container(
             height: AppSpacing.bottomNavHeight,
             decoration: BoxDecoration(
-              color: AppColors.glassSurface.withValues(alpha: 0.50),
+              color: colors.surface.withValues(alpha: 0.78),
               borderRadius: BorderRadius.circular(AppSpacing.bottomNavRadius),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x66000000), // rgba(0,0,0,0.4)
+                  color: colors.shadow.withValues(alpha: 0.40),
                   blurRadius: 40,
-                  offset: Offset(0, 12),
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
@@ -87,7 +88,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.home,
                   isActive: currentIndex == 0,
                   onTap: () => onTap(0),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navHome,
                 ),
                 _NavItem(
@@ -95,7 +96,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.explore,
                   isActive: currentIndex == 1,
                   onTap: () => onTap(1),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navExplore,
                 ),
                 _NavItem(
@@ -103,7 +104,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.collections_bookmark,
                   isActive: currentIndex == 2,
                   onTap: () => onTap(2),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navLibrary,
                 ),
                 _NavItem(
@@ -111,7 +112,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.person,
                   isActive: currentIndex == 3,
                   onTap: () => onTap(3),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navProfile,
                 ),
               ],
@@ -142,6 +143,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: onTap,
@@ -158,7 +161,7 @@ class _NavItem extends StatelessWidget {
               child: Icon(
                 isActive ? activeIcon : icon,
                 key: ValueKey(isActive),
-                color: isActive ? color : AppColors.onSurfaceVariant,
+                color: isActive ? color : colors.onSurfaceVariant,
                 size: 24,
               ),
             ),
@@ -171,7 +174,7 @@ class _NavItem extends StatelessWidget {
                 fontWeight: isActive
                     ? FontWeight.w700
                     : AppTypography.labelWeight,
-                color: isActive ? color : AppColors.onSurfaceVariant,
+                color: isActive ? color : colors.onSurfaceVariant,
               ),
               child: Text(
                 label,

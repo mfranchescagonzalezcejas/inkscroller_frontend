@@ -33,7 +33,7 @@ class AccountSection extends ConsumerWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -44,13 +44,19 @@ class AccountSection extends ConsumerWidget {
                 label: 'Email',
                 value: email,
               ),
-              const Divider(height: 1, color: AppColors.outlineVariant),
+              Divider(
+                height: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
               _ActionRow(
                 icon: Icons.lock_reset_outlined,
                 label: l10n.authResetPasswordButton,
                 onTap: () => _resetPassword(context, ref, email),
               ),
-              const Divider(height: 1, color: AppColors.outlineVariant),
+              Divider(
+                height: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
               _DangerButton(
                 key: const Key('deleteAccountButton'),
                 label: l10n.deleteAccountTitle,
@@ -112,15 +118,16 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: AppColors.outline,
+          color: colors.outline,
           letterSpacing: 0.5,
         ),
       ),
@@ -141,6 +148,7 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
@@ -149,7 +157,7 @@ class _InfoRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.cardHighest,
+              color: colors.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 20, color: AppColors.primary),
@@ -161,19 +169,19 @@ class _InfoRow extends StatelessWidget {
               children: <Widget>[
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
-                    color: AppColors.onSurface,
+                    color: colors.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 12,
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -237,6 +245,7 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -248,7 +257,7 @@ class _ActionRow extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.cardHighest,
+                color: colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, size: 20, color: AppColors.primary),
@@ -257,14 +266,14 @@ class _ActionRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
+            Icon(Icons.chevron_right, size: 20, color: colors.outline),
           ],
         ),
       ),

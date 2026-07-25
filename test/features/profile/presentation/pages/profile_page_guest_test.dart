@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:inkscroller_flutter/core/l10n/app_locale_provider.dart';
+import 'package:inkscroller_flutter/core/theme/app_theme.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/send_email_verification.dart';
@@ -40,15 +41,26 @@ import 'package:mocktail/mocktail.dart';
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
 class _MockSignIn extends Mock implements SignIn {}
+
 class _MockSignUp extends Mock implements SignUp {}
+
 class _MockSignOut extends Mock implements SignOut {}
+
 class _MockGetAuthState extends Mock implements GetAuthState {}
-class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+
+class _MockSendEmailVerification extends Mock
+    implements SendEmailVerification {}
+
 class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
+
 class _MockReloadUser extends Mock implements ReloadUser {}
+
 class _MockGetUserProfile extends Mock implements GetUserProfile {}
+
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
+
 class _MockGetPreferences extends Mock implements GetPreferences {}
+
 class _MockUpdatePreferences extends Mock implements UpdatePreferences {}
 
 // ── Fakes ──────────────────────────────────────────────────────────────────
@@ -56,17 +68,17 @@ class _MockUpdatePreferences extends Mock implements UpdatePreferences {}
 class _FakeAuthNotifier extends AuthNotifier {
   // ignore: use_super_parameters — explicit for test clarity
   _FakeAuthNotifier({required GetAuthState getAuthState})
-      : super(
-          signIn: _MockSignIn(),
-          signUp: _MockSignUp(),
-          signOut: _MockSignOut(),
-          getAuthState: getAuthState,
-          sendEmailVerification: _MockSendEmailVerification(),
-          sendPasswordReset: _MockSendPasswordReset(),
-          reloadUser: _MockReloadUser(),
-          getUserProfile: _MockGetUserProfile(),
-          updateUserProfile: _MockUpdateUserProfile(),
-        );
+    : super(
+        signIn: _MockSignIn(),
+        signUp: _MockSignUp(),
+        signOut: _MockSignOut(),
+        getAuthState: getAuthState,
+        sendEmailVerification: _MockSendEmailVerification(),
+        sendPasswordReset: _MockSendPasswordReset(),
+        reloadUser: _MockReloadUser(),
+        getUserProfile: _MockGetUserProfile(),
+        updateUserProfile: _MockUpdateUserProfile(),
+      );
 
   @override
   Future<void> signOut() async {}
@@ -77,18 +89,18 @@ class _FakeAuthNotifier extends AuthNotifier {
 
 class _FakePrefsNotifier extends PreferencesNotifier {
   _FakePrefsNotifier()
-      : super(
-          getPreferences: _MockGetPreferences(),
-          updatePreferences: _MockUpdatePreferences(),
-        );
+    : super(
+        getPreferences: _MockGetPreferences(),
+        updatePreferences: _MockUpdatePreferences(),
+      );
 }
 
 class _FakeProfileNotifier extends UserProfileNotifier {
   _FakeProfileNotifier()
-      : super(
-          getUserProfile: _MockGetUserProfile(),
-          updateUserProfile: _MockUpdateUserProfile(),
-        );
+    : super(
+        getUserProfile: _MockGetUserProfile(),
+        updateUserProfile: _MockUpdateUserProfile(),
+      );
 }
 
 void main() {
@@ -121,7 +133,7 @@ void main() {
     profileNotifier.state = const UserProfileState();
   });
 
-  Widget buildTestWidget() {
+  Widget buildTestWidget({ThemeData? theme}) {
     return ProviderScope(
       overrides: [
         authProvider.overrideWith((_) => authNotifier),
@@ -146,14 +158,12 @@ void main() {
               MangaDemographic.shounen,
               MangaDemographic.shoujo,
             ],
-            allowedOptions: [
-              MangaDemographic.shounen,
-              MangaDemographic.shoujo,
-            ],
+            allowedOptions: [MangaDemographic.shounen, MangaDemographic.shoujo],
           ),
         ),
       ],
       child: MaterialApp.router(
+        theme: theme,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: GoRouter(
@@ -174,8 +184,7 @@ void main() {
             ),
             GoRoute(
               path: '/about',
-              builder: (context, state) =>
-                  const Scaffold(body: Text('About')),
+              builder: (context, state) => const Scaffold(body: Text('About')),
             ),
           ],
         ),
@@ -183,18 +192,19 @@ void main() {
     );
   }
 
-  testWidgets('guest view shows reader mode, app language, and reading language',
-      (tester) async {
-    await tester.pumpWidget(buildTestWidget());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'guest view shows reader mode, app language, and reading language',
+    (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
 
-    expect(find.text('Reading mode'), findsOneWidget);
-    expect(find.text('App language'), findsOneWidget);
-    expect(find.text('Manga reading language'), findsOneWidget);
-  });
+      expect(find.text('Reading mode'), findsOneWidget);
+      expect(find.text('App language'), findsOneWidget);
+      expect(find.text('Manga reading language'), findsOneWidget);
+    },
+  );
 
-  testWidgets('guest view does not show age-restricted fields',
-      (tester) async {
+  testWidgets('guest view does not show age-restricted fields', (tester) async {
     await tester.pumpWidget(buildTestWidget());
     await tester.pumpAndSettle();
 
@@ -226,5 +236,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.settings_outlined), findsNothing);
+  });
+
+  testWidgets('guest view uses active light and dark theme colors', (
+    tester,
+  ) async {
+    for (final theme in <ThemeData>[AppTheme.light(), AppTheme.dark()]) {
+      await tester.pumpWidget(buildTestWidget(theme: theme));
+      await tester.pumpAndSettle();
+
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      final title = tester.widget<Text>(
+        find.text("You're using the app as a guest."),
+      );
+      final value = tester.widget<Text>(find.text('Vertical'));
+
+      expect(scaffold.backgroundColor, theme.scaffoldBackgroundColor);
+      expect(title.style?.color, theme.colorScheme.onSurface);
+      expect(value.style?.color, theme.colorScheme.onSurfaceVariant);
+    }
   });
 }

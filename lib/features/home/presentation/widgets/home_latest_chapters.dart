@@ -23,6 +23,7 @@ class LatestChaptersSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(homeLatestChaptersProvider);
     final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,7 +42,7 @@ class LatestChaptersSection extends ConsumerWidget {
                 child: Text(
                   l10n.homeNoMangas,
                   style: AppTypography.bodyStyle.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               );
@@ -61,8 +62,7 @@ class LatestChaptersSection extends ConsumerWidget {
           ),
           error: (e, _) => _ErrorState(
             message: l10n.homeChapterError,
-            onRetry: () =>
-                ref.invalidate(homeLatestChaptersProvider),
+            onRetry: () => ref.invalidate(homeLatestChaptersProvider),
           ),
         ),
       ],
@@ -78,9 +78,10 @@ class _LatestChapterTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
     final chapterLabel = l10n.chapterLabel(chapter.chapterNumber ?? '--');
-    final subtitle = chapter.chapterTitle != null &&
-            chapter.chapterTitle!.trim().isNotEmpty
+    final subtitle =
+        chapter.chapterTitle != null && chapter.chapterTitle!.trim().isNotEmpty
         ? '$chapterLabel · ${chapter.chapterTitle}'
         : chapterLabel;
 
@@ -92,7 +93,7 @@ class _LatestChapterTile extends StatelessWidget {
 
     // TODO(reader): open reader directly when chapter.id routing lands.
     return Material(
-      color: AppColors.card,
+      color: colorScheme.surfaceContainer,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () => context.push(
@@ -110,7 +111,7 @@ class _LatestChapterTile extends StatelessWidget {
                 child: SizedBox(
                   width: 48,
                   height: 64,
-                  child: _cover(chapter.mangaCoverUrl),
+                  child: _cover(context, chapter.mangaCoverUrl),
                 ),
               ),
               const SizedBox(width: 12),
@@ -124,11 +125,11 @@ class _LatestChapterTile extends StatelessWidget {
                       chapter.mangaTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.onSurface,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -136,10 +137,10 @@ class _LatestChapterTile extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: AppTypography.fontFamily,
                         fontSize: 12,
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -148,13 +149,13 @@ class _LatestChapterTile extends StatelessWidget {
               // Time + chevron
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 64),
-                child: _timeAgo(chapter.publishAt),
+                child: _timeAgo(context, chapter.publishAt),
               ),
               const SizedBox(width: 4),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
                 size: 18,
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -163,23 +164,25 @@ class _LatestChapterTile extends StatelessWidget {
     );
   }
 
-  Widget _cover(String? url) {
+  Widget _cover(BuildContext context, String? url) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (url == null || url.isEmpty) {
-      return const ColoredBox(
-        color: AppColors.cardHigh,
+      return ColoredBox(
+        color: colorScheme.surfaceContainerHigh,
         child: Center(
-          child: Icon(Icons.image, color: AppColors.outline, size: 20),
+          child: Icon(Icons.image, color: colorScheme.outline, size: 20),
         ),
       );
     }
     return CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,
-      placeholder: (_, __) => const ColoredBox(color: AppColors.cardHigh),
-      errorWidget: (_, __, ___) => const ColoredBox(
-        color: AppColors.cardHigh,
+      placeholder: (_, __) =>
+          ColoredBox(color: colorScheme.surfaceContainerHigh),
+      errorWidget: (_, __, ___) => ColoredBox(
+        color: colorScheme.surfaceContainerHigh,
         child: Center(
-          child: Icon(Icons.image, color: AppColors.outline, size: 20),
+          child: Icon(Icons.image, color: colorScheme.outline, size: 20),
         ),
       ),
       memCacheWidth: 96,
@@ -187,7 +190,7 @@ class _LatestChapterTile extends StatelessWidget {
     );
   }
 
-  Widget _timeAgo(DateTime? date) {
+  Widget _timeAgo(BuildContext context, DateTime? date) {
     if (date == null) return const SizedBox.shrink();
     final now = DateTime.now().toUtc();
     final diff = now.difference(date.toUtc());
@@ -201,10 +204,10 @@ class _LatestChapterTile extends StatelessWidget {
     }
     return Text(
       label,
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: AppTypography.fontFamily,
         fontSize: 11,
-        color: AppColors.onSurfaceVariant,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }
@@ -218,6 +221,7 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
@@ -226,14 +230,11 @@ class _ErrorState extends StatelessWidget {
             child: Text(
               message,
               style: AppTypography.bodyStyle.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
-          TextButton(
-            onPressed: onRetry,
-            child: Text(context.l10n.retryAction),
-          ),
+          TextButton(onPressed: onRetry, child: Text(context.l10n.retryAction)),
         ],
       ),
     );

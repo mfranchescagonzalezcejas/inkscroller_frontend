@@ -143,9 +143,8 @@ class _ReaderPageState extends ConsumerState<ReaderPage> {
     }
 
     final uiState = ref.watch(readerUiProvider(widget.chapterId));
-    final background = uiState.amoledBlack
-        ? Colors.black
-        : AppColors.voidLowest;
+    final colors = Theme.of(context).colorScheme;
+    final background = uiState.amoledBlack ? Colors.black : colors.surface;
 
     return Scaffold(
       backgroundColor: background,
@@ -352,7 +351,7 @@ class _FloatingIconButton extends StatelessWidget {
                   width: AppLayout.readerFloatingControlSize,
                   height: AppLayout.readerFloatingControlSize,
                   child: Material(
-                    color: AppColors.voidLowest.withValues(
+                    color: Theme.of(context).colorScheme.surface.withValues(
                       alpha: AppLayout.readerFloatingControlBackgroundOpacity,
                     ),
                     shape: RoundedRectangleBorder(
@@ -362,7 +361,7 @@ class _FloatingIconButton extends StatelessWidget {
                     ),
                     child: Icon(
                       icon,
-                      color: AppColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: AppSpacing.xl,
                     ),
                   ),

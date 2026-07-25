@@ -20,6 +20,8 @@ class TonalTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppLayout.tabBarHorizontalPadding,
@@ -29,7 +31,7 @@ class TonalTabBar extends StatelessWidget {
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.glassSurface,
+          color: colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(AppLayout.tonalTabRadius),
         ),
         child: Padding(
@@ -39,7 +41,9 @@ class TonalTabBar extends StatelessWidget {
               final bool isActive = selectedIndex == index;
               return Expanded(
                 child: Material(
-                  color: isActive ? AppColors.cardHigh : Colors.transparent,
+                  color: isActive
+                      ? colorScheme.primary.withValues(alpha: 0.16)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(
                     AppLayout.tonalTabItemRadius,
                   ),
@@ -67,8 +71,8 @@ class TonalTabBar extends StatelessWidget {
                                   ? FontWeight.w700
                                   : AppTypography.labelLgWeight,
                               color: isActive
-                                  ? AppColors.primary
-                                  : AppColors.onSurfaceVariant,
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),

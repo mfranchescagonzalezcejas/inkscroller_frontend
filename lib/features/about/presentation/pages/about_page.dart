@@ -17,20 +17,21 @@ class AboutPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final packageInfo = ref.watch(appVersionProvider).valueOrNull;
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.stage,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.stage,
-        foregroundColor: AppColors.onSurface,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: colors.onSurface,
         elevation: 0,
         title: Text(
           l10n.aboutTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: AppTypography.fontFamily,
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.onSurface,
+            color: colors.onSurface,
           ),
         ),
       ),
@@ -58,43 +59,44 @@ class _AppIdentitySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
     final version = packageInfo != null
         ? l10n.aboutVersion(packageInfo!.version, packageInfo!.buildNumber)
         : '';
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
       ),
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         children: <Widget>[
-          const Text(
+          Text(
             AppConstants.appName,
             style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: AppTypography.display,
               fontWeight: AppTypography.displayWeight,
-              color: AppColors.onSurface,
+              color: colors.onSurface,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             version,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 13,
-              color: AppColors.onSurfaceVariant,
+              color: colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             l10n.aboutAppDescription,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 12,
-              color: AppColors.outline,
+              color: colors.outline,
             ),
           ),
         ],
@@ -111,6 +113,7 @@ class _DisclaimerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -118,7 +121,7 @@ class _DisclaimerSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           ),
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -158,6 +161,7 @@ class _CreditsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -165,7 +169,7 @@ class _CreditsSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           ),
           padding: const EdgeInsets.symmetric(
@@ -180,21 +184,21 @@ class _CreditsSection extends StatelessWidget {
                 description: l10n.aboutCreditMangadexDescription,
                 url: 'api.mangadex.org',
               ),
-              const Divider(color: AppColors.outlineVariant, height: 1),
+              Divider(color: colors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.api_outlined,
                 name: 'Jikan API',
                 description: l10n.aboutCreditJikanDescription,
                 url: 'api.jikan.moe',
               ),
-              const Divider(color: AppColors.outlineVariant, height: 1),
+              Divider(color: colors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.cloud_outlined,
                 name: 'Railway',
                 description: l10n.aboutCreditInfrastructureDescription,
                 url: 'railway.app',
               ),
-              const Divider(color: AppColors.outlineVariant, height: 1),
+              Divider(color: colors.outlineVariant, height: 1),
               _CreditRow(
                 icon: Icons.lock_outlined,
                 name: 'Firebase Auth',
@@ -218,15 +222,16 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(left: AppSpacing.xs),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: AppTypography.label,
           fontWeight: FontWeight.w600,
-          color: AppColors.outline,
+          color: colors.outline,
           letterSpacing: 0.5,
         ),
       ),
@@ -247,6 +252,7 @@ class _DisclaimerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -261,20 +267,20 @@ class _DisclaimerItem extends StatelessWidget {
             children: <Widget>[
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 body,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 12,
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -301,6 +307,7 @@ class _CreditRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
@@ -309,10 +316,10 @@ class _CreditRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.cardHighest,
+              color: colors.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 20, color: AppColors.onSurfaceVariant),
+            child: Icon(icon, size: 20, color: colors.onSurfaceVariant),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -321,19 +328,19 @@ class _CreditRow extends StatelessWidget {
               children: <Widget>[
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: AppTypography.body,
-                    color: AppColors.onSurface,
+                    color: colors.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 12,
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -341,10 +348,10 @@ class _CreditRow extends StatelessWidget {
           ),
           Text(
             url,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: AppTypography.label,
-              color: AppColors.outline,
+              color: colors.outline,
             ),
           ),
         ],

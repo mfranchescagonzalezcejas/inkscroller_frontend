@@ -17,17 +17,18 @@ class HomeSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, AppSpacing.xl, 20, AppSpacing.md),
       child: Row(
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.onSurface,
+              color: colorScheme.onSurface,
             ),
           ),
           const Spacer(),
@@ -39,11 +40,11 @@ class HomeSectionHeader extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 child: Text(
                   actionLabel!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.primary,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),

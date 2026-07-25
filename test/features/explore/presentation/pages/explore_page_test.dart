@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
+import 'package:inkscroller_flutter/core/theme/app_theme.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
@@ -52,7 +53,8 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
-class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+class _MockSendEmailVerification extends Mock
+    implements SendEmailVerification {}
 
 class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
 
@@ -98,7 +100,7 @@ class _SpyLibraryNotifier extends LibraryNotifier {
 
 class _FixedStateNotifier extends LibraryNotifier {
   _FixedStateNotifier(this.fixedState)
-      : super(_MockGetMangaList(), _MockSearchManga()) {
+    : super(_MockGetMangaList(), _MockSearchManga()) {
     state = fixedState;
   }
 
@@ -172,6 +174,7 @@ void main() {
     WidgetTester tester, {
     required LibraryNotifier notifier,
     bool isOnline = true,
+    ThemeData? theme,
   }) {
     return tester.pumpWidget(
       ProviderScope(
@@ -188,10 +191,32 @@ void main() {
             (ref) => _makeStubUserLibraryNotifier(),
           ),
         ],
-        child: wrapWithL10n(const ExplorePage(), locale: const Locale('es')),
+        child: wrapWithL10n(
+          const ExplorePage(),
+          locale: const Locale('es'),
+          theme: theme,
+        ),
       ),
     );
   }
+
+  testWidgets('uses the scaffold background in light and dark themes', (
+    tester,
+  ) async {
+    for (final ThemeData theme in <ThemeData>[
+      AppTheme.light(),
+      AppTheme.dark(),
+    ]) {
+      final notifier = _FixedStateNotifier(LibraryState.initial());
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await pumpExplorePage(tester, notifier: notifier, theme: theme);
+
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+
+      expect(scaffold.backgroundColor, theme.scaffoldBackgroundColor);
+    }
+  });
 
   group('scroll pagination', () {
     testWidgets('scroll with empty query calls loadMore', (tester) async {
