@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/l10n/l10n.dart';
 
@@ -67,7 +68,7 @@ class _AppIdentitySection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
       ),
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -122,7 +123,7 @@ class _DisclaimerSection extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+            borderRadius: BorderRadius.circular(AppLayout.cardRadius),
           ),
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
@@ -170,7 +171,7 @@ class _CreditsSection extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+            borderRadius: BorderRadius.circular(AppLayout.cardRadius),
           ),
           padding: const EdgeInsets.symmetric(
             vertical: AppSpacing.sm,

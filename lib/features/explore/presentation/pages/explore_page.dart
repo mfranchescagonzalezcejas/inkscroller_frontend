@@ -168,7 +168,12 @@ class _ExploreHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, AppSpacing.xxl, 20, AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(
+        20,
+        AppSpacing.twoXl,
+        20,
+        AppSpacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
