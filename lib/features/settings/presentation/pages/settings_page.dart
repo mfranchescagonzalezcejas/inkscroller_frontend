@@ -98,16 +98,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.stage,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.stage,
-        foregroundColor: AppColors.onSurface,
-        iconTheme: const IconThemeData(color: AppColors.onSurfaceVariant),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        iconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
         elevation: 0,
         title: Text(
           context.l10n.settingsTitle,
           style: AppTypography.titleLgStyle.copyWith(
-            color: AppColors.onSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
@@ -202,15 +204,16 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: AppColors.outline,
+          color: colors.outline,
           letterSpacing: 0.5,
         ),
       ),
@@ -233,9 +236,10 @@ class _ClearCacheButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(AppLayout.authFieldRadius),
       ),
       child: TextButton(

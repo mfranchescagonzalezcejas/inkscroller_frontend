@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/layout.dart';
 import '../design/design_tokens.dart';
 
 /// Configures Material 3 light and dark themes for InkScroller.
@@ -11,25 +12,50 @@ class AppTheme {
   static const _darkPrimary = AppColors.primary;
   static const _lightPrimary = AppColors.primaryLight;
   static const _tealSecondary = AppColors.secondary;
-  static const _tealAccent = AppColors.primaryDeepLight;
+  static const _score = AppColors.scoreGold;
+  static const _brandGradientStart = AppColors.brandGradientStart;
+  static const _brandGradientEnd = AppColors.brandGradientEnd;
+  static const _darkError = AppColors.danger;
+  static const _lightError = AppColors.dangerLight;
+  static const _onAction = AppColors.voidLowest;
 
-  // 🌙 Dark colors
+  // Dark colors
   static const _darkBg = AppColors.stage;
+  static const _darkGlass = AppColors.glassSurface;
   static const _darkSurface = AppColors.card;
+  static const _darkSurfaceHigh = AppColors.cardHigh;
   static const _darkDivider = AppColors.outlineVariant;
+  static const _darkOutline = AppColors.outlineDark;
   static const _darkText = AppColors.onSurface;
   static const _darkTextSecondary = AppColors.onSurfaceVariant;
 
-  // ☀️ Light colors
+  // Light colors
   static const _lightBg = AppColors.stageLight;
+  static const _lightGlass = AppColors.glassLight;
   static const _lightSurface = AppColors.cardLight;
+  static const _lightSurfaceHigh = AppColors.cardHighLight;
   static const _lightDivider = AppColors.outlineLight;
   static const _lightText = AppColors.onSurfaceLight;
   static const _lightTextSecondary = AppColors.onSurfaceVariantLight;
 
   static const _minimumControlSize = Size(
-    AppSpacing.minTouchTarget,
-    AppSpacing.minTouchTarget,
+    AppLayout.minTouchTarget,
+    AppLayout.minTouchTarget,
+  );
+
+  // Shared text theme — derives from AppTypography named roles.
+  static TextTheme _buildTextTheme(Color? bodyColor) => TextTheme(
+    titleLarge: AppTypography.titleLgStyle.copyWith(color: _lightText),
+    titleMedium: AppTypography.titleMdStyle,
+    bodyLarge: AppTypography.bodyLgStyle,
+    bodyMedium: AppTypography.bodyStyle.copyWith(color: bodyColor),
+    labelLarge: AppTypography.labelLgStyle,
+  );
+
+  // Shared button theme
+  static ButtonStyle _buttonStyle() => ButtonStyle(
+    minimumSize: WidgetStateProperty.all(_minimumControlSize),
+    tapTargetSize: MaterialTapTargetSize.padded,
   );
 
   // ☀️ LIGHT
@@ -48,8 +74,22 @@ class AppTheme {
 
       colorScheme: const ColorScheme.light(
         primary: _lightPrimary,
+        onPrimary: _onAction,
         secondary: _tealSecondary,
-        tertiary: _tealAccent,
+        tertiary: _score,
+        primaryContainer: _brandGradientStart,
+        secondaryContainer: _brandGradientEnd,
+        error: _lightError,
+        onError: _onAction,
+        onSurface: _lightText,
+        onSurfaceVariant: _lightTextSecondary,
+        surfaceContainerLowest: _lightBg,
+        surfaceContainerLow: _lightGlass,
+        surfaceContainer: _lightSurface,
+        surfaceContainerHigh: _lightSurfaceHigh,
+        surfaceContainerHighest: _lightSurfaceHigh,
+        outlineVariant: _lightDivider,
+        outline: _lightDivider,
       ),
 
       appBarTheme: const AppBarTheme(
@@ -69,7 +109,9 @@ class AppTheme {
         color: _lightSurface,
         elevation: 2,
         shadowColor: Colors.black12,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        ),
       ),
 
       listTileTheme: const ListTileThemeData(
@@ -78,59 +120,35 @@ class AppTheme {
         textColor: _lightText,
       ),
 
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        bodyLarge: TextStyle(fontSize: 16),
-        bodyMedium: TextStyle(fontSize: 14, color: _lightTextSecondary),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
+      textTheme: _buildTextTheme(_lightTextSecondary),
 
       dividerTheme: const DividerThemeData(color: _lightDivider, thickness: 1),
 
       iconTheme: const IconThemeData(color: _lightPrimary),
 
-      iconButtonTheme: IconButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
+      iconButtonTheme: IconButtonThemeData(style: _buttonStyle()),
+      textButtonTheme: TextButtonThemeData(style: _buttonStyle()),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyle()),
 
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: _darkSurface,
-        contentTextStyle: const TextStyle(color: _darkText),
+        backgroundColor: _lightSurface,
+        contentTextStyle: const TextStyle(color: _lightText),
         actionTextColor: _lightPrimary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.md),
+        ),
       ),
 
       dialogTheme: DialogThemeData(
-        backgroundColor: _darkSurface,
-        titleTextStyle: const TextStyle(
-          color: _darkText,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+        backgroundColor: _lightSurface,
+        titleTextStyle: AppTypography.titleMdStyle.copyWith(color: _lightText),
+        contentTextStyle: AppTypography.bodyStyle.copyWith(
+          color: _lightTextSecondary,
         ),
-        contentTextStyle: const TextStyle(
-          color: _darkTextSecondary,
-          fontSize: 14,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
@@ -151,9 +169,23 @@ class AppTheme {
 
       colorScheme: const ColorScheme.dark(
         primary: _darkPrimary,
+        onPrimary: _onAction,
         secondary: _tealSecondary,
-        tertiary: _tealAccent,
+        tertiary: _score,
+        primaryContainer: _brandGradientStart,
+        secondaryContainer: _brandGradientEnd,
+        error: _darkError,
+        onError: _onAction,
         surface: _darkSurface,
+        onSurface: _darkText,
+        onSurfaceVariant: _darkTextSecondary,
+        surfaceContainerLowest: _darkBg,
+        surfaceContainerLow: _darkGlass,
+        surfaceContainer: _darkSurface,
+        surfaceContainerHigh: _darkSurfaceHigh,
+        surfaceContainerHighest: _darkSurfaceHigh,
+        outlineVariant: _darkDivider,
+        outline: _darkOutline,
       ),
 
       appBarTheme: const AppBarTheme(
@@ -168,7 +200,9 @@ class AppTheme {
         color: _darkSurface,
         elevation: 4,
         shadowColor: Colors.black54,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        ),
       ),
 
       listTileTheme: const ListTileThemeData(
@@ -177,38 +211,15 @@ class AppTheme {
         textColor: _darkText,
       ),
 
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        bodyLarge: TextStyle(fontSize: 16),
-        bodyMedium: TextStyle(fontSize: 14, color: _darkTextSecondary),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
+      textTheme: _buildTextTheme(_darkTextSecondary),
 
       dividerTheme: const DividerThemeData(color: _darkDivider, thickness: 1),
 
       iconTheme: const IconThemeData(color: _darkPrimary),
 
-      iconButtonTheme: IconButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
+      iconButtonTheme: IconButtonThemeData(style: _buttonStyle()),
+      textButtonTheme: TextButtonThemeData(style: _buttonStyle()),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyle()),
     );
   }
 }

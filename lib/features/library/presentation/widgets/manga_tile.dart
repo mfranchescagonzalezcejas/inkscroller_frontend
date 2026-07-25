@@ -4,6 +4,7 @@ import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/features/library/presentation/constants/library_ui_constants.dart';
 
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../domain/entities/manga.dart';
 import '../utils/manga_localizer.dart';
@@ -27,14 +28,14 @@ class MangaTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double? safeScore = manga.score;
     final String badgeLabel = safeScore?.toStringAsFixed(1) ?? '--';
-    final String secondaryMeta =
-        manga.status != null
-            ? MangaLocalizer.localizeStatus(context.l10n, manga.status!)
-            : (manga.year != null
-                ? '${manga.year}'
-                : context.l10n.libraryUnknownMeta);
+    final String secondaryMeta = manga.status != null
+        ? MangaLocalizer.localizeStatus(context.l10n, manga.status!)
+        : (manga.year != null
+              ? '${manga.year}'
+              : context.l10n.libraryUnknownMeta);
     final int? effectiveReadCount =
         readChaptersCount ?? manga.readChaptersCount;
     final int? effectiveTotalCount =
@@ -46,14 +47,14 @@ class MangaTile extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+      borderRadius: BorderRadius.circular(AppLayout.cardRadius),
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
         onTap: () {
           context.push(AppRoutes.mangaDetailPath(manga.id), extra: manga);
         },
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
           child: AspectRatio(
             aspectRatio: 2 / 3,
             child: Stack(
@@ -81,7 +82,7 @@ class MangaTile extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          AppColors.voidLowest.withValues(alpha: 0.93),
+                          colorScheme.surface.withValues(alpha: 0.93),
                         ],
                       ),
                     ),
@@ -93,8 +94,8 @@ class MangaTile extends StatelessWidget {
                           manga.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.onSurface,
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -106,8 +107,8 @@ class MangaTile extends StatelessWidget {
                           secondaryMeta,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.onSurfaceVariant,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 11,
                             fontWeight: FontWeight.w400,
@@ -123,8 +124,8 @@ class MangaTile extends StatelessWidget {
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.primary,
+                            style: TextStyle(
+                              color: colorScheme.primary,
                               fontFamily: AppTypography.fontFamily,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -147,7 +148,7 @@ class MangaTile extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.cardHigh,
+                      color: colorScheme.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -157,8 +158,8 @@ class MangaTile extends StatelessWidget {
                           Icons.star,
                           size: 12,
                           color: safeScore != null
-                              ? AppColors.scoreGold
-                              : AppColors.onSurfaceVariant,
+                              ? colorScheme.tertiary
+                              : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -168,8 +169,8 @@ class MangaTile extends StatelessWidget {
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: safeScore != null
-                                ? AppColors.scoreGold
-                                : AppColors.onSurfaceVariant,
+                                ? colorScheme.tertiary
+                                : colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],

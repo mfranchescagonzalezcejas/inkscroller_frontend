@@ -28,11 +28,11 @@ class AppTypography {
   // ═══════════════════════════════════════════════════════════════════════
 
   /// Title large — Screen titles, major headers
-  static const double titleLg = 20;
+  static const double titleLg = 22;
   static const FontWeight titleLgWeight = FontWeight.w700;
 
   /// Title medium — Card titles, subheaders
-  static const double titleMd = 16;
+  static const double titleMd = 18;
   static const FontWeight titleMdWeight = FontWeight.w600;
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -42,6 +42,9 @@ class AppTypography {
   /// Body — Default body text
   static const double body = 14;
   static const FontWeight bodyWeight = FontWeight.w400;
+
+  /// Body small — Compact labels, secondary info
+  static const double bodySm = 13;
 
   /// Body large — Extended body text
   static const double bodyLg = 16;

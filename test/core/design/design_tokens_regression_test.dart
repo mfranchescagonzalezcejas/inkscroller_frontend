@@ -1,6 +1,6 @@
 /// Regression tests for design tokens that match the inkscroller.pen source of truth.
 ///
-/// These tests prevent future drift between AppSpacing/AppColors constants and
+/// These tests prevent future drift between AppLayout/AppColors constants and
 /// the values specified in design/pencil/inkscroller.pen.
 ///
 /// References:
@@ -10,29 +10,29 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:inkscroller_flutter/core/design/app_spacing.dart';
+import 'package:inkscroller_flutter/core/constants/layout.dart';
 import 'package:inkscroller_flutter/core/design/app_colors.dart';
 
 void main() {
-  group('AppSpacing — pen regression (TASK-025)', () {
+  group('AppLayout — pen regression (TASK-025)', () {
     // .pen node LHiWR: "cornerRadius": 28
     test('bottomNavRadius matches .pen cornerRadius (28)', () {
-      expect(AppSpacing.bottomNavRadius, 28.0);
+      expect(AppLayout.bottomNavRadius, 28.0);
     });
 
     // .pen node LHiWR: "width": 358
     test('bottomNavWidth matches .pen width (358)', () {
-      expect(AppSpacing.bottomNavWidth, 358.0);
+      expect(AppLayout.bottomNavWidth, 358.0);
     });
 
     // .pen: x=16 → margin from screen edge
     test('bottomNavMargin matches .pen x offset (16)', () {
-      expect(AppSpacing.bottomNavMargin, 16.0);
+      expect(AppLayout.bottomNavMargin, 16.0);
     });
 
     // .pen node LHiWR: "height": 72
     test('bottomNavHeight matches .pen height (72)', () {
-      expect(AppSpacing.bottomNavHeight, 72.0);
+      expect(AppLayout.bottomNavHeight, 72.0);
     });
   });
 

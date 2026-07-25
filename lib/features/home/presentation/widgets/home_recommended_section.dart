@@ -62,6 +62,7 @@ class _RecommendedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
       child: SizedBox(
@@ -86,7 +87,7 @@ class _RecommendedCard extends StatelessWidget {
                     height: 220,
                     child: Stack(
                       children: [
-                        _cover(manga.coverUrl),
+                        _cover(context, manga.coverUrl),
                         if (manga.score != null)
                           Positioned(
                             top: 6,
@@ -97,25 +98,25 @@ class _RecommendedCard extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.cardHigh,
+                                color: colorScheme.surfaceContainerHigh,
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.star,
                                     size: 10,
-                                    color: AppColors.scoreGold,
+                                    color: colorScheme.tertiary,
                                   ),
                                   const SizedBox(width: 2),
                                   Text(
                                     manga.score!.toStringAsFixed(1),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: AppTypography.fontFamily,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
-                                      color: AppColors.scoreGold,
+                                      color: colorScheme.tertiary,
                                     ),
                                   ),
                                 ],
@@ -133,20 +134,20 @@ class _RecommendedCard extends StatelessWidget {
               manga.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: AppTypography.fontFamily,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.onSurface,
+                color: colorScheme.onSurface,
               ),
             ),
             if (manga.demographicDisplay != null)
               Text(
                 manga.demographicDisplay!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 10,
-                  color: AppColors.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
           ],
@@ -155,23 +156,24 @@ class _RecommendedCard extends StatelessWidget {
     );
   }
 
-  Widget _cover(String? url) {
+  Widget _cover(BuildContext context, String? url) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (url == null || url.isEmpty) {
-      return const ColoredBox(
-        color: AppColors.card,
+      return ColoredBox(
+        color: colorScheme.surfaceContainer,
         child: Center(
-          child: Icon(Icons.image, color: AppColors.outline, size: 32),
+          child: Icon(Icons.image, color: colorScheme.outline, size: 32),
         ),
       );
     }
     return CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,
-      placeholder: (_, __) => const ColoredBox(color: AppColors.card),
-      errorWidget: (_, __, ___) => const ColoredBox(
-        color: AppColors.card,
+      placeholder: (_, __) => ColoredBox(color: colorScheme.surfaceContainer),
+      errorWidget: (_, __, ___) => ColoredBox(
+        color: colorScheme.surfaceContainer,
         child: Center(
-          child: Icon(Icons.image, color: AppColors.outline, size: 32),
+          child: Icon(Icons.image, color: colorScheme.outline, size: 32),
         ),
       ),
       memCacheWidth: 300,

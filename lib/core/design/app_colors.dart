@@ -94,15 +94,24 @@ class AppColors {
   // Outline variants (for borders)
   static const Color outlineVariant = Color(0xFF3E4947);
 
+  /// Standard outline for dark-mode controls and borders.
+  static const Color outlineDark = Color(0xFF4A4F55);
+
   // ═══════════════════════════════════════════════════════════════════════
   // BRAND GRADIENT — Reserved for Logo and "Start Reading" CTA only
   // ═══════════════════════════════════════════════════════════════════════
 
   /// Signature gradient: linear-gradient(135deg, #0F766E, #1E40AF)
   static const List<Color> brandGradient = [
-    Color(0xFF0F766E),
-    Color(0xFF1E40AF),
+    brandGradientStart,
+    brandGradientEnd,
   ];
+
+  /// First color in the signature brand gradient.
+  static const Color brandGradientStart = Color(0xFF0F766E);
+
+  /// Final color in the signature brand gradient.
+  static const Color brandGradientEnd = Color(0xFF1E40AF);
 
   // ═══════════════════════════════════════════════════════════════════════
   // GLASSMORPHISM — For floating elements

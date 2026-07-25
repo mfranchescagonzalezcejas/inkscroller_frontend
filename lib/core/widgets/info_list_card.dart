@@ -12,9 +12,11 @@ class SettingsSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(
           AppLayout.settingsSectionCardRadius,
         ),
@@ -50,6 +52,8 @@ class InfoListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return ConstrainedBox(
       constraints: const BoxConstraints(
         minHeight: AppLayout.infoListRowMinHeight,
@@ -62,14 +66,14 @@ class InfoListRow extends StatelessWidget {
               height: AppLayout.infoListIconSize,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.cardHigh,
+                  color: colorScheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(
                     AppLayout.infoListIconRadius,
                   ),
                 ),
                 child: Icon(
                   icon,
-                  color: AppColors.primary,
+                  color: colorScheme.primary,
                   size: AppLayout.infoListIconGlyphSize,
                 ),
               ),
@@ -87,7 +91,7 @@ class InfoListRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLgStyle.copyWith(
                     fontSize: 13,
-                    color: AppColors.onSurface,
+                    color: colorScheme.onSurface,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -98,7 +102,7 @@ class InfoListRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelStyle.copyWith(
                     fontSize: 12,
-                    color: AppColors.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

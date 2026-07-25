@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inkscroller_flutter/core/design/design_tokens.dart'
-    show AppColors, AppTypography;
+    show AppTypography;
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 
 /// Shows a dialog with a numeric input to jump to a specific chapter number.
@@ -12,9 +12,8 @@ Future<int?> showProgressJumpDialog(
 }) {
   return showDialog<int>(
     context: context,
-    builder: (context) => _ProgressJumpDialogBody(
-      totalChaptersCount: totalChaptersCount,
-    ),
+    builder: (context) =>
+        _ProgressJumpDialogBody(totalChaptersCount: totalChaptersCount),
   );
 }
 
@@ -54,30 +53,31 @@ class _ProgressJumpDialogBodyState extends State<_ProgressJumpDialogBody> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Text(
         context.l10n.jumpToChapter,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: AppColors.onSurface,
+          color: colorScheme.onSurface,
         ),
       ),
       content: TextField(
         controller: _controller,
         keyboardType: TextInputType.number,
         autofocus: true,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: 16,
-          color: AppColors.onSurface,
+          color: colorScheme.onSurface,
         ),
         decoration: InputDecoration(
           hintText: context.l10n.jumpToChapterHint,
           errorText: _error,
           filled: true,
-          fillColor: AppColors.card,
+          fillColor: colorScheme.surfaceContainer,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
@@ -90,9 +90,9 @@ class _ProgressJumpDialogBodyState extends State<_ProgressJumpDialogBody> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             context.l10n.dialogCancel,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ),

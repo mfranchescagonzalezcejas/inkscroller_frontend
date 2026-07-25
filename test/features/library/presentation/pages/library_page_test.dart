@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../../support/l10n_test_helpers.dart';
 import 'package:inkscroller_flutter/core/error/failures.dart';
 import 'package:inkscroller_flutter/core/network/connectivity_status_provider.dart';
+import 'package:inkscroller_flutter/core/theme/app_theme.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
@@ -52,7 +53,8 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
-class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+class _MockSendEmailVerification extends Mock
+    implements SendEmailVerification {}
 
 class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
 
@@ -135,6 +137,7 @@ void main() {
     bool isOnline = true,
     Map<String, UserLibraryEntry> libraryEntries =
         const <String, UserLibraryEntry>{},
+    ThemeData? theme,
   }) {
     return tester.pumpWidget(
       ProviderScope(
@@ -153,7 +156,11 @@ void main() {
             (ref) => _makeStubUserLibraryNotifier(libraryEntries),
           ),
         ],
-        child: wrapWithL10n(const LibraryPage(), locale: const Locale('es')),
+        child: wrapWithL10n(
+          const LibraryPage(),
+          locale: const Locale('es'),
+          theme: theme,
+        ),
       ),
     );
   }
@@ -161,6 +168,27 @@ void main() {
   setUp(() {
     getMangaList = _MockGetMangaList();
     searchManga = _MockSearchManga();
+  });
+
+  testWidgets('uses the scaffold background in light and dark themes', (
+    tester,
+  ) async {
+    for (final ThemeData theme in <ThemeData>[
+      AppTheme.light(),
+      AppTheme.dark(),
+    ]) {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await pumpLibraryPage(
+        tester,
+        getMangaList: getMangaList,
+        searchManga: searchManga,
+        theme: theme,
+      );
+
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+
+      expect(scaffold.backgroundColor, theme.scaffoldBackgroundColor);
+    }
   });
 
   testWidgets('shows empty local library state while initial load is pending', (
