@@ -42,6 +42,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
         .maybeWhen(data: (isOnline) => !isOnline, orElse: () => false);
@@ -65,7 +66,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.voidLowest,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -73,7 +74,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           if (isSyncing)
             LinearProgressIndicator(
               backgroundColor: Colors.transparent,
-              color: AppColors.primary.withValues(alpha: 0.5),
+              color: colorScheme.primary.withValues(alpha: 0.5),
               minHeight: 2,
             ),
           _LibraryHeader(mangaCount: libraryEntries.length),
@@ -102,7 +103,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 final authState = ref.read(authProvider);
                 final user = authState.user;
                 if (user != null && user.isEmailVerified) {
-                  await ref.read(userLibraryProvider.notifier).hydrate(user.uid);
+                  await ref
+                      .read(userLibraryProvider.notifier)
+                      .hydrate(user.uid);
                 }
               },
             ),
@@ -133,6 +136,7 @@ class _LibraryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(left: 20, top: 32, right: 20, bottom: 12),
       child: Column(
@@ -140,21 +144,21 @@ class _LibraryHeader extends StatelessWidget {
         children: <Widget>[
           Text(
             context.l10n.libraryTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: AppColors.onSurface,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             context.l10n.libraryCollectionsCount(mangaCount),
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -178,32 +182,33 @@ class _LibrarySearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surfaceHighest,
+          color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: <Widget>[
-            const Icon(Icons.search, color: AppColors.outline, size: 20),
+            Icon(Icons.search, color: colorScheme.outline, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: controller,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: 14,
-                  color: AppColors.onSurface,
+                  color: colorScheme.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: context.l10n.searchMangaHint,
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 14,
-                    color: AppColors.outline,
+                    color: colorScheme.outline,
                   ),
                   border: InputBorder.none,
                   isDense: true,
@@ -216,11 +221,7 @@ class _LibrarySearchBar extends StatelessWidget {
             if (query.trim().isNotEmpty)
               GestureDetector(
                 onTap: onClear,
-                child: const Icon(
-                  Icons.clear,
-                  color: AppColors.outline,
-                  size: 18,
-                ),
+                child: Icon(Icons.clear, color: colorScheme.outline, size: 18),
               ),
           ],
         ),
@@ -315,10 +316,11 @@ class _LibraryBodyState extends State<_LibraryBody> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (widget.allEntries.isEmpty) {
       return RefreshIndicator(
-        color: AppColors.primary,
-        backgroundColor: AppColors.card,
+        color: colorScheme.primary,
+        backgroundColor: colorScheme.surfaceContainer,
         onRefresh: widget.onRefresh,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -338,8 +340,8 @@ class _LibraryBodyState extends State<_LibraryBody> {
           : context.l10n.libraryEmptyTab;
 
       return RefreshIndicator(
-        color: AppColors.primary,
-        backgroundColor: AppColors.card,
+        color: colorScheme.primary,
+        backgroundColor: colorScheme.surfaceContainer,
         onRefresh: widget.onRefresh,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -363,60 +365,59 @@ class _LibraryBodyState extends State<_LibraryBody> {
         final double bottomSafePadding =
             LibraryUiConstants.cardGridBottomPadding + bottomInset;
 
-        final int displayCount =
-            _displayLimit.clamp(0, widget.filteredEntries.length);
+        final int displayCount = _displayLimit.clamp(
+          0,
+          widget.filteredEntries.length,
+        );
         final bool hasMore = displayCount < widget.filteredEntries.length;
 
         return RefreshIndicator(
-          color: AppColors.primary,
-          backgroundColor: AppColors.card,
+          color: colorScheme.primary,
+          backgroundColor: colorScheme.surfaceContainer,
           onRefresh: widget.onRefresh,
           child: CustomScrollView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                LibraryUiConstants.horizontalPadding,
-                0,
-                LibraryUiConstants.horizontalPadding,
-                0,
-              ),
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  LibraryUiConstants.horizontalPadding,
+                  0,
+                  LibraryUiConstants.horizontalPadding,
+                  0,
+                ),
                 sliver: SliverMasonryGrid(
                   gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: gridConfig.crossAxisCount,
+                    crossAxisCount: gridConfig.crossAxisCount,
                   ),
-                mainAxisSpacing: LibraryUiConstants.gridMainSpacing,
-                crossAxisSpacing: LibraryUiConstants.gridCrossSpacing,
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+                  mainAxisSpacing: LibraryUiConstants.gridMainSpacing,
+                  crossAxisSpacing: LibraryUiConstants.gridCrossSpacing,
+                  delegate: SliverChildBuilderDelegate((context, index) {
                     final UserLibraryEntry entry =
                         widget.filteredEntries[index];
                     return _LibraryEntryCard(entry: entry);
-                  },
-                  childCount: displayCount,
+                  }, childCount: displayCount),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: hasMore
-                    ? LibraryUiConstants.cardGridBottomPadding
-                    : bottomSafePadding,
-                child: hasMore
-                    ? const Center(
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : null,
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: hasMore
+                      ? LibraryUiConstants.cardGridBottomPadding
+                      : bottomSafePadding,
+                  child: hasMore
+                      ? const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : null,
+                ),
               ),
-            ),
-          ],
-        ),
-      );
+            ],
+          ),
+        );
       },
     );
   }
@@ -447,13 +448,14 @@ class _LibraryEmptyMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.onSurfaceVariant),
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
       ),
     );
@@ -467,6 +469,7 @@ class _LibraryEntryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final progress = ref.watch(
       readingProgressProvider.select((value) => value[entry.manga.id]),
     );
@@ -484,16 +487,16 @@ class _LibraryEntryCard extends ConsumerWidget {
           top: -3,
           left: -3,
           child: PopupMenuButton<_LibraryEntryAction>(
-            icon: const CircleAvatar(
+            icon: CircleAvatar(
               radius: 14,
-              backgroundColor: AppColors.cardHigh,
+              backgroundColor: colorScheme.surfaceContainerHigh,
               child: Icon(
                 Icons.more_horiz,
                 size: 16,
-                color: AppColors.onSurface,
+                color: colorScheme.onSurface,
               ),
             ),
-            color: AppColors.stage,
+            color: colorScheme.surfaceContainer,
             onSelected: (action) async {
               switch (action) {
                 case _LibraryEntryAction.reading:

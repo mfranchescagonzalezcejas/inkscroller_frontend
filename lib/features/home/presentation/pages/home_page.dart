@@ -24,33 +24,30 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Listen for precache opportunities
     ref.listen<HomeState>(homeProvider, (_, next) {
       if (next.featured.isNotEmpty) _precacheHome(context, next);
     });
     ref.listen<AsyncValue<List<HomeChapter>>>(
       homeLatestChaptersProvider,
-      (_, next) => next.whenData(
-        (chapters) => _precacheChapters(context, chapters),
-      ),
+      (_, next) =>
+          next.whenData((chapters) => _precacheChapters(context, chapters)),
     );
 
     // Loading state for the progress bar
     final homeState = ref.watch(homeProvider);
     final isHomeLoading = homeState.featured.isEmpty;
     final dataState = ref.watch(homeDataProvider);
-    final isDataLoading = dataState.isLoading &&
-        dataState.mangas.isEmpty;
+    final isDataLoading = dataState.isLoading && dataState.mangas.isEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.voidLowest,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: RefreshIndicator(
-        color: AppColors.primary,
-        backgroundColor: AppColors.card,
+        color: colorScheme.primary,
+        backgroundColor: colorScheme.surfaceContainer,
         onRefresh: () => _refreshHome(ref),
-        child: _HomeBody(
-          isLoading: isHomeLoading || isDataLoading,
-        ),
+        child: _HomeBody(isLoading: isHomeLoading || isDataLoading),
       ),
     );
   }
@@ -74,9 +71,7 @@ class HomePage extends ConsumerWidget {
       final url = manga.coverUrl;
       if (url != null && url.isNotEmpty) {
         try {
-          unawaited(
-            precacheImage(CachedNetworkImageProvider(url), context),
-          );
+          unawaited(precacheImage(CachedNetworkImageProvider(url), context));
         } on Object catch (_) {}
       }
     }
@@ -109,6 +104,7 @@ class _HomeBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Cada sección maneja su propio estado de carga — no hay full-page shimmer.
     // La página se renderiza de inmediato con esqueletos por sección.
     return ListView(
@@ -122,9 +118,9 @@ class _HomeBody extends ConsumerWidget {
 
         // Loading bar — debajo del hero, visible sin hacer scroll
         if (isLoading)
-          const LinearProgressIndicator(
+          LinearProgressIndicator(
             backgroundColor: Colors.transparent,
-            color: AppColors.primary,
+            color: colorScheme.primary,
             minHeight: 2,
           ),
 

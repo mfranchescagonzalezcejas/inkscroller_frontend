@@ -77,12 +77,12 @@ flutter_launcher_icons:
       adaptive_icon_background: "assets/icons/prod/background.png"
 
 flutter_native_splash:
-  color: "#1C3C41" # fondo normal
-  icon_background_color: "#1C3C41" # fondo de icono
+  color: "#0D1516" # coincide con AppColors.stage del splash animado
+  icon_background_color: "#0D1516"
 
   android: true
   ios: true
 
   android_12:
-    color: "#1C3C41"
-    icon_background_color: "#1C3C41"
+    color: "#0D1516"
+    icon_background_color: "#0D1516"

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
+import 'package:inkscroller_flutter/core/theme/app_theme.dart';
 import 'package:inkscroller_flutter/features/auth/domain/entities/app_user.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/get_auth_state.dart';
 import 'package:inkscroller_flutter/features/auth/domain/usecases/reload_user.dart';
@@ -42,7 +43,8 @@ class _MockGetUserProfile extends Mock implements GetUserProfile {}
 
 class _MockUpdateUserProfile extends Mock implements UpdateUserProfile {}
 
-class _MockSendEmailVerification extends Mock implements SendEmailVerification {}
+class _MockSendEmailVerification extends Mock
+    implements SendEmailVerification {}
 
 class _MockSendPasswordReset extends Mock implements SendPasswordReset {}
 
@@ -58,9 +60,9 @@ AuthNotifier _makeLoggedInAuthNotifier() {
   );
 
   final getUserProfile = _MockGetUserProfile();
-  when(() => getUserProfile()).thenAnswer(
-    (_) async => const Left(ServerFailure(message: 'test')),
-  );
+  when(
+    () => getUserProfile(),
+  ).thenAnswer((_) async => const Left(ServerFailure(message: 'test')));
 
   return AuthNotifier(
     signIn: _MockSignIn(),
@@ -79,6 +81,7 @@ AuthNotifier _makeLoggedInAuthNotifier() {
 Widget _buildTestApp({
   required SettingsRepository repo,
   required AccountCleanupRepository cleanup,
+  ThemeData? theme,
 }) {
   final router = GoRouter(
     initialLocation: AppRoutes.settings,
@@ -99,13 +102,11 @@ Widget _buildTestApp({
       authProvider.overrideWith((_) => _makeLoggedInAuthNotifier()),
       settingsRepositoryProvider.overrideWithValue(repo),
       settingsProvider.overrideWith((ref) {
-        return SettingsNotifier(
-          repository: repo,
-          cleanup: cleanup,
-        );
+        return SettingsNotifier(repository: repo, cleanup: cleanup);
       }),
     ],
     child: MaterialApp.router(
+      theme: theme,
       locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -127,9 +128,8 @@ void main() {
         () => repo.deleteAccount(),
       ).thenAnswer((_) async => const Right(null));
       when(
-        () => mockCleanup.cleanUpAfterDeletion(
-          password: any(named: 'password'),
-        ),
+        () =>
+            mockCleanup.cleanUpAfterDeletion(password: any(named: 'password')),
       ).thenAnswer((_) async => null);
       when(
         () => mockCleanup.hasDeletionCleanupPending(),
@@ -145,16 +145,11 @@ void main() {
     testWidgets('navigates to /login after successful account deletion', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _buildTestApp(repo: repo, cleanup: mockCleanup),
-      );
+      await tester.pumpWidget(_buildTestApp(repo: repo, cleanup: mockCleanup));
       await tester.pumpAndSettle();
 
       // AccountSection is visible because user is logged in.
-      expect(
-        find.byKey(const Key('deleteAccountButton')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('deleteAccountButton')), findsOneWidget);
 
       // Open the delete dialog.
       await tester.tap(find.byKey(const Key('deleteAccountButton')));
@@ -175,9 +170,7 @@ void main() {
     });
 
     testWidgets('does not navigate when dialog is cancelled', (tester) async {
-      await tester.pumpWidget(
-        _buildTestApp(repo: repo, cleanup: mockCleanup),
-      );
+      await tester.pumpWidget(_buildTestApp(repo: repo, cleanup: mockCleanup));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('deleteAccountButton')));
@@ -189,6 +182,26 @@ void main() {
 
       // Should still be on settings page, not on home.
       expect(find.text('Home Page'), findsNothing);
+    });
+
+    testWidgets('uses the active theme divider color', (tester) async {
+      for (final ThemeData theme in <ThemeData>[
+        AppTheme.light(),
+        AppTheme.dark(),
+      ]) {
+        await tester.pumpWidget(
+          _buildTestApp(repo: repo, cleanup: mockCleanup, theme: theme),
+        );
+        await tester.pumpAndSettle();
+
+        final dividers = tester.widgetList<Divider>(find.byType(Divider));
+
+        expect(dividers, isNotEmpty);
+        expect(
+          dividers.map((divider) => divider.color),
+          everyElement(theme.colorScheme.outlineVariant),
+        );
+      }
     });
   });
 }

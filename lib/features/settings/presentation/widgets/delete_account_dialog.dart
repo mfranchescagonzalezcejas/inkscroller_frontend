@@ -57,6 +57,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
     final state = ref.watch(settingsProvider);
     final bool isPending = state.cleanupRecoveryPending;
     final bool needsPassword = state.requiresRecentLogin;
@@ -74,15 +75,15 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
     return PopScope(
       canPop: !busy,
       child: AlertDialog(
-        backgroundColor: AppColors.stage,
+        backgroundColor: colors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           l10n.deleteAccountTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.onSurface,
+            color: colors.onSurface,
           ),
         ),
         content: Column(
@@ -103,45 +104,45 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
             ] else ...[
               Text(
                 l10n.deleteAccountWarningBody,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 l10n.deleteAccountPrompt,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 key: const Key('deleteConfirmField'),
                 controller: _controller,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: 'DELETE',
                   hintStyle: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
-                    color: AppColors.outline.withValues(alpha: 0.5),
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    borderSide: BorderSide(color: AppColors.outline),
+                  border: OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: colors.outline),
                   ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    borderSide: BorderSide(color: AppColors.outline),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: colors.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -159,11 +160,11 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
               const SizedBox(height: 16),
               Text(
                 l10n.deleteAccountPasswordLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -172,25 +173,25 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 controller: _passwordController,
                 obscureText: true,
                 onChanged: (_) => setState(() {}),
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: l10n.deleteAccountPasswordHint,
                   hintStyle: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
-                    color: AppColors.outline.withValues(alpha: 0.5),
+                    color: colors.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    borderSide: BorderSide(color: AppColors.outline),
+                  border: OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: colors.outline),
                   ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    borderSide: BorderSide(color: AppColors.outline),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: colors.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -211,9 +212,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
             onPressed: busy ? null : () => Navigator.of(context).pop(false),
             child: Text(
               l10n.deleteAccountCancelAction,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
-                color: AppColors.onSurfaceVariant,
+                color: colors.onSurfaceVariant,
               ),
             ),
           ),
@@ -246,21 +247,21 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 : null,
             style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
             child: _isDeleting
-                ? const SizedBox(
+                ? SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.voidLowest,
+                      color: colors.onError,
                     ),
                   )
                 : Text(
                     isPending
                         ? l10n.deleteAccountFinalizeAction
                         : l10n.deleteAccountDeleteAction,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
-                      color: AppColors.voidLowest,
+                      color: colors.onError,
                     ),
                   ),
           ),

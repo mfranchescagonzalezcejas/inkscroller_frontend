@@ -91,6 +91,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final state = ref.watch(exploreProvider);
     final bool isOffline = ref
         .watch(connectivityStatusProvider)
@@ -105,7 +106,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.voidLowest,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -113,7 +114,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
           if (state.isLoading && state.mangas.isNotEmpty)
             LinearProgressIndicator(
               backgroundColor: Colors.transparent,
-              color: AppColors.primary.withValues(alpha: 0.5),
+              color: colorScheme.primary.withValues(alpha: 0.5),
               minHeight: 2,
             ),
           const _ExploreHeader(),
@@ -144,8 +145,8 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             ),
           Expanded(
             child: RefreshIndicator(
-              color: AppColors.primary,
-              backgroundColor: AppColors.card,
+              color: colorScheme.primary,
+              backgroundColor: colorScheme.surfaceContainer,
               onRefresh: () => ref.read(exploreProvider.notifier).refresh(),
               child: _ExploreGrid(state: state, controller: _scrollController),
             ),
@@ -165,28 +166,34 @@ class _ExploreHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, AppSpacing.xxl, 20, AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(
+        20,
+        AppSpacing.twoXl,
+        20,
+        AppSpacing.md,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.l10n.exploreTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: AppColors.onSurface,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.exploreSubtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: AppTypography.body,
               fontWeight: FontWeight.w400,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -212,6 +219,7 @@ class _ExploreSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, AppSpacing.md),
       child: Container(
@@ -220,27 +228,27 @@ class _ExploreSearchBar extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surfaceHighest,
+          color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppSpacing.md),
         ),
         child: Row(
           children: [
-            const Icon(Icons.search, color: AppColors.outline, size: 20),
+            Icon(Icons.search, color: colorScheme.outline, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: controller,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: AppTypography.fontFamily,
                   fontSize: AppTypography.body,
-                  color: AppColors.onSurface,
+                  color: colorScheme.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: context.l10n.searchMangaHint,
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: AppTypography.body,
-                    color: AppColors.outline,
+                    color: colorScheme.outline,
                   ),
                   border: InputBorder.none,
                   isDense: true,
@@ -254,11 +262,7 @@ class _ExploreSearchBar extends StatelessWidget {
             if (query.trim().isNotEmpty)
               GestureDetector(
                 onTap: onClear,
-                child: const Icon(
-                  Icons.clear,
-                  color: AppColors.outline,
-                  size: 18,
-                ),
+                child: Icon(Icons.clear, color: colorScheme.outline, size: 18),
               ),
           ],
         ),
@@ -304,6 +308,7 @@ class _ExploreGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (state.isLoading && state.mangas.isEmpty) {
       return const LibraryShimmer();
     }
@@ -330,7 +335,7 @@ class _ExploreGrid extends StatelessWidget {
                     ? context.l10n.noMangasAvailable
                     : context.l10n.noSearchResults(state.query),
                 style: AppTypography.bodyStyle.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),

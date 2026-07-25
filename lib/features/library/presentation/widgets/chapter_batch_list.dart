@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inkscroller_flutter/core/design/design_tokens.dart'
-    show AppColors, AppTypography;
+    show AppTypography;
 import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 
 import '../../domain/chapter_progress_utils.dart';
@@ -43,10 +43,9 @@ class ChapterBatchList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final progress = ref.watch(
-      readingProgressProvider.select(
-        (value) => value[mangaId],
-      ),
+      readingProgressProvider.select((value) => value[mangaId]),
     );
 
     final displayBatches = descending ? batches.reversed.toList() : batches;
@@ -61,12 +60,14 @@ class ChapterBatchList extends ConsumerWidget {
     final Set<String> effectiveHidden = hiddenChapterIds ?? <String>{};
     final visibleBatches = hasFilter
         ? displayBatches
-            .map((b) => b.copyWithFilteredItems(
+              .map(
+                (b) => b.copyWithFilteredItems(
                   effectiveHidden,
                   manualThreshold: manualThreshold,
-                ))
-            .where((b) => b.items.isNotEmpty)
-            .toList()
+                ),
+              )
+              .where((b) => b.items.isNotEmpty)
+              .toList()
         : displayBatches;
 
     if (visibleBatches.isEmpty) {
@@ -75,10 +76,10 @@ class ChapterBatchList extends ConsumerWidget {
           padding: const EdgeInsets.all(24),
           child: Text(
             context.l10n.chaptersFilteredOut,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 14,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -131,6 +132,7 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final batch = widget.batch;
     final manualCount = widget.progress?.manuallyMarkedCount ?? 0;
     final readCount = batch.items.where((item) {
@@ -149,24 +151,24 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
           title: Text(
             '${context.l10n.chaptersTitle} '
             '${formatChapterNumber(batch.start.toDouble())}–${formatChapterNumber(batch.end.toDouble())}',
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.onSurface,
+              color: colorScheme.onSurface,
             ),
           ),
           subtitle: Text(
             '$readCount / ${batch.items.length}',
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: AppTypography.fontFamily,
               fontSize: 11,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           trailing: Icon(
             _expanded ? Icons.expand_less : Icons.expand_more,
-            color: AppColors.onSurfaceVariant,
+            color: colorScheme.onSurfaceVariant,
           ),
           onTap: () => setState(() => _expanded = !_expanded),
         ),
@@ -174,31 +176,32 @@ class _BatchExpansionTileState extends ConsumerState<_BatchExpansionTile> {
           ...batch.items.map((item) {
             return switch (item) {
               ReadableChapterBatchItem() => ChapterTile(
-                  chapter: item.chapter,
-                  isRead:
-                      widget.progress?.isChapterRead(item.chapter.id) ?? false,
-                  onTap: () => widget.onChapterTap(item.chapter),
-                  onToggleRead: () {
-                    final chapters = widget.allChapters ??
-                        batch.items
-                            .whereType<ReadableChapterBatchItem>()
-                            .map((i) => i.chapter)
-                            .toList();
-                    ref
-                        .read(readingProgressProvider.notifier)
-                        .toggleChapter(
-                          mangaId: widget.mangaId,
-                          chapterId: item.chapter.id,
-                          totalChaptersCount: batch.end,
-                          chapters: chapters,
-                        );
-                  },
-                ),
+                chapter: item.chapter,
+                isRead:
+                    widget.progress?.isChapterRead(item.chapter.id) ?? false,
+                onTap: () => widget.onChapterTap(item.chapter),
+                onToggleRead: () {
+                  final chapters =
+                      widget.allChapters ??
+                      batch.items
+                          .whereType<ReadableChapterBatchItem>()
+                          .map((i) => i.chapter)
+                          .toList();
+                  ref
+                      .read(readingProgressProvider.notifier)
+                      .toggleChapter(
+                        mangaId: widget.mangaId,
+                        chapterId: item.chapter.id,
+                        totalChaptersCount: batch.end,
+                        chapters: chapters,
+                      );
+                },
+              ),
               PlaceholderChapterBatchItem() => _PlaceholderTile(
-                  chapterNumber: item.chapterNumber,
-                  mangaId: widget.mangaId,
-                  allChapters: widget.allChapters,
-                ),
+                chapterNumber: item.chapterNumber,
+                mangaId: widget.mangaId,
+                allChapters: widget.allChapters,
+              ),
             };
           }),
       ],
@@ -222,10 +225,9 @@ class _PlaceholderTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final progress = ref.watch(
-      readingProgressProvider.select(
-        (value) => value[mangaId],
-      ),
+      readingProgressProvider.select((value) => value[mangaId]),
     );
     final int manualCount = progress?.manuallyMarkedCount ?? 0;
     final bool isChecked = manualCount >= chapterNumber;
@@ -235,23 +237,23 @@ class _PlaceholderTile extends ConsumerWidget {
         icon: Icon(
           isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
           size: 22,
-          color: isChecked
-              ? AppColors.primary
-              : AppColors.onSurfaceVariant,
+          color: isChecked ? colorScheme.primary : colorScheme.onSurfaceVariant,
         ),
         onPressed: () {
           if (isChecked) {
             ref
                 .read(readingProgressProvider.notifier)
                 .setManuallyMarkedCountTo(
-                  mangaId, chapterNumber - 1,
+                  mangaId,
+                  chapterNumber - 1,
                   chapters: allChapters,
                 );
           } else {
             ref
                 .read(readingProgressProvider.notifier)
                 .setManuallyMarkedCountTo(
-                  mangaId, chapterNumber,
+                  mangaId,
+                  chapterNumber,
                   chapters: allChapters,
                 );
           }
@@ -260,19 +262,21 @@ class _PlaceholderTile extends ConsumerWidget {
         visualDensity: VisualDensity.compact,
       ),
       title: Text(
-        context.l10n.chapterLabel(formatChapterNumber(chapterNumber.toDouble())),
-        style: const TextStyle(
+        context.l10n.chapterLabel(
+          formatChapterNumber(chapterNumber.toDouble()),
+        ),
+        style: TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: 14,
-          color: AppColors.onSurfaceVariant,
+          color: colorScheme.onSurfaceVariant,
         ),
       ),
-      subtitle: const Text(
+      subtitle: Text(
         '—', // Placeholder indicator
         style: TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: 11,
-          color: AppColors.outline,
+          color: colorScheme.outline,
         ),
       ),
       enabled: false,

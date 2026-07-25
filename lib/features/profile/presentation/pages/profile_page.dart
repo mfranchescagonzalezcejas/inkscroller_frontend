@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart'
-    show AppColors, AppTypography;
-import '../../../../core/design/app_spacing.dart';
+    show AppTypography;
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/l10n/app_locale_provider.dart';
@@ -80,8 +80,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final isGuest = authState.user == null;
     final shouldLoadProfile =
         authState.user != null && authState.needsEmailVerification == false;
-    final shouldLoadPreferences = !preferencesState.isLoading &&
-        preferencesState.preferences == null;
+    final shouldLoadPreferences =
+        !preferencesState.isLoading && preferencesState.preferences == null;
 
     if (shouldLoadProfile && !_profileRequested) {
       _profileRequested = true;
@@ -117,14 +117,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.stage,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       body: SafeArea(
         child: isGuest
-            ? _buildGuestView(
-                context,
-                preferencesState,
-              )
+            ? _buildGuestView(context, preferencesState)
             : _buildAuthenticatedView(
                 context,
                 authState,
@@ -146,7 +143,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final effectiveReaderMode =
         _selectedReaderMode ?? prefs?.defaultReaderMode ?? ReaderMode.vertical;
     final effectiveReadingLanguage =
-        _selectedReadingLanguage ?? prefs?.defaultLanguage ?? AppConstants.defaultLanguage;
+        _selectedReadingLanguage ??
+        prefs?.defaultLanguage ??
+        AppConstants.defaultLanguage;
     final effectiveAppLanguage =
         appLocale?.languageCode ?? Localizations.localeOf(context).languageCode;
 
@@ -156,16 +155,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         // ── Guest header ──────────────────────────────────────────────────
         Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.all(24),
           child: Column(
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.person_outline,
                 size: 48,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
               FittedBox(
@@ -173,7 +172,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Text(
                   context.l10n.profileGuestTitle,
                   style: AppTypography.bodyLgStyle.copyWith(
-                    color: AppColors.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -182,7 +181,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Text(
                 context.l10n.profileGuestSubtitle,
                 style: AppTypography.bodyStyle.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -191,8 +190,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 width: double.infinity,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.voidLowest,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -214,7 +213,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.menu_book_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileReadingModeTitle,
               value: effectiveReaderMode == ReaderMode.vertical
                   ? context.l10n.profileReadingModeVertical
@@ -229,7 +228,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.translate_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredAppLanguageTitle,
               value:
                   _languageLabels[effectiveAppLanguage] ??
@@ -240,7 +239,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.language_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredReadingLanguageTitle,
               value:
                   _languageLabels[effectiveReadingLanguage] ??
@@ -264,7 +263,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.storage_outlined,
-              iconColor: AppColors.onSurfaceVariant,
+              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
               title: context.l10n.profileCacheSettingsTitle,
               value: context.l10n.profileCacheSettingsSubtitle,
               valueIsSubtitle: true,
@@ -272,7 +271,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.info_outline,
-              iconColor: AppColors.onSurfaceVariant,
+              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
               title: context.l10n.profileAppInfoTitle,
               value: context.l10n.profileAppInfoSubtitle,
               valueIsSubtitle: true,
@@ -280,7 +279,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ],
         ),
-
       ],
     );
   }
@@ -323,7 +321,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         if (authState.needsEmailVerification) ...[
           const SizedBox(height: 20),
           _EmailVerificationSection(
-            onResend: () => ref.read(authProvider.notifier).sendVerificationEmail(),
+            onResend: () =>
+                ref.read(authProvider.notifier).sendVerificationEmail(),
             isLoading: authState.isLoading,
           ),
         ],
@@ -336,7 +335,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.person_outline,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.authChangeUsernameOption,
               value: profile?.username ?? '',
               onTap: () {
@@ -360,7 +359,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.menu_book_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileReadingModeTitle,
               value: effectiveReaderMode == ReaderMode.vertical
                   ? context.l10n.profileReadingModeVertical
@@ -375,7 +374,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.translate_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredAppLanguageTitle,
               value:
                   _languageLabels[effectiveAppLanguage] ??
@@ -386,7 +385,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.language_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredReadingLanguageTitle,
               value:
                   _languageLabels[effectiveReadingLanguage] ??
@@ -401,7 +400,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.visibility_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileContentRatingTitle,
               value: _contentRatingLabel(
                 context,
@@ -419,7 +418,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.category_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileDemographicTitle,
               value: _demographicCountLabel(
                 context,
@@ -431,8 +430,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onTap: preferencesState.isLoading
                   ? null
                   : () => _showDemographicDialog(
-                        context, demographicResolution, prefs,
-                      ),
+                      context,
+                      demographicResolution,
+                      prefs,
+                    ),
             ),
           ],
         ),
@@ -445,7 +446,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.storage_outlined,
-              iconColor: AppColors.onSurfaceVariant,
+              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
               title: context.l10n.profileCacheSettingsTitle,
               value: context.l10n.profileCacheSettingsSubtitle,
               valueIsSubtitle: true,
@@ -453,7 +454,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.info_outline,
-              iconColor: AppColors.onSurfaceVariant,
+              iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
               title: context.l10n.profileAppInfoTitle,
               value: context.l10n.profileAppInfoSubtitle,
               valueIsSubtitle: true,
@@ -565,8 +566,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         options: resolution.allowedOptions,
         current: current.toSet(),
         labelFor: (demo) => _demographicLabel(context, demo),
-        emptySelectionMessage:
-            context.l10n.profileDemographicSelectionRequired,
+        emptySelectionMessage: context.l10n.profileDemographicSelectionRequired,
       ),
     );
     if (selected == null || !context.mounted) return;
@@ -625,41 +625,43 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
+        backgroundColor: Theme.of(ctx).colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
         ),
         title: Text(
           context.l10n.authChangeUsernameTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: AppColors.onSurface,
+            color: Theme.of(ctx).colorScheme.onSurface,
           ),
         ),
         content: Form(
           key: formKey,
           child: TextFormField(
             controller: controller,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 14,
-              color: AppColors.onSurface,
+              color: Theme.of(ctx).colorScheme.onSurface,
             ),
             decoration: InputDecoration(
               labelText: context.l10n.authUsernameLabel,
-              labelStyle: const TextStyle(
+              labelStyle: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
-                borderSide: const BorderSide(color: AppColors.outlineVariant),
+                borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
+                borderSide: BorderSide(
+                  color: Theme.of(ctx).colorScheme.outlineVariant,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
-                borderSide: const BorderSide(color: AppColors.primary),
+                borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
               ),
             ),
             validator: (value) {
@@ -682,9 +684,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
               context.l10n.dialogCancel,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -694,7 +696,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Navigator.of(ctx).pop(true);
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: Text(context.l10n.authChangeUsernameSave),
           ),
         ],
@@ -781,10 +783,13 @@ class _AvatarSection extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: AppColors.brandGradient,
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer,
+                  Theme.of(context).colorScheme.secondaryContainer,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -792,14 +797,14 @@ class _AvatarSection extends StatelessWidget {
             padding: const EdgeInsets.all(2),
             child: CircleAvatar(
               radius: 40,
-              backgroundColor: AppColors.card,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               child: Text(
                 initials,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -808,11 +813,11 @@ class _AvatarSection extends StatelessWidget {
           if (preferredName != null) ...<Widget>[
             Text(
               preferredName,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: AppColors.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -820,10 +825,10 @@ class _AvatarSection extends StatelessWidget {
           if (email.isNotEmpty)
             Text(
               email,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 13,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
         ],
@@ -871,11 +876,11 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Plus Jakarta Sans',
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: AppColors.outline,
+          color: Theme.of(context).colorScheme.outline,
           letterSpacing: 0.5,
         ),
       ),
@@ -894,7 +899,7 @@ class _PrefCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -935,7 +940,7 @@ class _PrefRow extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.cardHighest,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, size: 20, color: iconColor),
@@ -947,10 +952,10 @@ class _PrefRow extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 14,
-                      color: AppColors.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -960,14 +965,18 @@ class _PrefRow extends StatelessWidget {
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 12,
                       color: valueIsSubtitle
-                          ? AppColors.onSurfaceVariant
-                          : AppColors.primary,
+                          ? Theme.of(context).colorScheme.onSurfaceVariant
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, size: 20, color: AppColors.outline),
+            Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ],
         ),
       ),
@@ -990,7 +999,7 @@ class _EmailVerificationSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1000,13 +1009,13 @@ class _EmailVerificationSection extends ConsumerWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.cardHighest,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.mark_email_unread_outlined,
               size: 20,
-              color: AppColors.accent,
+              color: Theme.of(context).colorScheme.tertiary,
             ),
           ),
           const SizedBox(width: 12),
@@ -1016,19 +1025,19 @@ class _EmailVerificationSection extends ConsumerWidget {
               children: <Widget>[
                 Text(
                   context.l10n.authVerifyInProfile,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
-                    color: AppColors.accent,
+                    color: Theme.of(context).colorScheme.tertiary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   context.l10n.authVerifyInProfileSubtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 12,
-                    color: AppColors.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -1043,11 +1052,11 @@ class _EmailVerificationSection extends ConsumerWidget {
             ),
             child: Text(
               context.l10n.authVerifyEmailResend,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
@@ -1076,7 +1085,7 @@ class _SignOutSection extends ConsumerWidget {
       children: <Widget>[
         Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
           ),
           child: TextButton(
@@ -1116,10 +1125,10 @@ class _SignOutSection extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           appVersionText,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 11,
-            color: AppColors.outline,
+            color: Theme.of(context).colorScheme.outline,
           ),
           textAlign: TextAlign.center,
         ),
@@ -1142,24 +1151,26 @@ class _ErrorBanner extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.cardHigh,
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outline.withValues(alpha: 0.4)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
+        ),
       ),
       child: Row(
         children: <Widget>[
-          const Icon(
+          Icon(
             Icons.cloud_off_outlined,
-            color: AppColors.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             size: 18,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               context.l10n.profileServerConnectionError,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -1167,7 +1178,7 @@ class _ErrorBanner extends StatelessWidget {
             onPressed: onRetry,
             child: Text(
               context.l10n.retryAction,
-              style: const TextStyle(color: AppColors.primary, fontSize: 12),
+              style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 12),
             ),
           ),
         ],
@@ -1194,7 +1205,7 @@ class _SelectionDialog<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.card,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1206,11 +1217,11 @@ class _SelectionDialog<T> extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -1223,17 +1234,17 @@ class _SelectionDialog<T> extends StatelessWidget {
                         (option) => ListTile(
                           title: Text(
                             labelFor(option),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Plus Jakarta Sans',
                               fontSize: 14,
-                              color: AppColors.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           trailing: option == current
-                              ? const Icon(
+                              ? Icon(
                                   Icons.check,
                                   size: 20,
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 )
                               : null,
                           onTap: () => Navigator.of(context).pop(option),
@@ -1281,7 +1292,7 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.card,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1293,11 +1304,11 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
               child: Text(
                 widget.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -1320,14 +1331,14 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
                           },
                           title: Text(
                             widget.labelFor(option),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Plus Jakarta Sans',
                               fontSize: 14,
-                              color: AppColors.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           controlAffinity: ListTileControlAffinity.leading,
-                          activeColor: AppColors.primary,
+                          activeColor: Theme.of(context).colorScheme.primary,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
@@ -1346,9 +1357,9 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
                       context.l10n.deleteAccountCancelAction,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Plus Jakarta Sans',
-                        color: AppColors.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -1356,7 +1367,7 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(_selected),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
                     child: const Text('OK'),
                   ),

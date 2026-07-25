@@ -53,6 +53,7 @@ class _ContinueReadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final read = item.progress.readChaptersCount;
     final total = item.progress.totalChaptersCount;
     final value = total > 0 ? (read / total).clamp(0.0, 1.0) : 0.0;
@@ -64,7 +65,7 @@ class _ContinueReadingCard extends StatelessWidget {
       child: SizedBox(
         width: 280,
         child: Material(
-          color: AppColors.card,
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(14),
           child: InkWell(
             onTap: () => context.push(
@@ -97,20 +98,20 @@ class _ContinueReadingCard extends StatelessWidget {
                           item.manga.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.onSurface,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Capítulo ${item.progress.readChaptersCount}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 12,
-                            color: AppColors.onSurfaceVariant,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const Spacer(),
@@ -120,18 +121,18 @@ class _ContinueReadingCard extends StatelessWidget {
                           child: LinearProgressIndicator(
                             value: value,
                             minHeight: 6,
-                            backgroundColor: AppColors.cardHigh,
-                            color: AppColors.primary,
+                            backgroundColor: colorScheme.surfaceContainerHigh,
+                            color: colorScheme.primary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           pct,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppTypography.fontFamily,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.onSurfaceVariant,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -154,22 +155,24 @@ class _CoverThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (coverUrl == null || coverUrl!.isEmpty) {
-      return const ColoredBox(
-        color: AppColors.cardHigh,
+      return ColoredBox(
+        color: colorScheme.surfaceContainerHigh,
         child: Center(
-          child: Icon(Icons.image, color: AppColors.outline, size: 28),
+          child: Icon(Icons.image, color: colorScheme.outline, size: 28),
         ),
       );
     }
     return CachedNetworkImage(
       imageUrl: coverUrl!,
       fit: BoxFit.cover,
-      placeholder: (_, __) => const ColoredBox(color: AppColors.cardHigh),
-      errorWidget: (_, __, ___) => const ColoredBox(
-        color: AppColors.cardHigh,
+      placeholder: (_, __) =>
+          ColoredBox(color: colorScheme.surfaceContainerHigh),
+      errorWidget: (_, __, ___) => ColoredBox(
+        color: colorScheme.surfaceContainerHigh,
         child: Center(
-          child: Icon(Icons.image, color: AppColors.outline, size: 28),
+          child: Icon(Icons.image, color: colorScheme.outline, size: 28),
         ),
       ),
       memCacheWidth: 200,

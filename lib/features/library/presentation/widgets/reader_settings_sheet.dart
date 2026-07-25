@@ -52,17 +52,19 @@ class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
   @override
   Widget build(BuildContext context) {
     final ReaderUiState uiState = ref.watch(readerUiProvider(widget.chapterId));
-    final ReaderUiNotifier uiNotifier =
-        ref.read(readerUiProvider(widget.chapterId).notifier);
+    final ReaderUiNotifier uiNotifier = ref.read(
+      readerUiProvider(widget.chapterId).notifier,
+    );
+    final colors = Theme.of(context).colorScheme;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF111416),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         border: Border(
-          top: BorderSide(color: Color(0x0DFFFFFF)),
-          left: BorderSide(color: Color(0x0DFFFFFF)),
-          right: BorderSide(color: Color(0x0DFFFFFF)),
+          top: BorderSide(color: colors.outlineVariant),
+          left: BorderSide(color: colors.outlineVariant),
+          right: BorderSide(color: colors.outlineVariant),
         ),
       ),
       child: SafeArea(
@@ -71,16 +73,16 @@ class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             // ── Handle ──────────────────────────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Center(
                 child: SizedBox(
                   width: 48,
                   height: 6,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Color(0x33889391),
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
+                      color: colors.onSurfaceVariant.withValues(alpha: 0.2),
+                      borderRadius: const BorderRadius.all(Radius.circular(3)),
                     ),
                   ),
                 ),
@@ -102,8 +104,11 @@ class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
                       // Persist immediately so the override survives page reload.
                       if (widget.mangaId != null) {
                         ref
-                            .read(perTitleOverrideProvider(widget.mangaId!)
-                                .notifier)
+                            .read(
+                              perTitleOverrideProvider(
+                                widget.mangaId!,
+                              ).notifier,
+                            )
                             .setMode(mode);
                       }
                     },
@@ -116,9 +121,9 @@ class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       _SectionLabel(context.l10n.readerSettingsBrightness),
-                      const Icon(
+                      Icon(
                         Icons.light_mode_outlined,
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                         size: 18,
                       ),
                     ],
@@ -126,15 +131,17 @@ class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
                   const SizedBox(height: 12),
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: AppColors.primary,
-                      inactiveTrackColor: AppColors.voidLowest,
-                      thumbColor: AppColors.primary,
-                      overlayColor: AppColors.primary.withValues(alpha: 0.12),
+                      activeTrackColor: colors.primary,
+                      inactiveTrackColor: colors.surfaceContainerHighest,
+                      thumbColor: colors.primary,
+                      overlayColor: colors.primary.withValues(alpha: 0.12),
                       trackHeight: 3,
-                      thumbShape:
-                          const RoundSliderThumbShape(enabledThumbRadius: 9),
-                      overlayShape:
-                          const RoundSliderOverlayShape(overlayRadius: 18),
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 9,
+                      ),
+                      overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 18,
+                      ),
                     ),
                     child: Slider(
                       value: uiState.brightness,
@@ -170,8 +177,8 @@ class _ReaderSettingsSheetState extends ConsumerState<ReaderSettingsSheet> {
                     width: double.infinity,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.cardHigh,
-                        foregroundColor: AppColors.onSurface,
+                        backgroundColor: colors.surfaceContainerHigh,
+                        foregroundColor: colors.onSurface,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -229,13 +236,14 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Text(
       text.toUpperCase(),
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: AppTypography.fontFamily,
         fontSize: 10,
         fontWeight: FontWeight.w700,
-        color: AppColors.onSurfaceVariant,
+        color: colors.onSurfaceVariant,
         letterSpacing: 2,
       ),
     );
@@ -246,17 +254,15 @@ class _DirectionSegment extends StatelessWidget {
   final ReaderMode active;
   final ValueChanged<ReaderMode> onChanged;
 
-  const _DirectionSegment({
-    required this.active,
-    required this.onChanged,
-  });
+  const _DirectionSegment({required this.active, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.voidLowest,
-        borderRadius: BorderRadius.all(Radius.circular(12)),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest,
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
@@ -290,6 +296,7 @@ class _SegmentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -298,7 +305,7 @@ class _SegmentButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.15)
+                ? colors.primary.withValues(alpha: 0.15)
                 : Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
@@ -309,7 +316,7 @@ class _SegmentButton extends StatelessWidget {
               fontFamily: AppTypography.fontFamily,
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: selected ? AppColors.primary : AppColors.onSurfaceVariant,
+                color: selected ? colors.primary : colors.onSurfaceVariant,
             ),
           ),
         ),
@@ -333,6 +340,7 @@ class _ToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onToggle,
       behavior: HitTestBehavior.opaque,
@@ -344,21 +352,21 @@ class _ToggleRow extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.onSurface,
+                    color: colors.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 11,
                     fontWeight: FontWeight.w400,
-                    color: AppColors.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -381,6 +389,7 @@ class _InkToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: 44,
@@ -388,8 +397,8 @@ class _InkToggle extends StatelessWidget {
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: value
-            ? AppColors.primary.withValues(alpha: 0.25)
-            : AppColors.voidLowest,
+            ? colors.primary.withValues(alpha: 0.25)
+            : colors.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
       child: Stack(
@@ -397,13 +406,14 @@ class _InkToggle extends StatelessWidget {
           AnimatedAlign(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-            alignment:
-                value ? Alignment.centerRight : Alignment.centerLeft,
+            alignment: value ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: value ? AppColors.primary : AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                color: value
+                    ? colors.primary
+                    : colors.onSurfaceVariant.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),
             ),

@@ -12,12 +12,14 @@ class UserLibraryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.voidLowest,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.voidLowest,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
           context.l10n.libraryTitle,
-          style: AppTypography.titleLgStyle.copyWith(color: AppColors.onSurface),
+          style: AppTypography.titleLgStyle.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         centerTitle: false,
       ),
@@ -27,16 +29,14 @@ class UserLibraryPage extends StatelessWidget {
 
   Widget _buildPlaceholder(BuildContext context) {
     // Placeholder data - replace with user's library when backend available
-    final placeholderMangas = [
-      const _PlaceholderManga(title: 'One Piece', coverColor: AppColors.card),
-      const _PlaceholderManga(
+    final colors = Theme.of(context).colorScheme;
+    final placeholderMangas = <_PlaceholderManga>[
+      _PlaceholderManga(title: 'One Piece', coverColor: colors.surface),
+      _PlaceholderManga(
         title: 'Solo Leveling',
-        coverColor: AppColors.cardHigh,
+        coverColor: colors.surfaceContainerHigh,
       ),
-      const _PlaceholderManga(
-        title: 'Tokyo Revengers',
-        coverColor: AppColors.card,
-      ),
+      _PlaceholderManga(title: 'Tokyo Revengers', coverColor: colors.surface),
     ];
 
     return GridView.builder(
@@ -51,7 +51,7 @@ class UserLibraryPage extends StatelessWidget {
       itemBuilder: (context, index) {
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: colors.surface,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -62,17 +62,13 @@ class UserLibraryPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: index < placeholderMangas.length
                         ? placeholderMangas[index].coverColor
-                        : AppColors.cardHigh,
+                        : colors.surfaceContainerHigh,
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.image,
-                      color: AppColors.outline,
-                      size: 32,
-                    ),
+                  child: Center(
+                    child: Icon(Icons.image, color: colors.outline, size: 32),
                   ),
                 ),
               ),
@@ -82,11 +78,11 @@ class UserLibraryPage extends StatelessWidget {
                   index < placeholderMangas.length
                       ? placeholderMangas[index].title
                       : 'Manga ${index + 1}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: AppTypography.fontFamily,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.onSurface,
+                    color: colors.onSurface,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

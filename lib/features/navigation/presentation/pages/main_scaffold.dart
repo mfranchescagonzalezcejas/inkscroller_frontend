@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/layout.dart';
-import '../../../../core/design/design_tokens.dart';
+import '../../../../core/design/app_spacing.dart';
+import '../../../../core/design/app_typography.dart';
 import '../../../../core/l10n/l10n.dart';
 
 /// Root scaffold that hosts the floating bottom navigation bar and tab pages.
@@ -52,28 +53,31 @@ class _FloatingBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        AppSpacing.bottomNavMargin,
+        AppLayout.bottomNavMargin,
         0,
-        AppSpacing.bottomNavMargin,
+        AppLayout.bottomNavMargin,
         bottomInset > 0 ? bottomInset : AppSpacing.md,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.bottomNavRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
-          child: Container(
-            height: AppSpacing.bottomNavHeight,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppLayout.bottomNavWidth),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppLayout.bottomNavRadius),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
+            child: Container(
+              height: AppLayout.bottomNavHeight,
             decoration: BoxDecoration(
-              color: AppColors.glassSurface.withValues(alpha: 0.50),
-              borderRadius: BorderRadius.circular(AppSpacing.bottomNavRadius),
-              boxShadow: const [
+              color: colors.surface.withValues(alpha: 0.78),
+              borderRadius: BorderRadius.circular(AppLayout.bottomNavRadius),
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x66000000), // rgba(0,0,0,0.4)
+                  color: colors.shadow.withValues(alpha: 0.40),
                   blurRadius: 40,
-                  offset: Offset(0, 12),
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
@@ -87,7 +91,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.home,
                   isActive: currentIndex == 0,
                   onTap: () => onTap(0),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navHome,
                 ),
                 _NavItem(
@@ -95,7 +99,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.explore,
                   isActive: currentIndex == 1,
                   onTap: () => onTap(1),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navExplore,
                 ),
                 _NavItem(
@@ -103,7 +107,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.collections_bookmark,
                   isActive: currentIndex == 2,
                   onTap: () => onTap(2),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navLibrary,
                 ),
                 _NavItem(
@@ -111,7 +115,7 @@ class _FloatingBottomBar extends StatelessWidget {
                   activeIcon: Icons.person,
                   isActive: currentIndex == 3,
                   onTap: () => onTap(3),
-                  color: AppColors.primary,
+                  color: colors.primary,
                   label: l10n.navProfile,
                 ),
               ],
@@ -119,8 +123,9 @@ class _FloatingBottomBar extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
-  }
+}
 }
 
 class _NavItem extends StatelessWidget {
@@ -142,6 +147,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: onTap,
@@ -158,7 +165,7 @@ class _NavItem extends StatelessWidget {
               child: Icon(
                 isActive ? activeIcon : icon,
                 key: ValueKey(isActive),
-                color: isActive ? color : AppColors.onSurfaceVariant,
+                color: isActive ? color : colors.onSurfaceVariant,
                 size: 24,
               ),
             ),
@@ -171,7 +178,7 @@ class _NavItem extends StatelessWidget {
                 fontWeight: isActive
                     ? FontWeight.w700
                     : AppTypography.labelWeight,
-                color: isActive ? color : AppColors.onSurfaceVariant,
+                color: isActive ? color : colors.onSurfaceVariant,
               ),
               child: Text(
                 label,

@@ -10,9 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:inkscroller_flutter/core/constants/app_constants.dart';
+import 'package:inkscroller_flutter/core/theme/app_theme.dart';
 import 'package:inkscroller_flutter/features/about/presentation/pages/about_page.dart';
-
-import '../../../../support/l10n_test_helpers.dart';
+import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 
 /// Creates the PlatformChannel mock JSON that [PackageInfo.fromPlatform]
 /// expects on Android / Linux / Windows.
@@ -37,23 +37,30 @@ Future<void> pumpAboutPage(
   WidgetTester tester, {
   Locale locale = const Locale('en'),
   Map<String, dynamic>? mockPackageInfo,
+  ThemeData? theme,
 }) async {
   // Channel name used by package_info_plus on all desktop / linux platforms.
   // We set it up before every test run.
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
-    const MethodChannel('dev.fluttercommunity.plus/package_info'),
-    (methodCall) async {
-      if (methodCall.method == 'getAll') {
-        return mockPackageInfo ?? _mockPackageInfoData();
-      }
-      return null;
-    },
-  );
+        const MethodChannel('dev.fluttercommunity.plus/package_info'),
+        (methodCall) async {
+          if (methodCall.method == 'getAll') {
+            return mockPackageInfo ?? _mockPackageInfoData();
+          }
+          return null;
+        },
+      );
 
   await tester.pumpWidget(
     ProviderScope(
-      child: wrapWithL10n(const AboutPage(), locale: locale),
+      child: MaterialApp(
+        theme: theme,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const AboutPage(),
+      ),
     ),
   );
   // Let the async appVersionProvider resolve.
@@ -81,12 +88,13 @@ void main() {
       expectText(tester, 'Version 1.2.3 (Build 42)');
     });
 
-    testWidgets('renders version string in Spanish when package info resolves', (
-      tester,
-    ) async {
-      await pumpAboutPage(tester, locale: const Locale('es'));
-      expectText(tester, 'Versión 1.2.3 (Build 42)');
-    });
+    testWidgets(
+      'renders version string in Spanish when package info resolves',
+      (tester) async {
+        await pumpAboutPage(tester, locale: const Locale('es'));
+        expectText(tester, 'Versión 1.2.3 (Build 42)');
+      },
+    );
 
     testWidgets('renders app description', (tester) async {
       await pumpAboutPage(tester);
@@ -198,5 +206,17 @@ void main() {
       expect(find.byType(Scaffold), findsOneWidget);
       expect(find.byType(AppBar), findsOneWidget);
     });
+  });
+
+  testWidgets('uses active light and dark theme colors', (tester) async {
+    for (final theme in <ThemeData>[AppTheme.light(), AppTheme.dark()]) {
+      await pumpAboutPage(tester, theme: theme);
+
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      final appName = tester.widget<Text>(find.text(AppConstants.appName));
+
+      expect(scaffold.backgroundColor, theme.scaffoldBackgroundColor);
+      expect(appName.style?.color, theme.colorScheme.onSurface);
+    }
   });
 }
