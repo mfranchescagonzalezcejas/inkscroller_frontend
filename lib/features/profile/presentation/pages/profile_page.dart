@@ -155,7 +155,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         // ── Guest header ──────────────────────────────────────────────────
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.all(24),
@@ -783,10 +783,13 @@ class _AvatarSection extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [Color(0xFF0F766E), Color(0xFF1E40AF)],
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer,
+                  Theme.of(context).colorScheme.secondaryContainer,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
