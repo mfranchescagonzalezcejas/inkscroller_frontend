@@ -5,6 +5,7 @@ import 'package:inkscroller_flutter/l10n/app_localizations.dart';
 import 'core/l10n/app_locale_provider.dart';
 import 'core/providers/session_startup_provider.dart';
 import 'core/router/app_router.dart';
+import 'core/design/design_tokens.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/inkscroller_logo_loader.dart';
 import 'features/home/presentation/providers/home_provider.dart';
@@ -111,7 +112,7 @@ class _SplashScreen extends StatelessWidget {
       textDirection: TextDirection.ltr,
       child: Container(
         // Fondo oscuro constante — el splash es branding, no parte del tema
-        color: const Color(0xFF0D1516),
+        color: AppColors.stage,
         width: double.infinity,
         height: double.infinity,
         child: const Center(
@@ -126,7 +127,7 @@ class _SplashScreen extends StatelessWidget {
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
-                  color: Color(0xFFE2E4E6),
+                  color: AppColors.onSurface,
                 ),
               ),
             ],
