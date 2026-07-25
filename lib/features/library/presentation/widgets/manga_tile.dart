@@ -4,6 +4,7 @@ import 'package:inkscroller_flutter/core/l10n/l10n.dart';
 import 'package:inkscroller_flutter/core/router/app_routes.dart';
 import 'package:inkscroller_flutter/features/library/presentation/constants/library_ui_constants.dart';
 
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../domain/entities/manga.dart';
 import '../utils/manga_localizer.dart';
@@ -46,14 +47,14 @@ class MangaTile extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+      borderRadius: BorderRadius.circular(AppLayout.cardRadius),
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
         onTap: () {
           context.push(AppRoutes.mangaDetailPath(manga.id), extra: manga);
         },
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
           child: AspectRatio(
             aspectRatio: 2 / 3,
             child: Stack(

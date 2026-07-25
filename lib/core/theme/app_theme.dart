@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/layout.dart';
 import '../design/design_tokens.dart';
 
 /// Configures Material 3 light and dark themes for InkScroller.
@@ -18,7 +19,7 @@ class AppTheme {
   static const _lightError = AppColors.dangerLight;
   static const _onAction = AppColors.voidLowest;
 
-  // 🌙 Dark colors
+  // Dark colors
   static const _darkBg = AppColors.stage;
   static const _darkGlass = AppColors.glassSurface;
   static const _darkSurface = AppColors.card;
@@ -28,7 +29,7 @@ class AppTheme {
   static const _darkText = AppColors.onSurface;
   static const _darkTextSecondary = AppColors.onSurfaceVariant;
 
-  // ☀️ Light colors
+  // Light colors
   static const _lightBg = AppColors.stageLight;
   static const _lightGlass = AppColors.glassLight;
   static const _lightSurface = AppColors.cardLight;
@@ -38,8 +39,23 @@ class AppTheme {
   static const _lightTextSecondary = AppColors.onSurfaceVariantLight;
 
   static const _minimumControlSize = Size(
-    AppSpacing.minTouchTarget,
-    AppSpacing.minTouchTarget,
+    AppLayout.minTouchTarget,
+    AppLayout.minTouchTarget,
+  );
+
+  // Shared text theme — derives from AppTypography named roles.
+  static TextTheme _buildTextTheme(Color? bodyColor) => TextTheme(
+    titleLarge: AppTypography.titleLgStyle.copyWith(color: _lightText),
+    titleMedium: AppTypography.titleMdStyle,
+    bodyLarge: AppTypography.bodyLgStyle,
+    bodyMedium: AppTypography.bodyStyle.copyWith(color: bodyColor),
+    labelLarge: AppTypography.labelLgStyle,
+  );
+
+  // Shared button theme
+  static ButtonStyle _buttonStyle() => ButtonStyle(
+    minimumSize: WidgetStateProperty.all(_minimumControlSize),
+    tapTargetSize: MaterialTapTargetSize.padded,
   );
 
   // ☀️ LIGHT
@@ -65,8 +81,7 @@ class AppTheme {
         secondaryContainer: _brandGradientEnd,
         error: _lightError,
         onError: _onAction,
-        // Material's white default matches Card Light; keep the token mapping explicit.
-        surface: _lightSurface, // ignore: avoid_redundant_argument_values
+        surface: _lightSurface,
         onSurface: _lightText,
         onSurfaceVariant: _lightTextSecondary,
         surfaceContainerLowest: _lightBg,
@@ -95,7 +110,9 @@ class AppTheme {
         color: _lightSurface,
         elevation: 2,
         shadowColor: Colors.black12,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        ),
       ),
 
       listTileTheme: const ListTileThemeData(
@@ -104,59 +121,35 @@ class AppTheme {
         textColor: _lightText,
       ),
 
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        bodyLarge: TextStyle(fontSize: 16),
-        bodyMedium: TextStyle(fontSize: 14, color: _lightTextSecondary),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
+      textTheme: _buildTextTheme(_lightTextSecondary),
 
       dividerTheme: const DividerThemeData(color: _lightDivider, thickness: 1),
 
       iconTheme: const IconThemeData(color: _lightPrimary),
 
-      iconButtonTheme: IconButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
+      iconButtonTheme: IconButtonThemeData(style: _buttonStyle()),
+      textButtonTheme: TextButtonThemeData(style: _buttonStyle()),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyle()),
 
       snackBarTheme: SnackBarThemeData(
         backgroundColor: _lightSurface,
         contentTextStyle: const TextStyle(color: _lightText),
         actionTextColor: _lightPrimary,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.md),
+        ),
       ),
 
       dialogTheme: DialogThemeData(
         backgroundColor: _lightSurface,
-        titleTextStyle: const TextStyle(
-          color: _lightText,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-        contentTextStyle: const TextStyle(
+        titleTextStyle: AppTypography.titleMdStyle.copyWith(color: _lightText),
+        contentTextStyle: AppTypography.bodyStyle.copyWith(
           color: _lightTextSecondary,
-          fontSize: 14,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        ),
       ),
     );
   }
@@ -208,7 +201,9 @@ class AppTheme {
         color: _darkSurface,
         elevation: 4,
         shadowColor: Colors.black54,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        ),
       ),
 
       listTileTheme: const ListTileThemeData(
@@ -217,38 +212,15 @@ class AppTheme {
         textColor: _darkText,
       ),
 
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        bodyLarge: TextStyle(fontSize: 16),
-        bodyMedium: TextStyle(fontSize: 14, color: _darkTextSecondary),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
+      textTheme: _buildTextTheme(_darkTextSecondary),
 
       dividerTheme: const DividerThemeData(color: _darkDivider, thickness: 1),
 
       iconTheme: const IconThemeData(color: _darkPrimary),
 
-      iconButtonTheme: IconButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
-
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(_minimumControlSize),
-          tapTargetSize: MaterialTapTargetSize.padded,
-        ),
-      ),
+      iconButtonTheme: IconButtonThemeData(style: _buttonStyle()),
+      textButtonTheme: TextButtonThemeData(style: _buttonStyle()),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyle()),
     );
   }
 }

@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/layout.dart';
-import '../../../../core/design/design_tokens.dart';
+import '../../../../core/design/app_spacing.dart';
+import '../../../../core/design/app_typography.dart';
 import '../../../../core/l10n/l10n.dart';
 
 /// Root scaffold that hosts the floating bottom navigation bar and tab pages.
@@ -56,20 +57,20 @@ class _FloatingBottomBar extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        AppSpacing.bottomNavMargin,
+        AppLayout.bottomNavMargin,
         0,
-        AppSpacing.bottomNavMargin,
+        AppLayout.bottomNavMargin,
         bottomInset > 0 ? bottomInset : AppSpacing.md,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.bottomNavRadius),
+        borderRadius: BorderRadius.circular(AppLayout.bottomNavRadius),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
           child: Container(
-            height: AppSpacing.bottomNavHeight,
+            height: AppLayout.bottomNavHeight,
             decoration: BoxDecoration(
               color: colors.surface.withValues(alpha: 0.78),
-              borderRadius: BorderRadius.circular(AppSpacing.bottomNavRadius),
+              borderRadius: BorderRadius.circular(AppLayout.bottomNavRadius),
               boxShadow: [
                 BoxShadow(
                   color: colors.shadow.withValues(alpha: 0.40),

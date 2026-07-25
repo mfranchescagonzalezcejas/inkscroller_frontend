@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/app_version_provider.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/layout.dart';
 import '../../../../core/design/design_tokens.dart'
     show AppColors, AppTypography;
-import '../../../../core/design/app_spacing.dart';
 import '../../../../core/feedback/app_feedback.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/l10n/app_locale_provider.dart';
@@ -627,7 +627,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: Theme.of(ctx).colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          borderRadius: BorderRadius.circular(AppLayout.cardRadius),
         ),
         title: Text(
           context.l10n.authChangeUsernameTitle,
@@ -654,13 +654,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 color: Theme.of(ctx).colorScheme.onSurfaceVariant,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+                borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
                 borderSide: BorderSide(
                   color: Theme.of(ctx).colorScheme.outlineVariant,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+                borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
                 borderSide: const BorderSide(color: AppColors.primary),
               ),
             ),
