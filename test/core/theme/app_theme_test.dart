@@ -54,7 +54,6 @@ void main() {
 
   test('runtime color migration paths do not access AppColors directly', () {
     const runtimePaths = <String>[
-      'lib/flutter_app.dart',
       'lib/core/widgets/app_top_bar.dart',
       'lib/core/feedback/app_feedback.dart',
       'lib/core/widgets/inkscroller_shimmer.dart',
@@ -70,8 +69,25 @@ void main() {
     ];
 
     for (final path in runtimePaths) {
-      expect(File(path).readAsStringSync(), isNot(contains('AppColors.')),
-          reason: '$path must use Theme.of(context).colorScheme');
+      expect(
+        File(path).readAsStringSync(),
+        isNot(contains('AppColors.')),
+        reason: '$path must use Theme.of(context).colorScheme',
+      );
     }
+  });
+
+  test('splash uses only static branding tokens outside the system theme', () {
+    const splashBrandingTokens = <String>[
+      'AppColors.stage',
+      'AppColors.onSurface',
+    ];
+    final source = File('lib/flutter_app.dart').readAsStringSync();
+    final tokens = RegExp(
+      r'AppColors\.\w+',
+    ).allMatches(source).map((match) => match.group(0)).toList();
+
+    // The native-independent splash is fixed branding, not runtime theme UI.
+    expect(tokens, splashBrandingTokens);
   });
 }
