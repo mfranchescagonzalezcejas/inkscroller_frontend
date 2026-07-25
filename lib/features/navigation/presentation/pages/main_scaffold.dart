@@ -62,12 +62,14 @@ class _FloatingBottomBar extends StatelessWidget {
         AppLayout.bottomNavMargin,
         bottomInset > 0 ? bottomInset : AppSpacing.md,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppLayout.bottomNavRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
-          child: Container(
-            height: AppLayout.bottomNavHeight,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppLayout.bottomNavWidth),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppLayout.bottomNavRadius),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
+            child: Container(
+              height: AppLayout.bottomNavHeight,
             decoration: BoxDecoration(
               color: colors.surface.withValues(alpha: 0.78),
               borderRadius: BorderRadius.circular(AppLayout.bottomNavRadius),
@@ -121,8 +123,9 @@ class _FloatingBottomBar extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
-  }
+}
 }
 
 class _NavItem extends StatelessWidget {

@@ -42,7 +42,9 @@ class TonalTabBar extends StatelessWidget {
               return Expanded(
                 child: Material(
                   color: isActive
-                      ? colorScheme.primary.withValues(alpha: 0.16)
+                      ? colorScheme.primary.withValues(
+                          alpha: AppLayout.tonalTabActiveFillOpacity,
+                        )
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(
                     AppLayout.tonalTabItemRadius,

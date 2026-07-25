@@ -190,7 +190,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 width: double.infinity,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -213,7 +213,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.menu_book_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileReadingModeTitle,
               value: effectiveReaderMode == ReaderMode.vertical
                   ? context.l10n.profileReadingModeVertical
@@ -228,7 +228,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.translate_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredAppLanguageTitle,
               value:
                   _languageLabels[effectiveAppLanguage] ??
@@ -239,7 +239,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.language_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredReadingLanguageTitle,
               value:
                   _languageLabels[effectiveReadingLanguage] ??
@@ -335,7 +335,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.person_outline,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.authChangeUsernameOption,
               value: profile?.username ?? '',
               onTap: () {
@@ -359,7 +359,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: <Widget>[
             _PrefRow(
               icon: Icons.menu_book_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileReadingModeTitle,
               value: effectiveReaderMode == ReaderMode.vertical
                   ? context.l10n.profileReadingModeVertical
@@ -374,7 +374,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.translate_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredAppLanguageTitle,
               value:
                   _languageLabels[effectiveAppLanguage] ??
@@ -385,7 +385,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.language_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profilePreferredReadingLanguageTitle,
               value:
                   _languageLabels[effectiveReadingLanguage] ??
@@ -400,7 +400,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.visibility_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileContentRatingTitle,
               value: _contentRatingLabel(
                 context,
@@ -418,7 +418,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             _PrefRow(
               icon: Icons.category_outlined,
-              iconColor: AppColors.primary,
+              iconColor: Theme.of(context).colorScheme.primary,
               title: context.l10n.profileDemographicTitle,
               value: _demographicCountLabel(
                 context,
@@ -661,7 +661,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppLayout.buttonRadius),
-                borderSide: const BorderSide(color: AppColors.primary),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
               ),
             ),
             validator: (value) {
@@ -696,7 +696,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Navigator.of(ctx).pop(true);
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: Text(context.l10n.authChangeUsernameSave),
           ),
         ],
@@ -1009,10 +1009,10 @@ class _EmailVerificationSection extends ConsumerWidget {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.mark_email_unread_outlined,
               size: 20,
-              color: AppColors.accent,
+              color: Theme.of(context).colorScheme.tertiary,
             ),
           ),
           const SizedBox(width: 12),
@@ -1022,10 +1022,10 @@ class _EmailVerificationSection extends ConsumerWidget {
               children: <Widget>[
                 Text(
                   context.l10n.authVerifyInProfile,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
-                    color: AppColors.accent,
+                    color: Theme.of(context).colorScheme.tertiary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1049,11 +1049,11 @@ class _EmailVerificationSection extends ConsumerWidget {
             ),
             child: Text(
               context.l10n.authVerifyEmailResend,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
@@ -1175,7 +1175,7 @@ class _ErrorBanner extends StatelessWidget {
             onPressed: onRetry,
             child: Text(
               context.l10n.retryAction,
-              style: const TextStyle(color: AppColors.primary, fontSize: 12),
+              style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 12),
             ),
           ),
         ],
@@ -1238,10 +1238,10 @@ class _SelectionDialog<T> extends StatelessWidget {
                             ),
                           ),
                           trailing: option == current
-                              ? const Icon(
+                              ? Icon(
                                   Icons.check,
                                   size: 20,
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 )
                               : null,
                           onTap: () => Navigator.of(context).pop(option),
@@ -1335,7 +1335,7 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
                             ),
                           ),
                           controlAffinity: ListTileControlAffinity.leading,
-                          activeColor: AppColors.primary,
+                          activeColor: Theme.of(context).colorScheme.primary,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
@@ -1364,7 +1364,7 @@ class _MultiSelectDialogState<T> extends State<_MultiSelectDialog<T>> {
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(_selected),
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
                     child: const Text('OK'),
                   ),

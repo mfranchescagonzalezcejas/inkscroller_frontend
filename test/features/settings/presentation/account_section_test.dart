@@ -196,6 +196,7 @@ void main() {
 
         final dividers = tester.widgetList<Divider>(find.byType(Divider));
 
+        expect(dividers, isNotEmpty);
         expect(
           dividers.map((divider) => divider.color),
           everyElement(theme.colorScheme.outlineVariant),

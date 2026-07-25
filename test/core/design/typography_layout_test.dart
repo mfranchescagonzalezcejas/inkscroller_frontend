@@ -99,9 +99,11 @@ void main() {
 
     test('no component-specific constants in AppSpacing', () {
       // AppSpacing should only have spacing scale values.
-      // Verify old constants are removed.
-      // ignore: unnecessary_type_check
-      expect(AppSpacing, isA<Type>());
+      // Verify no bottomNav, cover, card, etc. prefixed members leak in.
+      final members = AppSpacing.toString();
+      expect(members, isNot(contains('bottomNav')));
+      expect(members, isNot(contains('cover')));
+      expect(members, isNot(contains('card')));
     });
   });
 }

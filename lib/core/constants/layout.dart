@@ -77,6 +77,9 @@ class AppLayout {
   static const double tonalTabItemVerticalPadding = 10;
   static const double tonalTabItemMinHeight = minTouchTarget;
 
+  /// Fill opacity for the active tonal tab indicator.
+  static const double tonalTabActiveFillOpacity = 0.16;
+
   // ═══════════════════════════════════════════════════════════════════════
   // SETTINGS
   // ═══════════════════════════════════════════════════════════════════════

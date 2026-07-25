@@ -166,7 +166,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: colors.onPrimary,
+                                color: colors.onPrimaryContainer,
                               ),
                             )
                           : Text(
@@ -175,7 +175,7 @@ class _VerifyEmailPageState extends ConsumerState<VerifyEmailPage> {
                                 fontFamily: AppTypography.fontFamily,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: colors.onPrimary,
+                                color: colors.onPrimaryContainer,
                               ),
                             ),
                     ),

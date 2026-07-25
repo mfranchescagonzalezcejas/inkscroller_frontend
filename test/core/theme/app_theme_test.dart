@@ -66,6 +66,7 @@ void main() {
       'lib/features/home/presentation/widgets/home_recommended_section.dart',
       'lib/features/library/presentation/widgets/manga_tile.dart',
       'lib/features/library/presentation/widgets/reader_settings_sheet.dart',
+      'lib/features/profile/presentation/pages/profile_page.dart',
     ];
 
     for (final path in runtimePaths) {
