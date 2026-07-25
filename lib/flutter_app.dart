@@ -8,12 +8,12 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/inkscroller_logo_loader.dart';
 import 'features/home/presentation/providers/home_provider.dart';
+import 'features/library/presentation/providers/library/library_state.dart';
 import 'flavors/flavor_config.dart';
 
-/// Raíz de la app. Muestra un splash de bienvenida durante ~2 segundos
-/// mientras [homeDataProvider] precarga los datos de Home en background.
-/// Cuando el splash desaparece, Home ya tiene datos en caché y se renderiza
-/// sin shimmer.
+/// Raíz de la app. Muestra un splash de bienvenida mientras [homeDataProvider]
+/// precarga los datos de Home en background. Cuando los datos están listos,
+/// el splash hace fade out.
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
@@ -25,6 +25,7 @@ class _MyAppState extends ConsumerState<MyApp>
     with SingleTickerProviderStateMixin {
   late final AnimationController _splashController;
   bool _splashDone = false;
+  bool _minSplashElapsed = false;
 
   @override
   void initState() {
@@ -34,15 +35,23 @@ class _MyAppState extends ConsumerState<MyApp>
       duration: const Duration(milliseconds: 400),
     );
 
-    // Mínimo 2 segundos de splash para que homeDataProvider tenga tiempo
-    // de cargar los datos. La animación de salida dura 400ms.
-    Future.delayed(const Duration(milliseconds: 2000), () {
+    // Tiempo mínimo para que el splash no parpadee
+    Future.delayed(const Duration(milliseconds: 600), () {
       if (!mounted) return;
+      setState(() => _minSplashElapsed = true);
+      _tryFadeOut();
+    });
+  }
+
+  void _tryFadeOut() {
+    if (!_minSplashElapsed || _splashDone) return;
+    final homeData = ref.read(homeDataProvider);
+    if (!homeData.isLoading) {
       _splashController.forward().then((_) {
         if (!mounted) return;
         setState(() => _splashDone = true);
       });
-    });
+    }
   }
 
   @override
@@ -54,8 +63,10 @@ class _MyAppState extends ConsumerState<MyApp>
   @override
   Widget build(BuildContext context) {
     // Activa providers de startup en segundo plano
+    ref.listen<LibraryState>(homeDataProvider, (_, next) {
+      if (!next.isLoading) _tryFadeOut();
+    });
     ref.watch(sessionStartupProvider);
-    ref.watch(homeDataProvider);
 
     final locale = ref.watch(appLocaleProvider);
 
@@ -96,26 +107,26 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Container(
-        color: colors.surfaceContainerLowest,
+        // Fondo oscuro constante — el splash es branding, no parte del tema
+        color: const Color(0xFF0D1516),
         width: double.infinity,
         height: double.infinity,
-        child: Center(
+        child: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const InkScrollerLogoLoader(),
-              const SizedBox(height: 24),
+              InkScrollerLogoLoader(),
+              SizedBox(height: 24),
               Text(
                 'InkScroller',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
-                  color: colors.onSurface,
+                  color: Color(0xFFE2E4E6),
                 ),
               ),
             ],
