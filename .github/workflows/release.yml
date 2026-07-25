@@ -277,19 +277,19 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Download release metadata
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-metadata
           path: release-metadata
 
       - name: Download APK artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: apk-*
           path: release-assets
 
       - name: Download AAB artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: aab-*
           path: release-assets
@@ -349,13 +349,13 @@ jobs:
             release_notes: release_notes_pro.txt
     steps:
       - name: Download release metadata
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-metadata
           path: release-metadata
 
       - name: Download ${{ matrix.flavor }} APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ matrix.artifact_name }}
           path: dist
@@ -403,7 +403,7 @@ jobs:
 
     steps:
       - name: Download pro AAB
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: aab-pro
           path: dist
